@@ -1,0 +1,140 @@
+<script type="text/javascript">
+	$('#nominal').autoNumeric(numOptions);
+	prepare_chosen();
+	$(document).on("change", "#kd_urusan", function () {		
+		$.ajax({
+			type: "POST",
+			url: '<?php echo site_url("common/cmb_bidang"); ?>',
+			data: {kd_urusan: $(this).val()},
+			success: function(msg){
+				$("#cmb-bidang").html(msg);				
+				$("#kd_program").val("");				
+				$("#nama_prog_or_keg").val("");		
+        		$("#kd_program").trigger("chosen:updated");
+				prepare_chosen();
+			}
+		});
+	});
+
+	$(document).on("change", "#kd_bidang", function () {		
+		$.ajax({
+			type: "POST",
+			url: '<?php echo site_url("common/cmb_program"); ?>',
+			data: {kd_urusan:$("#kd_urusan").val(), kd_bidang: $(this).val()},
+			success: function(msg){
+				$("#cmb-program").html(msg);
+				prepare_chosen();
+			}
+		});
+	});
+
+	$(document).on("change", "#kd_program", function () {		
+		var str = $(this).find('option:selected').text();		
+		var nama_program = str.substring(str.indexOf(".")+2);		
+		$("#nama_prog_or_keg").val(nama_program);		
+	});
+
+
+	$("#simpan").click(function(){
+		
+	    var valid = $("form#program").valid();
+	    if (valid) {
+	    	$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+	    	
+	    	$.ajax({
+				type: "POST",
+				url: $("form#program").attr("action"),
+				data: $("form#program").serialize(),
+				dataType: "json",
+				success: function(msg){
+					if (msg.success==1) {														
+						$.blockUI({
+							message: msg.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});							
+						$.facebox.close();
+						location.reload();						
+						
+					};						
+				}
+			});
+	    };
+	});
+
+</script>
+
+<div style="width: 900px">
+	<header>
+		<h3 style="padding:20px">Edit Data Program Kendali Renja</h3>
+	</header>
+	<div class="module_content">
+    <table class="table-common" style="width: 99.8%">
+    	<thead>
+        <tr align="center">
+          <th colspan="2">History</th></tr>
+        <tr>
+        	<th align="center">No</th>
+            <th align="left">Keterangan</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+		$i=0;
+		foreach ($history as $row) {
+		$i++;
+		?>
+        <tr>
+        	<td align="center"><?php echo $i;?></td>
+            <td align="left"><?php echo $row->ket;?></td>
+        </tr>
+        <?php
+		}
+		?>
+        </tbody>
+    </table>
+    <br />
+		<form action="<?php echo site_url('kendali/save_program_renja');?>" method="POST" name="program" id="program" accept-charset="UTF-8" enctype="multipart/form-data" >
+        <input type="hidden" name="id_skpd" value="<?php echo $this->session->userdata("id_skpd"); ?>" />
+        <input type="hidden" name="tahun" value="<?php echo $this->m_settings->get_tahun_anggaran(); ?>" />
+			<input type="hidden" name="id_program" value="<?php if(!empty($program->id)){echo $program->id;} ?>" />
+			<input type="hidden" id="nama_prog_or_keg" name="nama_prog_or_keg" value="<?php echo (!empty($program->nama_prog_or_keg))?$program->nama_prog_or_keg:''; ?>" />
+			
+			<table class="fcari" width="99.8%">
+				<tbody>
+					<tr>
+						<td width="15%">SKPD</td>
+						<td width="85%"><?php echo $skpd->nama_skpd; ?></td>
+					</tr>
+					<tr>
+						<td>Urusan</td>
+						<td>
+							<?php echo $kd_urusan; ?>
+		    			</td>
+					</tr>
+					<tr>
+						<td>Bidang Urusan</td>
+						<td id="cmb-bidang">
+							<?php echo $kd_bidang; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Program</td>
+						<td id="cmb-program">
+							<?php echo $kd_program; ?>
+						</td>
+					</tr>								
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<footer>
+		<div class="submit_link">    			
+  			<input id="simpan" type="button" value="Simpan">
+		</div> 
+	</footer>
+</div>

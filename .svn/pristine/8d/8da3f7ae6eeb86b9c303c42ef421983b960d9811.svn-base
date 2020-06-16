@@ -1,0 +1,35 @@
+<thead>
+	<tr>
+		<th >No</th>
+		<th >KODE</th>
+		<th >NAMA PROGRAM | NAMA KEGIATAN</th>
+		<th >JENIS PEKERJAAN</th>
+		<th >VOLUME/SATUAN</th>
+		<th >JUMLAH DANA</th>
+		<th >KEPUTUSAN</th>
+		<th >SKPD PENANGGUNGJAWAB</th>
+		<th >STATUS USULAN</th>
+	</tr>
+</thead>
+<tbody>
+	<?php
+	$i=0;
+		foreach ($musrenbangdes as $row) {
+		$i++
+	?>
+		<tr>
+			<td align="center"><?php echo $i; ?></td>
+			<td align="center"><?php echo $row->kd_urusan.".".$row->kd_bidang.".".$row->kd_program.".".$row->kd_kegiatan; ?></td>
+			<td align="center"><?php echo $row->ket_program." | ".$row->ket_kegiatan ;?></td>
+			<td align="left"><?php echo $row->jenis_pekerjaan;?></td>
+			<td align="center"><?php echo $row->volume." ".$row->satuan; ?></td>
+			<td align="right"><?php echo "Rp ".Formatting::currency($row->jumlah_dana); ?></td>
+			<td align="center"><?php echo $row->nama_kep; ?></td>
+			<td align="center"><?php echo $row->nama_skpd; ?></td>
+			<td align="center"><?php echo $row->nama_stat;?></td>
+		</tr>
+	<?php
+	;
+		}
+	?>
+</tbody>

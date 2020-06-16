@@ -1,0 +1,23 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-24 07:49:09 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-24 07:49:17 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-24 07:51:01 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 93
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 95
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 97
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$id_status_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 98
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 93
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 95
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 97
+ERROR - 2013-06-24 15:22:10 --> Severity: Notice  --> Undefined property: stdClass::$id_status_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 98
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 93
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 95
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 97
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$id_status_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 98
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 93
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 95
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 97
+ERROR - 2013-06-24 15:23:25 --> Severity: Notice  --> Undefined property: stdClass::$id_status_spm C:\xampp\htdocs\siaku\application\views\spj\tambah_spj.php 98
+ERROR - 2013-06-24 15:32:51 --> Severity: Notice  --> Undefined property: stdClass::$uraian_sptb C:\xampp\htdocs\siaku\application\views\spj\tambah_sptb.php 97
+ERROR - 2013-06-24 15:32:51 --> Severity: Notice  --> Undefined property: stdClass::$uraian_sptb C:\xampp\htdocs\siaku\application\views\spj\tambah_sptb.php 97

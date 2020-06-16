@@ -1,0 +1,312 @@
+<?php
+
+class Report extends CI_Controller {
+
+    public function __construct()
+	{
+		$this->CI =& get_instance();
+		parent::__construct();
+		$this->load->helper('url');
+		$this->load->model(array('guest/m_report', 'm_skpd', 'm_renstra_trx', 'm_rpjmd_trx',
+									'm_renja_trx','m_t_anggaran_aktif','m_rka','m_desa',
+									'm_musrenbang','m_kecamatan'));
+	}
+
+	function index()
+	{
+		$report=$this->input->get("report");
+
+		$data['active_menu'] = "report";
+		$jumlah = $this->m_report->get_jumlah_kegiatan_per_skpd();
+		$skpd_array=array();
+		$jum_array=array();
+		foreach ($jumlah as $row) {
+			$skpd_array[] = $row->nama;
+			$jum_array[] = $row->jumlah;
+		}
+		$data['jumlah'] = json_encode($jum_array);
+		$data['skpd'] = json_encode($skpd_array);
+
+		
+			
+
+		switch ($report) {
+			
+			case 'rekap_skpd':
+			default:
+				$data['title'] = 'Rekapitulasi SKPD';
+				$data['konten'] = $this->get_rekap_skpd();
+				$data['konten'] = $this->get_ta_rekap_skpd();
+				break;
+
+			case 'rekap_kecamatan':
+			default:
+				$data['title'] = 'Rekapitulasi Kecamatan';
+				$data['konten'] = $this->get_rekap_kecamatan();
+				$data['konten'] = $this->get_ta_rekap_kecamatan();
+				break;
+
+			case 'musrenbangdes':
+			default:
+				$data['title'] = 'Rekapitulasi Desa';
+				$data['konten'] = $this->get_musrenbangdes();
+				$data['konten'] = $this->get_t_anggaran_musrenbangdes();
+				break;
+
+			case 'rka':
+			default:
+				$data['title'] = 'RKA';
+				$data['konten'] = $this->get_rka();
+				$data['konten'] = $this->get_t_anggaran_rka();
+				break;
+
+			case 'renja':							
+			default:
+				$data['title'] = 'Renja';
+				$data['konten'] = $this->get_renja();
+				$data['konten'] = $this->get_t_anggaran_renja();
+				break;
+
+			case 'rpjmd':
+				$data['title'] = 'RPJMD';
+				$data['konten'] = $this->get_rpjmd();
+				break;
+
+			case 'renstra':							
+			default:
+				$data['title'] = 'Renstra';
+				$data['konten'] = $this->get_renstra();
+				break;
+
+		}
+		$this->template->load('guest/template', 'guest/report', $data);
+	}	
+
+	private function get_renstra(){
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL);
+		$data['dd_skpd'] = form_dropdown('dd_skpd', $all_skpd, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/renstra_frm', $data, TRUE);
+	}
+
+	function get_data_renstra(){
+		$id_skpd = $this->input->post("skpd");
+		$proses = $this->m_renstra_trx->count_jendela_kontrol($id_skpd);
+		
+		if (empty($proses->veri2)) {
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data renstra akhir belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}else{
+			$data['program'] = $this->m_renstra_trx->get_program_skpd_4_cetak($id_skpd);
+			$data2['renstra'] = $this->load->view('renstra/cetak/program_kegiatan', $data, TRUE);
+			$this->load->view('guest/report/renstra_view', $data2);
+		}		
+	}
+
+	private function get_rpjmd(){		
+		$temp['class_table']='class="table-common"';		
+		$temp['misi'] = $this->m_rpjmd_trx->get_misi_rpjmd_4_cetak_final();
+		$temp['bidang_urusans'] = $this->m_rpjmd_trx->get_all_bidang_urusan_4_cetak_final();
+		$data['rpjmd'] = $this->load->view("rpjmd/cetak/cetak_bidang_urusan", $temp, TRUE);
+		return $this->load->view('guest/report/rpjmd_view', $data, TRUE);
+	}
+
+	private function get_renja(){
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL);
+		$data['dd_skpd'] = form_dropdown('dd_skpd', $all_skpd, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/renja_frm', $data, TRUE);
+	}
+
+	private function get_t_anggaran_renja(){
+		$all_ta = $this->m_t_anggaran_aktif->get_data_dropdown_t_anggaran_aktif(NULL);
+		$data['t_anggaran'] = form_dropdown('t_anggaran', $all_ta, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/renja_frm', $data, TRUE);
+	}
+
+	function get_data_renja(){
+		$id_skpd = $this->input->post("skpd");
+		$ta = $this->input->post("ta");
+		$proses = $this->m_renja_trx->count_jendela_kontrol($id_skpd,$ta);
+		
+		if (empty($proses->veri2)) {
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data renja belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}else{
+			$data['ta']	= $ta;
+			$data['program'] = $this->m_renja_trx->get_program_skpd_4_cetak($id_skpd);
+			$data2['renja'] = $this->load->view('renja/cetak/program_kegiatan', $data, TRUE);
+			$this->load->view('guest/report/renja_view', $data2);
+		} 			
+	}
+	private function get_rka(){
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL);
+		$data['dd_skpd'] = form_dropdown('dd_skpd', $all_skpd, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/rka_frm', $data, TRUE);
+	}
+
+	private function get_t_anggaran_rka(){
+		$all_ta = $this->m_t_anggaran_aktif->get_data_dropdown_t_anggaran_aktif(NULL);
+		$data['t_anggaran'] = form_dropdown('t_anggaran', $all_ta, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/rka_frm', $data, TRUE);
+	}
+
+	function get_data_rka(){
+		$id_skpd = $this->input->post("skpd");
+		$ta = $this->input->post("ta");
+		$proses = $this->m_rka->count_jendela_kontrol($id_skpd,$ta);
+		
+		if (empty($proses->veri)) {
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data RKA belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}else{
+			$data['ta']	= $ta;
+			$data['program'] = $this->m_rka->get_program_skpd_4_cetak($id_skpd);
+			$data2['rka'] = $this->load->view('rka/cetak/program_kegiatan', $data, TRUE);
+			$this->load->view('guest/report/rka_view', $data2);
+		} 			
+	}
+
+	private function get_musrenbangdes(){
+		$all_desa = $this->m_desa->get_data_dropdown_desa(NULL);
+		$data['dd_desa'] = form_dropdown('dd_desa', $all_desa, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/musrenbangdes_frm', $data, TRUE);
+	}
+
+	private function get_t_anggaran_musrenbangdes(){
+		$all_ta = $this->m_t_anggaran_aktif->get_data_dropdown_t_anggaran_aktif(NULL);
+		$data['t_anggaran'] = form_dropdown('t_anggaran', $all_ta, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/musrenbangdes_frm', $data, TRUE);
+	}
+
+	function get_data_musrenbangdes()
+	{
+		$id_desa = $this->input->post("id_desa");
+		$ta = $this->input->post("ta");
+		$data['ta']	= $ta;
+		$data['musrenbangdes'] = $this->m_musrenbang->get_musrenbangdes_cetak($id_desa,$ta);
+		if(empty($data['musrenbangdes'])){
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data Musrenbangdes belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}
+		else{
+			$data2['musrenbang'] = $this->load->view('musrenbang/cetak/isi_musrenbangdes', $data, TRUE);
+			$this->load->view('guest/report/musrenbangdes_view', $data2);
+		}
+	}
+
+	private function get_rekap_kecamatan(){
+		$all_kecamatan = $this->m_kecamatan->get_data_dropdown_kecamatan(NULL);
+		$data['dd_kecamatan'] = form_dropdown('dd_kecamatan', $all_kecamatan, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/rekap_kec_frm', $data, TRUE);
+	}
+
+	private function get_ta_rekap_kecamatan(){
+		$all_ta = $this->m_t_anggaran_aktif->get_data_dropdown_t_anggaran_aktif(NULL);
+		$data['t_anggaran'] = form_dropdown('t_anggaran', $all_ta, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/rekap_kec_frm', $data, TRUE);
+	}
+
+	function get_data_rekap_kec()
+	{
+		$id_kec = $this->input->post("id_kec");
+		$ta = $this->input->post("ta");
+		$data['ta']	= $ta;
+		$data['rekap_kecamatan'] = $this->m_musrenbang->get_rekap_kecamatan_cetak($id_kec,$ta);
+		if(empty($data['rekap_kecamatan'])){
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data Rekapitulasi Kecamatan belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}
+		else{
+			$data2['musrenbang'] = $this->load->view('musrenbang/cetak/isi_rekap_kecamatan', $data, TRUE);
+			$this->load->view('guest/report/rekap_kecamatan_view', $data2);
+		}
+	}
+
+	private function get_rekap_skpd(){
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL);
+		$data['dd_skpd'] = form_dropdown('dd_skpd', $all_skpd, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/rekap_skpd_frm', $data, TRUE);
+	}
+
+	private function get_ta_rekap_skpd(){
+		$all_ta = $this->m_t_anggaran_aktif->get_data_dropdown_t_anggaran_aktif(NULL);
+		$data['t_anggaran'] = form_dropdown('t_anggaran', $all_ta, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/rekap_skpd_frm', $data, TRUE);
+	}
+
+	function get_data_rekap_skpd()
+	{
+		$id_skpd = $this->input->post("id_skpd");
+		$tahun = $this->input->post("tahun");
+		$id_keputusan1 = 1;
+     	$id_keputusan2 = 2;
+        $id_keputusan3 = 3;
+        $data['rekap_skpd1'] = $this->m_musrenbang->get_rekap_skpd_cetak($id_skpd,$tahun,$id_keputusan1);
+        $data['rekap_skpd2'] = $this->m_musrenbang->get_rekap_skpd_cetak($id_skpd,$tahun,$id_keputusan2);
+        $data['rekap_skpd3'] = $this->m_musrenbang->get_rekap_skpd_cetak($id_skpd,$tahun,$id_keputusan3); 
+		if(empty($data['rekap_skpd1']) && empty($data['rekap_skpd2']) && empty($data['rekap_skpd3'])){
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data Rekapitulasi SKPD belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}
+		else{
+			if(!empty($data['rekap_skpd1'])){
+				$data2['rekapitulasi1'] = $this->load->view('skpd/cetak/isi_rekap_skpd1', $data, TRUE);
+			}
+			if(!empty($data['rekap_skpd2'])){
+	        	$data2['rekapitulasi2'] = $this->load->view('skpd/cetak/isi_rekap_skpd2', $data, TRUE);
+			}
+			if(!empty($data['rekap_skpd3'])){
+		        $data2['rekapitulasi3'] = $this->load->view('skpd/cetak/isi_rekap_skpd3', $data, TRUE);
+		    }
+			$this->load->view('guest/report/rekap_skpd_view', $data2);
+		}
+	}
+}
+?>

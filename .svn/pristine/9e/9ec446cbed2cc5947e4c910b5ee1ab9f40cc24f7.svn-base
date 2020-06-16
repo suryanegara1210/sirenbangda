@@ -1,0 +1,39 @@
+<?php
+/**
+* 
+*/
+class M_pajak_golongan extends CI_Model {
+
+	function __construct()
+	{
+		parent::__construct();
+	}
+
+	function get_list_pajak_honor($map=false) 
+	{
+		$sql = "
+			SELECT UPPER(golongan) golongan, pph_honor, pph_spd
+			FROM t_pajak_golongan 
+			";
+
+		$query = $this->db->query($sql);
+		if($query) {
+			if($query->num_rows() > 0) {
+				if($map) {
+					$array = $query->result_array();
+					$result = array();
+					foreach($array as $key=>$row) {
+						$id = strtoupper(array_shift($row));
+						$result[$id] = $row; 
+					}
+					return $result;
+				} else {
+					return $query->result_array();
+				}
+			}
+		}
+
+		return NULL;
+	}
+}
+?>

@@ -1,0 +1,103 @@
+<style type="text/css">
+    #tr0{
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    #tab1{
+        text-indent: 1em;
+    }
+
+    #tab2{
+        text-indent: 2em;
+    }
+
+    #tab3{
+        text-indent: 4em;
+    }
+
+    #tab4{
+        text-indent: 6em;
+    }
+
+    #tab5{
+        text-indent: 8em;
+    }
+
+    #tab6{
+        text-indent: 10em;
+    }
+
+    #tab7{
+        text-indent: 12em;
+    }
+
+    #tab8{
+        text-indent: 14em;
+    }
+
+    #tab9{
+        text-indent: 16em;
+    }
+
+    .right-align{
+        text-align: right;
+    }
+</style>
+<h2>
+    <div style="text-align:center">
+        Universitas Udayana<br />
+        Laporan Neraca Saldo<br />
+        Bulan <?php echo $nama_bulan1; ?> - <?php echo $nama_bulan2; ?> Tahun <?php echo $thn_skrg; ?> <br />
+    </div>
+</h2>
+<table class="table-common" style="width: 98%;">
+    <tr>
+        <th rowspan="2" colspan="2">Uraian</th>        
+        <th style="min-width: 120px;" rowspan="2">Laporan Bulan <BR><?php echo $nama_bulan1; ?>-<?php echo $nama_bulan2; ?> <BR>Tahun <?php echo $thn_skrg; ?></th>
+        <th style="min-width: 120px;" rowspan="2">Laporan Bulan <BR><?php echo $nama_bulan1_sblm; ?>-<?php echo $nama_bulan2_sblm; ?> <BR>Tahun <?php echo $thn_sblm; ?></th>
+        <th colspan="2">Perubahan</th>
+    </tr>
+    <tr>
+        <th>Rupiah</th>
+        <th>%</th>
+    </tr>
+<?php
+    foreach($laporan as $lap){
+        $perubahan_rp=$lap->nominal_skrg - $lap->nominal_tahun_lalu;
+        
+        if($lap->nominal_tahun_lalu!=0){
+            $perubahan_prsen=round((abs(($lap->nominal_skrg - $lap->nominal_tahun_lalu)/$lap->nominal_tahun_lalu))*100, 2);
+        }else{
+            $perubahan_prsen='-';
+        }
+
+        if ($standar=='0') {
+            $tab=$lap->level;
+        }else{
+            $tab=1;
+        }
+
+        if ($tab==0) {
+?>
+    <tr style="font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+<?php
+            $tr='id="tr0"';
+        }else{
+            $tr='';
+        }
+?>
+    <tr <?php echo $tr; ?>>
+        <td id="tab<?php echo $tab; ?>"><?php echo $lap->akun_kode; ?></td>
+        <td><?php echo $lap->akun_nama; ?></td>                
+        <td class='right-align'><?php echo Formatting::currency($lap->nominal_skrg); ?></td>
+        <td class='right-align'><?php echo Formatting::currency($lap->nominal_tahun_lalu); ?></td>
+        <td class='right-align'><?php echo Formatting::currency($perubahan_rp); ?></td>
+        <td class='right-align'><?php echo $perubahan_prsen; ?></td>
+    </tr>
+<?php
+    }
+?>
+</table>

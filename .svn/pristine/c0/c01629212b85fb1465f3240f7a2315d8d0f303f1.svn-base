@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <style>
+            #tabel_pdf, #tabel_pdf tr, #tabel_pdf th, #tabel_pdf td{
+                border:black thin solid;
+                border-collapse:collapse;
+                width: 100%;   
+            }
+        </style>
+    </head>
+    <body>
+    <div style="text-align:center">
+        <h2>Ringkasan Realisasi Penerimaan</h2><br />
+    </div>
+    <?php if($nama_fakultas=='-1'){
+            echo 'Untuk selurus universitas Udayana';
+        }else{
+            if($nama_jurusan==-1){
+                echo "Seluruh fakultas ".$nama_fakultas."<br/>";
+            }else{
+                echo "Fakultas: ".$nama_fakultas."<br/>";
+                echo "Jurusan: ". $nama_jurusan."<br/>"; 
+            }
+        }
+        if ($tahun==-1){
+            echo "Untuk semua tahun ajaran";
+        }else{
+            if($semester==-1){
+                echo "Untuk Tahun ajaran $tahun";
+            }else{
+                echo  "Untuk Tahun ajaran ".$tahun." ".$semester;
+            }
+        }
+        //echo "tahun ajaran: ".$tahun_ajaran;
+    ?>
+    
+    
+        Mahasiswa yang membayar sebanyak <?php echo $bayar_banyak; ?> sejumlah <?php echo $this->uang->angka($bayar_jumlah).' terbilang '.$this->uang->terbilang($bayar_jumlah) ; ?> <br />
+        Mahasiswa yang menunggak sebanyak <?php echo $tunggakan_banyak; ?> sejumlah <?php echo $this->uang->angka($tunggakan_jumlah); ?> <br /><br />
+        
+        <p style="page-break-before: always">&nbsp;</p> 
+        <h2>
+        <div style="text-align:center">
+        Detail Pendapatan layanan Pendidikan:
+        </div>
+        </h2> <br /><br />
+        <table id="tabel_pdf" border="1">
+            <tr>
+                <th align="center">NIM</th>
+                <th align="center">Nama</th>
+                <th align="center">Semester</th>
+                <th align="center">Tanggal</th>
+                <th align="center">Jumlah</th>
+            </tr>
+        
+        <?php foreach ($bayar as $byr){
+                echo '<tr><td>'.$byr->nim.'</td><td>'.$byr->nama.'</td><td>'.$byr->th_ajar." ".$byr->semester.'</td><td>'.$byr->tgl_bayar.'</td><td align="right">'.$this->uang->angka($byr->nilai)."</td></tr>";
+            }
+        ?>
+        </table>
+        
+        <p style="page-break-before: always">&nbsp;</p> 
+        
+        <h2>
+        <div style="text-align:center">
+        Detail Mahasiswa Yang Menunggak
+        </div>
+        </h2> <br /><br />
+        <table id="tabel_pdf" border="1">
+            <tr>
+                <th align="center">NIM</th>
+                <th align="center">Nama</th>
+                <th align="center">Semester</th>
+                <th align="center">Jumlah</th>
+            </tr>
+        <?php foreach ($tunggakan as $tng){
+                echo '<tr><td>'.$tng->nim.'</td><td>'.$tng->nama.'</td><td>'.$tng->th_ajar." ".$tng->semester.'</td><td>'.$this->uang->angka($tng->nilai)."</td></tr>";
+            }
+        ?>
+        
+        </table>    
+        
+    </body>
+</html>

@@ -1,0 +1,40 @@
+<?php
+/**
+* 
+*/	
+class M_services extends CI_Model
+{
+	private $_table = 'm_pegawai_untuk_siaku';
+
+	function __construct()
+	{
+		parent::__construct();
+	}
+
+	function get_pegawai_by_params($params) 
+	{
+		$sql = "
+			SELECT * 
+			FROM {$this->_table}
+			WHERE 
+		";
+
+		$keys = array();
+		$vals = array();
+		foreach($params as $key=>$val){
+			$keys[] = $key . ' LIKE ?';
+			$vals[] = '%'.$val.'%';
+		}
+
+		$sql .= implode(' OR ', $keys);
+		$query = $this->db->query($sql, $vals);
+
+		if($query) {
+			if($query->num_rows() > 0)
+				return $query->result_array();
+		}
+
+		return array();
+	}
+}
+?>

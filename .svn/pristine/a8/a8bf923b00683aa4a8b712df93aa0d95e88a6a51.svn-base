@@ -1,0 +1,125 @@
+<script>
+$( function() {
+    $("#pro_pusat").validate({
+        rules: {
+            
+        },
+        messages: {
+            
+        },
+        submitHandler: function(form){
+            $(".bagian").each(function() {
+                $(this).val($(this).autoNumeric('get'));
+            });
+            form.submit();
+            try {
+                form.submit();
+            } catch(e) {
+                console.log(e);
+                return false;
+            }
+        }
+    });		
+});
+</script>
+<article class="module width_full">
+<header><h3>Pembagian Uang Pusat</h3></header>
+                    
+<div class="module_content">
+<table>
+    <tr>
+        <td>Total Uang Pusat</td>
+        <td>: <input type="text" name="totalUang" readonly id="totalUang" name="totalUang" value="<?php echo $bagian; ?>"/></td>
+    </tr>
+    <tr>
+        <td>Total Yang Sudah Dibagikan</td>
+        <td>: <input type="text" name="totalSudahBagi" readonly id="totalSudahBagi" value="<?php echo $sudah_terpakai; ?>"/></td>
+    </tr>
+    <tr>
+        <td>Total Yang Boleh Dibagikan</td>
+        <td>: <input type="text" name="totalBolehBagi" readonly id="totalBolehBagi" value="<?php echo $bagian-$sudah_terpakai; ?>"/></td>
+    </tr>
+    <tr>
+        <td>Sisa yang Belum Dibagikan</td>
+        <td>: <input type="text" name="sisaBagian" readonly id="sisaBagian"/></td>
+    </tr>
+</table>
+    <form id="pro_pusat" action="<?php echo site_url('pro_pusat/simpan');?>" 
+                method="POST" name="pro_pusat" id="pro_pusat" accept-charset="UTF-8">
+    <table  class="table-common">  
+    <thead> 
+       <tr >
+           <th>No</th>
+           <th>Nama Subunit</th>   
+           <th>Bagian</th>   
+       </tr>
+    </thead>
+    <?php
+        $no = 0;
+        foreach ($subunit as $su) {
+            $no++;
+    ?>    
+    <tr>
+        <td width="20px" align='center'><?php echo $no;?></td>
+        <td width="300px" align="left"><?php echo $su->nama_subunit;?></td>   
+        
+        <td>
+            <input type="text" name="subunit[<?php echo $su->id_subunit; ?>]" id="<?php echo $su->id_subunit; ?>" onchange="hitung(this)" class="bagian" value="<?php if (isset($pro_pusat[$su->id_subunit])) {echo $pro_pusat[$su->id_subunit];} ?>" />
+        </td>
+    </tr>
+    <?php } ?>
+        <tr>
+            <th></th>
+            <th></th>
+            <th><input type="text" name="totalbagi" readonly id="totalbagi" name="totalbagi"/></th>
+        </tr>
+    </table>
+    </div>
+    
+    <footer>
+    <div class="submit_link">  
+        <input type="submit" value="Simpan" id="simpan" name="submit">
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+</form>
+</article>  
+<script type="text/javascript">
+    $('.bagian').autoNumeric(window.numOptions);
+    function jumlah(){
+        var totalBagian=0;
+        $(".bagian").each(function() {
+            var bag_ini = parseFloat($(this).autoNumeric('get'));
+            var nil_bag = isNaN(bag_ini) ? 0 : bag_ini;
+            totalBagian=totalBagian + nil_bag;
+        });
+        return totalBagian;
+    }
+    function hitung(baris){
+        var totalBagian=jumlah();
+        $('#totalbagi').val(totalBagian);
+        var sisa=$('#totalBolehBagi').val()-totalBagian;
+        $('#sisaBagian').val(sisa);
+        if (sisa<0){
+            alert ('Dananya sudah habis, perbaiki lagi');
+            $('#simpan').attr("disabled", "disabled");
+            baris.value=0;
+            hitung('')
+            return false;
+        }else{
+            $('#simpan').removeAttr("disabled");
+            //nitip baris ke session
+            var data = {id_subunit:baris.id,nilai:$(baris).autoNumeric('get')};
+            $.ajax({ //post id unit
+                type: "POST",
+                url : "<?php echo site_url('pro_pusat/nitip_sesi')?>",
+                data: data,
+                success: function(msg){
+                }
+            });
+            
+            
+            return true;
+        }
+    }
+</script>

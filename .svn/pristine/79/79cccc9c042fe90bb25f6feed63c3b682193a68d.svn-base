@@ -1,0 +1,62 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_evaluasi_renja extends CI_Model
+{	
+    public function __construct()
+    {
+        parent::__construct();
+    }
+	
+	public function get_renja_all($tahun, $id_skpd)
+	{
+		$where = array(
+						'tahun' => $tahun,
+						'id_skpd' => $id_skpd,
+						'id_status' => 7,
+						'is_prog_or_keg' => 2
+					);
+		$data['renja'] = $this->db->where($where)
+									->get("t_renja_prog_keg")
+									->result();
+
+		$indikator = $this->db->where($where)
+									->select("t_renja_indikator_prog_keg.*")
+									->select("m_lov.nama_value AS satuan", false)
+									->join("t_renja_prog_keg", "t_renja_indikator_prog_keg.id_prog_keg=t_renja_prog_keg.id")
+									->join("m_lov", "t_renja_indikator_prog_keg.satuan_target=m_lov.kode_value AND nama_app='satuan'")
+									->order_by("t_renja_indikator_prog_keg.id_prog_keg")
+									->get("t_renja_indikator_prog_keg")
+									->result();				
+		$temp = array();
+		foreach ($indikator as $row) {
+			$temp[$row->id_prog_keg][] = $row;
+		}
+		$data['indikator'] = $temp;
+
+		return $data;
+	}
+
+	public function get_one_renja($id)
+	{
+		$where = array(
+						't_renja_prog_keg.id' => $id						
+					);
+		$data['renja'] = $this->db->where($where)
+									->get("t_renja_prog_keg")
+									->row();
+
+		$indikator = $this->db->where($where)
+									->select("t_renja_indikator_prog_keg.*")
+									->select("m_lov.nama_value AS satuan", false)
+									->join("t_renja_prog_keg", "t_renja_indikator_prog_keg.id_prog_keg=t_renja_prog_keg.id")
+									->join("m_lov", "t_renja_indikator_prog_keg.satuan_target=m_lov.kode_value AND nama_app='satuan'")
+									->order_by("t_renja_indikator_prog_keg.id_prog_keg")
+									->get("t_renja_indikator_prog_keg")
+									->result();
+											
+		$data['indikator'] = $indikator;
+
+		return $data;
+	}	
+}
+?>

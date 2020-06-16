@@ -1,0 +1,1 @@
+<?php echo form_dropdown("id_header2",$option_header2,'',"id='id_header2' style='width:450px;'"); ?>

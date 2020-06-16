@@ -1,0 +1,26 @@
+	    <article class="module width_full">
+    		<header><h3>Surat Permohonan Pencairan UP</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+            <?php include_once ('mohon_cair_up_isi.php') ?>
+            
+            </div>
+            <footer>
+                <div id="status"></div>
+				<div class="submit_link">
+                    
+                    <input type="button" value="Kembali" onclick="window.history.back()">
+                    <input type="button" value="Cetak" onclick="cetak()">
+                        <script>
+                            function cetak(){
+                                var lokasi='<?php echo site_url('usulan/detail_mohon_cair_up/'.$mohon_cair_up->id_cair_up."/cetak"); ?>';
+                                
+                                location.href=lokasi;
+                            }
+                        </script>
+				
+                </div>
+			</footer>
+   </form>
+        </article>
+        <!-- end of styles article --> 

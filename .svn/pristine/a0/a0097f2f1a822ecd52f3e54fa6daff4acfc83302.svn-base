@@ -1,0 +1,88 @@
+<article class="module width_full">
+<header>
+	<h3>REKAPITULASI SPM DAN SP2D</h3>
+</header>
+
+<div class="module_content">
+                   
+<form method="post" name='form_jurnal' action="<?php echo base_url();?>report/simpan_jurnal" onSubmit='return validasi(this)'> 
+<table cellspacing="0" >
+	<tr>
+    	<td>Periode</td>
+        <td>:</td>
+        <td><select name="bulanx" id="bulanx">
+        		<option value="0">-- Bulan --</option>
+                <option value="01">Januari</option>
+                <option value="02">Pebruari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </td>
+        <td>sampai</td>
+        <td><select name="bulany" id="bulany">
+        		<option value="0">-- Bulan --</option>
+                <option value="01">Januari</option>
+                <option value="02">Pebruari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </td>
+        <td><select name="tahun" id="tahun">
+        		<option value="0">-- Tahun --</option>
+                <option value="2014">2014</option>
+				<option value="2015">2015</option>
+        	</select>
+        </td>
+        <td>Unit</td>
+        <td>
+			<?php
+			$id_nmunit="";
+			echo form_dropdown("nm_unit",$nm_unit,$id_nmunit,"id='unit_drp' class='kombocari' id='nm_unit' style='width:94%;'");            ?>
+        </td>
+        <td>
+        	<input type="button" value="tampil" name="tampil" id="tampil" onClick="viewAll()">
+        </td>
+    </tr>  
+</table> 
+
+
+<table><div id='tabel'></div> </table>
+</div>
+</article> 
+
+<script>
+
+function viewAll(){
+	var bulanx= $("#bulanx").val();
+	var bulany= $("#bulany").val();
+	var tahun= $("#tahun").val();
+	var unit= $("#unit_drp").val();
+	$.ajax({
+        type: "POST",
+        url : "<?php echo site_url('rekap/list_sp2dcair')?>",
+        data: { bulanx:bulanx,bulany:bulany,tahun: tahun,unit:unit},
+        success: function(msg){            
+            $('#tabel').html(msg);
+            
+        }
+    });
+ }
+
+</script>
+ 

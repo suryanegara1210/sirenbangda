@@ -1,0 +1,35 @@
+<?php 
+/**
+* 
+*/
+class Services extends CI_Controller
+{
+
+	function __construct()
+	{
+		parent::__construct();
+		$this->load->database();
+		$this->load->model('m_services');
+	}
+
+	public function pegawai()
+	{
+		$param = $this->uri->segment(3);
+		$param = urldecode($param);
+
+		$params['nip'] = $param;
+		$params['nama']= $param;
+
+		$lists = $this->m_services->get_pegawai_by_params($params);
+		foreach($lists as $key=>$row) {
+			$item = array(
+                    'id'	=> $row['nip'],
+					'label'	=> $row['nama'],
+					'value'	=> $row['golongan'],
+					'desc'	=> $row['kode_unit']);
+			$lists[$key] = $item;
+		}
+		echo json_encode($lists);		
+	}
+}
+?>

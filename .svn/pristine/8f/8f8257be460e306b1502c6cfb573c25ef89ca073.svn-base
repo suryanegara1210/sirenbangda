@@ -1,0 +1,33 @@
+<table  class="table-common" style="margin-left: 20px; width: 90%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Output/Komponen/Akun</th>
+                <th>Header</th>
+                <th>Uraian</th>
+                <th>Volume</th>
+                <th>Satuan</th>
+                <th>Harga Satuan</th>
+                <th>Jumlah</th>
+                <th>Aksi</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+                 foreach($list_tender as $row) : $i++;?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdkomponen;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->hdr; ?> </td>
+                    <td align="left"><?php echo $row->uraian; ?> </td>
+                    <td align="center"><?php echo $row->vol; ?> </td>
+                    <td align="center"><?php echo $row->sat; ?> </td>
+                    <td align="center"><?php echo $row->hargasat; ?> </td>
+                    <td align="center"><?php echo $row->jumlah; ?> </td>
+                    <td align="center">
+                    <img title="Ajukan Tender" onclick="masukan(<?php echo $row->idtdet;?>)" src="<?php echo base_url(); ?>asset/images/add.png"/></td>
+                   
+                </tr>
+             <?php endforeach; ?> 
+        </tbody>
+</table>

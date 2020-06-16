@@ -1,0 +1,77 @@
+<article class="module width_full">
+    <header><h3>Daftar Verifikasi Bukti Akuntansi</h3></header>
+        <div class="module_content">
+            <div style="width: 100%; margin-top: 10px; float:left;">
+                <div id="jbkt" style="margin-right: 10px; float:left; max-width: 250px;">
+                    Jenis Bukti<br/>
+                    <?php echo form_dropdown("jen_bkt",$jen_bkt,"","id='jen_bkt'"); ?>
+                </div>
+                <div id="jpen" style="margin-right: 10px; float:left; ">
+                    Periode Awal<br/>
+                    <?php echo form_dropdown("bulan",$bulan,"","id='bulan'"); ?>
+                </div>
+                <div id="jpen" style="margin-right: 10px; float:left; ">
+                    <br/>
+                    -
+                </div>
+                <div id="jpen" style="margin-right: 10px; float:left; ">
+                    Periode Akhir<br/>
+                    <?php echo form_dropdown("bulan2",$bulan,"","id='bulan2'"); ?>
+                </div>
+                <div id="div_status" style="margin-right: 10px; float:left; ">
+                    Status<br/>
+                    <?php echo form_dropdown("status",$status,"","id='status'"); ?>
+                </div>
+                <div id="div_role" style="margin-right: 10px; float:left; ">
+                    Role<br/>
+                    <?php echo form_dropdown("role",$role,"","id='role'"); ?>
+                </div>
+            </div>
+            <div style="width: 100%; margin-top: 10px; float:left;">
+                <div id="div_sort" style="margin-right: 2px; float:left; ">
+                    Pengurutan<br/>
+                    <?php echo form_dropdown("sort",$sort,"","id='sort'"); ?>
+                </div>
+                <div id="div_jsort" style="margin-right: 10px; float:left; ">
+                    <br/>
+                    <?php echo form_dropdown("jsort",$jsort,"","id='jsort'"); ?>
+                </div>
+                <div id="div_search" style="margin-right: 10px; float:left; ">
+                    Pencarian <i>(Nomor Bukti)</i><br/>
+                    <input name="search" id="search" style="min-width: 400px; " type="text">
+                </div>
+            </div>
+            <div style="width: 100%; margin-top: 10px; float:left;">                
+                <div id="cr" style="margin-right: 10px;float:left;">
+                    Tampilkan:<br/>
+                    <input type="button" id="cari" value="Tampilkan" onclick="ambildata()" />
+                </div>
+            </div>
+        </div>
+</article>
+
+<div id="data"></div>
+
+<script type="text/javascript">
+    function ambildata(){
+        var jen_bkt= $("#jen_bkt").val();
+        var bulan= $("#bulan").val();
+        var bulan2= $("#bulan2").val();
+        var status= $("#status").val();        
+        var role= $("#role").val();
+        var sort= $("#sort").val();
+        var jsort= $("#jsort").val();
+        var search= $("#search").val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('bukti_akuntansi/semua_daftar_veri');?>",
+                data: { jen_bkt: jen_bkt, bulan:bulan, bulan2:bulan2, status: status, role: role, sort: sort, jsort: jsort, search: search},
+                success: function(msg){
+                    $('#data').html('');
+                    $('#data').html(msg);
+                }
+        });
+    }
+
+    ambildata();
+</script>

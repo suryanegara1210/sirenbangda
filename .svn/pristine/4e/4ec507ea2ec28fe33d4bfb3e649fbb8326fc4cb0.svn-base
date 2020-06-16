@@ -1,0 +1,52 @@
+<?php
+
+class rbac_roles extends CI_Controller {
+    
+    
+    function rbac_roles(){
+        parent::__construct();
+    }
+    function index(){
+        $sql = "SELECT * FROM rbac_roles";
+        $sql_query = $this->db->query($sql);
+        $data['results'] = $sql_query->result();
+        
+        $this->template->load('rbac/rbac_index', 'rbac/rbac_role_home',$data);
+    }
+    
+    function edit($role_id){
+        $sql = "SELECT * FROM rbac_roles WHERE role_id=".$role_id;
+        $sql_result = $this->db->query($sql);
+        $data['results'] = $sql_result->result();
+        
+        $this->template->load('rbac/rbac_index', 'rbac/edit_roles',$data);
+    }
+    
+    function saveEdit(){
+        $role_id = $this->input->post('role_id',false);
+        $role_name = $this->input->post('role_name',false);
+        $sql = "UPDATE rbac_roles SET role_name='".$role_name."' WHERE role_id='".$role_id."'";
+        $this->db->query($sql);
+        redirect('rbac/rbac_roles');
+    }
+    
+    function delete($role_id){
+        $sql = "DELETE FROM rbac_roles WHERE role_id='".$role_id."'";
+        $this->db->query($sql);
+        redirect('rbac/rbac_roles');
+    }
+    
+    function addRoles(){
+        $this->template->load('rbac/rbac_index', 'rbac/add_roles');
+    }
+    
+    function addRolesProcess(){
+        $role_name = $this->input->post('role_name',false);
+        $sql = "INSERT INTO rbac_roles (role_name) VALUE ('".$role_name."')";
+        $this->db->query($sql);
+        redirect('rbac/rbac_roles');
+    }
+}
+
+
+?>

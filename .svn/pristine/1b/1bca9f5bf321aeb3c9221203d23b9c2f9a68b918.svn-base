@@ -1,0 +1,22 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-08-29 13:29:25 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:31:25 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:33:07 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:34:36 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:35:24 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:37:32 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:44:39 --> Severity: Notice  --> Undefined variable: nama_unit C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 4
+ERROR - 2013-08-29 13:44:39 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 6
+ERROR - 2013-08-29 13:45:49 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 4
+ERROR - 2013-08-29 13:45:49 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 4
+ERROR - 2013-08-29 13:45:49 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 6
+ERROR - 2013-08-29 13:46:31 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 4
+ERROR - 2013-08-29 13:46:31 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 4
+ERROR - 2013-08-29 13:46:31 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\views\sptb\tampil_kunci.php 6
+ERROR - 2013-08-29 13:46:48 --> Severity: Warning  --> number_format() expects parameter 1 to be double, object given C:\xampp\htdocs\siaku\application\libraries\Formatting.php 18
+ERROR - 2013-08-29 13:53:58 --> Severity: Notice  --> Undefined property: stdClass::$jumlah C:\xampp\htdocs\siaku\application\models\m_sptb.php 280
+ERROR - 2013-08-29 16:57:01 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 98
+ERROR - 2013-08-29 16:57:01 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 100
+ERROR - 2013-08-29 16:57:01 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 104
+ERROR - 2013-08-29 16:57:01 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 106

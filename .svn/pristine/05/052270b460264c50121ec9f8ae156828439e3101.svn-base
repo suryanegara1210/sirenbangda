@@ -1,0 +1,97 @@
+<html>
+<head>    
+</head>
+<body style="margin: 30px">
+    <div style="font-size: 10;">
+        <table width="100%" style="border-collapse:collapse; padding:5px;" align="center">        
+            <tr>    
+                <td width="50%">UNIVERSITAS UDAYANA</td>
+                <td width="15%"></td>
+                <td width="11%">Tgl. Cetak</td>
+                <td width="3%">:</td>
+                <td width="21%"><?php echo $tanggal; ?></td>
+            </tr>
+            <tr>
+                <td width="50%">Jalan Kampus Bukit Jimbaran </td>                
+                <td width="15%"></td>
+                <td width="11%">Periode</td>
+                <td width="3%">:</td>
+                <td width="21%"><?php echo $tahun; ?></td>
+            </tr>
+            
+            <tr>
+                <td colspan="7" align="center">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="7" align="center">Buku Besar</td>
+            </tr>
+            <tr>
+                <td colspan="7" align="center">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="7" align="center">&nbsp;</td>
+            </tr>        
+        </table>
+        <table width="100%" style="font-size: 6; border-collapse:collapse; padding:5px;" border="1" align="center">
+           <thead> 
+                <tr bgcolor="#EEE">
+                    <th>No</th>
+                    <th>Kode</th>
+                    <th>Akun</th>
+                    <th>Debet</th>
+                    <th>Kredit</th>
+                    <th>Saldo</th> 
+                </tr>
+          </thead>
+           <tbody>                          
+               <?php if ( COUNT ($isi_bukti)<=0){
+                            echo "<tr><td colspan=\"6\"><center>Tidak Ada Data...</center></td></tr>";
+                        }else{
+                            $i=0;
+                            $sum_debet=0;
+                            $sum_kredit=0;                      
+                            $saldo=$saldo_awal;
+
+                            ?>
+                            <tr>
+                                <td align="center" bgcolor="#EEE"></td>
+                                <td colspan="2" align="center" bgcolor="#EEE">SALDO AWAL</td>
+                                <td align="right" bgcolor="#EEE"><?php echo Formatting::currency($saldo_awal); ?> </td>
+                                <td align="right" bgcolor="#EEE"><?php echo "0" ?> </td>
+                                <td align="right" bgcolor="#EEE"><?php echo Formatting::currency($saldo); ?> </td>
+                            </tr>
+                            <?php
+
+                            foreach($isi_bukti as $row) : $i++;
+                            $sum_debet+= $row->debet;
+                            $sum_kredit+= $row->kredit;
+                            $saldo=$saldo+($row->debet)-($row->kredit);
+                            ?>
+                            
+                            <tr>
+                                <td align="center"><?php echo $i;?></td>                            
+                                <td align="left"><?php echo $row->akun_bas; ?> </td>
+                                <td align="left"><?php echo $row->akun_nama; ?> </td>
+                                <td align="right"><?php echo Formatting::currency($row->debet,0,false);?> </td>
+                                <td align="right"><?php echo Formatting::currency($row->kredit,0,false); ?> </td>
+                                <td align="right"><?php echo Formatting::currency($saldo,0,false); ?> </td>
+                            </tr>
+                            <?php endforeach; 
+                            $tot_debet=0;
+                            $tot_kredit=0;
+                            $tot_debet=$sum_debet+$saldo_awal;
+                            $tot_kredit=$sum_kredit;
+                            ?>
+                            <tr>
+                                <input type="hidden" id="saldo" value="<?php echo $saldo; ?>" />
+                                <td colspan="3" align="center" bgcolor="#EEE">SALDO AKHIR</td>
+                                <td align="right" bgcolor="#EEE"><?php echo Formatting::currency($tot_debet,0,false); ?> </td>
+                                <td align="right" bgcolor="#EEE"><?php echo Formatting::currency($tot_kredit,0,false); ?> </td>
+                                <td align="right" bgcolor="#EEE"><?php echo Formatting::currency($saldo,0,false); ?> </td>
+                            </tr>                            
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

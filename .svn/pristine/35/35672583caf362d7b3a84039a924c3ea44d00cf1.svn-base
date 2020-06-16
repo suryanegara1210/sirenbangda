@@ -1,0 +1,687 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class akuntansi dari pembuatan jurnal
+ * 
+ * Controller Class akuntansi dari pembuatan jurnal sampai laporan neraca
+ * 
+ * 
+ * @author Putu Praba Santika
+ * @author Putu Ptutu Ari Arjana
+ * @author Putu I Wayan Sudharmika
+ */
+
+class akuntansi extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+        {                                
+            $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->library('konversi','');
+            $this->load->model('m_akun'); 
+        }
+//========================
+//<<<==  MENU - MENU AKUNTANSI
+//========================
+
+
+//JURNAL================
+//======================
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGINPUT JURNAL BARU
+*/
+function jurnal_input()
+  	{   
+        if($this->auth->is_logged_in() == true)
+		{ 
+          $th_spm = $this->uri->segment(3);       
+          $id_spm = $this->uri->segment(4);       
+          //$data['daftar_sp2d'] = $this->m_akun->list_sp2d3($id_spm,$th_spm);
+          //echo $this->db->last_query();
+		  $data['query_deb'] = $this->m_akun->getAll_debet();
+		  
+		  $data['query_jum_deb'] = $this->m_akun->get_jum_All_debet();
+		  $data['query_jum_kre'] = $this->m_akun->get_jum_All_kredit();
+		  
+		  $data['query_kre'] = $this->m_akun->getAll_kredit();
+		  $this->template->load('template','akuntansi/jurnal_input',$data);
+		} else redirect(base_url());
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGAKTIFKAN AUTOCOMPLETE PADA JURNAL
+*/
+function lookup(){
+		// process posted form data (the requested items like province)
+        $keyword = $this->input->post('term');
+        $data['response'] = 'false'; //Set default response
+        $query = $this->m_akun->lookup($keyword); //Search DB
+        if( ! empty($query) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $query as $row )
+            {
+                $data['message'][] = array( 
+                                        'id'=>$row->nama_akun,
+                                        'value' => $row->kode_akun . '-- '.  $row->nama_akun,
+                                        ''
+                                     );  //Add a row to array
+            }
+        }
+        if('IS_AJAX')
+        {
+            echo json_encode($data); //echo json string if ajax request
+        }
+        else
+        {
+             $this->template->load('template','akuntansi/jurnal_input',$data);
+        }
+	}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAH DEBET PADA JURNAL
+*/
+function tambah_deb()
+	{
+    $kd_akun_debet = $this->input->post('kd_akun_debet');
+	$nilai_kd_akun = strstr($kd_akun_debet, '--', true);
+	$nilai_debet = $this->input->post('nilai_debet');
+	
+	$this->m_akun->simpan_kd_akun_deb($nilai_kd_akun,$nilai_debet);
+	
+	$data['query_jum_deb'] = $this->m_akun->get_jum_All_debet();
+	$data['query_jum_kre'] = $this->m_akun->get_jum_All_kredit();
+		  
+    $data['query_deb'] = $this->m_akun->getAll_debet();
+	$data['query_kre'] = $this->m_akun->getAll_kredit();
+
+	$this->load->view('akuntansi/bj_db',$data);
+  }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENDELETE DEBET PADA JURNAL
+*/
+function del_deb()
+	{
+    $id = $this->input->post('del_id');
+    $this->db->delete('t_jurnal', array('id' => $id));
+	
+	$data['query_jum_deb'] = $this->m_akun->get_jum_All_debet();
+	$data['query_jum_kre'] = $this->m_akun->get_jum_All_kredit();
+	
+    $data['query_deb'] = $this->m_akun->getAll_debet();
+	$data['query_kre'] = $this->m_akun->getAll_kredit();
+	
+	$this->load->view('akuntansi/bj_db',$data);
+  }
+
+//*********
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAH KREDIT PADA JURNAL
+*/
+function tambah_kre()
+	{
+    $kd_akun_kredit = $this->input->post('kd_akun_kredit');
+	$nilai_kd_kredit = strstr($kd_akun_kredit, '--', true);
+	$nilai_kredit = $this->input->post('nilai_kredit');
+	
+	$this->m_akun->simpan_kd_akun_kre($nilai_kd_kredit,$nilai_kredit);
+	
+	$data['query_jum_deb'] = $this->m_akun->get_jum_All_debet();
+	$data['query_jum_kre'] = $this->m_akun->get_jum_All_kredit();
+	
+    $data['query_deb'] = $this->m_akun->getAll_debet();
+	$data['query_kre'] = $this->m_akun->getAll_kredit();
+	
+	$this->load->view('akuntansi/bj_db',$data);
+  }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGHAPUS KREDIT PADA JURNAL
+*/
+function del_kre()
+	{
+    $id = $this->input->post('del_id_kre');
+    $this->db->delete('t_jurnal', array('id' => $id));
+	
+	$data['query_jum_deb'] = $this->m_akun->get_jum_All_debet();
+	$data['query_jum_kre'] = $this->m_akun->get_jum_All_kredit();
+	
+    $data['query_deb'] = $this->m_akun->getAll_debet();
+	$data['query_kre'] = $this->m_akun->getAll_kredit();
+	
+	$this->load->view('akuntansi/bj_db',$data);
+  }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA JURNAL
+*/
+function simpan_jurnal()
+	{
+		$object->tgl_buku = $this->input->post('tgl_buku');
+		$object->tgl_transaksi = $this->input->post('tgl_trans');
+		$object->bukti = $this->input->post('bukti');
+		$object->keterangan = $this->input->post('ket');
+		$username = $this->session->userdata('username');
+        $update =$this->m_akun->update_spm_jurnal();
+		$success = $this->m_akun->simpan_jurnal($object,$username);
+		if($success) 
+				{ 
+					$this->session->set_userdata('msg_typ', 'ok');
+                	$this->session->set_userdata('msg', 'Berhasil menyimpan transaksi.');
+                }
+				else
+				{
+					$this->session->set_userdata('msg_typ', 'err');
+                	$this->session->set_userdata('msg', 'GAGAL menyimpan transaksi.');
+				}
+				redirect('c_akun/spm_terbayar');
+	}
+
+
+//=======================================================
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA JURNAL
+*/
+function jurnal_view() 
+{
+//count the total rows of tb_book
+		$this->db->select('*');
+		$this->db->from('t_jurnal');
+		$getData = $this->db->get('');
+		
+		$a = $getData->num_rows();
+		$config['base_url'] = site_url().'akuntansi/jurnal_view'; //set the base url for pagination
+		$config['total_rows'] = $a; //total rows
+		$config['per_page'] = '100'; //the number of per page for pagination
+		$config['uri_segment'] = 3; //see from base_url. 3 for this case
+		$config['full_tag_open'] = '<p>';
+		$config['full_tag_close'] = '</p>';
+		$this->pagination->initialize($config); //initialize pagination
+		$data['title'] = 'menampilkan isi buku';
+		$data['detail'] = $this->m_akun->get_jurnal($config['per_page'],$this->uri->segment(3));
+		$this->template->load('template','akuntansi/jurnal_view', $data);
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENCETAK OUTPUT PADA JURNAL BAGIAN 1
+*/
+function print_jurnal() 
+{
+		$this->load->library('pdf2');
+		$data['hasil'] = $this->m_akun->print_jurnal();		
+		$html = $this->load->view('akuntansi/print_jurnal', $data);
+		$this->pdf2->pdf_create($html, 'Jurnal Umum');
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENCETAK OUTPUT PADA JURNAL BAGIAN 2
+*/
+function print_jurnal2($download_pdf = ''){
+	ini_set('memory_limit', '64M');
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $ret = ''; 
+             $pdf_filename='dhar.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_up/true/','Download Pdf');
+             $this->load->model('m_akun');
+             $data['hasil'] = $this->m_akun->print_jurnal();		
+             $data['link'] = $link_download ;  
+             $output = $this->load->view('akuntansi/print_jurnal', $data, true);
+                 generate_pdf_A4($output,$pdf_filename);  
+          }
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENCETAK OUTPUT PADA JURNAL BAGIAN 3
+*/
+function print_jurnal3() 
+{
+		$data['hasil'] = $this->m_akun->print_jurnal();		
+		$this->load->library('mpdf');
+		$html = $this->load->view('akuntansi/print_jurnal', $data);
+		$this->mpdf->WriteHTML($html);
+		$this->mpdf->Output();
+}
+
+//BUKU BESAR==========
+//======================
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENCARI AKUN YANG DIPILIH OLEH USER
+*/
+function ac_bukubesar(){
+        $keyword = $this->input->post('term');
+        $data['response'] = 'false'; //Set default response
+        $query = $this->m_akun->lookup($keyword); //Search DB
+        if( ! empty($query) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $query as $row )
+            {
+                $data['message'][] = array( 
+                                        'id'=>$row->nama_akun,
+                                        'value' => $row->kode_akun . '-- '.  $row->nama_akun,
+                                        ''
+                                     );  //Add a row to array
+            }
+        }
+        if('IS_AJAX')
+        {
+            echo json_encode($data); //echo json string if ajax request
+        }
+        else
+        {
+             $this->template->load('template','akuntansi/akun_daftar_buku_besar', $data);
+        }
+	}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA BUKU BESAR
+*/
+ function view_buku_besar(){   
+        if($this->auth->is_logged_in() == true){ 
+        $this->template->load('template','akuntansi/akun_daftar_buku_besar');
+		}
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MEMILIH TAMPILAN YANG DIINGINKAN 
+*/	
+function pilih_jenis_tampilan(){   
+		$jenis = $this->input->post('jenis');
+		if($jenis=='01')
+		{ $this->load->view('akuntansi/jenis_laporan/bulan');}
+		else if ($jenis=='02')
+		{ $this->load->view('akuntansi/jenis_laporan/triwulan');}
+		else if ($jenis=='03')
+		{ $this->load->view('akuntansi/jenis_laporan/semester');}
+		
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA BUKU BESAR 2
+*/	
+function buku_besar_view()
+    {
+            $kode5 = $this->input->post('kode1');
+			$bulan = $this->input->post('bulan');
+			$kd_akun = strstr($kode5, '--', true);	
+			$data['detil_akun'] = $this->m_akun->detil_akun($kd_akun);
+			$data['get_saldo_akhir_tahun'] = $this->m_akun->get_saldo_akhir_tahun($kd_akun);
+			$data['get_saldo_awal'] = $this->m_akun->get_saldo_awal($bulan,$kd_akun);
+			$data['hasil'] = $this->m_akun->buku_besar($bulan,$kd_akun);
+			$data['sum'] = $this->m_akun->buku_besar($bulan,$kd_akun);
+			$this->load->view('akuntansi/buku_besar',$data);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA BUKU BESAR BAGIAN KE 3
+*/		
+function buku_besar_tampil()
+    {
+            $kode5 = $this->input->post('kode1');
+			$bulan = $this->input->post('bulan');
+			$tampil = $this->input->post('tampil');
+			$kd_akun = strstr($kode5, '--', true);	
+			$data['detil_akun'] = $this->m_akun->detil_akun($kd_akun);
+			$data['get_saldo_akhir_tahun'] = $this->m_akun->get_saldo_akhir_tahun($kd_akun);
+			$data['get_saldo_awal'] = $this->m_akun->get_saldo_awal($bulan,$kd_akun);
+			$data['hasil'] = $this->m_akun->buku_besar_detil($bulan,$kd_akun);
+			$data['sum'] = $this->m_akun->buku_besar($bulan,$kd_akun);
+			$this->load->view('akuntansi/buku_besar_detil',$data);
+    }	
+	
+
+
+//NERACA LAJUR =========
+//======================
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA NERACA LAJUR PERTAMA KALINYA
+*/	
+ function n_lajur(){   
+        if($this->auth->is_logged_in() == true){ 
+          $this->template->load('template','akuntansi/neraca_lajur');
+		}
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA NERACA LAJUR BERDASARKAN BULAN YANG DIPILIH
+*/	
+function view_neraca_lajur()
+    {
+			$bulan = $this->input->post('bulan');
+			$bulan2 = $bulan + 1;
+			$data['hasil'] = $this->m_akun->v_n_lajur($bulan2);
+            $data['saldo_akhir_tahun_arr'] = $this->m_akun->saldo_akhir_tahun_all();
+			$this->load->view('akuntansi/view_neraca_lajur',$data);
+    }
+	
+	
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA LAPORAN OPERASIONAL
+*/	
+ function lap_operasional(){   
+        if($this->auth->is_logged_in() == true){ 
+        $this->template->load('template','akuntansi/lap_operasional');      
+		}
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA LAPORAN OPERASIONAL BERDASARKAN BULAN 
+*/	
+function view_lap_operasional()
+    {
+			$bulan = $this->input->post('bulan');
+			$bulan_lalu = $bulan - 1;
+			$data['hasil_pendapatan'] = $this->m_akun->v_lop_pendapatan($bulan, $bulan_lalu);
+			$data['hasil_biaya'] = $this->m_akun->v_lop_biaya($bulan, $bulan_lalu);
+            $data['saldo_akhir_tahun_arr'] = $this->m_akun->saldo_akhir_tahun_all();
+			$this->load->view('akuntansi/view_lap_operasional',$data);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA NERACA
+*/	
+ function neraca(){   
+        if($this->auth->is_logged_in() == true){ 
+        $this->template->load('template','akuntansi/neraca');      
+		}else redirect(base_url());
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN VIEW PADA NERACA TIAP BULANNYA
+*/
+function view_neraca()
+    {
+			$bulan = $this->input->post('bulan');
+            $data['saldo_akhir_tahun_arr'] = $this->m_akun->saldo_akhir_tahun_all();
+			$data['aktiva_lancar'] = $this->m_akun->v_neraca($bulan,"aktiva_lancar");
+            $data['investasi_panjang'] = $this->m_akun->v_neraca($bulan,"investasi_panjang");
+            $data['aktiva_tetap'] = $this->m_akun->v_neraca($bulan,"aktiva_tetap");
+            $data['kewajiban'] = $this->m_akun->v_neraca($bulan,"kewajiban");
+            $data['ekuitas'] = $this->m_akun->v_neraca($bulan,"ekuitas");
+			//$data['hasil_biaya'] = $this->m_akun->v_lop_biaya($bulan, $bulan_lalu);
+			$this->load->view('akuntansi/view_neraca',$data);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGEKSPORT LAPORAN KE EXEL
+*/
+public function eksport(){
+        $baris_awal=4;
+        $kolom_awal=1;
+        $kolom_awal_huruf='B';
+        $judul='UNIVERSITAS UDAYANA';
+        $judul2='Jln. Terserah anda, Dimana saja, Asal di Bali, Indonesia';
+        $namafile='laporan';
+        
+        $this->load->library('phpexcel');
+        $this->load->library('PHPExcel/iofactory');
+        
+        $laporan = new PHPExcel();
+        $laporan->getProperties()->setTitle("Laporan")
+                    ->setDescription("Contoh laporan");
+                        
+        // Assign cell values
+        $laporan->setActiveSheetIndex(0);
+        $sheet=$laporan->getActiveSheet();
+        $sheet->setTitle($namafile);
+
+
+        $style_judul = array(
+                'font' => array(
+                        'bold' => true,
+                'size' => 20,
+                ),
+            'alignment' => array(
+                'horizontal'=>'left',
+            )
+        );
+        
+        $style_judul2 = array(
+                'font' => array(
+                        'bold' => true,
+                'size' => 14,
+                ),
+            'alignment' => array(
+                'horizontal'=>'left',
+            )
+        );
+        
+        $style_kepala = array(
+                'font' => array(
+                        'bold' => false,
+                'size' => 20
+                ),
+            'alignment' => array(
+                'horizontal'=>'center'
+            ),
+            'borders' => array(
+                 'outline' => array(
+                    'style' => PHPExcel_Style_Border::BORDER_THIN,
+                    'color' => array('argb' => 'FF00FF00')
+                 ),
+                 'inside' => array(
+                              'style' => PHPExcel_Style_Border::BORDER_THIN,
+                     'color' => array('argb' => 'FF00FF00')
+                          )
+
+
+            ),
+             'fill' => array(
+                            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                            'color' => array(
+                                    'argb' => 'FFFF0000',
+                            ),
+                    ),
+        );
+        
+        $style_isi = array(
+                'font' => array(
+                        'bold' => false,
+                'size' => 10,
+                ),
+            'alignment' => array(
+                'horizontal'=>'left',
+            ),
+            'borders' => array(
+                 'outline' => array(
+                    'style' => PHPExcel_Style_Border::BORDER_THIN,
+                    'color' => array('argb' => 'FFFF0000'),
+                 ),
+                 'inside' => array(
+                              'style' => PHPExcel_Style_Border::BORDER_THIN,
+                     'color' => array('argb' => 'FFFF0000'),
+                          ),
+            )
+        );
+        $sheet->setCellValue("C1", $judul)
+            ->getStyle("A1:D1")->applyFromArray($style_judul);
+         $sheet->setCellValue("C2", $judul2)
+            ->getStyle("A2:D2")->applyFromArray($style_judul2);   
+        
+      $kolom_hr=$kolom_awal_huruf;
+        for ($kolom=0;$kolom<$kepala_pnj;$kolom++){
+            //echo $kepala[$kolom];
+            $sheet->setCellValueByColumnAndRow(($kolom+$kolom_awal),$baris_awal, $kepala[$kolom]);
+            $sheet->getStyleByColumnAndRow(($kolom+$kolom_awal),$baris_awal)->applyFromArray($style_kepala);
+            $sheet->getColumnDimension($kolom_hr++)->setAutoSize(true);
+        }
+        $tipe=$this->uri->segment(3);
+            $objWriter = IOFactory::createWriter($laporan, 'Excel5');
+			header('Content-Disposition: attachment;filename="'.$namafile.'.xls"');
+			$objWriter->save('php://output');
+    
+    }
+	
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGEKSPORT BUKU BESAR KE EXEL
+*/
+function eks_buku_besar()
+{
+		$kode5 = '111612A';
+		$this->db->select('*'); 
+        $this->db->from('jurnal');
+		$this->db->where('kode_akun',$kode5);
+		$query = $this->db->get();
+        if(!$query)
+            return false;
+        $this->load->library('PHPExcel');
+        $this->load->library('PHPExcel/IOFactory');
+        $objPHPExcel = new PHPExcel();
+        $objPHPExcel->getProperties()->setTitle("export")->setDescription("none");
+        $objPHPExcel->setActiveSheetIndex(0);
+        $fields = $query->list_fields();
+        $col = 0;
+        foreach ($fields as $field)
+        {
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($col, 1, $field);
+            $col++;
+        }
+        $row = 2;
+        foreach($query->result() as $data)
+        {
+            $col = 0;
+            foreach ($fields as $field)
+            {
+                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($col, $row, $data->$field);
+                $col++;
+            }
+             
+            $row++;
+        }
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objWriter = IOFactory::createWriter($objPHPExcel, 'Excel5');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="BukuBesar'.date('dMy').'.xls"');
+        header('Cache-Control: max-age=0');
+        $objWriter->save('php://output');
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGAMBIL DATA AKUN LAPORAN AKUNTANSI
+*/
+function lak(){   
+        if($this->auth->is_logged_in() == true){
+            $this->load->model('m_akun');
+            $data['a4254']=$this->m_akun->ambil_lak('4254');
+            $data['a4241']=$this->m_akun->ambil_lak('4241');
+            $data['a4242']=$this->m_akun->ambil_lak('4242');
+            $data['a4243']=$this->m_akun->ambil_lak('4243');
+            $data['a4249']=$this->m_akun->ambil_lak('4249');
+            $data['a521']=$this->m_akun->ambil_lak('521');
+            $data['a522']=$this->m_akun->ambil_lak('522');
+            $data['a523']=$this->m_akun->ambil_lak('523');
+            $data['a524']=$this->m_akun->ambil_lak('524');
+            $data['a525_a']=$this->m_akun->ambil_lak_akhir('525','A');
+            $data['a525_b']=$this->m_akun->ambil_lak_akhir('525','B');
+            $data['a115']=$this->m_akun->ambil_lak('115');
+            $data['a424961']=$this->m_akun->ambil_lak('424961');
+            $data['a114']=$this->m_akun->ambil_lak('114');
+            $data['a12']=$this->m_akun->ambil_lak('12');
+            $data['a53']=$this->m_akun->ambil_lak('53');
+            $data['a536']=$this->m_akun->ambil_lak('536');
+            $data['a537115']=$this->m_akun->ambil_lak('537115');
+	        $data['a22']=$this->m_akun->ambil_lak('22');
+            $data['saldo_akhir_tahun_arr'] = $this->m_akun->saldo_akhir_tahun_all();
+            $data['akun_arr'] = $this->m_akun->akun_all();
+            
+            $this->template->load('template','akuntansi/lak', $data);      
+		}else redirect(base_url());
+}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGEPOST JURNAL BARU 
+*/
+function jurnal_buat(){
+        $jurnal_all=$this->m_akun->jurnal_all(date('Y'));
+        $jurnal=array();
+        foreach($jurnal_all as $rows) { 
+            $jur['tgl_buku']=$rows->tgl_buku;
+            $jur['tgl_transaksi']=$rows->tgl_transaksi;
+            $jur['bukti']=$rows->bukti;
+            $jur['keterangan']=$rows->keterangan;
+            $jur['kode_akun']=$rows->kode_akun;
+            $jur['nama_akun']=$rows->nama_akun;
+            $jur['debet']=$rows->debet;
+            $jur['kredit']=$rows->kredit;
+            $jurnal[]=$jur;
+        }
+        return $jurnal;
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGEKSPORT JURNAL KE EXEL
+*/	
+function eksport_excel(){
+    $this->load->library('excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    $this->excel->setActiveSheetIndex(0);
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setTitle('Jurnal');
+    $sheet->setCellValue('A1', 'Badan Layanan Umum Universitas Udayana');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(20);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    $sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    $sheet->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $sheet->setCellValue('A2', 'Jurnal Umum Tahun: 2012');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(16);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    $sheet->mergeCells('A2:H2');//merge cell A1 until D1
+    $sheet->getStyle('A2')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $sheet->setCellValue('A4', 'Tanggal Pembukuan');
+    $sheet->setCellValue('B4', 'Tanggal Transaksi');
+    $sheet->setCellValue('C4', 'Bukti');
+    $sheet->setCellValue('D4', 'Keterangan');
+    $sheet->setCellValue('E4', 'Kode Akun');
+    $sheet->setCellValue('F4', 'Nama Akun');
+    $sheet->setCellValue('G4', 'Debet');
+    $sheet->setCellValue('H4', 'Kredit');
+    
+    $sheet->getStyle('A4:H4')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A4:H4')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    
+    $sheet->getColumnDimension('A')->setWidth(12);
+    $sheet->getColumnDimension('B')->setWidth(12);
+    $sheet->getColumnDimension('C')->setWidth(15);
+    $sheet->getColumnDimension('D')->setWidth(30);
+    $sheet->getColumnDimension('E')->setWidth(10);
+    $sheet->getColumnDimension('F')->setWidth(20);
+    $sheet->getColumnDimension('G')->setWidth(15);
+    $sheet->getColumnDimension('H')->setWidth(15);
+    
+    $jurnal_arr =$this->jurnal_buat();
+    foreach($jurnal_arr as $baris=>$jurnal){
+        $sheet->setCellValueByColumnAndRow(0,$baris+5,$jurnal['tgl_buku']);
+        $sheet->setCellValueByColumnAndRow(1,$baris+5,$jurnal['tgl_transaksi']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+5,$jurnal['bukti']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+5,$jurnal['keterangan']);
+            $sheet->getStyleByColumnAndRow(3, $baris+5)->getAlignment()->setWrapText(true);
+        $sheet->setCellValueByColumnAndRow(4,$baris+5,$jurnal['kode_akun']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+5,$jurnal['nama_akun']);
+            $sheet->getStyleByColumnAndRow(5, $baris+5)->getAlignment()->setWrapText(true);
+        $sheet->setCellValueByColumnAndRow(6,$baris+5,$jurnal['debet']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+5,$jurnal['kredit']);
+    }
+    $filename='laporan.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    $objWriter->save('php://output');
+    }
+//======================
+//===== END CLASS ======
+}
+//======================
+//======================

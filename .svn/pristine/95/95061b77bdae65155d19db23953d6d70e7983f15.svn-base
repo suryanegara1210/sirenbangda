@@ -1,0 +1,41 @@
+	<style type="text/css">
+		.table-inner {
+			border-collapse: separate;
+			border-spacing: 1px;
+			border: none;
+		}
+	</style>
+	
+	<?php if($list_uraian !== FALSE) { ?>
+		<table  class='table-common table-inner' style='margin: 0px; width: 100%; ' >  
+			<thead> 
+				<tr>
+					<th width='25px'>No</th>
+					<th >Uraian</th>
+					<th width='40px'>Volume</th>
+					<th width='60px'>Satuan</th>
+					<th width='100px'>Harga Sat</th>
+					<th width='100px'>Jumlah</th> 
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				foreach($list_uraian as $i=>$row) {
+					$i++;
+					echo "
+					<tr>
+						<td align='center'>{$i}</td>
+						<td align='left' title='{$row->uraian}'> " .
+						StrUtil::getShortStr($row->uraian,40) . "</td>
+						<td align='center'>{$row->volume}</td>					
+						<td align='center'>{$row->satuan}</td>					
+						<td align='right'>" . Formatting::currency($row->harga_satuan,0,false) . "</td>					
+						<td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>					
+					</tr>";				
+				}
+				?>
+			</tbody>
+		</table>
+	<?php } else { ?>
+	<center>uraian tidak ada</center>
+	<?php } ?>

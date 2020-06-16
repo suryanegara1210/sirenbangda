@@ -1,0 +1,753 @@
+<?php /**
+	* @brief Model Class yang terkait dengan pengaturan menu admin
+	* 
+	*
+	* Class Model ini untuk mengelola proses data user, pengumuman, klasifikasi user
+	* yang merupakan bagian dari menu-menu yang ada pada fasilitas admin
+	*
+	* @author Putu Ari Arjana
+	*
+	*/
+
+    class MAdmin extends CI_Model {
+        
+/**
+* Fungsi untuk menampilkan data user
+* @param start is integer  nilai batas awal
+* @param limit is integer  nilai batas penampilan data 
+* @param sidx is varchar nama field pada tabel yg di kondisikan sebagai pengurutan data
+* @param sord is varchar nama kondisi 
+* @param where is varchar kondisi
+* @return list of object
+*/		        		          																									           																	 
+    function ambilDatauser($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_users");
+            $this->db->join("m_group",'m_group.id_group=m_users.id_group','inner');
+            
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();    
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan banyak data user
+* @return list of object
+*/		        		          																									           																									
+    function banyak_semua()
+        {
+            return $this->db->count_all_results('m_users');
+        }
+
+/**
+* Fungsi untuk menampilkan data uraian
+* @return list of object
+*/		        		          																									           																									
+    function semua_user()
+        {
+            $q = $this->db->query("select * from m_users");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menambahkan data user baru
+* @param user is varchar merupakan isian nama user
+*/		        		          																									           																									
+    function add_artis($user)
+        {
+            $this->db->insert('m_users', $user);
+        }
+
+/**
+* Fungsi untuk mengupdate data user
+* @param user is varchar data input nama user
+* @param id is integer id data yang akan di update
+*/		        		          																									           																									
+    function update_artis($user,$id)
+        {
+            $this->db->where('id_user', $id);
+            $this->db->update('m_users', $user);
+        }
+
+/**
+* Fungsi untuk menghapus data user 
+* @param id_user is integer id yang akan di delete
+* @return list of object
+*/		        		          																									           																									
+    function delete_artis($id_user)
+        {
+            $this->db->where('id_user', $id_user);
+            $this->db->delete('m_users'); 
+        }
+
+/**
+* Fungsi untuk menampilkan data unit 
+* @param start is integer nilai awal
+* @param limit is integer nilai batas
+* @param sidx is integer nilai id
+* @param sord is integer nilai order
+* @param where is varchar kondisi where
+* @return list of object
+*/    		          																									           																    function ambilDataunit($start,$limit,$sidx,$sord,$where)
+        { 
+            $this->db->select("*"); 
+            $this->db->from("m_unit2");
+            
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah data unit
+* @return list of object
+*/		        		          																									           																									
+    function banyak_semuaunit()
+        {
+            return $this->db->count_all_results('m_unit2');
+        }
+
+/**
+* Fungsi untuk menampilkan data unit
+* @return list of object
+*/		        		          																									           																									
+    function semua_unit()
+        {
+            $q = $this->db->query("select * from m_unit2");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menyimpan data unit
+*/		        		          																									           																									
+    function add_unit($unit)
+        {
+            $this->db->insert('m_unit2', $unit);
+        }
+
+/**
+* Fungsi untuk mengupdate data unit
+* @param unit is varchar inputan nama unit
+* @param id is integer id unit yang akan di update
+*/		        		          																									           																									
+    function update_unit($unit,$id)
+        {
+            $this->db->where('id_unit', $id);
+            $this->db->update('m_unit2', $unit);
+        }
+		
+/**
+* Fungsi untuk menghapus data unit
+* @param id is integer id unit yang akan di delete
+*/		        		          																									           																									
+    function delete_unit($id)
+        {
+            $this->db->where('id_unit', $id);
+            $this->db->delete('m_unit2'); 
+        }
+
+/**
+* Fungsi untuk menampilkan data keuangan
+* @return list of object
+*/	   		          																									           																						    function tampil_keuangan()
+        {
+            $keuangan = $this->db->query("select * from tb_groupkeuangan");
+            return $keuangan->result();
+        }
+
+/**
+* Fungsi untuk menampilkan grup unit
+* @return list of object
+*/		        		          																									           																									
+    function tampil_group_unit()
+        {
+            $group = $this->db->query("select * from m_group where id_punya=3");
+            return $group->result();
+        }
+
+/**
+* Fungsi untuk menampilkan grup data unit
+* @return list of object
+*/		        		          																									           																									
+    function tampil_group_pusat()
+        {
+            $group = $this->db->query("select * from m_group where id_punya=4");
+            return $group->result();
+        }
+
+/**
+* Fungsi untuk menampilkan data unit
+* @return list of object
+*/		        		          																									           																									
+    function tampil_unit()
+        {
+            $unit = $this->db->query("select * from m_unit2");
+            return $unit->result();
+        }
+
+/**
+* Fungsi untuk menampilkan data subunit
+* @return list of object
+*/		        		          																									           																											
+    function tampil_subunit()
+        {
+            $unit = $this->db->query("select * from m_subunit");
+            return $unit->result();
+        }
+
+/**
+* Fungsi untuk menampilkan pengumuman
+* @return list of object
+*/		        		          																									           																											
+    function tampil_pengumuman($offset,$limit)
+        {
+            $p = $this->db->query("select * from tb_pengumuman order by id_pengumuman DESC LIMIT $offset,$limit");
+            return $p;
+        }
+
+/**
+* Fungsi untuk mengecek ada/tidak password
+* @param id is integer id user 
+* @param password is varchar password user
+* @return boolean true jika berhasil
+* @return boolean false jika salah
+*/		        		          																									           																											
+    function cek_password($id, $password)
+        {
+           $this->db->select('*');
+           $this->db->from('m_users');
+           $this->db->where('id_user',$id);
+           $this->db->where('password',$password);
+           $this->db->limit(1);
+           $query = $this->db->get();
+        
+           if($query -> num_rows() == 1)
+           {
+                 return true;
+           }
+           else
+           {
+             return false;
+           }
+         }
+
+/**
+* Fungsi untuk menampilkan data berdasarkan tabel 
+* @param tabel is varchar nama tabel
+* @param seleksi is varchar kondisi where sebagai seleksi
+* @return list of object
+*/		        		          																									           																										    function editpengumuman($tabel,$seleksi)
+        {
+            $query=$this->db->query("select * from $tabel where $seleksi");
+            return $query;
+        }
+
+/**
+* Fungsi untuk menghapuskan data berdasar tabel 
+* @param id is integer id yang akan di delete
+* @param tabel is varchar nama tabel
+* @param seleksi is varchar kondisi where
+*/		        		          																									           																											
+    function hapuspengumuman($id,$tabel,$seleksi)
+        {
+            $this->db->where($seleksi,$id);
+            $this->db->delete($tabel);
+        }
+
+/**
+* Fungsi untuk menampilkan data tabel
+* @param tabel is varchar nama tabel
+* @return list of object
+*/		        		          																									           																											
+    function Total_Data($tabel)
+        {
+            $q=$this->db->query("select * from $tabel");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengupdate data tabel
+* @param tabel is varchar nama tabel
+* @param isi is varchar isian yang akan d update
+* @param seleksi is varchar kondisiwhere
+*/		        		          																									           																											
+    function Update_Pengumuman($tabel,$isi,$seleksi)
+        {
+            $this->db->where($seleksi,$isi[$seleksi]);
+            $this->db->update($tabel,$isi); 
+        }
+
+/**
+* Fungsi untuk menyimpan data pengumuman
+* @return boolean true jika query simpan pengumuman berhasil
+*/		        		          																									           																											
+    function Simpan_Pengumuman($data)
+        {
+            $s=$this->db->insert('tb_pengumuman',$data);
+            return $s;
+        } 
+        
+/**
+* Fungsi untuk menampilkan cara bayar
+* @param start is integer nilai mulai
+* @param limit is integer nilai batas
+* @param sidx is integer field yang mendapat fungsi order
+* @param sord is integer field yang akan di sort
+* @param where is varchar data kondisi
+* @return list of object
+*/		        		          																									           																									
+       function ambilcarabayar($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_carabayar");
+            
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();    
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan cara bayar
+* @return list of object
+*/		        		          																									           																											
+    function banyak_carabayar()
+        {
+            return $this->db->count_all_results('m_carabayar');
+        }
+
+/**
+* Fungsi untuk menampilkan cara bayar
+* @return list of object
+*/		        		          																									           																											
+    function semua_carabayar()
+        {
+            $q = $this->db->query("select * from m_carabayar");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan cara bayar
+* @param cb is varchar cara bayar
+*/		        		          																									           																											
+    function add_carabayar($cb)
+        {
+            $this->db->insert('m_carabayar', $cb);
+        }
+
+/**
+* Fungsi untuk mengupdate data cara bayar
+* @param cb is integer cara bayar
+* @param id is integer id data yang akan di update
+*/		        		          																									           																											
+    function update_carabayar($cb,$id)
+        {
+            $this->db->where('id_carabayar', $id);
+            $this->db->update('m_carabayar', $cb);
+        }
+
+/**
+* Fungsi untuk menghapus data cara bayar
+* @param id is integer id data yang akan di hapus
+*/		        		          																									           																											
+    function delete_carabayar($id)
+        {
+            $this->db->where('id_carabayar', $id);
+            $this->db->delete('m_carabayar'); 
+        }
+    
+/**
+* Fungsi untuk menampilkan data sifat pembayaran
+* @param start is integer nilai mulai
+* @param limit is integer nilai batas
+* @param sidx is integer field yang mendapat fungsi order
+* @param sord is integer field yang akan di sort
+* @param where is varchar data kondisi
+* @return list of object
+*/		        		          																									           																											
+    function ambilsifatpembayaran($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_sifatpembayaran");
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();
+            
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan banyak data sifat pembayaran
+* @return integer
+*/		        		          																									           																													
+    function banyak_sifatpembayaran()
+        {
+            return $this->db->count_all_results('m_sifatpembayaran');
+        }
+
+/**
+* Fungsi untuk menampilkan semua data sifat pembayaran
+* @return list of object
+*/		        		          																									           																													
+    function semua_sifatpembayaran()
+        {
+            $q = $this->db->query("select * from m_sifatpembayaran");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menyimpan data sifat pembayaran
+* @param sp is varchar nama sifat pembayaran
+*/		        		          																									           																													
+    function add_sifatpembayaran($sp)
+        {
+            $this->db->insert('m_sifatpembayaran', $sp);
+            
+        } 
+
+/**
+* Fungsi untuk mengupdate data sifat pembayaran
+* @param sp is varchar nama sifat pembayran
+* @param id is integer id sifat pembayaran yang ingin di ubah
+*/		        		          																									           																													    function update_sifatpembayaran($sp,$id)
+        {
+            $this->db->where('id_sifatpembayaran', $id);
+            $this->db->update('m_sifatpembayaran', $sp);
+        }
+
+/**
+* Fungsi untuk meghapus data sifat pembayaran
+* @param id is integer id sifat pembayaran yang akan dihapus
+*/		        		          																									           																													
+    function delete_sifatpembayaran($id)
+        {
+            $this->db->where('id_sifatpembayaran', $id);
+            $this->db->delete('m_sifatpembayaran'); 
+        }
+   
+/**
+* Fungsi untuk menampilkan data sub unit
+* @param start is integer nilai mulai
+* @param limit is integer nilai batas
+* @param sidx is integer field yang mendapat fungsi order
+* @param sord is integer field yang akan di sort
+* @param where is varchar data kondisi
+* @return list of object
+*/		        		          																									           																											
+    function ambilsubunit($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_subunit");
+            $this->db->join("m_unit2",'m_unit2.id_unit=m_subunit.id_unit','inner');
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();
+            
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah data subunit
+* @return list of object
+*/		        		          																									           																													
+    function banyak_subunit()
+        {
+            return $this->db->count_all_results('m_subunit');
+        }
+
+/**
+* Fungsi untuk menampilkan data sifat pembayaran
+* @return list of object
+*/		        		          																									           																													
+    function semua_subunit()
+        {
+            $q = $this->db->query("select * from m_subunit");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menambah data subunit
+* @param sp is varchar nama sub unit
+* @return list of object
+*/		        		          																									           																													
+    function add_subunit($sp)
+        {
+            $this->db->insert('m_subunit', $sp);
+            
+        } 
+
+/**
+* Fungsi untuk mengupdate data subunit
+* @param sp is varchar nama subunit
+* @param id is integer id sub unit yang akan di update
+*/		        		          																									           																													    function update_subunit($sp,$id)
+        {
+            $this->db->where('id_subunit', $id);
+            $this->db->update('m_subunit', $sp);
+        }
+
+/**
+* Fungsi untuk menghapus data subunit
+* @param id is integer id subunit yang akan di hapus
+*/		        		          																									           																													
+    function delete_subunit($id)
+        {
+            $this->db->where('id_subunit', $id);
+            $this->db->delete('m_subunit'); 
+        }
+
+/**
+* Fungsi untuk menampilkan data jenis user
+* @return list of object
+*/		        		          																									           																													
+    function get_jenis_user()
+        {
+            
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('tb_tes');
+            $this->db->order_by('id_tes','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Jenis User-';
+                $result[$row->id_tes]= ("$row->id_tes - $row->tes");
+            }
+            
+            return $result;
+        }
+     
+/**
+* Fungsi untuk menampilkan data user subunit
+* @param start is integer nilai mulai
+* @param limit is integer nilai batas
+* @param sidx is integer field yang mendapat fungsi order
+* @param sord is integer field yang akan di sort
+* @param where is varchar data kondisi
+* @return list of object
+*/		        		          																									           																											
+    function ambilDatauser_subunit($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_users");
+            $this->db->join("m_subunit",'m_subunit.id_subunit=m_users.id_subunit','inner');
+            $this->db->where("id_kategori", 2);
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();    
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah data user
+* @return integer
+*/		        		          																									           																													
+    function banyak_semua_user_subunit()
+        {
+            return $this->db->count_all_results('m_users');
+        }
+
+/**
+* Fungsi untuk menampilkan data sub unit
+* @return list of object
+*/		        		          																									           																													
+    function semua_user_subunit()
+        {
+            $q = $this->db->query("select * from m_users");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menambah data user subunit
+* @param user is varchar nama user
+*/		        		          																									           																													
+    function add_user_subunit($user)
+        {
+            $this->db->insert('m_users', $user);
+        }
+
+/**
+* Fungsi untuk mengupdate data user subunit
+* @param user is varchar nama user
+* @param id is integer id user subunit yang akan di update
+*/		        		          																									           																													
+    function update_user_subunit($user,$id)
+        {
+            $this->db->where('id_user', $id);
+            $this->db->update('m_users', $user);
+        }
+
+/**
+* Fungsi untuk menghapus data user subunit
+* @param id_user is integer id data sub unit yang akan di sub unit
+*/		        		          																									           																													
+    function delete_user_subunit($id_user)
+        {
+            $this->db->where('id_user', $id_user);
+            $this->db->delete('m_users'); 
+        }
+    
+/**
+* Fungsi untuk menampilkan data user unit
+* @param start is integer nilai mulai
+* @param limit is integer nilai batas
+* @param sidx is integer field yang mendapat fungsi order
+* @param sord is integer field yang akan di sort
+* @param where is varchar data kondisi
+* @return list of object
+*/		        		          																									           																											
+    function ambilDatauser_unit($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_users");
+            $this->db->join("m_unit2",'m_unit2.id_unit=m_users.id_unit','inner');
+            $this->db->join("m_group",'m_group.id_group=m_users.id_group','inner');
+            $this->db->where("id_kategori", 3);
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();    
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan banyak data user unit
+* @return list of object
+*/		        		          																									           																													
+    function banyak_semua_user_unit()
+        {
+            return $this->db->count_all_results('m_users');
+        }
+
+/**
+* Fungsi untuk menampilkan data user
+* @return list of object
+*/		        		          																									           																													
+    function semua_user_unit()
+        {
+            $q = $this->db->query("select * from m_users");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menambahkan data user
+* @param user is integer nama user
+*/		        		          																									           																													
+    function add_user_unit($user)
+        {
+            $this->db->insert('m_users', $user);
+        }
+
+/**
+* Fungsi untuk mengupdate data user
+* @param user is varchar nama user
+* @param id is integer nilai id user yang akan di update
+*/		        		          																									           																													
+    function update_user_unit($user,$id)
+        {
+            $this->db->where('id_user', $id);
+            $this->db->update('m_users', $user);
+        }
+
+/**
+* Fungsi untuk menghapus data user unit
+* @param id_user is integer id user yang akan dihapus
+*/		        		          																									           																													
+    function delete_user_unit($id_user)
+        {
+            $this->db->where('id_user', $id_user);
+            $this->db->delete('m_users'); 
+        }
+        
+/**
+* Fungsi untuk menampilkan data user pusat
+* @param start is integer nilai mulai
+* @param limit is integer nilai batas
+* @param sidx is integer field yang mendapat fungsi order
+* @param sord is integer field yang akan di sort
+* @param where is varchar data kondisi
+* @return list of object
+*/		        		          																									           																											
+    function ambilDatauser_pusat($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*"); 
+            $this->db->from("m_users");
+            $this->db->join("m_group",'m_group.id_group=m_users.id_group','inner');
+            $this->db->where("id_kategori", 4);
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();    
+            return $query->result();
+        }
+
+/**
+* Fungsi untuk menampilkan banyak data user pusat
+* @return list of object
+*/		        		          																									           																													
+    function banyak_semua_user_pusat()
+        {
+            return $this->db->count_all_results('m_users');
+        }
+
+/**
+* Fungsi untuk menampilkan data user pusat
+* @return list of object
+*/		        		          																									           																													
+    function semua_user_pusat()
+        {
+            $q = $this->db->query("select * from m_users");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menambah data user pusat
+* @param user is varchar nama user pusat
+*/		        		          																									           																															
+    function add_user_pusat($user)
+        {
+            $this->db->insert('m_users', $user);
+        }
+
+/**
+* Fungsi untuk mengupdate data user pusat
+* @param user is varchar nama user pusat
+* @param id is integer id user yang akan diupdate
+*/		        		          																									           																															
+    function update_user_pusat($user,$id)
+        {
+            $this->db->where('id_user', $id);
+            $this->db->update('m_users', $user);
+        }
+
+/**
+* Fungsi untuk mengghapus data user pusat
+* @param id_user is integer id user yang akan di hapus
+*/		        		          																									           																															
+    function delete_user_pusat($id_user)
+        {
+            $this->db->where('id_user', $id_user);
+            $this->db->delete('m_users'); 
+        }
+    
+    
+       
+}
+?>

@@ -1,0 +1,189 @@
+<script>
+$( function() {
+        $("#usulan").autoNumeric(window.numOptions);
+    });
+</script>
+
+<table  class="table-common" style="margin-left: 20px; width: 97%;" >  
+       <thead></thead><tr>
+         <th>Sisa Pagu Semu</th>
+         <th><?php echo $this->uang->angka($pembanding) ;?></th>
+         <th>Usulan Tender</th>
+         <th><input id="usulan" name="usulan" readonly="readonly" type="text" value="0" /></th>
+       </tr>
+       </thead>
+</table>
+
+<div style="width: 100%; float: left; max-height: 300px; overflow-y: auto; margin-bottom:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="<?php echo base_url();?>dpt/simpan_tender" onSubmit='return validasi(this)'>
+<table  class="table-common" style="margin-left: 20px; width:97%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Output/Komponen/Akun</th>
+                <th>Header</th>
+                <th>Uraian</th>
+                <th>Volume</th>
+                <th>Satuan</th>
+                <th>Harga Satuan</th>
+                <th>Jumlah</th>
+                <th>Aksi</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+                 foreach($isi_tender as $row) : $i++;?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdkomponen;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->hdr; ?> </td>
+                    <td align="left"><?php echo $row->uraian; ?> </td>
+                    <td align="center"><?php echo $row->vol; ?> </td>
+                    <td align="center"><?php echo $row->sat; ?> </td>
+                    <td align="right"><?php echo Formatting::currency($row->hargasat,0,false); ?> </td>
+                    <td align="right"><?php echo Formatting::currency($row->jumlah,0,false); ?> </td>
+                    <td align="center"><input type="checkbox" name="cek[]" value="<?php echo $row->idtdet; ?>"/>
+                    	<input id="u<?php echo $row->idtdet; ?>" name="" type="hidden" value="<?php echo $row->jumlah; ?>" />
+                    </td>
+                </tr>
+             <?php endforeach; ?> 
+             	<tr><td colspan="9" align="right"><input type="button" id="simpan" value="Simpan" name="simpan" onclick="simpanlah()" /></td></tr>
+        </tbody>
+</table>
+</form>
+</div>
+<table  class="table-common" style="margin-left: 20px; width: 97%;" >  
+       <thead></thead><tr><th></br>DAFTAR RINCIAN URAIAN TENDER</br></th></tr></thead>
+</table>
+<div style="width: 100%; float: left; max-height: 300px; overflow-y: auto; margin-bottom:20px">
+<form method="post" id="form_hapus" name='form_hapus' action="<?php echo base_url();?>dpt/hapus_tender" onSubmit='return validasi(this)'>
+<table  class="table-common" style="margin-left: 20px; width: 97%;" >
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Output/Komponen/Akun</th>
+                <th>Header</th>
+                <th>Uraian</th>
+                <th>Volume</th>
+                <th>Satuan</th>
+                <th>Harga Satuan</th>
+                <th>Jumlah</th>
+                <th>Aksi</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+                 foreach($data_tender as $row) : $i++;?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdkomponen;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->hdr; ?> </td>
+                    <td align="left"><?php echo $row->uraian; ?> </td>
+                    <td align="center"><?php echo $row->vol; ?> </td>
+                    <td align="center"><?php echo $row->sat; ?> </td>
+                    <td align="right"><?php echo Formatting::currency($row->hargasat,0,false); ?> </td>
+                    <td align="right"><?php echo Formatting::currency($row->jumlah,0,false); ?> </td>
+                    <td align="center"><input type="checkbox" name="list[]" value="<?php echo $row->idtdet; ?>"/>
+                    	<input id="h<?php echo $row->idtdet; ?>" name="" type="hidden" value="<?php echo $row->jumlah; ?>" />
+                    </td>
+                   
+                </tr>
+             <?php endforeach; ?> 
+                <tr><td colspan="9" align="right"><input type="button" id="hapus" value="Hapus" name="hapus" onclick="hapuslah()" /></td></tr>
+        </tbody>
+</table>
+</form>
+</div>
+
+<script>
+	function hitung_usulan_tender(){
+		var total = 0;
+		$('#form_simpan :checkbox').each(function() {
+			if (this.checked)
+				total += parseFloat($("#u"+$(this).attr('value')).attr('value'));
+		});							
+
+		return total;
+	}
+	
+	var GRAND_TOTAL = hitung_usulan_tender();
+
+	$( function () {
+		$('#form_simpan :checkbox').change(function() {
+			//alert(0);
+			//nominal = parseFloat($("#h"+$(this).attr('value')).attr('value'));
+			GRAND_TOTAL = hitung_usulan_tender();
+			
+			//alert(GRAND_TOTAL);
+			//$("#usulan").val(GRAND_TOTAL);
+			$("#usulan").autoNumeric('set', GRAND_TOTAL);		
+		});	
+		
+						
+	});
+	
+
+	function simpanlah(){
+			//var pembanding=10000000;
+			var pembanding=<?php echo $pembanding;?>;	
+			//var nominal = $("#usulan").value
+			var nominal = $("#usulan").autoNumeric('get');
+			var nom = document.getElementById('usulan');
+			var nominal = nom.value;
+			//alert (nominal);
+			  if (nominal > pembanding)
+				  {
+					alert("Nominal melebihi dari SPS" );
+					form.nominal.focus();
+					return (false);
+				  }
+
+        if (confirm('Apakah Anda Yakin untuk Mengajukan Tender ini ... ?')){
+			var nodeArray = Array();
+			
+			$('#form_simpan :checkbox').each(function() {
+				if(this.checked)
+					nodeArray.push($(this).attr('value'));					
+			});							
+			
+			var idVar = {id:nodeArray};
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('dpt/simpan_tender')?>",
+                    data: idVar,
+                    success: function(msg){
+                        //alert ("masuk"+id);
+                        tampilrkakl();
+                    }
+              });
+			
+			tampilrkakl();
+        }        
+    }
+</script>
+<script>
+	
+	function hapuslah(){
+        if (confirm('Apakah Anda Yakin untuk Membatalkan Tender ini ... ?')){
+			var nodeArray = Array();
+			
+			$('#form_hapus :checkbox').each(function() {
+				if(this.checked)
+					nodeArray.push($(this).attr('value'));					
+			});							
+			
+			var idVar = {id:nodeArray};
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('dpt/hapus_tender')?>",
+                    data: idVar,
+                    success: function(msg){
+                        //alert ("masuk"+id);
+                        tampilrkakl();
+                    }
+              });
+			
+			tampilrkakl();
+        }        
+    }
+</script>

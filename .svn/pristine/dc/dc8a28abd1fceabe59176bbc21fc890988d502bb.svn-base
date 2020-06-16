@@ -1,0 +1,28 @@
+<table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Persyaratan</th>
+                <th>Keterangan</th>
+                
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no =1; 
+            foreach($khusus->result_array() as $row)
+            {  
+            $id_uraian= $row['id_uraian'];
+            $uraian= $row['uraian'];
+               
+              echo" <tr>
+                <td align='left'>$no</td>
+                <td>$uraian</td>
+                <input type='hidden' name='cek[]' value='$id_uraian' disabled:true>  
+                <td align='center'><input type='checkbox' name='tes[]' value='$id_uraian' disabled:false></td>
+              </tr>";
+              
+            $no++; 
+            };   
+            ?>
+</table>

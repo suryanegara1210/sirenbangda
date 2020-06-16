@@ -1,0 +1,111 @@
+<table class="fcari" width="800px">
+	<tbody>
+		<tr>
+			<td width="20%">SKPD</td>
+			<td width="77%"><?php echo $renja->nama_skpd; ?></td>
+		</tr>		
+		<tr>
+			<td>Tujuan</td>
+			<td><?php echo $renja->tujuan; ?></td>
+		</tr>
+		<tr>
+			<td>Sasaran</td>
+			<td><?php echo $renja->sasaran; ?></td>
+		</tr>
+		<tr>
+			<td>Indikator Sasaran</td>
+			<td><?php echo $renja->indikator; ?></td>
+		</tr>		
+		<tr style="background-color: white;">			
+			<td colspan="2"><hr></td>
+		</tr>
+		<tr>
+			<td>Urusan</td>
+			<td><?php echo $renja->kd_urusan.". ".$renja->Nm_Urusan; ?></td>
+		</tr>		
+		<tr>
+			<td>Bidang Urusan</td>
+			<td style="padding-left: 20px;"><?php echo $renja->kd_bidang.". ".$renja->Nm_Bidang; ?></td>
+		</tr>
+		<tr>
+			<td>Program</td>
+			<td style="padding-left: 43px;"><?php echo $renja->kd_program.". ".$renja->Ket_Program; ?></td>
+		</tr>
+		<tr>
+			<td>Kegiatan</td>
+			<td style="padding-left: 65px;"><?php echo $renja->kd_kegiatan.". ".$renja->nama_prog_or_keg; ?></td>
+		</tr>
+		<tr>
+			<td>Indikator Kinerja</td>
+			<td><?php echo $renja->indikator_kinerja; ?></td>
+		</tr>
+		<tr>
+			<td>Data Capaian pada Awal Tahun</td>
+			<td><?php echo $renja->kondisi_awal." ".$renja->nama_value; ?></td>
+		</tr>
+		<tr>
+			<td>Penanggung Jawab</td>
+			<td><?php echo $renja->penanggung_jawab; ?></td>
+		</tr>
+		<tr>
+			<td>Lokasi</td>
+			<td><?php echo $renja->lokasi; ?></td>
+		</tr>
+		<tr style="background-color: white;">			
+			<td colspan="2"><hr></td>
+		</tr>
+	</tbody>
+</table>
+<table class="fcari" width="800px">
+	<tbody>	
+		<tr>
+			<th>Triwulan 1 (<?php echo $renja->nama_value; ?>)</th>
+			<th>Triwulan 2 (<?php echo $renja->nama_value; ?>)</th>
+			<th>Triwulan 3 (<?php echo $renja->nama_value; ?>)</th>
+			<th>Triwulan 4 (<?php echo $renja->nama_value; ?>)</th>
+		</tr>
+		<tr>
+			<td align="center"><?php echo $renja->triwulan_1; ?></td>
+			<td align="center"><?php echo $renja->triwulan_2; ?></td>
+			<td align="center"><?php echo $renja->triwulan_3; ?></td>
+			<td align="center"><?php echo $renja->triwulan_4; ?></td>
+		</tr>
+		<tr>
+			<th>Nominal 1</th>
+			<th>Nominal 2</th>
+			<th>Nominal 3</th>
+			<th>Nominal 4</th>			
+		</tr>
+		<tr>
+			<td align="right">Rp. <?php echo Formatting::currency($renja->nominal_1); ?></td>
+			<td align="right">Rp. <?php echo Formatting::currency($renja->nominal_2); ?></td>
+			<td align="right">Rp. <?php echo Formatting::currency($renja->nominal_3); ?></td>
+			<td align="right">Rp. <?php echo Formatting::currency($renja->nominal_4); ?></td>
+		</tr>
+		<tr>
+			<th>Lokasi 1</th>
+			<th>Lokasi 2</th>
+			<th>Lokasi 3</th>
+			<th>Lokasi 4</th>
+		</tr>
+		<tr>
+			<td align="left"><?php echo $renja->lokasi_1; ?></td>
+			<td align="left"><?php echo $renja->lokasi_2; ?></td>
+			<td align="left"><?php echo $renja->lokasi_3; ?></td>
+			<td align="left"><?php echo $renja->lokasi_4; ?></td>
+		</tr>
+		<tr>
+			<th>Uraian Kegiatan 1</th>
+			<th>Uraian Kegiatan 2</th>
+			<th>Uraian Kegiatan 3</th>
+			<th>Uraian Kegiatan 4</th>
+		</tr>
+		<tr>
+			<td align="left"><?php echo $renja->uraian_kegiatan_1; ?></td>
+			<td align="left"><?php echo $renja->uraian_kegiatan_2; ?></td>
+			<td align="left"><?php echo $renja->uraian_kegiatan_3; ?></td>
+			<td align="left"><?php echo $renja->uraian_kegiatan_4; ?></td>
+
+		</tr>
+	</tbody>
+</table>

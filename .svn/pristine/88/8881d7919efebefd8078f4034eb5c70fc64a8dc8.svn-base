@@ -1,0 +1,33 @@
+<script type="text/javascript">
+	
+</script>
+<article class="module width_full">
+	<header>
+	  <h3>Tugas Kak Ari</h3>
+	</header>
+	<div style='float:right'><a href="<?php echo 'sirenbangda'?>">Tambah Data ......</a></div><br>
+	<div class="module_content"; style="overflow:auto">
+		<table id="cik_table" class="table-common tablesorter" style="width:100%">
+			<thead>
+				<tr>
+					<th rowspan="2" class="no-sort">No</th>	
+					<th rowspan="2">Tujuan</th>
+					<th rowspan="2">Sasaran</th>
+					<th rowspan="2">Strategi dan Arah Kebijakan</th>
+					<th rowspan="2">Indikator Kerja (Outcome)</th>	
+					<th colspan="2">Capaian Kinerja</th>
+					<th rowspan="2">Program Pembangunan Daerah</th>
+					<th rowspan="2">Bidang Urusan</th>
+					<th rowspan="2">SKPD Penanggungjawab</th>
+					<th rowspan="2" class="no-sort">Action</th>
+				</tr>
+				<tr>
+					<th>Kondisi Awal</th>
+					<th>Kondisi Akhir</th>
+				</tr>				
+			</thead>
+			<tbody>			
+			</tbody>
+		</table>
+	</div>
+</article>

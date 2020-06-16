@@ -1,0 +1,379 @@
+<?php
+/**
+ *
+ * Class ini digunakan sebagai common gateway ke internal data
+ *
+ * @author I Made Agus Setiawan <madeagus@gmail.com>
+ *
+ */
+class Common extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {
+        $this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+        $this->load->model(array('m_pok', 'm_settings', 'm_kwitansi',
+                                 'm_bas'));
+    }
+
+    function get_list_kegiatan() {
+        //DONE-TODO: Cari list kegiatan di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdgiat,nmgiat FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $kdgiat         = $this->input->post('kdgiat');
+
+        $lists = $this->m_pok->get_list_kegiatan($ta, $cdsu, $jns_kwitansi);
+
+        $options = "<option value=''>Pilih Kegiatan</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $selected = '';
+                if($kdgiat === $row->kdgiat)
+                    $selected = 'selected';
+
+                $options .= "<option value='{$row->kdgiat}' {$selected}>{$row->nmgiat}</option>";
+            }
+        }
+
+        echo $options;
+
+        //temporary result format
+        //echo "
+        //    <option value=''>Pilih</option>
+        //    <option value='1'>Kegiatan 1</option>
+        //    <option value='2'>Kegiatan 2</option>
+        //    <option value='3'>Kegiatan 3</option>
+        //";
+    }
+
+
+    function get_list_output() {
+        //DONE-TODO: Cari list output di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdoutput,nmoutput FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $kdgiat 		= $this->input->post('kdgiat');
+        $kdoutput       = $this->input->post('kdoutput');
+
+        $lists = $this->m_pok->get_list_output($ta, $cdsu, $jns_kwitansi, $kdgiat);
+
+        $options = "<option value=''>Pilih Output</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $selected = '';
+                if($kdoutput === $row->kdoutput)
+                    $selected = 'selected';
+
+                $options .= "<option value='{$row->kdoutput}' {$selected}>{$row->nmoutput}</option>";
+            }
+        }
+
+        echo $options;
+
+        ////temporary result format
+        //echo "
+        //    <option value=''>Pilih</option>
+        //    <option value='1'>Output 1</option>
+        //    <option value='2'>Output 2</option>
+        //    <option value='3'>Output 3</option>
+        //";
+    }
+
+    function get_list_komponen() {
+        //DONE-TODO: cari list komponen di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdkomponen,nmkomponen FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $kdgiat 		= $this->input->post('kdgiat');
+        $kdoutput 		= $this->input->post('kdoutput');
+        $kdkomponen     = $this->input->post('kdkomponen');
+
+        $lists = $this->m_pok->get_list_komponen($ta, $cdsu, $jns_kwitansi, $kdgiat,
+                                               $kdoutput);
+
+        $options = "<option value=''>Pilih Komponen</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $selected = '';
+                if($kdkomponen === $row->kdkomponen)
+                    $selected = 'selected';
+
+                $options .= "<option value='{$row->kdkomponen}' {$selected}>{$row->nmkomponen}</option>";
+            }
+        }
+
+        echo $options;
+
+        //echo "
+        //    <option value=''>Pilih</option>
+        //    <option value='1'>Komponen 1</option>
+        //    <option value='2'>Komponen 2</option>
+        //    <option value='3'>Komponen 3</option>
+        //";
+    }
+
+    function get_list_akun() {
+        //DONE-TODO: cari list akun di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdakun,nmakun FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $kdgiat 		= $this->input->post('kdgiat');
+        $kdoutput 		= $this->input->post('kdoutput');
+        $kdkomponen 	= $this->input->post('kdkomponen');
+        $kdakun         = $this->input->post('kdakun');
+
+        $lists = $this->m_pok->get_list_akun($ta, $cdsu, $jns_kwitansi, $kdgiat,
+                                               $kdoutput, $kdkomponen);
+
+        $options = "<option value=''>Pilih Akun</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $selected = '';
+                if($kdakun === $row->kdakun)
+                    $selected = 'selected';
+
+                $options .= "<option value='{$row->kdakun}' {$selected}>{$row->nmakun}</option>";
+            }
+        }
+
+        echo $options;
+
+        //echo "
+        //    <option value=''>Pilih</option>
+        //    <option value='1'>Akun 1</option>
+        //    <option value='2'>Akun 2</option>
+        //    <option value='3'>Akun 3</option>
+        //";
+    }
+
+    function get_list_header() {
+        //DONE-TODO: cari list header di tabel t_rkakl,
+        //INGAT: Tidak lagi menggunakan idheader, pergunakan saja teks nya.
+        //SELECT DISTINCT hdr as kdhdr, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $kdgiat 		= $this->input->post('kdgiat');
+        $kdoutput 		= $this->input->post('kdoutput');
+        $kdkomponen 	= $this->input->post('kdkomponen');
+        $kdakun  	    = $this->input->post('kdakun');
+        $kdhdr          = $this->input->post('kdhdr');
+
+        $lists = $this->m_pok->get_list_header($ta, $cdsu, $jns_kwitansi, $kdgiat,
+                                               $kdoutput, $kdkomponen, $kdakun);
+
+        $options = "<option value=''>Pilih Header</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $selected = '';
+                if($kdhdr === $row->kdhdr)
+                    $selected = 'selected';
+
+                $options .= "<option value='{$row->kdhdr}' {$selected}>{$row->hdr}</option>";
+            }
+        }
+
+        echo $options;
+
+        //echo "
+        //    <option value=''>Pilih</option>
+        //    <option value='1'>Header 1</option>
+        //    <option value='2'>Header 2</option>
+        //    <option value='3'>Header 3</option>
+        //";
+    }
+
+    function get_list_bas() {
+        //TODO: cari informasi ke sudhar
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $kdgiat 		= $this->input->post('kdgiat');
+        $kdoutput 		= $this->input->post('kdoutput');
+        $kdakun  	    = $this->input->post('kdakun');
+        $kdbas          = $this->input->post('akun_kode');
+
+        $lists = $this->m_bas->get_list_bas_by_akun_detail($kdgiat,$kdoutput, $kdakun);
+
+        $options = "<option value=''>Pilih BAS 12 digit</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $selected = '';
+                if($kdbas === $row->akun_kode)
+                    $selected = 'selected';
+
+                //$pattern = '/(\d{6})(\d{2})(\d{1})(\d{3})/';
+                //$replace = '\1.\2.\3.\4';
+                //$formated_kode = preg_replace($pattern, $replace, $row->akun_kode);
+                $formated_kode = Formatting::bas_format($row->akun_kode);
+                $options .= "<option value='{$row->akun_kode}' {$selected}>{$formated_kode} - {$row->akun_nama}</option>";
+            }
+        }
+
+        echo $options;
+
+        //echo "
+        //    <option value=''>Pilih</option>
+        //    <option value='1'>Bas 1</option>
+        //    <option value='2'>Bas 2</option>
+        //    <option value='3'>Bas 3</option>
+        //";
+    }
+
+    function get_nilai_pok() {
+        //TODO: cari di tabel rkakl
+        //SELECT tahunkdgiat, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+        $idsu= $this->session->userdata('id_subunit');
+
+        $kdgiat 		= $this->input->post('kdgiat');
+        $kdoutput 		= $this->input->post('kdoutput');
+        $kdkomponen 	= $this->input->post('kdkomponen');
+        $kdakun  	    = $this->input->post('kdakun');
+        $kdhdr  	    = $this->input->post('kdhdr');
+        $id_kwitansi    = $this->input->post('id_kwitansi');
+
+        $pok_header = $this->m_pok->get_nilai_pok($ta, $cdsu, $kdgiat, $kdoutput,
+                                           $kdkomponen, $kdakun, $kdhdr);
+
+        $pok_akun = $this->m_pok->get_nilai_pok_per_akun($ta, $cdsu, $kdgiat, 
+                                            $kdoutput, $kdkomponen, $kdakun);
+
+
+        $pok_terpakai_header = $this->m_kwitansi->get_nilai_kwitansi_by_akun_detail(
+                                $ta, $idsu, $kdgiat, $kdoutput, $kdkomponen,
+                                $kdakun, $kdhdr);
+
+        $pok_terpakai_akun = $this->m_kwitansi->get_nilai_kwitansi_per_akun(
+                                $ta, $idsu, $kdgiat, $kdoutput, $kdkomponen, 
+                                $kdakun);
+
+        if(!empty($id_kwitansi)) {
+            $kwitansi = $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+            if($kwitansi) {
+                $pok_terpakai_header -= $kwitansi->nominal;
+                $pok_terpakai_akun   -= $kwitansi->nominal;                            
+            }
+        }
+
+        $response['pok_header'] = $pok_header;
+        $response['pok_akun'] = $pok_akun;
+        $response['pok_terpakai_header'] = $pok_terpakai_header;
+        $response['pok_terpakai_akun'] = $pok_terpakai_akun;
+
+        echo json_encode($response);
+    }
+
+    function get_jns_kwitansi() {
+        //DONE-TODO: Cari list output di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdoutput,nmoutput FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi
+
+		$jns_belanja 	= $this->input->post('jns_belanja');
+        $lists = $this->m_kwitansi->get_jns_kwitansi($jns_belanja );
+
+        $options = "<option value=''>Pilih Jenis Kwitansi</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $options .= "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+            }
+        }
+
+        echo $options;
+    }
+
+    function get_jns_kwitansi_view() {
+
+		$jns_belanja 	= $this->input->post('jns_belanja');
+        $lists 			= $this->m_kwitansi->get_jns_kwitansi($jns_belanja );
+        $options 		= '<option value="">Semua Jenis Kwitansi</option>';
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $options .= "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+            }
+        }
+
+        echo $options;
+    }
+
+
+    function get_status_kwitansi() {
+        //DONE-TODO: Cari list output di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdoutput,nmoutput FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi
+
+//        echo "
+//            <option value=''>Semua Kwitansi</option>
+//            <option value='0'>Kwitansi Baru</option>
+//        ";
+
+        $lists = $this->m_pok->get_status_kwitansi($jns_belanja );
+
+        $options = "<option value=''>Semua Jenis</option>";
+
+        if(isset($lists))
+        {
+            foreach($lists as $row)
+            {
+                $options .= "<option value='{$row->id_status_kwitansi}'>{$row->status_kwitansi}</option>";
+            }
+        }
+
+        echo $options;
+    }
+
+}
+
+?>

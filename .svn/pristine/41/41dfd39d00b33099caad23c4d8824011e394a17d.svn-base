@@ -1,0 +1,99 @@
+<article class="module width_full">
+    <header>
+      <h3>Kunci SPTB</h3></header>
+        <div class="module_content">
+        <form method="post" name='form_kunci' id='form_kunci' action="<?php echo site_url('sptb/kunci')?>" >
+		<input name='call_from' type='hidden' id="call_from" value='<?php echo isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : ''?>'/>
+
+        	<table width="98%" style="margin-bottom:10px">
+            <tr>
+              <td width="14%">Sifat Bayar</td>
+              <td width="86%">
+              <select name="sifat_bayar" id="sifat_bayar"  >
+			  <?php
+              	foreach($sifat_bayar as $row){
+                	echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+                }
+              ?>
+              </select>
+              </td>
+            </tr>
+            </table>
+        	
+<table><div id='tabel'></div> </table>
+</div>
+</article> 
+
+<script>
+		$("#sifat_bayar").change(function(){
+		  var sifat_bayar = $("#sifat_bayar").val();
+
+		  $('#tabel').html(loader());
+		  
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('sptb/tampil_kunci')?>",
+			  data: { sifat_bayar: sifat_bayar},
+			  success: function(data){
+					catch_expired_session2(data);
+
+			  		$('#tabel').html(data);				  
+			  }
+		  });
+		});
+		
+		function lock(){
+        if (confirm('Apakah Anda Yakin Mengunci SPTB ... ?')){
+			var sifat_bayar = $("#sifat_bayar").val();
+			
+			var sifat_bayar= $("#sifat_bayar").val();
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('sptb/lock')?>",
+                    data: { sifat_bayar: sifat_bayar},
+					
+		    });
+			alert('SPTB Berhasil dikunci');
+		}
+	    $('#tabel').html(loader());
+		  
+		$.ajax({
+		type: "POST",
+		url : "<?php echo site_url('sptb/tampil_kunci')?>",
+		data: { sifat_bayar: sifat_bayar},
+		success: function(data){
+			catch_expired_session2(data);
+		
+			$('#tabel').html(data);				  
+		}
+		});
+        }
+		
+		function unlock(){
+        if (confirm('Apakah Anda Yakin Membuka Kunci SPTB ... ?')){
+			var sifat_bayar = $("#sifat_bayar").val();
+			
+			var sifat_bayar= $("#sifat_bayar").val();
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('sptb/unlock')?>",
+                    data: { sifat_bayar: sifat_bayar},
+					
+		    });
+			alert('SPTB Berhasil dibuka');
+		}
+	    $('#tabel').html(loader());
+		  
+		$.ajax({
+		type: "POST",
+		url : "<?php echo site_url('sptb/tampil_kunci')?>",
+		data: { sifat_bayar: sifat_bayar},
+		success: function(data){
+			catch_expired_session2(data);
+		
+			$('#tabel').html(data);				  
+		}
+		});
+        }
+
+</script>

@@ -1,0 +1,124 @@
+<script language="javascript">
+
+$( function () {
+	
+		$('#create_spj :checkbox').change(function() {
+			var total=0;
+			var nilai_kwi	= parseFloat($("#nilai_kwitansi_tambah").val());
+			var nama 		= "#u"+this.value;
+			//alert(nilai_kwi);
+			if (this.checked)
+				{
+					total = nilai_kwi + parseFloat($(nama).val());
+				}
+			else
+				{
+					total = nilai_kwi - parseFloat($(nama).val());
+				}
+			//tmpilkan nilai kwitansi
+			$("#nilai_kwitansi_tambah").val(total);
+			//enable tombol jika nilai kwitansi sudah lebih dari nilai x persen dan kurang dari / = nilai up
+			var nilai_persen	= parseFloat($("#nilai_persen_tambah").val());
+			var nilai_up		= parseFloat($("#nilai_up_tambah").val());
+			var nilai_kwi_baru	= parseFloat($("#nilai_kwitansi_tambah").val());
+			if (nilai_kwi_baru>nilai_persen && nilai_kwi_baru<=nilai_up)
+			{
+				$('#tambah').removeAttr('disabled');
+			}
+			else {
+				$('#tambah').attr("disabled", "disabled");
+			}
+		});	
+		
+});
+
+// simpan data
+	function simpan(){
+        if (confirm('Apakah Anda Yakin menambah SPM ini untuk SPJ ... ?')){
+			var nodeArray = Array();
+			
+			$('#create_spj :checkbox').each(function() {
+				if(this.checked)
+					nodeArray.push($(this).attr('value'));					
+			});							
+			var id_spj= $("#id_spj").val();
+			var idVar = {id:nodeArray, id_spj: id_spj};
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('spj/tambah_spm_keSPJ')?>",
+                    data: idVar,
+		  });
+		alert('Data Berhasil dikirim');
+		//return false;
+		load_view();
+		}
+	$.facebox.close();	
+    }
+
+</script>
+<!--==============================-->
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   }  
+?>
+<form method="post" id="create_spj" name='create_spj' action="" style="margin:10px 10px 10px 10px; width:800px" >
+<input type="hidden" name="nilai_persen_tambah" id="nilai_persen_tambah" value="<?php echo $nilai_min;?>" />
+<input type="hidden" name="nilai_up_tambah" id="nilai_up_tambah" value="<?php echo $nilai_max;?>" />
+<input type="hidden" name="nilai_kwitansi_tambah" id="nilai_kwitansi_tambah" value="<?php echo $jum_kwi;?>" />
+<input type="hidden" name="id_spj" id="id_spj" value="<?php echo $id_spj;?>" />
+<h2>Tambah Data SPM</h2>
+    <table  class="table-common" id="hasil" style="width:99.9%;" >  
+       <thead> 
+            <tr>
+            	<th width="10px">No.</th>
+            	<th width="150px">No SPM</th>
+                <th width="100px">Sifat Bayar</th>
+                <th width="100px">Tanggal</th>
+                <th>Jumlah</th>
+                <th>Keterangan</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php 
+             if($isi!= false){
+			 	$i=0;
+			 	foreach($isi as $row) : $i++;
+				?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                	<td align="center"><?php echo $row->no_spm; ?></td>
+                    <td align="center"><?php echo $row->sifat_bayar; ?> </td>
+                    <td align="center"><?php echo date("d-m-Y", strtotime($row->tgl_spm)); ?> </td>
+                    <td align="right"><?php echo $this->uang->angka($row->jumlah); ?> </td>
+                    <td align="center"><?php echo $row->uraian_spm;  ?></td>
+                    <td align="center"><?php echo $row->id_status_spm;  ?></td>
+                    <td>
+                    <input type="checkbox" name="cek[]" value="<?php echo $row->id_spm; ?>"/>
+                    <input id="u<?php echo $row->id_spm; ?>" type="hidden" value="<?php echo $row->jumlah; ?>" />
+                    </td>
+                </tr>
+             <?php endforeach;?>  
+        </tbody>
+ </table>
+ <br /> 
+ </div>
+<div align="right">
+<input type="button" id="tambah" 
+value="Tambah SPM" disabled="disabled" onclick="simpan()" />
+</div>
+
+               <?php }else{ ?>
+                 <tr>
+                 <td align='center' colspan="9" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td></tr>
+                 </tbody>
+ </table>
+ <br />
+ </div>
+             <?php } ?> 
+
+</form>             
+

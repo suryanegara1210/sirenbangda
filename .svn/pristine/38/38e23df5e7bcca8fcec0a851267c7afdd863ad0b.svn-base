@@ -1,0 +1,46 @@
+ <article class="module width_full">
+<header>
+  <h3>Daftar Dana Parkir Tender</h3></header>
+  
+  <div id="sub-content"> 
+  <form method="post" name='formdpt'action=" <?php echo site_url(); ?> dpt/simpan_tender" onSubmit='return validasi(this)'>
+      <table  class="table-common" style="margin-left: 20px; width: 90%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Output/Komponen/Akun</th>
+                <th>Header</th>
+                <th>Uraian</th>
+                <th>Volume</th>
+                <th>Satuan</th>
+                <th>Harga Satuan</th>
+                <th>Jumlah</th>
+                <th>Aksi</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+                 foreach($list_tender as $row) : $i++;?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdkomponen;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->hdr; ?> </td>
+                    <td align="left"><?php echo $row->uraian; ?> </td>
+                    <td align="center"><?php echo $row->vol; ?> </td>
+                    <td align="center"><?php echo $row->sat; ?> </td>
+                    <td align="center"><?php echo $row->hargasat; ?> </td>
+                    <td align="center"><?php echo $row->jumlah; ?> </td>
+                    <td align="center"><a href="<?php echo base_url();?>dpt/simpan_tender/<?php echo $row->idtdet;?>" title="Ajukan Tender" onclick="return confirm('Apakah Anda Yakin untuk Mengajukan Tender ini ... ?')" ><img src="<?php echo base_url(); ?>asset/images/add.png"/></a> </td>
+                   
+                </tr>
+             <?php endforeach; ?> 
+        </tbody>
+</table>
+</div>
+<footer>         
+                <div class="submit_link">  
+                    <!--<input type="button" value="Kembali" onclick=self.history.back() >--> 
+                </div>
+
+            </footer>
+</article>  

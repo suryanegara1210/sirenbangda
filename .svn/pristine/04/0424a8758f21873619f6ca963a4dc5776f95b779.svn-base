@@ -1,0 +1,15 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-25 10:29:10 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-25 10:29:10 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-25 17:00:14 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-25 17:00:15 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\print_kwitansi.php 181
+ERROR - 2013-07-25 17:00:15 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\print_kwitansi.php 183
+ERROR - 2013-07-25 17:00:15 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\print_kwitansi.php 191
+ERROR - 2013-07-25 17:00:15 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\print_kwitansi.php 193
+ERROR - 2013-07-25 11:00:32 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-25 11:00:32 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-25 11:00:38 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-25 11:00:38 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-25 11:02:52 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-25 11:02:52 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268

@@ -1,0 +1,119 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-12 04:41:23 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 04:41:23 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 04:41:23 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 04:41:45 --> Severity: Notice  --> Undefined property: stdClass::$uraian C:\xampp\htdocs\siaku\application\controllers\dpt.php 638
+ERROR - 2013-06-12 04:41:45 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 638
+ERROR - 2013-06-12 04:41:45 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 639
+ERROR - 2013-06-12 04:41:45 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 639
+ERROR - 2013-06-12 04:41:45 --> Severity: Notice  --> Undefined property: stdClass::$jumlah C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 04:45:47 --> Severity: Notice  --> Undefined property: stdClass::$uraian C:\xampp\htdocs\siaku\application\controllers\dpt.php 639
+ERROR - 2013-06-12 04:45:47 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 639
+ERROR - 2013-06-12 04:45:47 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 04:45:47 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 04:45:47 --> Severity: Notice  --> Undefined property: stdClass::$jumlah C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:52:21 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 04:52:21 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 04:52:21 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 04:52:32 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 04:52:32 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:52:32 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:53:21 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 04:53:21 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:53:21 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$volume C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 04:56:51 --> Severity: Notice  --> Undefined property: stdClass::$harga_satuan C:\xampp\htdocs\siaku\application\controllers\dpt.php 642
+ERROR - 2013-06-12 05:00:49 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 05:00:49 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 05:00:49 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 05:08:57 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 05:08:57 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 05:08:57 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 05:12:00 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 05:12:00 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 05:12:00 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 05:32:57 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 05:32:57 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 05:32:57 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 05:34:04 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\controllers\dpt.php 640
+ERROR - 2013-06-12 05:34:04 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 05:34:04 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\controllers\dpt.php 641
+ERROR - 2013-06-12 05:40:41 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 05:40:41 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 05:40:41 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 05:41:04 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 563
+ERROR - 2013-06-12 06:12:36 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 06:12:36 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 06:12:36 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 06:13:02 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 563
+ERROR - 2013-06-12 06:15:09 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 06:15:09 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 06:15:09 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 06:24:09 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 563
+ERROR - 2013-06-12 06:24:23 --> Severity: Notice  --> Undefined property: stdClass::$tahun C:\xampp\htdocs\siaku\application\models\m_dpt.php 923
+ERROR - 2013-06-12 06:24:23 --> Query error: Unknown column 'vol' in 'field list'
+ERROR - 2013-06-12 08:04:15 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 08:04:15 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 08:04:15 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 08:04:58 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 563
+ERROR - 2013-06-12 08:04:58 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 566
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 30
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 31
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 32
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 30
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 31
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 32
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 30
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 31
+ERROR - 2013-06-12 08:17:50 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 32
+ERROR - 2013-06-12 08:18:01 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 30
+ERROR - 2013-06-12 08:18:01 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 31
+ERROR - 2013-06-12 08:18:01 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 32
+ERROR - 2013-06-12 08:18:01 --> Severity: Notice  --> Undefined property: stdClass::$vol C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 30
+ERROR - 2013-06-12 08:18:01 --> Severity: Notice  --> Undefined property: stdClass::$sat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 31
+ERROR - 2013-06-12 08:18:01 --> Severity: Notice  --> Undefined property: stdClass::$hargasat C:\xampp\htdocs\siaku\application\views\dpt\list_uraian_item_tender.php 32
+ERROR - 2013-06-12 08:41:14 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 08:41:14 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 08:41:14 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 09:40:19 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 09:40:20 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 09:40:20 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 10:24:47 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 10:24:47 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 10:24:47 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 10:25:18 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:29:56 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 10:29:56 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 10:29:56 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 10:30:15 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:30:25 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:31:35 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:35:03 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 10:35:03 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 10:35:03 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 10:35:32 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:40:27 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 10:40:27 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 10:40:27 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 10:40:49 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:42:22 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 81
+ERROR - 2013-06-12 10:42:22 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 88
+ERROR - 2013-06-12 10:42:22 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 93
+ERROR - 2013-06-12 10:42:41 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:43:11 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-06-12 10:43:46 --> Severity: Notice  --> Undefined property: stdClass::$total_usulan C:\xampp\htdocs\siaku\application\models\m_dpt.php 871
+ERROR - 2013-06-12 10:56:32 --> 404 Page Not Found --> simwisuda

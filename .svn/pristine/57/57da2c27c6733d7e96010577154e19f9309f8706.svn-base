@@ -1,0 +1,54 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Pendapatan_daerah extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));        
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_pendapatan'));
+	}
+
+	function index()
+	{
+        $this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+		//$data['url_delete_data'] = site_url('rka/delete_rka');
+		$this->template->load('template','view_pendapatan');
+	}
+	
+	function load_data()
+	{
+		$search = $this->input->post("search");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+		$order = $this->input->post("order");
+		
+		$pend = $this->m_pendapatan->get_data_table($search, $start, $length, $order["0"]);		
+		$alldata = $this->m_pendapatan->count_data_table($search, $start, $length, $order["0"]);
+
+		$data = array();
+		$no=0;
+
+
+		foreach ($pend as $row) {
+			$no++;
+			$data[] = array(
+							$no, 
+                            $row->jenis_pendapatan,
+                            $row->realisasi_2011,
+                            $row->realisasi_2012,
+                            $row->proyeksi_2013,
+                            $row->proyeksi_2014,
+                            $row->proyeksi_2015
+							);
+		}
+		$json = array("recordsTotal"=> $alldata, "recordsFiltered"=> $alldata, 'data' => $data);
+		
+        echo json_encode($json);
+	}
+}

@@ -1,0 +1,101 @@
+<script type="text/javascript">
+	$(function() {
+		var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+    
+	    $("#nilai_up").autoNumeric(numOptions);    
+	    $("#limit_spjup").autoNumeric(numOptions);
+	});
+</script>
+
+<style>
+label.error {
+	margin-left: 2px;
+	width: auto;
+	display: block;
+	color:#F00;
+}
+.col_akhir {	width:50px;	
+}
+</style>
+<article class="module width_full">
+<header>
+  <h3>Buat Kwitansi Baru LS</h3>
+</header>             
+ <div class="module_content">     
+<table border='0' width='100%' >
+  <tr>
+    <td width="300px">&nbsp;</td>
+    <td width="10">&nbsp;</td>
+    <td width="616">&nbsp;</td>
+    <td width="147">Unit Kerja</td>
+    <td width="5">:</td>
+    <td class="col_akhir">
+	  <input type="text" name="unit_kerja" id="unit_kerja" readonly size="18" value="<?php echo $nama_unit; ?>"/></td>
+  </tr>
+  <tr>
+    <td width="200px">&nbsp;</td>
+    <td width="10">&nbsp;</td>
+    <td width="616">&nbsp;</td>
+    <td>Nilai Limit UP</td>
+    <td>:</td>
+    <td width="109" class="col_akhir"><label for="nilai_up">
+      <input name='nilai_up' type='text' id="nilai_up"  size="18" style="text-align: right;"
+             			value="<?php echo $nilai_up;  ?>" disabled="disabled" />
+    </label></td>
+  </tr>
+  <tr>
+    <td width="200px">&nbsp;</td>
+    <td width="10">&nbsp;</td>
+    <td width="616">&nbsp;</td>
+    <td>Sisa Limit</td>
+    <td>:</td>
+    <td width="109" class="col_akhir"><label for="sisa_limit">
+      <input name='limit_spjup' type='text' id="limit_spjup"  size="18" style="text-align: right;"
+             			value="<?php echo $limit_spjup; ?>" disabled="disabled" />
+    </label></td>
+  </tr>
+  <tr>
+    <td width="250">Jenis Kwitansi</td>
+    <td >&nbsp;:</td>
+    <td><label for="jenis_kwitansi"></label>
+      <select name="jns_kwitansi" id="jns_kwitansi"  >
+        <option value="">-</option>
+		
+        <option value="BARANG">BELANJA BARANG</option>
+        <option value="PERJADIN">BELANJA PERJADIN</option>
+        <option value="HONOR">BELANJA HONOR</option>
+      </select></td>
+  </tr>
+  <input name="jns_belanja" id="jns_belanja" type="hidden" value="<?php echo $jns_belanja; ?>"/>
+</table>
+   <div id="jenis_kwitansi">
+  </div>
+
+</article>
+
+
+
+<style type="text/css">
+.col_akhir {	width:50px;	
+}
+</style>
+
+<script type="text/javascript">
+	$("#jns_kwitansi").change(function(){
+	  var jeniskw = $("#jns_kwitansi").val();
+	  var jenisblj= $("#jns_belanja").val();
+	  $.ajax({
+		  type: "POST",
+		  url : "<?php echo site_url('gup/jenis_kwitansi')?>",
+		  data: { jns_kwitansi: jeniskw,
+				  jns_belanja: jenisblj },
+		  success: function(msg){
+			  $('#jenis_kwitansi').html(msg);
+		  }
+	  });
+	});
+		
+	$( function () {
+	    //proses disable jns kwitansi berdasarkan GUP, TUP, LS
+	});		
+</script> 

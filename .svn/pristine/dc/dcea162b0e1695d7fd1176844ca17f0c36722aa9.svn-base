@@ -1,0 +1,349 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_musrenbang extends CI_Model 
+{
+	var $table_musrenbang = 't_musrenbang';
+    var $primary_musrenbang = 'id_musrenbang';
+    var $table_renstra = 't_renstra_rkpd';
+    var $table_skpd = 'm_skpd';
+    var $primary_skpd = 'id_skpd';
+    
+    public function __construct()
+    {
+        parent::__construct();           
+    }
+    
+    function insert($data,$table) {
+        $this->db->insert($this->$table,$data);
+        return $this->db->insert_id();
+    }
+    function update($id,$data,$table,$primary) {
+        $this->db->where($this->$primary,$id);
+        return $this->db->update($this->$table,$data);
+    }
+    function delete($id,$data,$table,$primary) {
+        $this->db->where($this->$primary,$id);
+        return $this->db->update($this->$table,$data);
+    }
+
+    function get_data($data,$table){
+        $this->db->where($data);
+        $query = $this->db->get($this->$table);
+        return $query->row();
+    }
+    
+    function get_data_with_rincian($id_musrenbang,$table){
+    //     $sql = "
+    //                 SELECT a.*, nm_urusan, nm_bidang, ket_program, ket_kegiatan
+				// 	FROM ".$this->$table." as a
+    //                 INNER JOIN t_renstra_rkpd AS renstra 
+    //                 ON a.kd_urusan=renstra.kd_urusan AND a.kd_bidang=renstra.kd_bidang AND a.kd_program=renstra.kd_program AND a.kd_kegiatan=renstra.kd_kegiatan
+				// 	WHERE id_musrenbang = ?
+				// ";
+        $sql ="
+            SELECT a.*, u.`Nm_Urusan`AS nm_urusan, b.`Nm_Bidang` AS nm_bidang, p.`Ket_Program` AS ket_program, k.`Ket_Kegiatan` AS ket_kegiatan
+                FROM ".$this->$table." AS a
+                INNER JOIN m_urusan AS u ON a.`kd_urusan`=u.`Kd_Urusan`
+                INNER JOIN m_bidang AS b ON a.`kd_urusan`=b.`Kd_Urusan` 
+                                        AND a.`kd_bidang`=b.`Kd_Bidang`
+                INNER JOIN m_program AS p ON a.`kd_urusan`=p.`Kd_Urusan` 
+                                        AND a.`kd_bidang`=p.`Kd_Bidang` 
+                                        AND a.`kd_program`=p.`Kd_Prog`
+                INNER JOIN m_kegiatan AS k ON a.`kd_urusan`=k.`Kd_Urusan` 
+                                        AND a.`kd_bidang`=k.`Kd_Bidang` 
+                                        AND a.`kd_program`=k.`Kd_Prog` 
+                                        AND a.`kd_kegiatan`=k.`Kd_Keg`
+                WHERE id_musrenbang = ?
+        ";
+
+			$query = $this->db->query($sql, array($id_musrenbang));
+                    /*INNER JOIN m_urusan ON a.kd_urusan=m_urusan.Kd_Urusan
+                    INNER JOIN m_bidang ON a.kd_urusan=m_bidang.Kd_Urusan AND a.kd_bidang=m_bidang.Kd_Bidang
+                    INNER JOIN m_program ON a.kd_urusan=m_program.Kd_Urusan AND a.kd_bidang=m_program.Kd_Bidang AND a.kd_program=m_program.Kd_Prog
+                    INNER JOIN m_kegiatan ON a.kd_urusan=m_kegiatan.Kd_Urusan AND a.kd_bidang=m_kegiatan.Kd_Bidang AND a.kd_program=m_kegiatan.Kd_Prog AND a.kd_kegiatan=m_kegiatan.Kd_Keg*/
+			if($query) {
+				if($query->num_rows() > 0) {
+					return $query->row();
+				}
+			}
+
+			return NULL;
+    }    
+	
+
+	function get_data_table($search, $start, $length, $order){
+		$order_arr = array('id_musrenbang','kd_urusan','kd_bidang','kd_program','kd_kegiatan','jenis_kegiatan');
+        /*$this->db->distinct();
+        $this->db->select($this->table_musrenbang.'.*,renstra.ket_program,renstra.ket_kegiatan');
+        $this->db->from($this->table_musrenbang);
+        $this->db->join('t_renstra_rkpd AS renstra',"t_musrenbang.`kd_urusan`=renstra.kd_urusan AND t_musrenbang.`kd_bidang`=renstra.kd_bidang AND t_musrenbang.`kd_program`=renstra.`kd_program` AND t_musrenbang.`kd_program`",'left');
+        $this->db->like($this->table_musrenbang.".kd_urusan", $search['value']);
+        $this->db->or_like($this->table_musrenbang.".kd_bidang", $search['value']);
+        $this->db->or_like($this->table_musrenbang.".kd_program", $search['value']);
+        $this->db->or_like($this->table_musrenbang.".kd_kegiatan", $search['value']);
+        $this->db->or_like($this->table_musrenbang.".jenis_pekerjaan", $search['value']);*/
+        //TABEL DI JOIN DENGAN RENSTRA_RKPD
+        /*$sql="
+        SELECT DISTINCT `t_musrenbang`.*,renstra.`ket_program`,renstra.`ket_kegiatan`
+            FROM (`t_musrenbang`) 
+        LEFT JOIN t_renstra_rkpd AS renstra 
+            ON t_musrenbang.`kd_urusan`=renstra.kd_urusan AND t_musrenbang.`kd_bidang`=renstra.kd_bidang AND t_musrenbang.`kd_program`=renstra.`kd_program` AND t_musrenbang.`kd_kegiatan`=renstra.`kd_kegiatan`
+            WHERE `t_musrenbang`.`kd_urusan` LIKE '%".$search['value']."%' 
+            OR `t_musrenbang`.`kd_bidang` LIKE '%".$search['value']."%' 
+            OR `t_musrenbang`.`kd_program` LIKE '%".$search['value']."%' 
+            OR `t_musrenbang`.`kd_kegiatan` LIKE '%".$search['value']."%' 
+            OR `t_musrenbang`.`jenis_pekerjaan` LIKE '%".$search['value']."%'
+        ";*/
+        $id_desa = $this->session->userdata('id_desa');
+        $sql="
+            SELECT * FROM (
+            SELECT m.*,p.`Ket_Program` AS ket_program, k.`Ket_Kegiatan` AS ket_kegiatan
+                FROM t_musrenbang AS m
+                LEFT JOIN m_program AS p ON m.`kd_urusan`= p.`Kd_Urusan` 
+                                            AND m.`kd_bidang`=p.`Kd_Bidang` 
+                                            AND m.`kd_program`=p.`Kd_Prog`
+                LEFT JOIN m_kegiatan AS k ON m.`kd_urusan`= k.`Kd_Urusan` 
+                                            AND m.`kd_bidang`=k.`Kd_Bidang` 
+                                            AND m.`kd_program`=k.`Kd_Prog` 
+                                            AND m.`kd_kegiatan`=k.`Kd_Keg`
+            WHERE (m.`kd_urusan` LIKE '%".$search['value']."%' 
+            OR m.`kd_bidang` LIKE '%".$search['value']."%' 
+            OR m.`kd_program` LIKE '%".$search['value']."%' 
+            OR m.`kd_kegiatan` LIKE '%".$search['value']."%' 
+            OR m.`jenis_pekerjaan` LIKE '%".$search['value']."%')
+            AND id_desa = '$id_desa'
+            ) as a
+            order by ".$order_arr[$order["column"]]." ".$order["dir"]."
+            limit $start,$length
+            
+        ";
+		//$this->db->limit($length, $start);
+		//$this->db->order_by($order_arr[$order["column"]], $order["dir"]); 
+        
+		$result = $this->db->query($sql);
+		return $result->result();
+	}
+
+	function count_data_table($search, $start, $length, $order){		
+		/*
+        $this->db->from($this->table_musrenbang);
+		$this->db->like("kd_urusan", $search['value']);
+		$this->db->or_like("kd_bidang", $search['value']);
+		$this->db->or_like("kd_program", $search['value']);
+		$this->db->or_like("kd_kegiatan", $search['value']);
+        $this->db->or_like("jenis_pekerjaan", $search['value']);		
+		$result = $this->db->count_all_results();
+        */
+        $id_desa = $this->session->userdata('id_desa');
+        $sql="
+            SELECT count(*) as jumlah FROM (
+            SELECT m.*,p.`Ket_Program` AS ket_program, k.`Ket_Kegiatan` AS ket_kegiatan
+                FROM t_musrenbang AS m
+                LEFT JOIN m_program AS p ON m.`kd_urusan`= p.`Kd_Urusan` 
+                                            AND m.`kd_bidang`=p.`Kd_Bidang` 
+                                            AND m.`kd_program`=p.`Kd_Prog`
+                LEFT JOIN m_kegiatan AS k ON m.`kd_urusan`= k.`Kd_Urusan` 
+                                            AND m.`kd_bidang`=k.`Kd_Bidang` 
+                                            AND m.`kd_program`=k.`Kd_Prog` 
+                                            AND m.`kd_kegiatan`=k.`Kd_Keg`
+            WHERE (m.`kd_urusan` LIKE '%".$search['value']."%' 
+            OR m.`kd_bidang` LIKE '%".$search['value']."%' 
+            OR m.`kd_program` LIKE '%".$search['value']."%' 
+            OR m.`kd_kegiatan` LIKE '%".$search['value']."%' 
+            OR m.`jenis_pekerjaan` LIKE '%".$search['value']."%')
+            AND id_desa = '$id_desa'
+            ) as a
+
+            
+        ";
+		//$this->db->limit($length, $start);
+		//$this->db->order_by($order_arr[$order["column"]], $order["dir"]); 
+        
+		$result = $this->db->query($sql)->row();
+		return $result->jumlah;
+    }
+
+    function get_data_table_cam($search, $start, $length, $order){
+		//pada level kecamatan, data yang muncul hanya sesuai dengan skpd nya
+        $id_skpd = $this->session->userdata('id_skpd');
+        
+        $order_arr = array('id_musrenbang','kd_urusan','kd_bidang','kd_program','kd_kegiatan','jenis_kegiatan');
+        /*
+		$this->db->select("*");
+		$this->db->from($this->table_musrenbang);
+		
+		$this->db->like("kd_urusan", $search['value']);
+		$this->db->or_like("kd_bidang", $search['value']);
+		$this->db->or_like("kd_program", $search['value']);
+		$this->db->or_like("kd_kegiatan", $search['value']);
+        $this->db->or_like("jenis_pekerjaan", $search['value']);
+
+		$this->db->limit($length, $start);
+		$this->db->order_by($order_arr[$order["column"]], $order["dir"]); 
+        */
+        /*$sql = "
+            SELECT DISTINCT * 
+            FROM (
+                SELECT m.*,s.nama_skpd,d.nama_desa,renstra.`ket_program`,renstra.`ket_kegiatan` FROM t_musrenbang AS m 
+                LEFT JOIN m_skpd AS s
+                ON m.id_skpd=s.id_skpd
+                LEFT JOIN m_desa AS d
+                ON m.id_desa=d.id_desa
+                LEFT JOIN t_renstra_rkpd AS renstra
+                ON m.`kd_urusan`=renstra.`kd_urusan` AND m.`kd_bidang`=renstra.`kd_bidang` AND m.`kd_program`=renstra.`kd_program` AND m.`kd_kegiatan`=renstra.`kd_kegiatan`
+
+            ) as t
+            WHERE (
+                kd_urusan like '%".$search['value']."%' or
+                kd_bidang like '%".$search['value']."%' or
+                kd_program like '%".$search['value']."%' or
+                kd_kegiatan like '%".$search['value']."%' or
+                jenis_pekerjaan like '%".$search['value']."%'
+            )
+            and id_skpd = '".$id_skpd."' and flag_delete='0'
+            order by ".$order_arr[$order["column"]]." ".$order["dir"]."
+            limit ".$start.",".$length." 
+            ";*/
+        $sql = "
+            SELECT m.*,p.`Ket_Program` AS ket_program, k.`Ket_Kegiatan` AS ket_kegiatan, s.nama_skpd, d.nama_desa
+                FROM t_musrenbang AS m
+                LEFT JOIN m_program AS p ON m.`kd_urusan`= p.`Kd_Urusan` 
+                                            AND m.`kd_bidang`=p.`Kd_Bidang` 
+                                            AND m.`kd_program`=p.`Kd_Prog`
+                LEFT JOIN m_kegiatan AS k ON m.`kd_urusan`= k.`Kd_Urusan` 
+                                            AND m.`kd_bidang`=k.`Kd_Bidang` 
+                                            AND m.`kd_program`=k.`Kd_Prog` 
+                                            AND m.`kd_kegiatan`=k.`Kd_Keg`
+                LEFT JOIN m_skpd AS s ON m.id_skpd=s.id_skpd
+                LEFT JOIN m_desa AS d ON m.id_desa=d.id_desa
+                WHERE (
+                m.kd_urusan LIKE '%".$search['value']."%' OR
+                m.kd_bidang LIKE '%".$search['value']."%' OR
+                m.kd_program LIKE '%".$search['value']."%' OR
+                m.kd_kegiatan LIKE '%".$search['value']."%' OR
+                m.jenis_pekerjaan LIKE '%".$search['value']."%'
+                )
+                and m.id_skpd = '".$id_skpd."' and flag_delete='0'
+                order by ".$order_arr[$order["column"]]." ".$order["dir"]."
+                limit ".$start.",".$length."
+        ";
+        
+        
+		$result = $this->db->query($sql);
+		return $result->result();
+	}
+
+	function count_data_table_cam($search, $start, $length, $order){		
+		$id_skpd = $this->session->userdata('id_skpd');
+        $sql = "
+            SELECT * 
+            FROM t_musrenbang 
+            WHERE (
+                kd_urusan like '%".$search['value']."%' or
+                kd_bidang like '%".$search['value']."%' or
+                kd_program like '%".$search['value']."%' or
+                kd_kegiatan like '%".$search['value']."%' or
+                jenis_pekerjaan like '%".$search['value']."%'
+            )
+            and id_skpd = '".$id_skpd."' and flag_delete='0'";
+        
+        
+		$result = $this->db->query($sql)->num_rows();
+		
+		return $result;
+	}
+    //Revisi : Autocomplete sudah ada di controller common, tinggal ambil ke sana
+    /*
+    function get_value_autocomplete_kd_urusan($search){
+    		$this->db->select('kd_urusan AS id, nm_urusan AS label');
+    		$this->db->like('kd_urusan', $search);
+    		$this->db->or_like('nm_urusan', $search);
+    		$this->db->group_by('kd_urusan');
+            $result = $this->db->get($this->table_renstra);
+    		return $result->result();
+    	}
+
+    	function get_value_autocomplete_kd_bidang($search, $kd_urusan){
+    		$this->db->select('kd_bidang AS id, nm_bidang AS label');
+    		$this->db->where('kd_urusan', $kd_urusan);
+    		$this->db->where('(kd_bidang LIKE \'%'. $search .'%\' OR nm_bidang LIKE \'%'. $search .'%\')');    		 
+    		$this->db->group_by('kd_bidang');
+            $result = $this->db->get($this->table_renstra);
+    		return $result->result();
+    	}
+
+    	function get_value_autocomplete_kd_prog($search, $kd_urusan, $kd_bidang){
+    		$this->db->select('kd_program AS id, ket_program AS label');
+    		$this->db->where('kd_urusan', $kd_urusan);
+    		$this->db->where('kd_bidang', $kd_bidang);
+    		$this->db->where('(kd_program LIKE \'%'. $search .'%\' OR ket_program LIKE \'%'. $search .'%\')');
+    		$this->db->group_by('kd_program');
+            $result = $this->db->get($this->table_renstra);
+    		return $result->result();
+    	}
+
+    	function get_value_autocomplete_kd_keg($search, $kd_urusan, $kd_bidang, $kd_prog){
+    		$this->db->select('kd_kegiatan AS id, ket_kegiatan AS label,id AS id_renstra');
+    		$this->db->where('kd_urusan', $kd_urusan);
+    		$this->db->where('kd_bidang', $kd_bidang);
+    		$this->db->where('kd_program', $kd_prog);
+    		$this->db->where('(kd_kegiatan LIKE \'%'. $search .'%\' OR ket_kegiatan LIKE \'%'. $search .'%\')');
+   			$this->db->group_by('kd_kegiatan');
+            $result = $this->db->get($this->table_renstra);
+    		return $result->result();
+    	}
+      */  
+        function create_lov_skpd($id_skpd){
+    		$query = $this->db->get($this->table_skpd);
+	        $data = '<option value="">--- Pilih SKPD ---</option>';
+	        foreach ($query->result() as $row)
+	        {
+	            if($id_skpd===$row->id_skpd){
+	                $data .= "<option value='".$row->id_skpd."' selected='selected'>".$row->nama_skpd."</option>";
+	            }else{
+	                $data .= "<option value='".$row->id_skpd."'>".$row->nama_skpd."</option>";
+	            }
+	        }
+	        return $data;
+    	}
+		
+	function add_file($file, $name, $ket, $location){
+		$this->db->set('file', $file); 
+		$this->db->set('name', $name); 
+		$this->db->set('ket', $ket); 
+		$this->db->set('location', $location); 
+		$this->db->insert('t_upload_file'); 
+		return $this->db->insert_id();
+	}
+
+	function delete_file($id){
+		$this->db->where("id", $id);
+		$result = $this->db->delete('t_upload_file'); 
+		return $result;
+	}
+
+	function get_file($id = array(), $only = FALSE){		
+		$this->db->where_in("id", $id);
+		$this->db->from('t_upload_file');
+		$result = $this->db->get(); 
+		if ($only) {
+			return $result;
+		}else{
+			return $result->result();
+		}		
+	}
+
+	function get_one_file($id){		
+		$this->db->where("id", $id);
+		$this->db->from('t_upload_file');
+		$result = $this->db->get();		
+		return $result->row();		
+	}
+
+	function update_file($id, $data){		
+		$this->db->where('id', $id);
+		$result = $this->db->update('t_upload_file', $data); 
+		return $result;
+	}
+}
+?>

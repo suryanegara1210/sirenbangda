@@ -1,0 +1,61 @@
+<?php include('rincian_header.php'); ?>
+
+</br>
+<table class="form-honor-cetak list" width="100%" border="1">
+	<thead>
+  		<tr>
+  		  <th width="25px">No</th>
+        <th>Nama Dosen</th>
+        <th width="40px">Gol</th>
+        <th width="60px">Kode MK</th>
+        <th width="100px">Mata Kuliah</th>        
+        <th width="80px">Honor Naskah</th>
+        <th width="90px">Jumlah Honor</th>
+        <th width="80px">PPH</th>
+        <th width="90px">Jumlah Honor Diterima</th>
+        <th width="100px">Tanda Tangan</th>
+    </thead>
+    <tbody>
+<?php if($hasil ==""){
+	 echo "<tr><td colspan='13' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	 }else{
+     $i=0;
+   $grand_total=0;
+   $grand_pph=0;
+   $grand_terima=0;
+   $grand_koreksi = 0;
+   $grand_naskah = 0; 
+	 foreach($hasil->result() as $row) : $i++; ?>
+    <tr>
+        <td class='txt-center'><?php echo $i ?></td>
+        <td ><?php echo $row->nama; ?></td>
+        <td class="txt-center"><?php echo $row->golongan; ?></td>
+        <td class="txt-center"><?php echo $row->kd_mk; ?></td>
+        <td ><?php echo $row->m_kul; ?></td>                        
+        <td class="txt-right"><?php echo Formatting::currency($row->honor_naskah); ?></td>
+        <td class="txt-right"><?php echo Formatting::currency($row->subtotal, 2); ?></td>
+        <td class="txt-right"><?php echo Formatting::currency($row->pph_honor);?></td>
+        <td class="txt-right"><?php echo Formatting::currency($row->subtotal - $row->pph_honor, 2); ?></td>
+        <td class="ttd">........................</td>
+     </tr>
+<?php 
+    $grand_total += $row->subtotal;
+    $grand_pph   += $row->pph_honor;
+    $grand_terima+= ($row->subtotal - $row->pph_honor);
+    $grand_koreksi += ($row->volume * $row->satuan);
+    $grand_naskah += $row->honor_naskah;
+    endforeach; }?>
+    <tr>
+      <td class="txt-center" colspan="4">Jumlah</td>
+      <td align="right"><?php echo Formatting::currency($grand_koreksi);?></td>
+      <td align="right"><?php echo Formatting::currency($grand_naskah);?></td>
+      <td align="right"><?php echo Formatting::currency($grand_total, 2);?></td>
+      <td align="right"><?php echo Formatting::currency($grand_pph);?></td>
+      <td align="right"><?php echo Formatting::currency($grand_terima, 2);?></td>
+      <td>&nbsp;</td>
+    </tr>
+
+    </tbody>
+</table>
+
+<?php include('rincian_footer.php'); ?>

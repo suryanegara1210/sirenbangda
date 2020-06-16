@@ -1,0 +1,39 @@
+                <table id="jenis" class="table-common" style="width: 98%;" >
+                    <tr>
+                        <th>Item Arus Kas</th>
+                        <th>Aksi</th>
+                    </tr>
+                    <?php
+                        foreach ($item as $it){
+                            echo "<tr id=\"baris_item_{$arus}_{$it->id_rincian}\" class=\"baris_item\" onclick=\"rincian_ambil('{$arus}',$it->id_rincian)\">
+                                    <td>
+                                    <input type=\"hidden\" id=\"id_item_{$arus}_{$it->id_rincian}\" name=\"id_item{$it->id_rincian}\" value=\"{$it->id_rincian}\"/>
+                                    <input type=\"hidden\" id=\"kode_item_{$arus}_{$it->id_rincian}\" name=\"kode_item{$it->id_rincian}\" value=\"{$it->kode_group}\" />
+                                    <input type=\"hidden\" id=\"deskripsi_item_{$arus}_{$it->id_rincian}\" name=\"deskripsi_item{$it->id_rincian}\" value=\"{$it->deskripsi}\" />
+                                    {$it->deskripsi}</td>
+                                    <td align=\"center\">
+                                        <img src=\"".base_url()."asset/images/detail.png\" onclick=\"rincian_ambil('{$arus}',$it->id_rincian)\"/></a>
+                                        <img id=\"editjenis\" src=\"".base_url()."asset/images/edit.png\" onclick=\"edit_item('{$arus}',{$it->id_rincian})\" /></a>
+                                        <img src=\"".base_url()."asset/images/delete.png\" onclick=\"del_item({$it->id_rincian})\" /></a>
+                                    </td>
+                                </tr>";
+                        }
+                    ?>
+                    <tr>
+                        <th>
+                            <input type="hidden" type="text" id="id_jenis_<?php echo $arus; ?>" name="id_jenis" value="<?php echo $id_jenis; ?>"/>
+                            <input type="hidden" type="text" id="arus_item_<?php echo $arus; ?>" name="arus_item" value="<?php echo $arus; ?>" />
+                            <input type="hidden" type="text" id="id_item_<?php echo $arus; ?>" name="id_item" />
+                            <input type="text" id="kode_item_<?php echo $arus; ?>" name="kode_item" style="width:30%" placeholder="Kode Arus Kas" />
+                            <input type="text" id="deskripsi_item_<?php echo $arus; ?>" name="deskripsi_item" style="width:65%" placeholder="Deskripsi Arus Kas" />
+                        </th>
+                        <th>
+                            <input type="button" value="Simpan" name="submit" onclick="save_item('<?php echo $arus; ?>')" >
+                            <input type="button" value="Batal" name="submit" onclick="reset_item('<?php echo $arus; ?>')" >
+                        </th>
+                    </tr>
+                </table>
+                
+                <div id="rincian_<?php echo $arus; ?>"></div>
+ 
+

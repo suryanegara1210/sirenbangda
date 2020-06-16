@@ -1,0 +1,31 @@
+	    <article class="module width_full">
+    		<header><h3>Detail Surat Setor</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+
+            <?php
+                if ($isi_ss){
+                    include_once ('isi.php');
+                }else{
+                    echo "<h2>Surat Setor Tidak Ditemukan...</h2>";
+                }
+             ?>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <?php if ($isi_ss){ ?>
+                        <input type="button" value="Cetak" onclick="cetak()">
+                        <script>
+                            function cetak(){
+                                var lokasi='<?php echo base_url();?>surat_setor/detail/'+'<?php echo $isi_ss->id_setor; ?>'+'/cetak';
+                                location.href=lokasi;
+                            }
+                        </script>
+                    <?php } ?>
+                    
+				</div>
+			</footer>
+   </form>
+        </article>
+        <!-- end of styles article --> 

@@ -1,0 +1,24 @@
+<?php echo form_dropdown("kdoutput3", $output,'',"id='kdoutput3' style='width:450px;' "); ?> 
+        <script type="text/javascript">
+          $("#kdoutput3").change(function(){
+                var selectValues = $("#kdoutput3").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen3\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen3').html(msg);
+                }else{
+                    var kdoutput = $("#kdoutput3").val();
+                    var jns_kwitansi = $("#jns_kwitansi").val();
+					//alert(kdoutput, jns_kwitansi);
+					var dataString  = 'kdoutput3='+ kdoutput + '&jns_kwitansi=' + jns_kwitansi ;	
+                    $('#id_komponen3').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_komponen3')?>",
+                            data: dataString,
+                            success: function(msg){
+                                $('#komponen3').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>

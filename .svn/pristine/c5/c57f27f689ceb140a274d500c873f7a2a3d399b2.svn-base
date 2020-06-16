@@ -1,0 +1,52 @@
+<article class="module width_full">
+            <header><h3>Daftar SPM TUP (Tambahan Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama Subunit</th>
+                <th>Jumlah</th> 
+                <th>Aksi</th>   
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no = 1; 
+            foreach($detail_spm->result_array() as $row)
+            {  
+            $id=$row['id_transaksi'];     
+            $th=$row['th_transaksi'];     
+            $id_rekap=$row['id_rekap'];     
+            $nama_unit=$row['nama_subunit'];  
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");    
+            ?>
+              <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>"> 
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>  
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center">
+                <a href='<?php echo base_url()."tup/detail_rincian/$th/$id_rekap";?>' title='Detail Rincian Belanja'> <img src='<?php echo base_url();?>asset/images/detail.png'>
+                </a>
+                </td>
+              </tr>
+              
+            <?php $no++ ; }   
+            ?>         
+            
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer> 
+
+
+

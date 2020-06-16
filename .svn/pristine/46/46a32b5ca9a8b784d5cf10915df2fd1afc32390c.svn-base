@@ -1,0 +1,536 @@
+<?php
+    $aset[1]="";
+    $aset[2]="";
+    $aset[3]="";
+    $aset[4]="";
+    $jml_aset[1][1]=0;
+    $jml_aset[2][1]=0;
+    $jml_aset[3][1]=0;
+    $jml_aset[4][1]=0;
+    $jml_aset[1][2]=0;
+    $jml_aset[2][2]=0;
+    $jml_aset[3][2]=0;
+    $jml_aset[4][2]=0;
+
+    $wajib[1]="";
+    $wajib[2]="";
+    $jml_wajib[1][1]=0;
+    $jml_wajib[2][1]=0;    
+    $jml_wajib[1][2]=0;
+    $jml_wajib[2][2]=0;
+
+    $ekuitas[1]="";
+    $ekuitas[2]="";    
+    $jml_ekuitas[1][1]=0;
+    $jml_ekuitas[2][1]=0;    
+    $jml_ekuitas[1][2]=0;
+    $jml_ekuitas[2][2]=0;
+
+    foreach($laporan as $lap){
+        $perubahan_rp=$lap->nominal_skrg - $lap->nominal_tahun_lalu;
+        
+        if($lap->nominal_tahun_lalu!=0){
+            $perubahan_prsen=round((abs(($lap->nominal_skrg - $lap->nominal_tahun_lalu)/$lap->nominal_tahun_lalu))*100, 2);
+        }else{
+            $perubahan_prsen='-';
+        }
+
+        if (substr($lap->akun_kode,0,1)=='1') {
+            if($standar=='0'){
+                if ($lap->akun_kode=='11') {
+                    $jml_aset[1][1]=$lap->nominal_tahun_lalu;
+                    $jml_aset[1][2]=$lap->nominal_skrg;
+                }elseif ($lap->akun_kode=='12') {
+                    $jml_aset[2][1]=$lap->nominal_tahun_lalu;
+                    $jml_aset[2][2]=$lap->nominal_skrg;
+                }elseif ($lap->akun_kode=='13') {
+                    $jml_aset[3][1]=$lap->nominal_tahun_lalu;
+                    $jml_aset[3][2]=$lap->nominal_skrg;
+                }elseif ($lap->akun_kode=='15') {
+                    $jml_aset[4][1]=$lap->nominal_tahun_lalu;
+                    $jml_aset[4][2]=$lap->nominal_skrg;
+                }
+            }else{
+                //SAK Level Lbh dari 1
+                if (substr($lap->akun_kode,0,2)=='11') {
+                    $jml_aset[1][1]+=$lap->nominal_tahun_lalu;
+                    $jml_aset[1][2]+=$lap->nominal_skrg;
+                }elseif (substr($lap->akun_kode,0,2)=='12') {
+                    $jml_aset[2][1]+=$lap->nominal_tahun_lalu;
+                    $jml_aset[2][2]+=$lap->nominal_skrg;
+                }elseif (substr($lap->akun_kode,0,2)=='13') {
+                    $jml_aset[3][1]+=$lap->nominal_tahun_lalu;
+                    $jml_aset[3][2]+=$lap->nominal_skrg;
+                }elseif (substr($lap->akun_kode,0,2)=='15') {
+                    $jml_aset[4][1]+=$lap->nominal_tahun_lalu;
+                    $jml_aset[4][2]+=$lap->nominal_skrg;
+                }
+            }
+
+            if (substr($lap->akun_kode,0,2)=='11') {
+                $i=1;
+            }elseif (substr($lap->akun_kode,0,2)=='12') {
+                $i=2;
+            }elseif (substr($lap->akun_kode,0,2)=='13') {
+                $i=3;
+            }else{
+                $i=4;
+            }
+            
+            if ($standar=='0') {
+                $tab=$lap->level;
+            }else{
+                $tab=0;
+            }
+        
+            $aset[$i]=$aset[$i].
+            "<tr>
+                <td id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td>". $lap->akun_nama ."</td>                
+                <td class='right-align'>". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td class='right-align'>". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td class='right-align'>". Formatting::currency($perubahan_rp) ."</td>
+                <td class='right-align'>". $perubahan_prsen ."</td>
+            </tr>";
+        }elseif (substr($lap->akun_kode,0,1)=='2') {
+            if($standar=='0'){
+                if ($lap->akun_kode=='21') {
+                    $jml_wajib[1][1]=$lap->nominal_tahun_lalu;
+                    $jml_wajib[1][2]=$lap->nominal_skrg;
+                }elseif ($lap->akun_kode=='22') {
+                    $jml_wajib[2][1]=$lap->nominal_tahun_lalu;
+                    $jml_wajib[2][2]=$lap->nominal_skrg;
+                }
+            }else{
+                //SAK Level Lbh dari 1
+                if (substr($lap->akun_kode,0,2)=='21') {
+                    $jml_wajib[1][1]+=$lap->nominal_tahun_lalu;
+                    $jml_wajib[1][2]+=$lap->nominal_skrg;
+                }elseif (substr($lap->akun_kode,0,2)=='22') {
+                    $jml_wajib[2][1]+=$lap->nominal_tahun_lalu;
+                    $jml_wajib[2][2]+=$lap->nominal_skrg;
+                }
+            }
+            
+            if (substr($lap->akun_kode,0,2)=='21') {
+                $i=1;
+            }elseif (substr($lap->akun_kode,0,2)=='22') {
+                $i=2;
+            }else{
+                $i=0;
+            }
+            
+            if ($standar=='0') {
+                $tab=$lap->level;
+            }else{
+                $tab=0;
+            }
+        
+            $wajib[$i]=$wajib[$i].
+            "<tr>
+                <td id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td>". $lap->akun_nama ."</td>                
+                <td class='right-align'>". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td class='right-align'>". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td class='right-align'>". Formatting::currency($perubahan_rp) ."</td>
+                <td class='right-align'>". $perubahan_prsen ."</td>
+            </tr>";
+        }elseif (substr($lap->akun_kode,0,1)=='3') {
+            if($standar=='0'){
+                if ($lap->akun_kode=='31') {
+                    $jml_ekuitas[1][1]=$lap->nominal_tahun_lalu;
+                    $jml_ekuitas[1][2]=$lap->nominal_skrg;
+                }elseif ($lap->akun_kode=='32') {
+                    $jml_ekuitas[2][1]=$lap->nominal_tahun_lalu;
+                    $jml_ekuitas[2][2]=$lap->nominal_skrg;
+                }
+            }else{
+                //SAK Level Lbh dari 1
+                if (substr($lap->akun_kode,0,2)=='31') {
+                    $jml_ekuitas[1][1]+=$lap->nominal_tahun_lalu;
+                    $jml_ekuitas[1][2]+=$lap->nominal_skrg;
+                }elseif (substr($lap->akun_kode,0,2)=='32') {
+                    $jml_ekuitas[2][1]+=$lap->nominal_tahun_lalu;
+                    $jml_ekuitas[2][2]+=$lap->nominal_skrg;
+                }   
+            }
+            
+            if (substr($lap->akun_kode,0,2)=='31') {
+                $i=1;
+            }elseif (substr($lap->akun_kode,0,2)=='32') {
+                $i=2;
+            }else{
+                $i=0;
+            }
+            
+            if ($standar=='0') {
+                $tab=$lap->level;
+            }else{
+                $tab=0;
+            }
+        
+            $ekuitas[$i]=$ekuitas[$i].
+            "<tr>
+                <td id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td>". $lap->akun_nama ."</td>                
+                <td class='right-align'>". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td class='right-align'>". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td class='right-align'>". Formatting::currency($perubahan_rp) ."</td>
+                <td class='right-align'>". $perubahan_prsen ."</td>
+            </tr>";
+        }
+    }     
+?>
+
+<style type="text/css">
+    #tab0{
+        text-indent: 1em;
+    }
+
+    #tab1{
+        text-indent: 2em;
+    }
+
+    #tab2{
+        text-indent: 4em;
+    }
+
+    #tab3{
+        text-indent: 6em;
+    }
+
+    #tab4{
+        text-indent: 8em;
+    }
+
+    #tab5{
+        text-indent: 10em;
+    }
+
+    #tab6{
+        text-indent: 12em;
+    }
+
+    #tab7{
+        text-indent: 14em;
+    }
+
+    #tab8{
+        text-indent: 16em;
+    }
+
+    #tab9{
+        text-indent: 18em;
+    }
+
+    .right-align{
+        text-align: right;
+    }
+</style>
+<h2>
+    <div style="text-align:center">
+        Universitas Udayana<br />
+        Laporan Neraca<br />
+        Bulan <?php echo $nama_bulan1; ?> - <?php echo $nama_bulan2; ?> Tahun <?php echo $thn_skrg; ?> <br />
+    </div>
+</h2>
+<table class="table-common" style="width: 98%;">
+    <tr>
+        <th rowspan="2" colspan="2">Uraian</th>        
+        <th style="min-width: 120px;" rowspan="2">Laporan Bulan <BR><?php echo $nama_bulan1; ?>-<?php echo $nama_bulan2; ?> <BR>Tahun <?php echo $thn_skrg; ?></th>
+        <th style="min-width: 120px;" rowspan="2">Laporan Bulan <BR><?php echo $nama_bulan1_sblm; ?>-<?php echo $nama_bulan2_sblm; ?> <BR>Tahun <?php echo $thn_sblm; ?></th>
+        <th colspan="2">Perubahan</th>
+    </tr>
+    <tr>
+        <th>Rupiah</th>
+        <th>%</th>
+    </tr>    
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">ASET</td>
+    </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Aset Lancar</td>
+        </tr>
+        <?php
+            echo $aset[1];
+        ?>
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Investasi Jangka Panjang</td>
+        </tr>
+        <?php
+            echo $aset[2];
+        
+            $tot_jumlah_aset[1]=$jml_aset[1][1]+$jml_aset[2][1];
+            $tot_jumlah_aset[2]=$jml_aset[1][2]+$jml_aset[2][2];
+            $temp=$tot_jumlah_aset[2]-$tot_jumlah_aset[1];
+            if ($tot_jumlah_aset[1]!=0) {
+                $temp_persen=($temp/$tot_jumlah_aset[1])*100;
+            }else{
+                $temp_persen="-";
+            }
+        ?>
+
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Aset Lancar</td>            
+            <td class='right-align'><?php echo Formatting::currency($tot_jumlah_aset[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($tot_jumlah_aset[1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Aset Tetap</td>
+        </tr>
+        <?php
+            echo $aset[3];
+
+            $temp = $jml_aset[3][2]-$jml_aset[3][1];
+            if ($jml_aset[3][1]!=0) {
+                $temp_persen = ($temp/$jml_aset[3][1])*100;
+            }else{
+                $temp_persen ="-";
+            }            
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Aset Tetap</td>            
+            <td class='right-align'><?php echo Formatting::currency($jml_aset[3][2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($jml_aset[3][1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Aset Lainnya</td>
+        </tr>
+        <?php
+            echo $aset[4];
+
+            $temp = $jml_aset[4][2]-$jml_aset[4][1];
+            if ($jml_aset[4][1]!=0) {
+                $temp_persen = ($temp/$jml_aset[4][1])*100;
+            }else{
+                $temp_persen ="-";
+            }            
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Aset Lainnya</td>            
+            <td class='right-align'><?php echo Formatting::currency($jml_aset[4][2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($jml_aset[4][1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+    
+    <?php
+        $total_aset[1] = $jml_aset[1][1]+$jml_aset[2][1]+$jml_aset[3][1]+$jml_aset[4][1];
+        $total_aset[2] = $jml_aset[1][2]+$jml_aset[2][2]+$jml_aset[3][2]+$jml_aset[4][2];
+        $temp = $total_aset[2]-$total_aset[1];
+        if ($total_aset[1]!=0) {
+            $temp_persen = ($temp/$total_aset[1])*100;
+        }else{
+            $temp_persen ="-";
+        }
+
+        $total[1]   = $temp;
+        $persen[1]  = $temp_persen;
+    ?>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Aset</td>        
+        <td class='right-align'><?php echo Formatting::currency($total_aset[2]); ?></td>
+        <td class='right-align'><?php echo Formatting::currency($total_aset[1]); ?></td>
+        <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+        <td class='right-align'><?php echo $temp_persen; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">KEWAJIBAN</td>
+    </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Kewajiban Jangka Pendek</td>
+        </tr>
+        <?php
+            echo $wajib[1];
+            
+            $temp = $jml_wajib[1][2]-$jml_wajib[1][1];
+            if ($jml_wajib[1][1]!=0) {
+                $temp_persen = ($temp/$jml_wajib[1][1])*100;
+            }else{
+                $temp_persen ="-";
+            }            
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Kewajiban Jangka Pendek</td>            
+            <td class='right-align'><?php echo Formatting::currency($jml_wajib[1][2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($jml_wajib[1][1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Kewajiban Jangka Panjang</td>
+        </tr>
+        <?php
+            echo $wajib[2];
+            
+            $temp = $jml_wajib[2][2]-$jml_wajib[2][1];
+            if ($jml_wajib[2][1]!=0) {
+                $temp_persen = ($temp/$jml_wajib[2][1])*100;
+            }else{
+                $temp_persen ="-";
+            }            
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Kewajiban Jangka Pendek</td>            
+            <td class='right-align'><?php echo Formatting::currency($jml_wajib[2][2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($jml_wajib[2][1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+    <?php
+        $total_wajib[1] = $jml_wajib[1][1]+$jml_wajib[2][1];
+        $total_wajib[2] = $jml_wajib[1][2]+$jml_wajib[2][2];
+        $temp = $total_wajib[2]-$total_wajib[1];
+        if ($total_wajib[1]!=0) {
+            $temp_persen = ($temp/$total_wajib[1])*100;
+        }else{
+            $temp_persen ="-";
+        }  
+
+        $total[2]   = $temp;
+        $persen[2]  = $temp_persen;
+    ?>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Kewajiban</td>        
+        <td class='right-align'><?php echo Formatting::currency($total_wajib[2]); ?></td>
+        <td class='right-align'><?php echo Formatting::currency($total_wajib[1]); ?></td>
+        <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+        <td class='right-align'><?php echo $temp_persen; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">EKUITAS</td>
+    </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Ekuitas Dana Lancar</td>
+        </tr>
+        <?php
+            echo $ekuitas[1];
+            
+            $temp = $jml_ekuitas[1][2]-$jml_ekuitas[1][1];
+            if ($jml_ekuitas[1][1]!=0) {
+                $temp_persen = ($temp/$jml_ekuitas[1][1])*100;
+            }else{
+                $temp_persen ="-";
+            }        
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Ekuitas Dana Lancar</td>            
+            <td class='right-align'><?php echo Formatting::currency($jml_ekuitas[1][2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($jml_ekuitas[1][1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Ekuitas Dana Investasi</td>
+        </tr>
+        <?php
+            echo $ekuitas[2];
+            
+            $temp = $jml_ekuitas[2][2]-$jml_ekuitas[2][1];
+            if ($jml_ekuitas[2][1]!=0) {
+                $temp_persen = ($temp/$jml_ekuitas[2][1])*100;
+            }else{
+                $temp_persen ="-";
+            }            
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Ekuitas Dana Investasi</td>            
+            <td class='right-align'><?php echo Formatting::currency($jml_ekuitas[2][2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($jml_ekuitas[2][1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+        <?php
+            $total_eku[1] = $jml_ekuitas[1][1]+$jml_ekuitas[2][1];
+            $total_eku[2] = $jml_ekuitas[1][2]+$jml_ekuitas[2][2];
+            $temp = $total_eku[2]-$total_eku[1];
+            if ($total_eku[1]!=0) {
+                $temp_persen = ($temp/$total_eku[1])*100;
+            }else{
+                $temp_persen ="-";
+            }
+
+            $total[3]   = $temp;
+            $persen[3]  = $temp_persen;
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Ekuitas</td>
+            <td class='right-align'><?php echo Formatting::currency($total_eku[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total_eku[1]); ?></td>            
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">&nbsp;</td>
+        </tr>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Aset</td>            
+            <td class='right-align'><?php echo Formatting::currency($total_aset[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total_aset[1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total[1]); ?></td>
+            <td class='right-align'><?php echo $persen[1]; ?></td>
+        </tr>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Kewajiban</td>
+            <td class='right-align'><?php echo Formatting::currency($total_wajib[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total_wajib[1]); ?></td>            
+            <td class='right-align'><?php echo Formatting::currency($total[2]); ?></td>
+            <td class='right-align'><?php echo $persen[2]; ?></td>
+        </tr>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Ekuitas</td>
+            <td class='right-align'><?php echo Formatting::currency($total_eku[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total_eku[1]); ?></td>            
+            <td class='right-align'><?php echo Formatting::currency($total[3]); ?></td>
+            <td class='right-align'><?php echo $persen[3]; ?></td>
+        </tr>
+
+        <?php            
+            $temp = ($total_wajib[2]+$total_eku[2])-($total_wajib[1]+$total_eku[1]);
+            if (($total_wajib[1]+$total_eku[1])!=0) {
+                $temp_persen = ($temp/($total_wajib[1]+$total_eku[1]))*100;
+            }else{
+                $temp_persen ="-";
+            }
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">&nbsp;</td>
+        </tr>
+        <tr style="background-color: #dedede; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Aset</td>            
+            <td class='right-align'><?php echo Formatting::currency($total_aset[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total_aset[1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total[1]); ?></td>
+            <td class='right-align'><?php echo $persen[1]; ?></td>
+        </tr>        
+        <tr style="background-color: #dedede; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Kewajiban Dan Ekuitas</td>            
+            <td class='right-align'><?php echo Formatting::currency($total_wajib[2]+$total_eku[2]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($total_wajib[1]+$total_eku[1]); ?></td>
+            <td class='right-align'><?php echo Formatting::currency($temp); ?></td>
+            <td class='right-align'><?php echo $temp_persen; ?></td>
+        </tr>
+</table>

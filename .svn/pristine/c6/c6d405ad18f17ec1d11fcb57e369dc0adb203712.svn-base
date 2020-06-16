@@ -1,0 +1,450 @@
+<?php
+	if (!empty($revisi_rpjmd) && !empty($nominal_banding)) {
+		$nominal_1_pro = 0;
+		$nominal_2_pro = 0;
+		$nominal_3_pro = 0;
+		$nominal_4_pro = 0;
+		
+		if (!empty($nominal_banding->nominal_1_pro)) {
+			$nominal_1_pro = $nominal_banding->nominal_1_pro;
+		}
+		if (!empty($nominal_banding->nominal_2_pro)) {
+			$nominal_2_pro = $nominal_banding->nominal_2_pro;
+		}
+		if (!empty($nominal_banding->nominal_3_pro)) {
+			$nominal_3_pro = $nominal_banding->nominal_3_pro;
+		}
+		if (!empty($nominal_banding->nominal_4_pro)) {
+			$nominal_4_pro = $nominal_banding->nominal_4_pro;
+		}
+
+		$sisa1 = $revisi_rpjmd->nominal_1 - $nominal_1_pro;
+		$sisa2 = $revisi_rpjmd->nominal_2 - $nominal_2_pro;
+		$sisa3 = $revisi_rpjmd->nominal_3 - $nominal_3_pro;
+		$sisa4 = $revisi_rpjmd->nominal_4 - $nominal_4_pro;
+	}
+?>
+<script type="text/javascript">
+	prepare_chosen();
+	$('input[name=nominal_1]').autoNumeric(numOptions);
+	$('input[name=nominal_2]').autoNumeric(numOptions);
+	$('input[name=nominal_3]').autoNumeric(numOptions);
+	$('input[name=nominal_4]').autoNumeric(numOptions);
+	$('input[name=nominal_5]').autoNumeric(numOptions);	
+
+	$.validator.addMethod('maxNominal',
+		function(value, element, params) {
+			try {			
+				value 		= parseFloat($(element).autoNumeric('get'));
+				var nil1	= parseFloat(params);
+			} catch(e) { alert(e) }
+
+			return this.optional(element) || ( value >0 && value <= nil1);
+		}, "Mohon masukan nilai kurang dari atau sama dengan {0}."
+	);
+
+	$('form#kegiatan').validate({
+		rules: {				
+			kd_kegiatan : "required",
+			indikator_kinerja : "required",
+			satuan_target : "required",
+			triwulan_1 : {
+						required:true,
+						digits:true
+			},
+			triwulan_2 : {
+						required:true,
+						digits:true
+			},
+			triwulan_3 : {
+						required:true,
+						digits:true
+			},
+			triwulan_4 : {
+						required:true,
+						digits:true
+			},
+			kondisi_awal : {
+						required:true,
+						digits:true
+			},
+			target_kondisi_akhir : {
+						required:true,
+						digits:true
+			},
+			nominal_1 : {
+				required : true,			
+			<?php
+				if (!empty($sisa1)) {
+			?>
+
+				maxNominal: function() {
+					return Math.min(<?php echo ($sisa1>0)?"'". $sisa1 ."'":"'0'"; ?>) 
+				}
+			<?php
+				};
+			?>
+			},
+			nominal_2 : {
+				required : true,
+			<?php
+				if (!empty($sisa1)) {
+			?>
+
+				maxNominal: function() {
+					return Math.min(<?php echo ($sisa2>0)?"'". $sisa2 ."'":"'0'"; ?>) 
+				}
+			<?php
+				};
+			?>
+			},
+			nominal_3 : {
+				required : true,
+			<?php
+				if (!empty($sisa3)) {
+			?>
+
+				maxNominal: function() {
+					return Math.min(<?php echo ($sisa3>0)?"'". $sisa3 ."'":"'0'"; ?>) 
+				}
+			<?php
+				};
+			?>
+			},
+			nominal_4 : {
+				required : true,
+			<?php
+				if (!empty($sisa4)) {
+			?>
+
+				maxNominal: function() {
+					return Math.min(<?php echo ($sisa4>0)?"'". $sisa4 ."'":"'0'"; ?>) 
+				}
+			<?php
+				};
+			?>
+			},
+			uraian_kegiatan_1 : {
+				required : true
+			},
+			uraian_kegiatan_2 : {
+				required : true
+			},
+			uraian_kegiatan_3 : {
+				required : true
+			},
+			uraian_kegiatan_4 : {
+				required : true
+			},
+		},
+		ignore: ":hidden:not(select)"
+	});
+	
+	$(document).on("change", "#kd_kegiatan", function () {		
+		var str = $(this).find('option:selected').text();		
+		var nama_kegiatan = str.substring(str.indexOf(".")+1);
+		$("#nama_kegiatan").html(nama_kegiatan);
+		$("#nama_prog_or_keg").val(nama_kegiatan);		
+	});
+
+	$("#simpan").click(function(){
+	    var valid = $("form#kegiatan").valid();
+	    if (valid) {
+	    	$('input[name=nominal_1]').val($('input[name=nominal_1]').autoNumeric('get'));
+			$('input[name=nominal_2]').val($('input[name=nominal_2]').autoNumeric('get'));
+			$('input[name=nominal_3]').val($('input[name=nominal_3]').autoNumeric('get'));
+			$('input[name=nominal_4]').val($('input[name=nominal_4]').autoNumeric('get'));
+			
+	    	$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+	    	
+	    	$.ajax({
+				type: "POST",
+				url: $("form#kegiatan").attr("action"),
+				data: $("form#kegiatan").serialize(),
+				dataType: "json",
+				success: function(msg){
+					if (msg.success==1) {
+						$.blockUI({
+							message: msg.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+						$.facebox.close();						
+						element_program.trigger( "click" );
+						reload_jendela_kontrol();
+					};
+				}
+			});
+	    };
+	});
+</script>
+
+<div style="width: 900px">
+	<header>
+		<h3>
+	<?php
+		if (!empty($kegiatan)){
+		    echo "Edit Data Kegiatan";
+		} else{
+		    echo "Input Data Kegiatan";
+		}
+	?>
+	</h3>
+	</header>
+	<div class="module_content">
+		<form action="<?php echo site_url('renja/save_kegiatan');?>" method="POST" name="kegiatan" id="kegiatan" accept-charset="UTF-8" enctype="multipart/form-data" >
+			<input type="hidden" name="id_kegiatan" value="<?php if(!empty($kegiatan->id)){echo $kegiatan->id;} ?>" />
+			<input type="hidden" name="id_renja" value="<?php echo $id_renja; ?>" />
+			<input type="hidden" name="id_sasaran" value="<?php echo $id_sasaran; ?>" />
+			<input type="hidden" name="id_program" value="<?php echo $id_program; ?>" />
+
+			<input type="hidden" name="kd_urusan" value="<?php echo $tujuan_sasaran_n_program->kd_urusan; ?>" />
+			<input type="hidden" name="kd_bidang" value="<?php echo $tujuan_sasaran_n_program->kd_bidang; ?>" />
+			<input type="hidden" name="kd_program" value="<?php echo $tujuan_sasaran_n_program->kd_program; ?>" />
+			<input type="hidden" id="nama_prog_or_keg" name="nama_prog_or_keg" value="<?php echo (!empty($kegiatan->nama_prog_or_keg))?$kegiatan->nama_prog_or_keg:''; ?>" />
+		<?php
+			if (!empty($revisi_rpjmd)) {
+		?>
+			<div style="margin-bottom: 10px;">
+				<table class="table-common" width="99%">
+					<tbody>
+						<tr>
+							<th colspan="5">Revisi dari RPJMD</th>
+						</tr>
+						<tr>
+							<td colspan="1">Kode</td>
+							<td colspan="4"><?php echo $revisi_rpjmd->kd_urusan.".".$revisi_rpjmd->kd_bidang.".".$revisi_rpjmd->kd_program; ?></td>
+						</tr>
+						<tr>
+							<td colspan="1">Nama Program</td>
+							<td colspan="4"><?php echo $revisi_rpjmd->nama_prog_or_keg; ?></td>
+						</tr>
+						<tr>
+							<th width="20%">Nominal 1</td>
+							<th width="20%">Nominal 2</th>
+							<th width="20%">Nominal 3</th>
+							<th width="20%">Nominal 4</th>
+							<th width="20%">Nominal 5</th>
+						</tr>
+						<tr>
+							<td align="right"><?php echo Formatting::currency($revisi_rpjmd->nominal_1); ?></td>
+							<td align="right"><?php echo Formatting::currency($revisi_rpjmd->nominal_2); ?></td>
+							<td align="right"><?php echo Formatting::currency($revisi_rpjmd->nominal_3); ?></td>
+							<td align="right"><?php echo Formatting::currency($revisi_rpjmd->nominal_4); ?></td>
+							<td align="right"><?php echo Formatting::currency($revisi_rpjmd->nominal_5); ?></td>
+						</tr>
+						<tr>
+							<th width="20%">Keterangan 1</td>
+							<th width="20%">Keterangan 2</th>
+							<th width="20%">Keterangan 3</th>
+							<th width="20%">Keterangan 4</th>
+							<th width="20%">Keterangan 5</th>
+						</tr>
+						<tr>
+							<td><?php echo $revisi_rpjmd->ket_revisi_1; ?></td>
+							<td><?php echo $revisi_rpjmd->ket_revisi_2; ?></td>
+							<td><?php echo $revisi_rpjmd->ket_revisi_3; ?></td>
+							<td><?php echo $revisi_rpjmd->ket_revisi_4; ?></td>
+							<td><?php echo $revisi_rpjmd->ket_revisi_5; ?></td>
+						</tr>
+						<tr>
+							<th width="20%">Sisa 1</td>
+							<th width="20%">Sisa 2</th>
+							<th width="20%">Sisa 3</th>
+							<th width="20%">Sisa 4</th>
+							<th width="20%">Sisa 5</th>
+						</tr>
+						<tr>
+							<td align="right" <?php echo ($sisa1<0)?'style="color: red;"':'';?>><?php echo Formatting::currency($sisa1); ?></td>
+							<td align="right" <?php echo ($sisa2<0)?'style="color: red;"':'';?>><?php echo Formatting::currency($sisa2); ?></td>
+							<td align="right" <?php echo ($sisa3<0)?'style="color: red;"':'';?>><?php echo Formatting::currency($sisa3); ?></td>
+							<td align="right" <?php echo ($sisa4<0)?'style="color: red;"':'';?>><?php echo Formatting::currency($sisa4); ?></td>
+							<td align="right" <?php echo ($sisa5<0)?'style="color: red;"':'';?>><?php echo Formatting::currency($sisa5); ?></td>
+						</tr>
+					</tbody>
+				</table>
+				<i>*Jumlah semua kegiatan dalam 1 kegiatan tidak boleh melebihi jumlah yang terdapat pada tabel diatas.</i>
+				<hr>		
+			</div>
+		<?php
+			}
+		?>			
+		
+			<table class="fcari" width="100%">
+				<tbody>
+					<tr>
+						<td width="20%">SKPD</td>
+						<td width="80%"><?php echo $skpd->nama_skpd; ?></td>
+					</tr>
+					<tr>
+						<td>Tujuan</td>
+						<td><?php echo $tujuan_sasaran_n_program->tujuan; ?></td>
+					</tr>
+					<tr>
+						<td>Sasaran</td>
+						<td><?php echo $tujuan_sasaran_n_program->sasaran; ?></td>
+					</tr>					
+					<tr>
+						<td>Kode & Nama Program</td>
+						<td><?php echo $tujuan_sasaran_n_program->kd_urusan.". ".$tujuan_sasaran_n_program->kd_bidang.". ".$tujuan_sasaran_n_program->kd_program." - ".$tujuan_sasaran_n_program->nama_prog_or_keg; ?></td>
+					</tr>
+					<tr>
+						<td>Kegiatan</td>
+						<td>
+							<?php echo $kd_kegiatan; ?>
+		    			</td>
+					</tr>
+					<tr>
+						<td>Nama Kegiatan</td>
+						<td id="nama_kegiatan">
+							<?php echo (!empty($kegiatan->nama_prog_or_keg))?$kegiatan->nama_prog_or_keg:''; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Indikator Kerja</td>
+						<td>
+							<textarea class="common" name="indikator_kinerja"><?php echo (!empty($kegiatan->indikator_kinerja))?$kegiatan->indikator_kinerja:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>Satuan</td>
+						<td><?php echo $satuan; ?></td>
+					</tr>
+					<tr>
+						<td>Kondisi Awal</td>
+						<td><input class="common" name="kondisi_awal" value="<?php echo (!empty($kegiatan->kondisi_awal))?$kegiatan->kondisi_awal:''; ?>"></td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Triwulan 1</td>
+						<td><input class="common" type="text" name="triwulan_1" value="<?php if(!empty($kegiatan->triwulan_1)){echo $kegiatan->triwulan_1;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Triwulan 1</td>
+						<td>Rp. <input type="text" name="nominal_1" value="<?php if(!empty($kegiatan->nominal_1)){echo $kegiatan->nominal_1;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Lokasi Triwulan 1</td>
+						<td>
+							<textarea class="common" name="lokasi_1"><?php echo (!empty($kegiatan->lokasi_1))?$kegiatan->lokasi_1:''; ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Triwulan 1</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_1"><?php echo (!empty($kegiatan->uraian_kegiatan_1))?$kegiatan->uraian_kegiatan_1:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Triwulan 2</td>
+						<td><input class="common" type="text" name="triwulan_2" value="<?php if(!empty($kegiatan->triwulan_2)){echo $kegiatan->triwulan_2;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Triwulan 2</td>
+						<td>Rp. <input type="text" name="nominal_2" value="<?php if(!empty($kegiatan->nominal_2)){echo $kegiatan->nominal_2;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Lokasi Triwulan 2</td>
+						<td>
+							<textarea class="common" name="lokasi_2"><?php echo (!empty($kegiatan->lokasi_2))?$kegiatan->lokasi_2:''; ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Triwulan 2</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_2"><?php echo (!empty($kegiatan->uraian_kegiatan_2))?$kegiatan->uraian_kegiatan_2:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>					
+					<tr>
+						<td>&nbsp;&nbsp;Triwulan 3</td>
+						<td><input class="common" type="text" name="triwulan_3" value="<?php if(!empty($kegiatan->triwulan_3)){echo $kegiatan->triwulan_3;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Triwulan 3</td>
+						<td>Rp. <input type="text" name="nominal_3" value="<?php if(!empty($kegiatan->nominal_3)){echo $kegiatan->nominal_3;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Lokasi Triwulan 3</td>
+						<td>
+							<textarea class="common" name="lokasi_3"><?php echo (!empty($kegiatan->lokasi_3))?$kegiatan->lokasi_3:''; ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Triwulan 3</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_3"><?php echo (!empty($kegiatan->uraian_kegiatan_3))?$kegiatan->uraian_kegiatan_3:''; ?></textarea>
+						</td>
+					</tr>					
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>					
+					<tr>
+						<td>&nbsp;&nbsp;Triwulan 4</td>
+						<td><input class="common" type="text" name="triwulan_4" value="<?php if(!empty($kegiatan->triwulan_4)){echo $kegiatan->triwulan_4;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Triwulan 4</td>
+						<td>Rp. <input type="text" name="nominal_4" value="<?php if(!empty($kegiatan->nominal_4)){echo $kegiatan->nominal_4;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Lokasi Triwulan 4</td>
+						<td>
+							<textarea class="common" name="lokasi_4"><?php echo (!empty($kegiatan->lokasi_4))?$kegiatan->lokasi_4:''; ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Triwulan 4</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_4"><?php echo (!empty($kegiatan->uraian_kegiatan_4))?$kegiatan->uraian_kegiatan_4:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>Target Kondisi Akhir</td>
+						<td><input class="common" name="target_kondisi_akhir" value="<?php echo (!empty($kegiatan->target_kondisi_akhir))?$kegiatan->target_kondisi_akhir:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Penanggung Jawab</td>
+						<td><input class="common" name="penanggung_jawab" value="<?php echo (!empty($kegiatan->penanggung_jawab))?$kegiatan->penanggung_jawab:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Lokasi</td>
+						<td><input class="common" name="lokasi" value="<?php echo (!empty($kegiatan->lokasi))?$kegiatan->lokasi:''; ?>"></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<footer>
+		<div class="submit_link">    			
+  			<input id="simpan" type="button" value="Simpan">
+		</div> 
+	</footer>
+</div>

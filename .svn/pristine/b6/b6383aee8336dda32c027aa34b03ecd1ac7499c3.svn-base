@@ -1,0 +1,254 @@
+<script type="text/javascript">
+$(document).on("focus keyup","input#nama",function(event){
+
+    $(this).autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>kwitansi/lookup",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+		          		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+					event.preventDefault();
+            		this.value = ui.item.label;
+					$( '#golongan' ).val( ui.item.value );
+         		},		
+    		});
+});
+    
+//load file
+var reader = new FileReader();
+function readText(that){
+
+    if(that.files && that.files[0]){
+        var reader = new FileReader();
+        reader.onload = function (e) {  
+            var output=e.target.result;
+            //alert (output);
+            //process text to show only lines with "@":				
+            //output=output.split("\n").filter(/./.test, /\@/).join("\n");
+            output=output.split("\n");
+            var hasil='';
+            var has = new Array();
+            var hasCount=0;
+                output.forEach(function(out) {
+                  var batas=document.getElementById('batas').value;
+                    if(hasCount>=batas-1){
+                            baris=out.split("<?php echo constant::CSV_SEPARATOR ; ?>");
+                        var has2Count=0;
+                        var has2 = new Array();
+                        baris.forEach(function(kolom) {						
+                            has2[has2Count]=kolom;
+                            //hasil=hasil+kolom+"<--->";
+                            has2Count++;
+                        });
+                        //hasil=hasil+"<br>";
+                        has[hasCount-batas+1]=has2;
+                    }
+                    hasCount++;
+                });					    
+                //masukan ke row
+                masuk_sesi_dr_file(has);
+                //alert(has[3][0]);
+                //document.getElementById('main').innerHTML=hasil;
+        };//end onload()
+        
+        reader.readAsText(that.files[0]);
+    }//end if html5 filelist support
+    
+}
+</script>
+
+<script type="text/javascript">
+
+function ambil_tabel(){
+    var data = {
+                jns_honor:$("#jns_honor").val()
+            }
+    $.ajax({
+        type: "POST",
+        url : "<?php echo site_url('kwitansi/honor_make_table')?>",
+        data: data,
+        success: function(msg){
+            $('#isi_tabel').html(msg);
+            $("#isi_tabel").show();  
+        }
+    });
+}
+
+function reset_form(){
+    $("#id_rincian").val('');
+    $("#nama").val('');
+    $("#jabatan").val('');
+    $("#golongan").val('');
+    $("#jml_bln").val('');
+    $("#bruto").val('');
+    ambil_tabel();
+}
+
+
+
+function kirim_input(data_input){
+    $.when(
+        $.ajax({ 
+            type: "POST",
+            url : "<?php echo site_url('kwitansi/honor_to_session')?>",
+            data: data_input,
+            success: function(msg){
+                $('#hasil').html(msg);
+            }
+        })
+    ).done(function(){
+        return;
+    });
+}
+
+function masuk_sesi_dr_file(data_isi){
+    console.log(data_isi);
+    if (data_isi.length>0){
+            for(var i=0;i<data_isi.length;i++){
+                data = {
+                        aksi:'simpan',
+                        jns_honor:$("#jns_honor").val(),
+                        id_rincian:'',
+                        nama:data_isi[i][0],
+                        jabatan:data_isi[i][1],
+                        golongan:data_isi[i][2],
+                        jml_bln:data_isi[i][3],
+                        bruto:data_isi[i][4],
+                        };
+                
+                kirim_input(data);
+            }
+            ambil_tabel();
+        
+    }
+    
+}
+function masuk_sesi(){
+    var data = {
+                aksi:'simpan',
+                jns_honor:$("#jns_honor").val(),
+                id_rincian:$("#id_rincian").val(),
+                nama:$("#nama").val(),
+                jabatan:$("#jabatan").val(),
+                golongan:$("#golongan").val(),
+                jml_bln:$("#jml_bln").val(),
+                bruto:$("#bruto").val(),
+                jumlah:$("#jumlah").val(),
+            };
+        kirim_input(data)
+        reset_form();
+        ambil_tabel();
+    
+}
+
+function ambil_sesi(id){
+    var data = {
+                aksi:'perbaiki',
+                jns_honor:$("#jns_honor").val(),
+                id_rincian:id
+            };
+    $.ajax({ 
+        type: "POST",
+        url : "<?php echo site_url('kwitansi/honor_to_session')?>",
+        data: data,
+        dataType: 'json',
+        success: function(msg){
+            console.log(msg);
+            $("#id_rincian").val(id);
+            $("#nama").val(msg[0]);
+            $("#jabatan").val(msg[1]);
+            $("#golongan").val(msg[2]);
+            $("#jml_bln").val(msg[3]);
+            $("#bruto").val(msg[4]);
+            $("#jumlah").val(msg[5]);
+        }
+    });
+}
+
+function hapus_sesi(id){
+    var hasil=confirm("Yakin hapus ?");
+    if (hasil){
+        var data = {
+                    aksi:'hapus',
+                    jns_honor:$("#jns_honor").val(),
+                    id:id
+                };
+            $.ajax({ 
+                type: "POST",
+                url : "<?php echo site_url('kwitansi/honor_to_session')?>",
+                data: data,
+                dataType: 'json',
+                success: function(msg){
+                    $('#hasil').html(msg);
+                    ambil_tabel();
+                }
+            });
+         ambil_tabel();
+    }
+}
+        
+$(document).ready(function(){
+    ambil_tabel();
+});
+
+</script>
+    
+<div>
+<strong>RINCIAN HONOR PANITIA TETAP </strong><br/>
+  <br/>
+<?php echo $form_import ?>
+</div>
+<div id='hasil'></div>
+<table name="nama_honor" class="table-common" id="nama_honor" style="width: 99.9%;" >
+    <input name="id_rincian" type="hidden" id="id_rincian" value=""/>
+    <tr>
+        <td><input name="nama" type="text" id="nama" value=""/></td>
+        <td>
+            <select name="jabatan" id="jabatan" >
+                <option value=""><<- Pilihan ->></option>
+                <option value="Penanggung Jawab">Penanggung Jawab</option>
+                <option value="Pengarah">Pengarah </option>
+                <option value="Pelindung">Pelindung</option>
+                <option value="Ketua">Ketua</option>
+                <option value="Sekretaris">Sekretaris</option>
+                <option value="Bendahara">Bendahara</option>
+                <option value="Koordinator">Koordinator</option>
+                <option value="Anggota">Anggota</option>
+            </select>
+        </td>
+        <td><input name="golongan" type="text" id="golongan" readonly size="10"/></td>
+        <td><input name="jum_blm" type="text" id="jml_bln" size="5"/></td>
+        <td><input name="bruto" type="text" id="bruto"/></td>
+        <td colspan='2'>
+            <center>
+                <input type="button" onclick="masuk_sesi()" value="Simpan"/>
+                <input type="button" onclick="reset_form()" value="Reset"/>
+            </center>
+        </td>
+    </tr>
+        
+        <tr>
+            <th>Nama</th>
+            <th>Jabatan</th>
+            <th>Golongan</th>
+            <th>Jumlah Bulan</th>
+            <th>Tarif/Bulan</th>
+            <th>Total Semua</th>
+            <th>Action</th>       
+        </tr>
+        <tbody id="isi_tabel" style="display:none"></tbody>
+        
+</table>

@@ -1,0 +1,29 @@
+<?php  
+   
+		$i=0;
+		foreach($hasil->result() as $row) : $i++;
+		$status=$row->status;
+        //echo $row->sifat_bayar;
+	if($row->no_kwitansi ==""){
+	    echo "<tr><td colspan='12' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	}else{
+		?>
+        
+		<tr>
+			<td align="center"><?php echo $i;?></td>
+			<td align="center"><?php echo "$row->kdgiat.$row->kdoutput.$row->kdakun"; ?> </td>  
+			<td align="center"><?php echo $row->sifat_bayar; ?> </td>
+			<td align="center"><?php echo $row->nama_subunit; ?> </td>
+			<td align="center"><?php echo $row->no_sptb ;?> </td>
+            <td align="center"><?php echo $row->tgl_sptb; ?> </td>
+            <td align="center"><?php echo $row->status_sptb; ?> </td>      
+            <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>
+			<?php if( $row->id_status_sptb==1){?>  
+                    <td align="center"><a href="<?php echo base_url();?>sptb/preview_sptb/<?php echo $row->id_sptb;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+            <?php }else {?>
+                    <td align="center"><a href="<?php echo base_url();?>sptb/preview_sptb/<?php echo $row->id_sptb;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                    <td align="center"><a href="<?php echo base_url();?>sptb/preview_sptjm/<?php echo $row->id_sptb;?>" title="Show SPTJM" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+            <?php } ?>
+            
+		</tr>             
+ <?php } endforeach; ?>      

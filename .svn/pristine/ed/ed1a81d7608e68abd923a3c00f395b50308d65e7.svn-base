@@ -1,0 +1,205 @@
+<?php 
+			foreach ($total_pagu as $pagu){
+				$kdoutput = $pagu->kdoutput;
+			}
+
+foreach($detail_spm->result_array() as $row){
+                   $id = $row['id_spm'];  
+                   $nomor_spm = $row['no_spm'];
+                   //$jum_huruf = $row['jum_huruf'];
+                   $jum = $row['jumlah'];
+                   $jumlah = number_format($jum,0,",",".");
+                   $carabayar = $row['carabayar'];
+                   //$tahun = $row['tahun'];
+                   $id_kegiatan = $row['kdkeg'];
+                   $kode_digit = $row['kode_digit'];
+                   $jenispembayaran = $row['jenispembayaran'];
+                   $sifatpembayaran = $row['sifatpembayaran'];
+                   $kepada = $row['kepada'];
+                   $npwp = $row['npwp'];
+                   $norek = $row['nomor_rekening'];
+                   $bank = $row['bank'];
+                   $uraian = $row['uraian_spm'];
+                   $dekan = $row['nama_dekan'];
+                   $nip_dekan = $row['nip_dekan'];
+                   $status_spm = $row['status_spm'];
+                   } ?>
+
+<article class="module width_full">
+  <center><strong>KEMENTERIAN PENDIDIKAN DAN KEBUDAYAAN<br />
+                BADAN LAYANAN UMUM<br />
+                UNIVERSITAS UDAYANA <br /><br />
+                SURAT PERINTAH MEMBAYAR (SPM)</strong>
+                <br /><br />
+                </center>
+                <table width="100%">
+                    <tr>
+                        <td>Tanggal <?php echo date('d/m/Y'); ?></td>
+                        <td align="right">Nomor : <?php echo"$nomor/$singkat/$kode_digit/$th";?> </td>
+                    </tr>
+                </table>
+                <center>
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="4">Pejabat Keuangan Badan Layanan Umum Universitas Udayana</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">Agar melakukan pembayaran sejumlah <?php echo"$jumlah,-"; ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4"><center>**<?php echo"$terbilang"; ?>**</center> </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Cara Bayar: <?php echo"$carabayar";?> </td>
+                        <td colspan="2">Tahun Anggaran: <?php echo"$th";  ?> </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table width="100%">
+                                <tr>
+                                    <td colspan="4">
+                                        <center>
+                                        <table>
+                                            <tr>
+                                                <td align="center" >Fungsi</td>
+                                                <td align="center" >Subfungsi</td>
+                                                <td align="center" >Program</td>
+                                                <td align="center" >Kegiatan</td>
+                                                <td align="center" >Output</td>
+                                                <td align="center" >Jenis Belanja</td>
+                                                <td align="center" >Unit Kerja</td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" >023</td>
+                                                <td align="center" >04</td>
+                                                <td align="center" >08</td>
+                                                <td align="center" ><?php echo"$id_kegiatan"; ?></td>
+                                                <td align="center" ><?php echo"$kdoutput "; ?></td>
+                                                <td align="center" >  </td>
+                                                <td align="center" > <?php echo "$kode_digit"; ?></td>
+                                            </tr>
+                                           
+                                        </table>
+                                        </center>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        Dasar Pembayaran: <br />
+                                        1. Perdirjen <br />
+                                        2. Kepres <br />
+                                        3. Dipa , Tanggal <br />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        <table>
+                                            <tr>
+                                                <td>Jenis Pembayaran</td>
+                                                <td>: <?php echo"$jenispembayaran";  ?></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Sifat Pembayaran</td>
+                                                <td>: <?php echo"$sifatpembayaran";  ?></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Sumber Dana</td>
+                                                <td>: PNBP</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="2" align="center">PENGELUARAN</td>
+                        <td colspan="2" align="center">POTONGAN</td>
+                    </tr>
+                    <tr>
+                        <td align="center">Akun</td>
+                        <td align="center">Jumlah Uang</td>
+                        <td align="center">Kode Pajak</td>
+                        <td align="center">Jumlah Uang</td>
+                    </tr>
+                    <?php foreach ($total_pagu as $pagu){
+                        
+                        if(isset($spp_kini[$pagu->kdoutput."-".$pagu->kdakun])){
+                            $kini=$spp_kini[$pagu->kdoutput."-".$pagu->kdakun]; 
+                        } else{
+                            $kini=0;  
+                        } 
+                        $kini_angka = number_format($kini,0,",",".");
+                        $jum_spp_diajukan_angka = number_format($jum_spp_diajukan,0,",",".");
+                    ?>
+                    
+                    <tr>
+                        <td align="center"><?php echo" $pagu->kdakun "; ?></td>
+                        <td align="right"> <?php echo "$jum_spp_diajukan_angka"; ?> </td>
+                        <td align="right">&nbsp;</td>
+                        <td align="right">&nbsp;</td>
+                        <?php }?>
+                    </tr>
+                    <tr>
+                        <td align="center">Jumlah Pengeluaran</td>
+                        <td align="right"> <?php echo"$jum_spp_diajukan_angka"; ?> </td>
+                        <td align="center">Jumlah Potongan</td>
+                        <td align="right">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><?php echo"$jum_spp_diajukan_angka"; ?></td>
+                    </tr>
+                </table>
+                </center>
+                <br>
+                <table>
+                    <tr>
+                        <td>Kepada</td>
+                        <td>:</td>
+                        <td><?php echo"$kepada"; ?></td>
+                    </tr>
+                    <tr>
+                        <td>NPWP</td>
+                        <td>:</td>
+                        <td><?php echo"$npwp"; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Nomor Rek.</td>
+                        <td>:</td>
+                        <td><?php echo "$norek"; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Bank/Pos</td>
+                        <td>:</td>
+                        <td><?php echo "$bank"; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Uraian</td>
+                        <td>:</td>
+                        <td><?php echo "$uraian";  ?></td>
+                    </tr>
+                </table>
+                <br />
+                
+                <table width="100%">
+                    <tr>
+                        <td  width="70%"></td>
+                        <td width="20%">
+                            Denpasar, <?php echo date('d/m/Y'); ?> <br />
+                            a.n. Penanda Tangan SPM
+                            <?php ?><br />
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+                            <?php echo"$dekan"; ?><br />
+                            NIP. <?php echo"$nip_dekan"; ?>
+                        </td>
+                         <td width="5%">
+                    </tr>
+                </table>
+        </article>    
+    </section>
+

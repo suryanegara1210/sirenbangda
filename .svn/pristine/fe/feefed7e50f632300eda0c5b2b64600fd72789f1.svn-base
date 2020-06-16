@@ -1,0 +1,64 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+* @brief Model Class yang berhubungan dengan Settingan tahun pada aplikasi 
+*
+* Class Model ini digunakan untuk mengelola Settingan Tahun
+* Long Description
+* @Author I Wayan Sudharmika
+* @Author I Putu Praba Santika
+* @Author Putu Ari Arjana
+* @Author I Wayan Shandyasa
+* @Author Dwi Adi Jaya Antika Putra
+* 
+*/
+class Msetting extends CI_Model {
+/** 
+* Fungsi untuk mengambil tahun data user aktif
+* @param start is integer merupakan nilai dari batas awal tampilan database
+* @param limit is integer merupakan batasan jumlah tampilan pada database
+* @param sidx is integer merupakan nama field dari tabel pada dat abase 
+* @param sord is varchar merupakan jenis dari pengurutan data
+* @param where is varchar merupakan kata kunci yang dipergunakan dalam proses search 
+* @param tipe is integer merupakan jenis dari tabel yang akan ditampilkan 
+* @return list of object
+*/        
+        function thn_aktif_ambil($start,$limit,$sidx,$sord,$where,$tipe){
+            $this->db->select("*");
+    		if($where != NULL)$this->db->where($where,NULL,FALSE);
+    		$this->db->order_by($sidx,$sord);
+            if($tipe=='1'){
+                $query = $this->db->get('m_config_penerimaan',$limit,$start);
+                return $query->result(); 
+            }else{
+                $this->db->from('m_config_penerimaan');
+                 return $this->db->count_all_results();
+            }
+        }
+/** 
+* Fungsi untuk menambahkan data tahun aktif
+* @param objek is integer merupakan inputan dari konfigurasi penerimaan
+*/         
+        function thn_aktif_add($objek){
+            $this->db->insert('m_config_penerimaan', $objek);
+        }
+/** 
+* Fungsi untuk mengubah data tahun aktif
+* @param objek is integer merupakan inputan dari konfigurasi penerimaan
+* @param id is integer merupakan id dari config penerimaan 
+*/   
+        function thn_aktif_update($objek,$id){
+    		$this->db->where('id', $id);
+    	    $this->db->update('m_config_penerimaan', $objek);
+        }
+/** 
+* Fungsi untuk menghilangkan data tahun aktif
+* @param id is integer  merupakan id dari config penerimaan 
+*/   
+        function thn_aktif_del($id){
+            $this->db->where('id', $id);
+            $this->db->delete('m_config_penerimaan'); 
+        }
+        
+
+	}
+?>

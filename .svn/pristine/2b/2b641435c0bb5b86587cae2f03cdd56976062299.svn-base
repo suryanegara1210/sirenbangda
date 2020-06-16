@@ -1,0 +1,223 @@
+<?php $tabel_header="
+    <table width=\"100%\" border=\"1\"  class=\"table-common\" id=\"hasil\" style=\"margin-left: 20px; width:850px;\" >  
+       <thead> 
+            <tr>
+            	<th >Kode akun</th>
+                <th >Nama Akun</th>
+                <th >Akhir Bulan Lalu</th>
+                <th >Akhir Bulan Sekarang</th>
+            </tr>";
+?>		 
+    <!-- tabel aktiva lancar -->
+			 <?php $aktiva_lancar_lalu_sum=0;
+				$aktiva_lancar_skr_sum=0;
+             echo $tabel_header;
+			 $i=0;
+			 if($aktiva_lancar ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl=0;
+				 $sum_ss=0;
+			 	foreach($aktiva_lancar as $row) : $i++;
+                
+                    if (isset($saldo_akhir_tahun_arr[$row->kd])){
+                        $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$row->kd];
+                    } else{
+                        $saldo_akhir_tahun=0;
+                    }
+					
+					$saldo_lalu=$saldo_akhir_tahun + ($row->sum_debet_l)-($row->sum_kredit_l);
+				 	$saldo_sekarang=$saldo_akhir_tahun + ($row->sum_debet_s)-($row->sum_kredit_s);  
+                ?>                 
+                <tr>
+                  <td width="80px"><?php echo $row->kd; ?></td>
+                  <td><?php echo $row->nama_akun; ?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $aktiva_lancar_lalu_sum=$aktiva_lancar_lalu_sum+$saldo_lalu;?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $aktiva_lancar_skr_sum=$aktiva_lancar_skr_sum+$saldo_sekarang;?></td>
+                </tr>
+			 <?php endforeach;
+             }?>
+             
+             <tr>
+                  <th>&nbsp;</th>
+                  <th >Jumlah Aktiva Lancar</th>
+                  <th ><?php echo $this->uang->angka($aktiva_lancar_lalu_sum); ?></th>
+                  <th ><?php echo $this->uang->angka($aktiva_lancar_skr_sum); ?></th>
+             </tr>
+ </table>
+ 
+ <!-- tabel aktiva lancar END-->
+ 
+ <!-- tabel investasi_panjang -->
+ <?php $investasi_panjang_lalu_sum=0;
+				$investasi_panjang_skr_sum=0;
+             echo $tabel_header;
+			 $i=0;
+			 if($investasi_panjang ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl=0;
+				 $sum_ss=0;
+			 	foreach($investasi_panjang as $row) : $i++;
+                
+                    if (isset($saldo_akhir_tahun_arr[$row->kd])){
+                        $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$row->kd];
+                    } else{
+                        $saldo_akhir_tahun=0;
+                    }
+					
+					$saldo_lalu=$saldo_akhir_tahun + ($row->sum_debet_l)-($row->sum_kredit_l);
+				 	$saldo_sekarang=$saldo_akhir_tahun + ($row->sum_debet_s)-($row->sum_kredit_s);  
+                ?>                 
+                <tr>
+                  <td width="80px"><?php echo $row->kd; ?></td>
+                  <td><?php echo $row->nama_akun; ?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $investasi_panjang_lalu_sum=$investasi_panjang_lalu_sum+$saldo_lalu;?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $investasi_panjang_skr_sum=$investasi_panjang_skr_sum+$saldo_sekarang;?></td>
+                </tr>
+			 <?php endforeach;
+             }?>
+             
+             <tr>
+                  <th>&nbsp;</th>
+                  <th >Jumlah Investasi Jangka Panjang</th>
+                  <th ><?php echo $this->uang->angka($investasi_panjang_lalu_sum); ?></th>
+                  <th ><?php echo $this->uang->angka($investasi_panjang_skr_sum); ?></th>
+             </tr>
+ </table>
+ <!-- tabel investasi_panjang END-->
+ 
+ <!-- tabel aktiva_tetap -->
+ <?php $aktiva_tetap_lalu_sum=0;
+				$aktiva_tetap_skr_sum=0;
+             echo $tabel_header;
+			 $i=0;
+			 if($aktiva_tetap ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl=0;
+				 $sum_ss=0;
+			 	foreach($aktiva_tetap as $row) : $i++;
+                
+                    if (isset($saldo_akhir_tahun_arr[$row->kd])){
+                        $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$row->kd];
+                    } else{
+                        $saldo_akhir_tahun=0;
+                    }
+					
+					$saldo_lalu=$saldo_akhir_tahun + ($row->sum_debet_l)-($row->sum_kredit_l);
+				 	$saldo_sekarang=$saldo_akhir_tahun + ($row->sum_debet_s)-($row->sum_kredit_s);  
+                ?>                 
+                <tr>
+                  <td width="80px"><?php echo $row->kd; ?></td>
+                  <td><?php echo $row->nama_akun; ?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $aktiva_tetap_lalu_sum=$aktiva_tetap_lalu_sum+$saldo_lalu;?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $aktiva_tetap_skr_sum=$aktiva_tetap_skr_sum+$saldo_sekarang;?></td>
+                </tr>
+			 <?php endforeach;
+             }?>
+             
+             <tr>
+                  <th>&nbsp;</th>
+                  <th >Jumlah Aktiva Tetap</th>
+                  <th ><?php echo $this->uang->angka($aktiva_tetap_lalu_sum); ?></th>
+                  <th ><?php echo $this->uang->angka($aktiva_tetap_skr_sum); ?></th>
+             </tr>
+ </table>
+ <!-- tabel aktiva_tetap END-->
+ 
+ <table width="100%" border="1"  class="table-common" id="hasil" style="margin-left: 20px; width:850px;">
+    <tr>
+        <th>&nbsp;</th>
+        <th >TOTAL AKTIFA</th>
+        <th ><?php echo $this->uang->angka($aktiva_lancar_lalu_sum+$investasi_panjang_lalu_sum+$aktiva_tetap_lalu_sum); ?></th>
+        <th ><?php echo $this->uang->angka($aktiva_lancar_skr_sum+$investasi_panjang_skr_sum+$aktiva_tetap_skr_sum); ?></th>
+    </tr>
+ </table>
+ 
+ <!-- tabel kewajiban -->
+ <?php $kewajiban_lalu_sum=0;
+				$kewajiban_skr_sum=0;
+             echo $tabel_header;
+			 $i=0;
+			 if($kewajiban ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl=0;
+				 $sum_ss=0;
+			 	foreach($kewajiban as $row) : $i++;
+                
+                    if (isset($saldo_akhir_tahun_arr[$row->kd])){
+                        $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$row->kd];
+                    } else{
+                        $saldo_akhir_tahun=0;
+                    }
+					
+					$saldo_lalu=$saldo_akhir_tahun + ($row->sum_debet_l)-($row->sum_kredit_l);
+				 	$saldo_sekarang=$saldo_akhir_tahun + ($row->sum_debet_s)-($row->sum_kredit_s);  
+                ?>                 
+                <tr>
+                  <td width="80px"><?php echo $row->kd; ?></td>
+                  <td><?php echo $row->nama_akun; ?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $kewajiban_lalu_sum=$kewajiban_lalu_sum+$saldo_lalu;?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $kewajiban_skr_sum=$kewajiban_skr_sum+$saldo_sekarang;?></td>
+                </tr>
+			 <?php endforeach;
+             }?>
+             
+             <tr>
+                  <th>&nbsp;</th>
+                  <th >Jumlah Kewajiban</th>
+                  <th ><?php echo $this->uang->angka($kewajiban_lalu_sum); ?></th>
+                  <th ><?php echo $this->uang->angka($kewajiban_skr_sum); ?></th>
+             </tr>
+ </table>
+ <!-- tabel kewajiban END-->
+ 
+ <!-- tabel ekuitas -->
+ <?php $ekuitas_lalu_sum=0;
+				$ekuitas_skr_sum=0;
+             echo $tabel_header;
+			 $i=0;
+			 if($ekuitas ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl=0;
+				 $sum_ss=0;
+			 	foreach($ekuitas as $row) : $i++;
+                
+                    if (isset($saldo_akhir_tahun_arr[$row->kd])){
+                        $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$row->kd];
+                    } else{
+                        $saldo_akhir_tahun=0;
+                    }
+					
+					$saldo_lalu=$saldo_akhir_tahun + ($row->sum_debet_l)-($row->sum_kredit_l);
+				 	$saldo_sekarang=$saldo_akhir_tahun + ($row->sum_debet_s)-($row->sum_kredit_s);  
+                ?>                 
+                <tr>
+                  <td width="80px"><?php echo $row->kd; ?></td>
+                  <td><?php echo $row->nama_akun; ?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $ekuitas_lalu_sum=$ekuitas_lalu_sum+$saldo_lalu;?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $ekuitas_skr_sum=$ekuitas_skr_sum+$saldo_sekarang;?></td>
+                </tr>
+			 <?php endforeach;
+             }?>
+             
+             <tr>
+                  <th>&nbsp;</th>
+                  <th >Jumlah Ekuitas</th>
+                  <th ><?php echo $this->uang->angka($ekuitas_lalu_sum); ?></th>
+                  <th ><?php echo $this->uang->angka($ekuitas_skr_sum); ?></th>
+             </tr>
+ </table>
+ <!-- tabel ekuitas END-->
+  
+ <table width="100%" border="1"  class="table-common" id="hasil" style="margin-left: 20px; width:850px;">
+    <tr>
+        <th>&nbsp;</th>
+        <th >TOTAL KEWAJIBAN & EKUITAS</th>
+        <th ><?php echo $this->uang->angka($kewajiban_lalu_sum+$ekuitas_lalu_sum); ?></th>
+        <th ><?php echo $this->uang->angka($kewajiban_skr_sum+$ekuitas_skr_sum); ?></th>
+    </tr>
+ </table>

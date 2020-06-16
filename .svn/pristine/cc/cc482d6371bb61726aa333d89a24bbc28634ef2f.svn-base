@@ -1,0 +1,102 @@
+<article class="module width_full">
+  <header><h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Daftar Pengajuan Tender</h3></header>  
+            
+  <div id="modul-content"> 
+  <form method="post" name='formdpt'action=" <?php echo site_url(); ?> dpt/hapus_tender" onSubmit='return validasi(this)'>
+  
+  <table  id="tender-list" class="table-common" style="margin-left: 20px; width: 94%;" >  
+       <thead> 
+            <tr>
+                <th width="25px">No</th>
+                <th>Output/Akun</th>
+                <th>Output</th>
+                <th>Akun</th>
+                <th>Total</th>
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+			 foreach($sum_tender as $row) : $i++;?>
+                <tr class='accordion'>
+                	<td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->nmoutput; ?> </td>
+                    <td align="left"><?php echo $row->nmakun; ?> </td>
+                    <td width='75px' align="right"><?php echo Formatting::currency($row->total,0,false); ?> </td>                   
+                </tr>
+                <tr class='detail' id="<?php echo $row->kdgiat.$row->kdoutput.$row->kdakun;?>">
+                    <td></td>
+                	<td colspan="4" style="padding: 0px; margin: 0px;"></td> 
+                </tr>
+			 <?php endforeach; ?> 
+        </tbody>
+</table>
+
+<script type="text/javascript">
+	$(function () {
+		var table = $('#tender-list');
+		table.find('tr.detail').hide();
+		
+		table.find('tr.accordion').click( function() {
+			var td = $(this).next().find("td").next();
+			$.ajax({
+				type: 	"POST",
+				url:	"<?php echo site_url('dpt/ajax_get_dpt_detail_per_akun')?>",
+				data:	{kdakun: $(this).next().attr("id")},
+				success: function (msg) {
+					td.html(msg);									
+				}
+			});
+			$(this).next().toggle();
+            if($(this).next().is(':visible')){
+                $(this).css({ 'background-color': 'lightgrey', 'font-weight' : 'bold'});                
+            } else {
+                $(this).css({ 'background-color': 'white', 'font-weight' : 'normal'});
+            }
+		});
+		
+	});
+	
+	
+</script>
+           
+<!--      <table  class="table-common" style="margin-left: 20px; width: 94%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Output/Komponen/Akun</th>
+                <th>Header</th>
+                <th>Uraian</th>
+                <th>Volume</th>
+                <th>Satuan</th>
+                <th>Harga Satuan</th>
+                <th>Jumlah</th>
+                <th>Aksi</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+			 	foreach($isi_tender as $row) : $i++;?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdkomponen;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->hdr; ?> </td>
+                    <td align="left"><?php echo $row->uraian; ?> </td>
+                    <td align="center"><?php echo $row->vol; ?> </td>
+                    <td align="center"><?php echo $row->sat; ?> </td>
+                    <td align="center"><?php echo $row->hargasat; ?> </td>
+                    <td align="center"><?php echo $row->jumlah; ?> </td>
+                    <td align="center"><a href="<?php echo base_url();?>dpt/hapus_tender/<?php echo $row->idtdet;?>" title="Batalkan Tender" onclick="return confirm('Apakah Anda Yakin untuk Membatalkan Tender ini ... ?')" ><img src="<?php echo base_url(); ?>asset/images/delete.png"/></a> </td>
+                   
+                </tr>
+			 <?php endforeach; ?> 
+        </tbody>
+</table>-->
+</div>
+<footer>         
+                <div class="submit_link">  
+                    <!--<input type="button" value="Kembali" onclick=self.history.back() >--> 
+                </div>
+
+            </footer>
+</article>  

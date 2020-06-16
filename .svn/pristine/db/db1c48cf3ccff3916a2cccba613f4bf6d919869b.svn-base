@@ -1,0 +1,102 @@
+<thead>
+	<tr>
+		<th rowspan="3">Tujuan</th>
+		<th rowspan="3">Sasaran</th>
+		<th rowspan="3">Indikator Sasaran</th>
+		<th rowspan="3" colspan="4">Kode</th>
+		<th rowspan="3">Program dan Kegiatan</th>
+		<th rowspan="3">Indikator Kinerja Program (outcome) dan Kegiatan (output)</th>		
+		<th rowspan="3">Data Capaian pada Tahun Awal Perencanaan</th>
+		<th colspan="12">Tahun Kinerja Program dan Kerangka Pendanaan</th>		
+		<th rowspan="3">Unit Kerja SKPD Penanggung Jawab</th>
+		<th rowspan="3">Lokasi</th>
+	</tr>
+	<tr>				
+		<th colspan="2">Tahun I</th>
+		<th colspan="2">Tahun II</th>
+		<th colspan="2">Tahun III</th>
+		<th colspan="2">Tahun IV</th>
+		<th colspan="2">Tahun V</th>
+		<th colspan="2">Kondisi Kinerja pada akhir periode</th>		
+	</tr>
+	<tr>
+		<th>Target</th>
+		<th>Rp</th>
+		<th>Target</th>
+		<th>Rp</th>
+		<th>Target</th>
+		<th>Rp</th>
+		<th>Target</th>
+		<th>Rp</th>
+		<th>Target</th>
+		<th>Rp</th>
+		<th>Target</th>
+		<th>Rp</th>
+	</tr>
+</thead>
+<tbody>
+<?php
+	foreach ($program as $row) {
+		$result = $this->m_renstra_trx->get_kegiatan_skpd_4_cetak($row->id);
+		$total_kegiatan = $result->num_rows();
+		$kegiatan = $result->result();
+
+		$total_nominal = $row->nominal_1_pro+$row->nominal_2_pro+$row->nominal_3_pro+$row->nominal_4_pro+$row->nominal_5_pro;
+?>
+	<tr>
+		<td rowspan="<?php echo $total_kegiatan+1; ?>"><?php echo $row->tujuan; ?></td>
+		<td rowspan="<?php echo $total_kegiatan+1; ?>"><?php echo $row->sasaran; ?></td>
+		<td rowspan="<?php echo $total_kegiatan+1; ?>"><?php echo $row->indikator; ?></td>
+		<td><?php echo $row->kd_urusan; ?></td>
+		<td><?php echo $row->kd_bidang; ?></td>
+		<td><?php echo $row->kd_program; ?></td>
+		<td><?php echo $row->kd_kegiatan; ?></td>
+		<td><?php echo $row->nama_prog_or_keg; ?></td>
+		<td><?php echo $row->indikator_kinerja; ?></td>
+		<td align="center"><?php echo $row->kondisi_awal." ".$row->nama_value; ?></td>
+		<td align="center"><?php echo $row->target_1." ".$row->nama_value; ?></td>
+		<td align="right"><?php echo Formatting::currency($row->nominal_1_pro); ?></td>
+		<td align="center"><?php echo $row->target_2." ".$row->nama_value; ?></td>
+		<td align="right"><?php echo Formatting::currency($row->nominal_2_pro); ?></td>
+		<td align="center"><?php echo $row->target_3." ".$row->nama_value; ?></td>
+		<td align="right"><?php echo Formatting::currency($row->nominal_3_pro); ?></td>
+		<td align="center"><?php echo $row->target_4." ".$row->nama_value; ?></td>
+		<td align="right"><?php echo Formatting::currency($row->nominal_4_pro); ?></td>
+		<td align="center"><?php echo $row->target_5." ".$row->nama_value; ?></td>
+		<td align="right"><?php echo Formatting::currency($row->nominal_5_pro); ?></td>
+		<td align="center"><?php echo $row->target_kondisi_akhir." ".$row->nama_value; ?></td>
+		<td align="right"><?php echo Formatting::currency($total_nominal); ?></td>
+		<td><?php echo $row->penanggung_jawab; ?></td>
+		<td><?php echo $row->lokasi; ?></td>
+	</tr>
+<?php
+		foreach ($kegiatan as $row) {
+?>
+			<tr>				
+				<td><?php echo $row->kd_urusan; ?></td>
+				<td><?php echo $row->kd_bidang; ?></td>
+				<td><?php echo $row->kd_program; ?></td>
+				<td><?php echo $row->kd_kegiatan; ?></td>
+				<td><?php echo $row->nama_prog_or_keg; ?></td>
+				<td><?php echo $row->indikator_kinerja; ?></td>
+				<td><?php echo $row->kondisi_awal." ".$row->nama_value; ?></td>
+				<td align="center"><?php echo $row->target_1." ".$row->nama_value; ?></td>
+				<td align="right"><?php echo Formatting::currency($row->nominal_1); ?></td>
+				<td align="center"><?php echo $row->target_2." ".$row->nama_value; ?></td>
+				<td align="right"><?php echo Formatting::currency($row->nominal_2); ?></td>
+				<td align="center"><?php echo $row->target_3." ".$row->nama_value; ?></td>
+				<td align="right"><?php echo Formatting::currency($row->nominal_3); ?></td>
+				<td align="center"><?php echo $row->target_4." ".$row->nama_value; ?></td>
+				<td align="right"><?php echo Formatting::currency($row->nominal_4); ?></td>
+				<td align="center"><?php echo $row->target_5." ".$row->nama_value; ?></td>
+				<td align="right"><?php echo Formatting::currency($row->nominal_5); ?></td>
+				<td align="center"><?php echo $row->target_kondisi_akhir." ".$row->nama_value; ?></td>
+				<td align="right"><?php echo Formatting::currency($total_nominal); ?></td>
+				<td><?php echo $row->penanggung_jawab; ?></td>
+				<td><?php echo $row->lokasi; ?></td>
+			</tr>
+<?php
+		}			
+	}
+?>
+</tbody>

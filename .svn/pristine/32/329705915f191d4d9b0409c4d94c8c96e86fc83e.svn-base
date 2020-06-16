@@ -1,0 +1,91 @@
+<script>
+    function buat_transaksi(sifatbayar,id_sp2d){
+        var lanjut = confirm('Apakah Anda Yakin untuk Mencairkan SP2D ?');
+        if (lanjut){
+            
+            $.blockUI({
+                    message: 'Mencairkan SP2D, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+            });
+            
+            $.post(
+                "<?php echo  base_url().'controler/fungsi';?>",
+                {sifatbayar:sifatbayar, id_sp2d:id_sp2d},
+                function(data){
+                        console.log(data);
+                        $("#jenis_belanja").change();
+                        try {
+							var response = $.parseJSON(data);
+							
+							if(response.errno != 0){
+								$.blockUI({
+									message: response.message,
+									timeout: 3000,
+									css: window._csserr,
+									overlayCSS: window._ovcsserr
+								});								
+							} else {							
+								$.blockUI({
+									message: response.message,
+									timeout: 1500,
+									css: window._css,
+									overlayCSS: window._ovcss
+								});
+							}
+						} catch(e) {
+							//log error, misal format json salah
+							console.log('System error : "' + e + '"');
+							$.unblockUI();
+						}
+                        
+                });
+        }else{
+            ambilsp2d();
+        }
+        
+    }
+
+</script>
+<table><br></table>  
+    <table  class="table-common" id="hasil" style= "width: 870px"; >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Nama Unit</th>
+                <th>Kode MAK</th>
+                <th>No.SP2D</th>
+                <th>No.SPM</th>
+                <th>No.SPTB</th>
+                <th>Tanggal</th>
+                <th>Jumlah</th>
+                <th>Action</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil == NULL){
+                 echo "<tr><td colspan='9' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;   
+                ?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->nama_unit?></td>
+                    <?php if($row->sifat_bayar == Constant::JB_UP  || $row->sifat_bayar == Constant::JB_TUP ){?>
+                        <td align="center"><?php echo $row->kdakun;?></td>
+                    <?php }else{?>
+                        <td align="center"><?php echo $row->kdgiat;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <?php }?>
+                    <td align="center"><?php echo $row->no_sp2d ?> </td>
+                    <td align="center"><?php echo $row->no_spm ?> </td>
+                    <td align="center"><?php echo $row->no_sptb ?> </td>
+                    <td align="center"><?php echo $row->tgl_sp2d; ?> </td>
+                    <td align="right"><?php echo $this->uang->angka($row->jumlah); ?> </td>    
+                    <td align="center">
+                        <img title="Buat Bukti Transaksi" onclick="buat_transaksi(<?php echo "'".$row->sifat_bayar."','".$row->id_sp2d."','".$row->id_spm."'"; ?>)" src="<?php echo base_url(); ?>asset/images/add.png"/>
+                    </td>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+</table>

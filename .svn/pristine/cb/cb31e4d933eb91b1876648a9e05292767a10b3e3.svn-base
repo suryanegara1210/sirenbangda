@@ -1,0 +1,68 @@
+<style type="text/css">
+	.no-border{
+		border-collapse: collapse;
+	}
+
+	td.print-no-border{
+		border: none;
+	}
+</style>
+<div>
+BULAN : <?php 
+		switch($bulan){
+			case '1';
+			default:
+				echo "JANUARI";
+				break;
+			case '2';
+			default:
+				echo "FEBRUARI";
+				break;
+			case '3';
+			default:
+				echo "MARET";
+				break;
+			case '4';
+			default:
+				echo "APRIL";
+				break;
+			case '5';
+			default:
+				echo "MEI";
+				break;
+			case '6';
+			default:
+				echo "JUNI";
+				break;
+			case '7';
+			default:
+				echo "JULI";
+				break;
+			case '8';
+			default:
+				echo "AGUSTUS";
+				break;
+			case '9';
+			default:
+				echo "SEPTEMBER";
+				break;
+			case '10';
+			default:
+				echo "OKTOBER";
+				break;
+			case '11';
+			default:
+				echo "NOVEMBER";
+				break;
+			case '12';
+			default:
+				echo "DESEMBER";
+				break;
+		}
+		?>
+	<table class="full_width border" style="font-size: 8px;">
+		<?php
+			echo $cik;
+		?>
+	</table>		
+</div>

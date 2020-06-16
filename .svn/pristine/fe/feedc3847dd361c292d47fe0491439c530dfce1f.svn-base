@@ -1,0 +1,59 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+
+<article class="module width_full">
+<header>
+  <h3>HOME <?php echo $this->session->userdata('nama_unit'); ?></h3></header>
+  <div class="module_content">
+
+
+
+	<!--<table  class='table-common table-inner' style='margin: 0px; width: 100%; ' >
+		<tr>
+			<th colspan='4'>Informasi Pagu</th>
+		</tr>
+		<tr>
+			<th width='100px'>POK total</th>
+			<th width='100px'>Penerimaan Real</th>
+			<th width='100px'>Pagu Real</th>
+			<th width='100px'>Sisa Pagu</th>
+		</tr>
+		<tr>
+			<td width='100px' align="right"><?php echo number_format($pok_total,0,",",".");?></td>
+			<td width='100px' align="right"><?php echo number_format($penerimaan_total,0,",",".");?></td>
+			<td width='100px' align="right"><?php echo number_format($pagu_total,0,",",".");?></td>
+			<td width='100px' align="right"><?php echo number_format($sisa_pagu,0,",",".");?></td>
+		</tr>
+	</table>-->
+
+
+  <!--<input type="button" id="btn_view_pok" value="Lihat POK">-->
+  <?php
+  if (!empty($idu) && empty($idsu)) {
+  	$value="Setting Identitas Unit";
+  	$link_set=$link_unit;  	
+  }else{
+  	$value="Setting Identitas Subunit";
+  	$link_set=$link_subunit;
+  }
+  ?>
+  <!--<input type="button" id="btn_setting_user" value="<?php echo $value; ?>">-->
+  </div>
+
+</article>
+<?php //include('tester_view.php');?>
+
+<script type="text/javascript">
+<!--
+
+	$(function() {
+
+		$('#btn_view_pok').click(function() {
+			Start('<?php echo site_url('pok/daftar_pok');?>');
+		});
+
+		$('#btn_setting_user').click(function(){
+			window.location.href = '<?php echo $link_set; ?>';
+		});
+	});
+-->
+</script>

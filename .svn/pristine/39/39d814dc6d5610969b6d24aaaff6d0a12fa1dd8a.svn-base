@@ -1,0 +1,383 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Moddel Class berkaitan pembuatan Bukti Akuntansi
+ * 
+ * Moddel Class berkaitan pembuatan Bukti Akuntansi untuk masing masing jenis
+ * penerimaan (Layanan Pendidikan Lain, Layanan Masyarakat, Hibah, Penyewaan Aset)
+ * 
+ * @author Putu Praba Santika
+ */
+    class M_bukti_akuntansi extends CI_Model {
+        /*
+         * cari akun dari m_bas_unit, hanya yg sesuai dengan setingnya.
+         */        
+
+        function cariAkun($batas='', $id_subunit=''){
+    	    $this->db->select('*');
+            $this->db->from("m_bas_unit");
+            $this->db->join('m_bas','m_bas.akun_kode=m_bas_unit.akun_bas AND m_bas_unit.id_subunit='.$id_subunit);
+            
+            if (isset ($batas) && $batas!==''){
+                $like="(";
+                $batas_arr = explode(",", $batas);
+                foreach($batas_arr as $batas_ak){
+                    //$this->db->like('akun_kode',$batas_ak, 'after');
+                    if ($batas_ak === end($batas_arr)){
+                        $like=$like."akun_kode LIKE '".$batas_ak."%'";
+                    }else {
+                        $like=$like."akun_kode LIKE '".$batas_ak."%' OR ";
+                    }
+                }
+                $like=$like.")";
+                $this->db->where($like, NULL, FALSE);
+            }
+            
+            $this->db->where('level','8');
+           
+            $this->db->order_by("akun_kode", "asc"); 
+            $query = $this->db->get();    
+            
+            return $query->result();
+        }
+        
+        /**
+         * Simpan Bukti kas masuk dan detailnya
+         * @param jenpen hanya untuk penerimaan layanan pendidikan (SPP, SDPP, dll)
+         */
+        function simpan($master,$akun,$debet,$kredit,$uraian,$kas_bank,$jenpen=null){
+            
+            $this->auth->has_privileges('create_bukti_akuntansi');
+            
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+            
+            if (isset($master->id_bukti) && $master->id_bukti!=''){
+                //update
+                $id_bukti=$master->id_bukti;
+                //delete detail
+                $this->db->where('id_bukti',$id_bukti);
+                $this->db->delete('t_bukti_det');
+            }else{
+                //insert baru
+                $bukti_baru=$this->nomer->gen_no_bukti($master->tgl_bukti,
+                                    $master->id_subunit,$master->jenis_bukti,
+                                    $master->jenis_transaksi,$master->id_unit);                
+                $id_bukti = $bukti_baru['id_bukti'];
+            }
+            
+            $this->db->where('id_bukti',$id_bukti);
+            $this->db->update('t_bukti_akuntansi', $master);
+            //insert detailnya
+            if(isset($akun)){
+                $totalDebet=$totalKredit=0;
+                foreach ($akun as $no=>$akn){
+                    
+                    $this->db->set('id_bukti',$id_bukti);
+                    $this->db->set('akun_bas',$akn);
+                    $this->db->set('created_date', date('Y-m-d H:i:s'));
+                    $this->db->set('created_by', $this->session->userdata('username'));
+                    
+                    if(isset ($debet[$no]) && $debet[$no]!=null && $debet[$no]!='undefined'){
+                        $this->db->set('debet',$debet[$no]);
+                        $isDebet=true;
+                        $totalDebet+=$debet[$no];
+                    }
+                    if(isset ($kredit[$no]) && $kredit[$no]!=null && $kredit[$no]!='undefined'){
+                        $this->db->set('kredit',$kredit[$no]);
+                        $isKredit=true;
+                        $totalKredit+=$kredit[$no];
+                    }
+                    if(isset ($uraian[$no]) && $uraian[$no]!=null && $uraian[$no]!='undefined'){
+                        $this->db->set('uraian',$uraian[$no]);
+                    }
+                    if(isset ($sub_unit[$no]) && $sub_unit[$no]!=null && $sub_unit[$no]!='undefined'){
+                        $this->db->set('sub_unit',$sub_unit[$no]);
+                    }
+                    if($isDebet || $isKredit){
+                        $this->db->insert('t_bukti_det');
+                    }
+                    
+                    if( $master->jenis_ref == constant::MOU_LADIK){
+                        if(isset ($jenpen[$no]) && $jenpen[$no]!=null && $jenpen[$no]!='undefined'){
+                            if ($master->jenis_bukti == constant::BUK_BKM){
+                                $this->m_ladik->updatePenBKM($master->id_subunit,$jenpen[$no]);
+                            }else if($master->jenis_bukti === constant::BUK_BM){
+                                //FIXME: bikinin untuk update penrimaan uda BM
+                                $this->m_ladik->updatePenBM($master->id_subunit,$jenpen[$no]);
+                            }
+                        }
+                    }
+                }
+                
+                //insert lawannya
+                $kasbankDet=$this->m_umum->basDetail($kas_bank);
+                if(isset($kasbankDet->saldo_normal)){
+                    $sn=$kasbankDet->saldo_normal;
+                    
+                    //kalau Bukti keluar, balik saldo normalnya
+                    if ($master->jenis_bukti == constant::BUK_BKK){
+                        if($sn=='K'){
+                            $sn='D';
+                        }else{
+                            $sn='K';
+                        }
+                    }
+                
+                    $this->db->set('id_bukti', $id_bukti);
+                    $this->db->set('akun_bas', $kas_bank);
+                    //FIXME: cek kepastian hasil input
+                    
+                    if( $sn =='K'){
+                        $this->db->set('kredit', $totalDebet);
+                    }else if ($sn == 'D'){
+                        $this->db->set('debet', $totalKredit);
+                    } else{
+                        return false;
+                    }
+                    $this->db->set('created_date', date('Y-m-d H:i:s'));
+                    $this->db->set('created_by', $this->session->userdata('username'));
+                    $this->db->insert('t_bukti_det');
+                }
+            }
+            $this->db->trans_complete();
+            
+            if($this->db->trans_status() === FALSE){
+                $hasil = false;
+            }else{
+                $hasil=$id_bukti;
+            }
+            return $hasil;
+        }
+        
+        function update_status($master){
+            $this->auth->restrict();
+            
+            if ($master->status=='DITERIMA'){
+                //masukin ke proporsi 100% kalau diterima, BKM, bukan Ladik
+                $bkmdet=$this->detail($master->id_bukti);
+                
+                if($bkmdet->jenis_bukti === constant::BUK_BKM && 
+                    $bkmdet->jenis_ref !== constant::MOU_LADIK){
+                    date_default_timezone_set('Etc/GMT-8');
+                    $month = date('m');
+                    if($month <7){
+                        $semester = 1;
+                    }else{
+                        $semester = 2;
+                    }
+                    
+                    //ambil satu yg berlawanan untuk liat nilai
+                    $bkmdetakun=$this->detail_akun($master->id_bukti);
+                    foreach($bkmdetakun as $key=>$val){
+                        if($val['saldo_normal']==='D'){
+                            $salahsatu=$bkmdetakun[$key];
+                        }
+                    }
+                    
+                    $data = array(
+                       'tahun' => date('Y') ,
+                       'semester' => $semester ,
+                       'subunit_asal' => $bkmdet->id_subunit,
+                       'subunit_tujuan' => $bkmdet->id_subunit,
+                       'proporsi' => '100',
+                       'jumlah' => $bkmdet->id_subunit,
+                       'jum_pro' => $salahsatu['debet'],
+                       'jen_pen' => $salahsatu['debet'],
+                       'remark' => 'PS',
+                       'create_by' => $this->session->userdata('username'),
+                       'create_date' => date('Y-m-d H:i:s')
+                    );
+
+                    $this->db->insert('t_proporsi', $data); 
+                }
+            }
+            
+            
+            $this->db->where('id_bukti',$master->id_bukti);
+            $status=$this->db->update('t_bukti_akuntansi', $master);
+            if(!$status){
+                return false;
+            }else{
+                return $master->id_bukti;
+            }
+        }
+        
+        /**
+         * Mengambil semua surat setor untuk salah satu jenis MOU
+         * @param jenis_mou kode jenis MOU yang ingin dilambil surat setornya
+         * @return daftar objek surat setor
+         */
+        function semua($jenis_bukti, $tahun, $bulan, $bulan2, $status, $role, $sort, $jsort, $search){
+            $query_role="(SELECT id_user, GROUP_CONCAT(if(role_id=1001,1,null)) AS 'bpm', GROUP_CONCAT(if(role_id=1003,1,null)) AS 'bpd' FROM rbac_user_role GROUP BY id_user) AS v_role";
+
+            //$this->db->select('t_surat_setor.*,m_unit.nama_unit');
+            $this->db->select('t_bukti_akuntansi.*, m_lov.nama_value');
+            $this->db->select("SUM(debet) AS nominal, if(bpm=1 AND bpd=1, 'BOTH', if(bpm=1, 'BPM', if(bpd=1, 'BPL', NULL))) AS role", false);
+            $this->db->from('t_bukti_akuntansi');
+
+            if ($jenis_bukti != 'SEMUA') {
+                $this->db->where('jenis_bukti',$jenis_bukti);
+            }
+
+            $this->db->where('MONTH(tgl_bukti) >=',$bulan);
+            $this->db->where('MONTH(tgl_bukti) <=',$bulan2);
+            $this->db->where('tahun_anggaran',$tahun);
+
+			if ($status == 'BARU') {
+                $this->db->where('status',  NULL);
+            }elseif ($status != 'SEMUA') {
+                $this->db->where('status', $status);
+            }
+
+            //filter role
+            if ($role != 'SEMUA') {
+                $this->db->having('role',$role); 
+            }
+
+            //search
+            $this->db->like('no_bukti',$search);            
+
+            $this->db->join('t_bukti_det','t_bukti_det.id_bukti=t_bukti_akuntansi.id_bukti ', 'INNER');             
+            $this->db->join('m_lov','t_bukti_akuntansi.status=m_lov.kode_value and m_lov.kode_app=6', 'LEFT');
+            $this->db->join('m_users','t_bukti_akuntansi.created_by=m_users.username', 'INNER');
+            $this->db->join($query_role,'m_users.id_user=v_role.id_user', 'INNER');
+            $this->db->group_by("t_bukti_akuntansi.id_bukti");
+            $this->db->order_by($sort,$jsort); 
+            $query=$this->db->get();
+            return $query->result();
+        }
+        /**
+         * Mengambil semua bukti kas masuk yang harus diverifikasi untuk salah satu jenis MOU
+         * @param jenis_mou kode jenis MOU yang ingin dilambil  bukti kas masuk
+         * @return daftar objek  bukti kas masuk
+         */
+        function ambilVeri($jenis_bukti, $tahun, $bulan, $bulan2, $status, $role, $sort, $jsort, $search){
+            $query_role="(SELECT id_user, GROUP_CONCAT(if(role_id=1001,1,null)) AS 'bpm', GROUP_CONCAT(if(role_id=1003,1,null)) AS 'bpd' FROM rbac_user_role GROUP BY id_user) AS v_role";
+
+            //$this->db->select('t_surat_setor.*,m_unit.nama_unit');
+            $this->db->select('t_bukti_akuntansi.*, m_lov.nama_value');
+            $this->db->select("SUM(debet) AS nominal, if(bpm=1 AND bpd=1, 'BOTH', if(bpm=1, 'BPM', if(bpd=1, 'BPL', NULL))) AS role", false);
+            $this->db->from('t_bukti_akuntansi');
+
+            if ($jenis_bukti != 'SEMUA') {
+                $this->db->where('jenis_bukti',$jenis_bukti);
+            }
+
+            $this->db->where('MONTH(tgl_bukti) >=',$bulan);
+            $this->db->where('MONTH(tgl_bukti) <=',$bulan2);
+            $this->db->where('tahun_anggaran',$tahun);
+            $this->db->where('status','BELUM');
+
+            if ($status == 'BARU') {
+                $this->db->where('status',  NULL);
+            }elseif ($status != 'SEMUA') {
+                $this->db->where('status', $status);
+            }
+
+            //filter role
+            if ($role != 'SEMUA') {
+                $this->db->having('role',$role); 
+            }
+
+            //search
+            $this->db->like('no_bukti',$search);            
+
+            $this->db->join('t_bukti_det','t_bukti_det.id_bukti=t_bukti_akuntansi.id_bukti ', 'INNER');             
+            $this->db->join('m_lov','t_bukti_akuntansi.status=m_lov.kode_value and m_lov.kode_app=6', 'LEFT');
+            $this->db->join('m_users','t_bukti_akuntansi.created_by=m_users.username', 'INNER');
+            $this->db->join($query_role,'m_users.id_user=v_role.id_user', 'INNER');
+            $this->db->group_by("t_bukti_akuntansi.id_bukti");
+            $this->db->order_by($sort,$jsort); 
+            $query=$this->db->get();
+            return $query->result();
+        }
+        /**
+         * Ambil detail surat setor
+         * @param id id mou yang mau dilihat
+         * @param th dua digit tahun dibuatnya mou
+         * @return object detail surat setor
+         */
+        function detail($id){
+            
+            $this->db->select('t_bukti_akuntansi.*,m_lov.nama_value ');
+            $this->db->join('m_lov','t_bukti_akuntansi.status=m_lov.kode_value and m_lov.kode_app=6', 'LEFT');
+            $this->db->where('id_bukti',$id);
+            $this->db->from('t_bukti_akuntansi');
+            $query = $this->db->get();
+            return $query->row();
+        }
+        
+        function detail_by_kode($jenis_bukti,$jenis_ref,$id_ref){
+            $this->db->select('t_bukti_akuntansi.*,m_lov.nama_value ');
+            $this->db->join('m_lov','t_bukti_akuntansi.status=m_lov.kode_value and m_lov.kode_app=6', 'LEFT');
+            $this->db->where('jenis_ref',$jenis_ref);
+            $this->db->where('id_ref',$id_ref);
+            $this->db->where('jenis_bukti',$jenis_bukti);
+            $this->db->from('t_bukti_akuntansi');
+            $query = $this->db->get();
+            return $query->row();
+        }
+        /**
+         * Ambil detail akun dalam bukti kas masuk.
+         * @param id id bukti kas masuk yang mau dilihat
+         * @param th dua digit tahun dibuatnya bukti kas masuk
+         * @return object detail akun bukti kas masuk
+         */
+        function detail_akun($id){
+            $this->db->where('id_bukti',$id);
+            $this->db->from('t_bukti_det');
+            $this->db->join('m_bas','m_bas.akun_kode=t_bukti_det.akun_bas');
+            $this->db->order_by('debet','desc');
+            $query = $this->db->get();
+            return $query->result_array();
+        }
+        /**
+         * ambil jenis nomer surat setor untuk sebuah mou
+         * @param $idMou id mou yang akan dicarikan nomor surat setor
+         * @param $thMou tahun mou yang akan dicarikan nomor surat setor
+         * @param $jenisMou tahun mou yang akan dicarikan nomor surat setor
+         * @return object surat setor
+         */
+        function ambilNoSs($idMou, $thMou, $jenisMou)
+        {
+            $this->db->select('id_setor, th_setor');
+            $this->db->from('t_surat_setor');
+            $this->db->where('id_mou',$idMou);
+            $this->db->where('th_mou',$thMou);
+            $this->db->where('jenis_mou',$jenisMou);
+            $query = $this->db->get();
+            return $query->row();
+        }
+
+        function cari_bas_sp2d($id_unit)
+        {
+            $query=$this->db->query("
+                    SELECT * 
+                    FROM m_bas
+                    WHERE 
+                        id_unit='". $id_unit ."'
+                ");
+            return $query->row();
+        }
+
+        function hapus_bukti_akuntansi($id)
+        {
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+
+            $this->db->query('DELETE FROM t_bukti_det WHERE id_bukti=\''. $id .'\'');           
+            $this->db->query('DELETE FROM t_jurnal WHERE id_bukti=\''. $id .'\'');      
+            $this->db->query('DELETE FROM t_bukti_akuntansi WHERE id_bukti=\''. $id .'\'');
+
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === FALSE){
+                return false;
+            }else{
+                return true;
+            }
+        }
+	}
+	
+	
+	// perbaikan coba back to revision
+?>

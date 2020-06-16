@@ -1,0 +1,134 @@
+<script>
+$(function() {
+    $('#mytable').on('click', '.toggle', function () {
+        //Gets all <tr>'s  of greater depth
+        //below element in the table
+        var findChildren = function (tr) {
+            var depth = tr.data('depth');
+            return tr.nextUntil($('tr').filter(function () {
+                return $(this).data('depth') <= depth;
+            }));
+        };
+
+        var el = $(this);
+        var tr = el.closest('tr'); //Get <tr> parent of toggle button
+        var children = findChildren(tr);
+
+        //Remove already collapsed nodes from children so that we don't
+        //make them visible. 
+        //(Confused? Remove this code and close Item 2, close Item 1 
+        //then open Item 1 again, then you will understand)
+        var subnodes = children.filter('.expand');
+        subnodes.each(function () {
+            var subnode = $(this);
+            var subnodeChildren = findChildren(subnode);
+            children = children.not(subnodeChildren);
+        });
+
+        //Change icon and hide/show children
+        if (tr.hasClass('expand')) {
+            tr.removeClass('expand').addClass('collapse');
+            children.show();
+        } else {
+            tr.removeClass('collapse').addClass('expand');
+            children.hide();
+        }
+        return children;
+    });
+});
+</script>
+<article class="module width_full">
+            <header>
+              <h3>Daftar SPM LS (Langsung)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" id="mytable">  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Tanggal SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="3">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th=$row['th_spm'];
+            //$nomor=$row['nomor_spp']; 
+            $nama_unit=$row['nama_unit'];   
+            $status_spm=$row['status_spm'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");    
+            ?>
+                 
+              <tr data-depth="0" class="expand collapsable level0">
+                <td align='center'><?php echo $no++;?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$th";?></td>
+                <td align="center"><?php echo $row['tgl_spm'];?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <?php if($status_spm =="verifikator blu"){?>
+                <td align="center"><a class="toggle collapse" href='#' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' ><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."index.php/ls/setuju_spm_veri/".$th."/".$id;?>' title='Kirim ke Kasubag Dana Masyarakat' onclick="return confirm('Apakah Anda Yakin untuk Mengirim SPM ke Kasubag Dana Masyarakat... ?')" ><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }else {?>
+                <td align="center"><a class="toggle collapse" href='#' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' ><img src='<?php echo base_url();?>asset/images/icn_alert_error.png'></a></td>
+                <td align="center"><a href='#' title='Kirim ke Kasubag Dana Masyarakat' onclick="return alert('Maaf SPM ini sudah dikirim ke Kepala Sub Bagian Dana Masyarakat')"><img src='<?php echo base_url();?>asset/images/like.png'></a></td>
+               
+              </tr>
+	  <tr data-depth="1" class="expand collapsable level1" style="display:none">
+                <th style="background-color:#FFF">&nbsp;</th>
+                <th>No</th>
+                <th>Tanggal SPTB</th>
+                <th>Nama Subunit</th>
+                <th>Jumlah Rp.</th>
+                <th>&nbsp;</th>
+                <th colspan="3">&nbsp;</th>
+            </tr>
+              <?php
+			  $x=1;
+			  $detail_spm = $this->m_ls->detail_spm2($row['id_spm'],$row['th_spm']); 
+				foreach($detail_spm->result_array() as $row)
+				{  
+				$id_kwitansi=$row['id_kwitansi'];     
+				$id_sptb=$row['id_sptb'];
+				$tgl_sptb=$row['tgl_sptb'];     
+				$nama_unit=$row['nama_subunit'];  
+				$jum=$row['jumlah'];  
+				$jumlah = number_format($jum,0,",",".");    
+			  ?>
+              <tr data-depth="1" class="expand collapsable level1" style="display:none; background-color:#E6E6E6">
+                <td align='center' style="background-color:#FFF">&nbsp;</td>
+                <td align="center"><?php echo $x++;?></td>
+                <td align="center"><?php echo "$tgl_sptb";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center">&nbsp;</td>
+                <td colspan="6" align="center">&nbsp;</td>
+                <?php } }?>
+              </tr>
+              
+            <?php 
+			}    
+            ?>         
+            
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer> 
+</article>

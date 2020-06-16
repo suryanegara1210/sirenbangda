@@ -1,0 +1,49 @@
+<article class="module width_full">
+<header>
+	<h3>List Surat Pertanggung Jawaban (SPJ)</h3>
+</header>
+
+<div class="module_content">
+                   
+<form method="post" name='form_bb' action="<?php echo base_url();?>spj/simpan_spj" onSubmit='return validasi(this)'> 
+
+<table cellspacing="0" >
+	<tr>
+        <td>Sifat Bayar</td>
+        <td>:</td>
+        <td>
+        	<select name="jenis_belanja" id="jenis_belanja"  >
+		<?php
+			foreach($sifat_bayar as $row){
+				echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+			}
+		?>
+      </select>
+        </td>
+        <td>
+        	<input  type="button" value="tampil" name="tampil" id="tampil" onClick="shows()">
+        </td>
+    </tr>  
+</table> 
+
+
+<table><div id='tabel'></div> </table>
+</div>
+</article> 
+
+<script>
+function shows(){
+	var jenis_belanja = $("#jenis_belanja").val();
+		var data  = {jenis_belanja:$("#jenis_belanja").val()};
+			$.ajax({
+				type: "POST",
+				url : "<?php echo site_url('spj/select_tahun_')?>",
+				data: {jenis_belanja: jenis_belanja},
+				success: function(msg){
+					$('#tabel').html(msg);
+				}
+			});
+	}
+
+</script>
+

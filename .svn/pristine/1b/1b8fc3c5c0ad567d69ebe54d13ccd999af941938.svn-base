@@ -1,0 +1,28 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-04-29 11:24:36 --> Severity: Notice  --> Undefined variable: option_unit C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\input.php 345
+ERROR - 2014-04-29 11:24:36 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\system\helpers\form_helper.php 331
+ERROR - 2014-04-29 11:48:23 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE (akun_kode LIKE '1119111114%')
+AND `level` =  '8'
+ORDER BY `akun_kode` asc' at line 4
+ERROR - 2014-04-29 11:48:50 --> Severity: Notice  --> Undefined index: jenpen C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 412
+ERROR - 2014-04-29 11:48:50 --> Severity: Notice  --> Undefined index: kredit C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 415
+ERROR - 2014-04-29 11:48:50 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2014-04-29 11:48:50 --> Severity: Notice  --> Undefined variable: isKredit C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2014-04-29 11:48:50 --> Query error: Unknown column 'akun_bas' in 'field list'
+ERROR - 2014-04-29 11:54:20 --> Severity: Notice  --> Undefined index: jenpen C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 413
+ERROR - 2014-04-29 11:54:20 --> Severity: Notice  --> Undefined index: kredit C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 416
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 7
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 13
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 31
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 35
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 49
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\detail.php 50
+ERROR - 2014-04-29 11:56:16 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\detail.php 65
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 7
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 13
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 31
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 35
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\isi.php 49
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\detail.php 50
+ERROR - 2014-04-29 11:56:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\detail.php 65

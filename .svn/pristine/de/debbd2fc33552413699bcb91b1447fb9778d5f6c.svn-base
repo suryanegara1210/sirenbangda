@@ -1,0 +1,92 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Rka extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));        
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_rka','m_urusan', 'm_bidang', 'm_program', 'm_kegiatan'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();
+		$this->template->load('template','rka/rka_view');
+	}
+
+	function cru_rka()
+	{
+		$kd_urusan_edit = NULL;
+		$kd_bidang_edit = NULL;
+		$kd_program_edit = NULL;
+		$kd_kegiatan_edit = NULL;
+
+		$kd_urusan = array("" => "");
+		foreach ($this->m_urusan->get_urusan() as $row) {
+			$kd_urusan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_bidang = array("" => "");
+		foreach ($this->m_bidang->get_bidang() as $row) {
+			$kd_bidang[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_program = array("" => "");
+		foreach ($this->m_program->get_prog() as $row) {
+			$kd_program[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_kegiatan = array("" => "");
+		foreach ($this->m_kegiatan->get_keg() as $row) {
+			$kd_kegiatan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$data['kd_urusan'] = form_dropdown('kd_urusan', $kd_urusan, $kd_urusan_edit, 'data-placeholder="Pilih Urusan" class="common chosen-select" id="kd_urusan"');
+		$data['kd_bidang'] = form_dropdown('kd_bidang', $kd_bidang, $kd_bidang_edit, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+		$data['kd_program'] = form_dropdown('kd_program', $kd_program, $kd_program_edit, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+		$data['kd_kegiatan'] = form_dropdown('kd_kegiatan', $kd_kegiatan, $kd_kegiatan_edit, 'data-placeholder="Pilih Kegiatan" class="common chosen-select" id="kd_kegiatan"');
+
+		$this->template->load('template','rka/cru_rka', $data);
+	}
+
+	function save_rka()
+	{
+		$id_rka 	= $this->input->post('id_rka');
+        $call_from	= $this->input->post('call_from');
+        $id_rka 	= $this->input->post('id_rka');
+        $data_post 	= array(
+            'kd_urusan'				=> $this->input->post('kd_urusan'),
+    		'kd_bidang'	 			=> $this->input->post('kd_bidang'),
+    		'kd_program'	 		=> $this->input->post('kd_programm'),
+    		'kd_kegiatan'			=> $this->input->post('kd_kegiatan'),
+    		'capaian_sekarang'		=> $this->input->post('capaian_sekarang'),
+    		'jumlah_dana_sekarang'	=> $this->input->post('jumlah_dana_sekarang'),
+    		'capaian_mendatang'		=> $this->input->post('capaian_mendatang'),
+    		'jumlah_dana_mendatang'	=> $this->input->post('jumlah_dana_mendatang'),
+    		'kesesuaian_ya'			=> $this->input->post('kesesuaian_ya'),
+            'kesesuaian_tidak'		=> $this->input->post('kesesuaian_tidak'),
+            'hasil_pengendalian'   	=> $this->input->post('hasil_pengendalian'),
+            'tindak_lanjut'	   		=> $this->input->post('tindak_lanjut'),
+            'hasil_tindak_lanjut'  	=> $this->input->post('hasil_tindak_lanjut')
+        );
+
+        if(strpos($call_from, 'rka/edit_rka') != FALSE) {
+			$call_from = '';
+		}
+		$cek_rka = $this->m_rka->get_data(array('id_rka'=>$id_rka),'table_rka');
+		if($cek_rka === empty($cek_rka)) {
+			$cek_rka = new stdClass();
+			$id_rka = '';
+		}
+	}
+
+	function load_rka()
+	{
+
+	}
+}

@@ -1,0 +1,14 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-23 15:16:53 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+			IF(NOT ISNULL(d.id_status_' at line 4
+ERROR - 2013-07-23 15:16:59 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+			IF(NOT ISNULL(d.id_status_' at line 4
+ERROR - 2013-07-23 15:16:59 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+			IF(NOT ISNULL(d.id_status_' at line 4
+ERROR - 2013-07-23 15:30:26 --> Severity: Notice  --> Undefined property: stdClass::$nominal C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 75
+ERROR - 2013-07-23 15:30:26 --> Severity: Notice  --> Undefined property: stdClass::$status_spj_su C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 76
+ERROR - 2013-07-23 15:30:26 --> Severity: Notice  --> Undefined property: stdClass::$id_spj_su C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 77
+ERROR - 2013-07-23 15:31:31 --> Severity: Notice  --> Undefined property: stdClass::$status_spj_su C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 76
+ERROR - 2013-07-23 15:31:31 --> Severity: Notice  --> Undefined property: stdClass::$id_spj_su C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 77
+ERROR - 2013-07-23 15:33:01 --> Severity: Notice  --> Undefined property: stdClass::$jum_unduh C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 157

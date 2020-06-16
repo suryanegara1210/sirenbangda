@@ -1,0 +1,19 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-08-27 05:16:38 --> Severity: Notice  --> Undefined variable: id_subunit C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 957
+ERROR - 2014-08-27 05:17:12 --> Severity: Notice  --> Undefined property: stdClass::$jumlah C:\xampp\htdocs\siaku\application\views\kwitansi\spj\list_view_spj.php 24
+ERROR - 2014-08-27 05:18:14 --> Severity: Notice  --> Undefined property: kwitansi_view::$m_spm C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 967
+ERROR - 2014-08-27 05:36:34 --> Severity: Notice  --> Undefined variable: id_spm C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 967
+ERROR - 2014-08-27 06:43:35 --> 404 Page Not Found --> spj/ajax_get_sptb
+ERROR - 2014-08-27 07:18:21 --> Severity: Notice  --> Undefined variable: id_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 309
+ERROR - 2014-08-27 07:19:50 --> Severity: Notice  --> Undefined property: stdClass::$sub_unit C:\xampp\htdocs\siaku\application\controllers\spj.php 334
+ERROR - 2014-08-27 07:19:50 --> Severity: Notice  --> Undefined property: stdClass::$sub_unit C:\xampp\htdocs\siaku\application\controllers\spj.php 334
+ERROR - 2014-08-27 07:19:50 --> Severity: Notice  --> Undefined property: stdClass::$sub_unit C:\xampp\htdocs\siaku\application\controllers\spj.php 334
+ERROR - 2014-08-27 07:19:50 --> Severity: Notice  --> Undefined property: stdClass::$sub_unit C:\xampp\htdocs\siaku\application\controllers\spj.php 334
+ERROR - 2014-08-27 07:19:50 --> Severity: Notice  --> Undefined property: stdClass::$sub_unit C:\xampp\htdocs\siaku\application\controllers\spj.php 334
+ERROR - 2014-08-27 09:53:43 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2014-08-27 09:53:43 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2014-08-27 09:53:44 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2014-08-27 09:53:44 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2014-08-27 09:53:58 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 130 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 188
+ERROR - 2014-08-27 09:53:58 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 130 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 188

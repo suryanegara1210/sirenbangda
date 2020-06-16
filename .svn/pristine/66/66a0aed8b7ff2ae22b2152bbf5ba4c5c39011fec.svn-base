@@ -1,0 +1,191 @@
+	    <article class="module width_full">
+    		<header><h3>Verifikasi Bukti Kas Masuk Penerimaan dari Mahasiswa</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <div id="unit" style="margin-right: 10px; float:left;">
+                    Fakultas : <br/>
+                    <?php 
+                        echo form_dropdown("unit_drp",$option_unit,"","id='unit_drp' style=\"max-width: 300px;\"");
+                    ?>
+                </div>
+                <div id="sub_unit" style="margin-right: 10px; float:left;">
+                    Jurusan :<br/>
+                    <select name="sub_unit_drp" id="sub_unit_drp" disabled style="max-width: 200px;">
+                        <option value="0">Pilih Fakultas Dahulu !!!</option>
+                    </select>
+                </div>
+                <div id="tahun" style="margin-right: 10px;float:left;">
+                    Tahun :<br/>
+                    <select name="tahun_drp" id="tahun_drp" disabled>
+                        <option value="0">Pilih Jurusan Dahulu !!!</option>
+                    </select>
+                </div>
+                <div id="semester" style="margin-right: 10px; float:left;" >
+                    Semester :<br/>
+                    <select name="semester_drp"  id="semester_drp" disabled>
+                        <!--<option value="-1">Semua</option>-->
+                        <option value="GANJIL">Ganjil</option>
+                        <option value="GENAP">Genap</option>
+                    </select>
+                </div>
+                <div style="margin-right: 10px; float:left;">
+                    Tampilkan:<br />
+                    <input type="button" id="tampil" value="Tampilkan" disabled onclick="tampil()" /></center>
+                </div> <br /><br />
+                <form name="form_rekomendasi" action="<?php echo site_url('ladik/simpanVeriPen')?>" method="POST">
+               <div id="ringkasan_masuk" style="margin-top: 20px;"></div>
+               <div id="bayar" style="display: none; width:900px;">
+                    <table id="sudah_bayar" ></table>
+                    <div id="pager_bayar"></div>
+               </div>
+
+            </div>
+        
+            <footer>
+				<div class="submit_link" id="submit_link" style="display: none;">
+                    <input type="button" onclick="javascript:checkAll('form_rekomendasi', false);" value="Batal" class="alt_btn">
+                    <input type="submit" value="Simpan" class="alt_btn">
+                </div>
+			</footer>
+            </form>
+        </article>
+        
+         <script>
+        //var kode_prodi='<?php echo $this->session->userdata('kode_prodi_unit');?>';
+            var id_subunit='<?php echo $this->session->userdata('id_subunit');?>';
+            var id_unit='<?php echo $this->session->userdata('id_unit');?>';
+            $(document).ready(function () {
+                if(id_subunit.length>0){
+                    sub_unit_pilih(id_subunit); //ambil nama subunit
+                    tahun_ambil($("#unit_drp").val(),$("#sub_unit_drp").val());
+                }else{
+                    sub_unit(); //ambil semua subunit
+                }
+            });
+            
+            $("#unit_drp").change(function(){
+                $('#tahun_drp').attr('disabled','disabled');
+                $('#semester_drp').attr('disabled','disabled');
+                $('#tampil').attr('disabled','disabled');
+                $('#sub_unit_drp').html("<option value='0'>L O A D I N G . . .</option>");
+                sub_unit();
+                $('#ringkasan_masuk').html('');
+            });
+            
+            $("#sub_unit_drp").change( function(){ //ketika sub-unit dirubah 
+                $('#semester_drp').attr('disabled','disabled');
+                $('#tampil').attr('disabled','disabled');
+                
+                if($("#sub_unit_drp").val()==0){
+                    $('#tahun_drp').attr('disabled','disabled');
+                } else{
+                    $("#tahun_drp").html("<option value='0'>L O A D I N G . . .</option>");
+                    tahun_ambil($("#unit_drp").val(),$("#sub_unit_drp").val());
+                }
+                $('#ringkasan_masuk').html('');
+                
+            });
+            
+            $("#tahun_drp").change( function(){ //ketika tahun dirubah 
+                $('#semester_drp').attr('disabled','disabled');
+                $('#tampil').attr('disabled','disabled');
+                
+                if($("#tahun_drp").val()==0){
+                    $('#semester_drp').attr('disabled','disabled');
+                    $('#tampil').attr('disabled','disabled');
+                } else{
+                    $("#semester_drp").removeAttr('disabled');
+                    $("#tampil").removeAttr('disabled');
+                }
+                $('#ringkasan_masuk').html('');
+            });
+            
+            //ambil semua sub unit berdasar unit yg login
+            function sub_unit(){ 
+                var kode_unit = $("#unit_drp").val();
+                if (kode_unit == 0){ //tidak memilih unit
+	    			var msg = "sub_unit :<br><select name=\"sub_unit_drp\" disabled><option value=\"Pilih unit Dahulu !!!\">Pilih unit Dahulu !!!</option></select>";
+	    			$('#sub_unit_drp').html(msg);
+	    		} else{
+	    		    if (kode_unit==-1){ //unit dipilih: seluruh fakultas
+	    		        var msg = "sub_unit :<br><select name=\"sub_unit_drp\" disabled><option value=\"-1\">Seluruh Fakultas</option></select>";
+	    			    $('#sub_unit_drp').html(msg);
+                        $('#sub_unit_drp').attr('disabled','disabled');
+	    		    } else{ //unit dipilih bukan : seluruh fakultas
+	    		        var fakultas = {fakultas:escape($("#unit_drp").val())};
+                        $.ajax({ //post id unit
+							type: "POST",
+							url : "<?php echo site_url('ladik/select_sub_unit')?>",
+							data: fakultas,
+							success: function(msg){
+								$('#sub_unit_drp').html(msg); //masukkan list sub-unit
+                                $("#sub_unit_drp").removeAttr('disabled'); //aktifkan pilihan sub-unit
+							}
+    				  	});
+                        
+	    		    }
+	    		}
+            }
+            function sub_unit_pilih(kode_sub_unit){
+	    		        var sub_unit = {sub_unit:escape(kode_sub_unit)};
+                        $.ajax({ //post id unit
+							type: "POST",
+							url : "<?php echo site_url('ladik/sub_unit_pilih')?>",
+							data: sub_unit,
+							success: function(msg){
+								$('#sub_unit_drp').html(msg); //masukkan list sub-unit
+                                //$("#sub_unit_drp").removeAttr('disabled'); //aktifkan pilihan sub-unit
+							}
+    				  	});
+            }
+            
+            //ambil tahun
+            function tahun_ambil(unit,sub_unit){ 
+               var fakultas = {unit:unit, subunit:sub_unit };
+                $.ajax({ //post id unit
+                    type: "POST",
+                    url : "<?php echo site_url('ladik/select_tahun')?>",
+                    data: fakultas,
+                    success: function(msg){
+                        $('#tahun_drp').html(msg); //masukkan list sub-unit
+                        $("#tahun_drp").removeAttr('disabled'); //aktifkan pilihan sub-unit
+                    }
+                });
+            }
+            
+            function tampil(){
+                $('#ringkasan_masuk').show(400);
+                $('#ringkasan_masuk').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+                var unit=escape($("#unit_drp").val());
+                var sub_unit=escape($("#sub_unit_drp").val());
+                var tahun=escape($("#tahun_drp").val());
+                var semester=escape($("#semester_drp").val());
+                post_request_ringkasan(unit, sub_unit, tahun, semester);
+                $('#submit_link').removeAttr('style');
+            }
+            
+            function post_request_ringkasan(unit, sub_unit, tahun, semester){
+                var kode_permintaan = {unit:unit, sub_unit:sub_unit, tahun:tahun, semester:semester};
+                $.ajax({
+    				type: "POST",
+    				url : "<?php echo site_url('ladik/realisasi_veri')?>",
+    				data: kode_permintaan,
+    				success: function(msg){
+    					$('#ringkasan_masuk').html(msg);
+                    }
+  			  	});
+                
+            }
+			function checkAll(formname, checktoggle){
+  				var checkboxes = new Array(); 
+  				checkboxes = document[formname].getElementsByTagName('input');
+ 
+  				for (var i=0; i<checkboxes.length; i++){
+    				if (checkboxes[i].type == 'checkbox'){
+      				checkboxes[i].checked = checktoggle;
+    				}
+  				}
+			}
+        </script>
+        <!-- end of styles article --> 
+	

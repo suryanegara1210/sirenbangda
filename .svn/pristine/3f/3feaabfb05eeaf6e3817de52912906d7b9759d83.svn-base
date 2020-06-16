@@ -1,0 +1,68 @@
+<table class="table-common tablesorter" style="width:99%" >
+	<thead>
+		<tr>
+			<th colspan="4">KODE</th>
+			<th>PROGRAM DAN KEGIATAN</th>
+			<th>INDIKATOR KINERJA PROGRAM / KEGIATAN</th>
+			<th>TW1</th>
+            <th>TW2</th>
+            <th>TW3</th>
+            <th>TW4</th>
+		</tr>
+	</thead>
+    <tbody>
+<?php    	
+    foreach ($renja['renja'] as $row) {
+    	$row_indikator = $renja['indikator'][$row->id][0];    	
+?>
+    	<tr>
+        	<td rowspan="<?= $renja['jumlah_indikator'][$row->id] ?>"><?= $row->kd_urusan ?></td>
+            <td rowspan="<?= $renja['jumlah_indikator'][$row->id] ?>"><?= $row->kd_bidang ?></td>
+            <td rowspan="<?= $renja['jumlah_indikator'][$row->id] ?>"><?= $row->kd_program ?></td>
+            <td rowspan="<?= $renja['jumlah_indikator'][$row->id] ?>"><?= $row->kd_kegiatan ?></td>
+            <td rowspan="<?= $renja['jumlah_indikator'][$row->id] ?>"><?= $row->nama_prog_or_keg ?></td>
+            <td>
+            	<?= @$row_indikator->indikator ?> <i>(<?= @$row_indikator->target." ".@$row_indikator->satuan ?>)</i>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="1" title="Evaluasi Triwulan 1"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="2" title="Evaluasi Triwulan 2"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="3" title="Evaluasi Triwulan 3"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="4" title="Evaluasi Triwulan 4"/>
+            </td>
+    	</tr>    	
+	<?php
+		if ($renja['jumlah_indikator'][$row->id] > 1) {
+			for ($i=1; $i < $renja['jumlah_indikator'][$row->id]; $i++) { 
+				$row_indikator = $renja['indikator'][$row->id][$i];
+	?>				
+		<tr>
+    		<td>
+    			<?= @$row_indikator->indikator ?> <i>(<?= @$row_indikator->target." ".@$row_indikator->satuan ?>)</i>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="1" title="Evaluasi Triwulan 1"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="2" title="Evaluasi Triwulan 2"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="3" title="Evaluasi Triwulan 3"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" idi="<?= @$row_indikator->id ?>" tw="4" title="Evaluasi Triwulan 4"/>
+            </td>
+        </tr>
+	<?php
+			}
+		}	
+    }
+?>    	
+    </tbody>
+</table>

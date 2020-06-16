@@ -1,0 +1,27 @@
+<?php echo form_dropdown("kdakun",$option_akun,'',"id='kdakun'"); ?> 
+<input type="hidden" name="kdkomponen" value="<?php echo"$kdkomponen" ?>"> 
+<input type="hidden" name="kdoutput" value="<?php echo "$kdoutput" ?>"> 
+<script type="text/javascript">
+          $("#kdakun").change(function(){
+                var selectValues = $("#kdakun").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_akun\" disabled><option value=\"Pilih Komponen\">Pilih Komponen Dahulu</option></select>";
+                    $('#tabel').html(msg);
+                }else{
+                    tampilrkakl();
+                }
+        });
+        function tampilrkakl(){
+            $('#tabel').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+            var kdakun = {kdakun:$("#kdakun").val(),kdkomponen:'<?php echo"$kdkomponen" ?>', kdoutput:'<?php echo"$kdoutput" ?>'};
+                    $('#tabel').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('dpt/select_header')?>",
+                            data: kdakun,
+                            success: function(msg){
+                                $('#tabel').html(msg);
+                            }
+                      });
+        }
+       </script>  

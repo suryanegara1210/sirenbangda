@@ -1,0 +1,26 @@
+<?php $id=$_POST['jns_pajak'];
+if($id =="0"){ ?>
+	<tr>
+        <td>
+		 <input name='p_ppn' type='' value='' size="25" id="p_ppn" readonly="readonly" />
+         PPH : 
+         <input name='p_pph' type='' value='' size="25" id="p_pph" readonly="readonly" />
+		 </td>
+         </td>
+      </tr>
+<?php }else{
+   foreach($hasil->result() as $row)
+   {
+      ?>
+      <tr>
+         <td>
+		 <input name='p_ppn' type='' value='<?php echo $row->ppn;?>' size="25" id="p_ppn" readonly="readonly" />
+         PPH : 
+         <input name='p_pph' type='' value='<?php echo $row->pph;?>' size="25" id="p_pph" readonly="readonly" />
+		 </td>
+         </td>
+      </tr>
+      <?php }
+}
+   ?>
+

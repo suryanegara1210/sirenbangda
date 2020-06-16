@@ -1,0 +1,1475 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class belanja dari Tambahan Uang Persediaan (TUP)
+ * 
+ * Controller Class belanja dari Tambahan Uang Persediaan (TUP) yang merupakan bagian dari
+ * Bisnis Belanja
+ * 
+ * @author Putu Ari Arjana
+ */                                                                                    
+    class Dpt extends CI_Controller
+{
+    var $CI = NULL;
+    function __construct()
+    {
+        // get CI's object
+        $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->library('konversi');
+            $this->load->library(array('StrUtil','Formatting'));
+			$this->load->model(array('m_dpt', 'm_logic', 'm_settings','munit','m_umum','m_lov','m_pok'));
+
+        	$this->_user = $this->auth->get_user(); 
+            			
+        }  
+    /**
+     * Menampilkan daftar yang akan di tenderkan
+     */
+    function daftar_dpt(){
+		$su = $this->session->userdata('id_subunit');
+		$ta = $this->m_settings->get_tahun_anggaran();
+			
+		$cek_ada_pagu_real=$this->m_logic->cek_ada_pagu_real($ta,$su);
+		if($cek_ada_pagu_real<=0)
+		  {
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Maaf Pagu Real Masih Kosong, Belum Dapat Mengajukan Tender');
+              redirect('');  			   
+	      }
+		else
+		{
+		
+		
+        $tahun= date('Y');
+        $kode_subunit = $this->session->userdata('kode_subunit'); 
+        //$data['isi_tender']=$this->m_dpt->tender_daftar_ambil();
+        $data['output'] = $this->m_dpt->getOutputList($kode_subunit);
+        //print_r ($data['isi_tender']);
+        //echo $this->db->last_query();
+        $id_subunit = $this->session->userdata('id_subunit'); 
+        $data['list_tender']=$this->m_dpt->list_usulan_tender($id_subunit,$tahun);
+        $this->template->load('template','dpt/daftar_dpt2',$data);
+		}
+    }
+    
+	
+	function view_dpt(){
+
+		
+        $idsunit = $this->session->userdata('id_subunit'); 
+        $data['sum_tender']=$this->m_dpt->view_tender_ambil($this->m_settings->get_tahun_anggaran(), $idsunit);
+		//var_dump($data['sum_tender']);
+		//echo $this->db->last_query();
+        $this->load->view('dpt/view_dpt',$data);
+	}
+	
+	/**
+	
+	*/
+	function ajax_get_dpt_detail_per_akun(){
+		$kdakun = $this->input->post('kdakun');
+		$idsunit= $this->session->userdata('id_subunit');
+		
+		$result = $this->m_dpt->view_list_detail_usulan_tender($this->m_settings->get_tahun_anggaran(), $idsunit,$kdakun);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th width='25px'>No</th>
+					<th width='150px'>Komponen</th>
+					<th width='150px'>Header</th>
+					<th >Uraian</th>
+					<th width='40px'>Vol</th>
+					<th width='40px'>Sat</th>
+					<th width='70px'>Harga Sat</th>
+					<th width='70px'>Jumlah</th> 
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			$str = "
+                <tr>
+                	<td width='25px' align='center'>{$i}</td>
+                    <td width='150px' align='left' title='{$row->kdkomponen} - {$row->nmkomponen}'>" . 
+                    StrUtil::getShortStr($row->kdkomponen.'-'.$row->nmkomponen,25) . "</td>
+                    <td width='150px' align='left' title='{$row->hdr}'>".  
+                    StrUtil::getShortStr($row->hdr,25) . "</td>
+                    <td width='*' align='left' title='{$row->uraian}'> " .
+                    StrUtil::getShortStr($row->uraian,40) . "</td>
+                    <td width='40px' align='center'>{$row->vol}</td>					
+                    <td width='40px' align='center'>{$row->sat}</td>					
+                    <td width='70px' align='right'>" . Formatting::currency($row->hargasat,0,false) . "</td>					
+                    <td width='70px' align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>					
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	}
+	
+		// ada konflik masbro
+	function simpan_tender(){
+        //$this->load->model('m_dpt');
+        $th = date('Y');
+		$id_rkakl = $this->input->post('id');
+        $id_subunit = $this->session->userdata('id_subunit');
+        $id_dpt = $this->m_dpt->id_dpt($id_subunit,$th);
+                 
+        $id_dpt = $this->m_dpt->id_dpt($id_subunit,$th);
+		//print_r($id_rkakl);
+		$count= count($id_rkakl);
+			for($i=0;$i<$count;$i++){
+		      if ($id_rkakl[$i]!=0 && $id_rkakl[$i]!='' ){
+		          if(isset($id_dpt->id_dpt) && $id_dpt->id_dpt !=''){
+              		  $this->m_dpt->simpan_dpt($id_rkakl[$i],$id_dpt->id_dpt);
+					  //echo $this->db->last_query();
+                    }else{
+                    	  $this->m_dpt->masukkan_dpt($id_subunit,$th);
+                    	  $id_dpt = $this->m_dpt->id_dpt($id_subunit,$th);  
+                    	  $this->m_dpt->simpan_dpt($id_rkakl[$i],$id_dpt->id_dpt);
+                    	  //echo $this->db->last_query();
+                    } 
+		      }
+			 	
+			}
+
+    }
+	
+	
+	
+	// ini fungsi dibuat oleh masbro praba
+	/*function simpan_tender(){
+        //$this->load->model('m_dpt');
+        $th = date('Y');
+        $id_rkakl = $this->input->post('id');
+        $id_subunit = $this->session->userdata('id_subunit');
+        $pagu_real = $this->m_dpt->cek_pagu_real($id_subunit,$th); 
+        //echo $this->db->last_query();
+        if($pagu_real>0){
+             $id_dpt = $this->m_dpt->id_dpt($id_subunit,$th);
+             if(isset($id_dpt->id_dpt) && $id_dpt->id_dpt !=''){
+              $this->m_dpt->simpan_dpt($id_rkakl,$id_dpt->id_dpt);
+              }else{
+              $this->m_dpt->masukkan_dpt($id_subunit,$th);
+              $id_dpt = $this->m_dpt->id_dpt($id_subunit,$th);  
+              $this->m_dpt->simpan_dpt($id_rkakl,$id_dpt->id_dpt);
+        }
+        }else{
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Maaf anda belum bisa mengajukan tender');
+        }
+        
+        
+    }*/
+	/**
+    * function untuk menghapus uraian Tender
+    */ 
+    function hapus_tender(){   
+        if($this->auth->is_logged_in() == true){ 
+          //$idtdet = $this->uri->segment(3);  
+		  $idtdet = $this->input->post('id');
+          $id_subunit = $this->session->userdata('id_subunit');
+          $count= count($idtdet);
+		  		for($i=0;$i<$count;$i++){
+		  			$this->m_dpt->hapus_uraian_dpt($idtdet[$i]);
+				}
+          //$this->session->set_userdata('msg_typ','ok');
+          //$this->session->set_userdata('msg', 'Uraian Tender berhasil dihapus'); 
+          //redirect('dpt/daftar_dpt');
+        }
+    }
+	
+    function select_komponen()
+    {
+           //$this->load->model('m_dpt'); 
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['option_komponen'] = $this->m_dpt->getKomponenList();        
+            $this->load->view('dpt/getkomponen',$data);
+            
+    }
+    function select_akun(){
+       // $this->load->model('m_dpt'); 
+            $data['kdkomponen'] = $this->input->post('kdkomponen');
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['option_akun'] = $this->m_dpt->getAkunList();      
+            $this->load->view('dpt/getakun',$data);
+            
+    }
+    function get_subunit(){
+       // $this->load->model('m_dpt'); 
+            $id_unit = $this->input->post('id_unit');   
+            $data['id_unit'] = $this->input->post('id_unit');      
+            $data['subunit'] = $this->m_dpt->getsubUnitList($id_unit);      
+            $this->load->view('dpt/getsubunit',$data);
+            
+    }
+    function select_header(){
+        //$this->load->model('m_dpt'); 
+            $kdkomponen = $this->input->post('kdkomponen');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $data['kdkomponen'] = $kdkomponen;
+            $data['kdoutput'] = $kdoutput;
+            $data['kdakun'] = $kdakun;
+			$id_sunit = $this->session->userdata('id_subunit');   
+            //$data['option_header'] = $this->munit->getHeaderList($kdakun, $kdkomponen,$kdoutput); 
+            $data['isi_tender']=$this->m_dpt->tender_daftar_ambil($kdoutput,$kdkomponen,$kdakun);
+			$data['data_tender']=$this->m_dpt->list_tender_ambil($this->m_settings->get_tahun_anggaran(),$id_sunit);
+            //echo $this->db->last_query();  
+			$su = $this->session->userdata('id_subunit');
+			$ta = $this->m_settings->get_tahun_anggaran();
+			$ta2 = $this->m_settings->get_tahun_anggaran2();
+		
+			$cek_ketersediaan_mp=$this->m_logic->check_mp_available($ta,$su);
+			$sps=$this->m_logic->get_sps($ta, $su);
+			$data['pembanding']=$sps;
+            $this->load->view('dpt/list_dpt2',$data);    
+    } 
+	
+    function usulan_tender(){         
+            $data['unit'] = $this->m_dpt->getUnitList();
+            //echo $this->db->last_query();
+            $this->template->load('template','dpt/usulan_tender', $data);
+            
+        } 
+    function daftar_usulan_tender(){
+        //$this->load->model('m_dpt');
+        $tahun = date('Y');
+        $id_subunit = $this->input->post('id_subunit'); 
+        $data['list_tender']=$this->m_dpt->list_usulan_tender($id_subunit,$tahun);  
+        $this->template->load('template','dpt/list_dpt_pusat',$data);
+    }   
+     function daftar_tender_permak(){
+         if($this->auth->is_logged_in() == true){          
+          $th = date('Y');  
+          $data['permak'] = $this->m_dpt->usulan_permak($th); 
+           foreach ($data['permak'] as $tgu){
+             $out=$tgu['kdoutput'];
+             $akun=$tgu['kdakun'];
+             $jumlah_gu= $this->m_dpt->banyak_detail2($out,$akun,$th);
+             $data['jumgu'][$out][$akun]= $jumlah_gu;
+           }
+          $this->template->load('template','dpt/daftar_dpt_permak',$data);  
+        }
+    }
+    function daftar_tender_permak_unit(){
+         if($this->auth->is_logged_in() == true){            
+          $kdoutput = $this->uri->segment(3);
+          $kdakun = $this->uri->segment(4);
+          $th = date('Y');  
+          $data['permak_unit'] = $this->m_dpt->usulan_permak_unit($kdoutput,$kdakun,$th); 
+          //echo $this->db->last_query();  
+           foreach ($data['permak_unit'] as $tgu){
+             //$kdoutput = $tgu['kdoutput'];   
+             //$kdakun = $tgu['kdakun'];   
+             $id_unit = $tgu['id_unit'];
+             $jumlah_gu= $this->m_dpt->banyak_detail_permak_unit($tgu['kdoutput'],$tgu['kdakun'],$tgu['id_unit'],$th); 
+           }
+          $data['jumgu']= $jumlah_gu;
+          
+          
+          $data['tes'] = $this->m_dpt->jum_no_kontrak_usulan($kdoutput,$kdakun,$id_unit,$th);
+          
+          //echo $this->db->last_query();
+          //echo $data['tes'];
+          if($data['tes'] > 0){
+               $data['kontrak'] = $this->m_dpt->no_kontrak_usulan($kdoutput,$kdakun,$id_unit,$th);   
+               $this->template->load('template','dpt/daftar_dpt_perunit',$data);
+          }else{             
+               $this->template->load('template','dpt/daftar_dpt_perunit',$data);
+          } 
+         //echo $this->db->last_query(); 
+          
+            
+        }
+    }
+    function daftar_tender_permak_unit_subunit(){
+         if($this->auth->is_logged_in() == true){ 
+          //$id_unit = $this->session->userdata('id_unit');
+          $kdoutput = $this->uri->segment(3);
+          $kdakun = $this->uri->segment(4);
+          $id_unit = $this->uri->segment(5);
+          $th = date('Y');  
+          $data['permak_unit'] = $this->m_dpt->usulan_permak_unit_subunit($kdoutput,$kdakun,$id_unit,$th);
+		  $data['nama'] = $this->m_dpt->get_nama($id_unit);  
+          //echo $this->db->last_query();  
+          //$jumlah_gu=array();
+           foreach ($data['permak_unit'] as $tgu){
+               
+             //$kdoutput = $tgu['kdoutput'];   
+             //$kdakun = $tgu['kdakun'];   
+             //$id_subunit = $tgu['id_subunit'];   
+             $jumlah_gu= $this->m_dpt->banyak_detail_permak_unit_subunit($tgu['kdoutput'],$tgu['kdakun'],$tgu['id_subunit'],$th);
+             //echo $this->db->last_query(); 
+              
+           }
+            //$jumlah_gu= $this->m_dpt->banyak_detail_permak_unit_subunit($kdoutput,$kdakun,$id_subunit,$th); 
+            $data['jumgu']= $jumlah_gu;
+           //$data['jumgu']= $jumlah_gu;
+          $this->template->load('template','dpt/daftar_dpt_perunit_sub',$data);  
+        }
+    }
+    function daftar_subunit_yang_tender(){
+         if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit');
+          $th = date('Y');  
+          $data['daftar_subunit'] = $this->m_dpt->get_subunit_dpt($th); 
+          //echo $this->db->last_query();  
+          $jumlah_gu=array();
+           foreach ($data['daftar_subunit'] as $tgu){
+             $jumlah_gu[]= $this->m_dpt->banyak_detail($tgu['id_subunit'],$th);
+             //echo $this->db->last_query();  
+           }
+           $data['jumgu']= $jumlah_gu;
+          $this->template->load('template','dpt/daftar_subunit_dpt',$data);  
+        }
+    }
+    function uraian_usulan(){
+        //$this->load->model('m_dpt');
+        $tahun = date('Y');
+        $id_subunit = $this->uri->segment(3);
+        $data['list_tender']=$this->m_dpt->list_usulan_tender($id_subunit,$tahun);  
+        $this->template->load('template','dpt/uraian_tender',$data);
+    }
+    function hapus_usulan_tender(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_subunit = $this->session->userdata('id_subunit');
+          $tahun = date('Y'); 
+          $id_rkakl = $this->uri->segment(3);  
+          $this->m_dpt->hapus_usulan($id_rkakl,$id_subunit,$tahun);
+          $this->session->set_userdata('msg_typ','ok');
+          $this->session->set_userdata('msg', 'Usulan Tender berhasil dihapus'); 
+          redirect('dpt/daftar_dpt');
+        }
+    }
+    function uraian_daftar(){
+        //$this->load->model('m_dpt'); 
+            $kdoutput = $this->uri->segment(3);
+            $kdakun = $this->uri->segment(4);
+            $id_subunit = $this->uri->segment(5);  
+            $tahun = date('Y');
+			$id_unit = $this->m_dpt->get_id_unit($id_subunit);
+			$data['nama_unit'] = $this->m_dpt->get_nama_unit($id_unit);
+			$data['nama_subunit'] = $this->m_dpt->get_nama_subunit($id_subunit);      
+            $data['isi_tender']=$this->m_dpt->uraian_daftar($kdoutput,$kdakun,$id_subunit,$tahun);
+            //echo $this->db->last_query(); 
+            $this->template->load('template','dpt/uraian_daftar',$data);
+    } 
+    function simpan_realisasi(){
+            if($this->auth->is_logged_in() == true){      
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $id_subunit = $this->input->post('id_subunit'); 
+            $tahun = date('Y');
+			$id_unit = $this->m_dpt->get_id_unit($id_subunit);  
+             $ids = $_POST['id'];
+             $tes = $_POST['tes'];                                                               
+             foreach($ids as $id_dpt_det=>$val) {
+                if($val!='' && $val!=0){
+                    $this->m_dpt->update_detail_kel($id_dpt_det,$val);
+                    $this->m_dpt->update_detail_kel2($id_dpt_det,$tes[$id_dpt_det]);
+                    
+                }                    
+             }
+             //redirect('dpt/daftar_tender_permak');
+             redirect("dpt/daftar_tender_permak_unit_subunit/$kdoutput/$kdakun/$id_unit");
+            /*
+            $data['isi_tender']=$this->m_dpt->uraian_daftar($kdoutput,$kdakun,$id_subunit,$tahun);
+            echo $this->db->last_query();
+            foreach($data['isi_tender'] as $row){
+                $id_tdet = $row->idtdet;
+                //$this->m_dpt->update_detail_kel($id_tdet);
+            }
+            $values = $_POST['id'];
+            $all_selected_values = ''; 
+                foreach($values as $value) 
+                { 
+                  $all_selected_values = $value;
+                  echo "$all_selected_values "; 
+                }
+            */
+        }
+    }   
+	
+    function tutup_buku_tender(){   
+        if($this->auth->is_logged_in() == true){
+        $tahun=date('Y');     
+          $data['open_tender']=$this->m_dpt->open_tender($tahun);
+          $this->template->load('template','dpt/tutup_buku_tender',$data); 
+        }
+    }
+    function simpan_session(){   
+        if($this->auth->is_logged_in() == true){
+            $kontrak = $this->input->post('kontrak');
+            //print_r($kontrak);
+           // $session_data['$kontrak']=$kontrak; 
+            $session_data = array(
+                'kontrak' => $kontrak
+            );  
+            $this->session->set_userdata($session_data);
+        }
+    }
+    
+    function buat_otomatis(){
+        $this->load->model('m_dpt');
+        $this->m_dpt->buat_kwitansi();
+        $this->m_dpt->buat_sptb();
+        $this->m_dpt->buat_spp_spm_sp2d();
+     }
+    
+	// Perbaikan Input DPT yg menginputkan dari header tanpa cek list barang uraian
+	
+	function index()
+    {
+    	//cek harus login
+        $this->auth->restrict();
+		$idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $usulan_dpt = $this->m_dpt->get_usulan_dpt($ta, $idsu);
+			
+		$this->_form_usulan_dpt();
+		
+    }
+
+    function get_form_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+		$this->_form_usulan_dpt();
+
+    }
+
+    private function _form_usulan_dpt()
+    {
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+		$data['nm_sunit'] = $this->m_umum->get_nama_sunit_by_id($idsu);
+		$data['id_subunit'] = $this->session->userdata('id_subunit');
+
+
+        //requirement for UP proposal
+        //1. Max UP must be defined, means pagu real must be available
+        $cek_ada_pagu_real=$this->m_logic->cek_ada_pagu_real($ta,$idsu);
+		if($cek_ada_pagu_real<=0)
+		{
+			$response['errno']  = 1;
+			$response['msg'] = "Sub Unit anda belum bisa mengusulkan tender.
+								Karena belum memiliki pagu real";
+			echo json_encode($response);
+			return;  			   
+	    }
+        
+
+        //tampilkan form usulan UP
+        //UP hanya bisa diajukan sebesar maks nilai max_up yang sudah ditentukan
+
+        $this->template->load('template','dpt/form_usulan_detail',$data);
+    }
+
+    function create_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+
+        //cek apakah sudah ada usulan up
+		$usulan_dpt = $this->m_dpt->get_usulan_dpt($ta, $idsu);
+
+		//jika belum, lanjutkan dengan membuat master usulan UP
+		if($usulan_dpt === FALSE){
+			$result = $this->m_dpt->create_usulan_dpt($ta, $idsu);
+
+			if($result === FALSE) {
+				//gagal, tampilkan informasi error
+				$data['errno'] = 1;
+				$data['msg'] = "Tender gagal dibuat.";
+				echo json_encode($data);
+				return;
+			}
+		}
+
+                //berhasil, coba open form usulan up
+                $this->_form_usulan_dpt();
+    }
+
+  
+    function get_tabel_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+		$id_dpt	= $this->input->post('id_dpt');
+		
+		var_dump($id_dpt);
+		
+		
+        //simpan kode di session
+        $cache  = new stdClass();
+        $cache->id_subunit  = $idsu;
+		$cache->id_dpt 		= $id_dpt;
+        $cache->kdgiat      = $this->input->post('kdgiat');
+        $cache->kdoutput    = $this->input->post('kdoutput');
+        $cache->kdkomponen  = $this->input->post('kdkomponen');
+        $cache->kdakun      = $this->input->post('kdakun');
+        $cache->hdr         = $this->input->post('kdhdr');
+        $cache->del_stack   = array();
+        //get nilai pok with info
+        $pok    = $this->m_pok->get_nilai_pok_with_info($ta, $cdsu, $cache->kdgiat,
+                                $cache->kdoutput, $cache->kdkomponen, $cache->kdakun,
+                                $cache->hdr);
+
+        if(!$pok) {
+            //TODO: aksi jika error
+			echo "Error ini Masbrow!!!";
+            return;
+        }
+		
+		$tender = $this->m_dpt->get_tender_by_id($cache->id_dpt);
+		var_dump($tender);
+		
+        $item_tender = $this->m_dpt->get_item_tender_by_id_dpt($tender->id_dpt, $cache);
+		
+		//belum mengecek isi tendernya
+
+        $cache->nmgiat      = $pok->nmgiat;
+        $cache->nmoutput    = $pok->nmoutput;
+        $cache->nmkomponen  = $pok->nmkomponen;
+        $cache->nmakun      = $pok->nmakun;
+		
+        if($item_tender === FALSE) {
+            $cache->id_dpt = NULL;
+            $data['total_uraian']   = 0;
+        } else {
+            $cache->id_dpt = $item_tender->id_dpt;
+            $data['total_uraian']   = $item_tender->jum_dpt;
+        }
+
+
+        $this->session->unset_userdata('cache_tender');
+        $this->session->set_userdata('cache_tender', $cache);
+
+
+        $data['nilai_pok']      = $pok->pok_total;
+        //$data['total_uraian']   = $this->m_usulan->get_nilai_uraian($ta, $idsu, $cache);
+
+        //format sesuai jqgrid
+        $satuan = $this->m_lov->get_list_lov(Constant::KAP_SATUAN);
+        $dtsatuan = array();
+        foreach($satuan as $row){
+            $dtsatuan[] = $row->kode_value.':'.$row->nama_value;
+        }
+        $data['satuan'] = implode(';', $dtsatuan);
+
+        $this->load->view('dpt/tabel_uraian',$data);
+    }
+
+    function get_data_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //ambil kode di session
+        $cache = $this->session->userdata('cache_tender');
+		//var_dump($cache->id_dpt);
+		//var_dump($cache->hdr);
+
+
+        if(!isset($cache->rows)) {
+            //cari data uraian,
+            $uraian = $this->m_dpt->get_uraian_by_id_dpt($cache->id_dpt, $cache);
+			//var_dump($uraian);
+            $cache->saved = TRUE;
+            if($uraian === FALSE) {
+                $uraian = $this->m_pok->get_list_pok($ta, $cdsu, $cache->kdgiat,
+                                                     $cache->kdoutput, $cache->kdkomponen,
+                                                     $cache->kdakun, $cache->hdr);
+                //TODO: asumsi uraian pasti sudah ada
+            }
+
+            $i = 0;
+            $rows = array();
+			
+            foreach($uraian as $row){
+                $id = isset($row->id_dpt_det) ? $row->id_dpt_det : 'cache'.$i;
+                $label = isset($row->id_dpt_det) ? $i+1 : 'C';
+
+                $array = array($label, trim($row->uraian), $row->volume,
+                                    $row->satuan, $row->harga_satuan,
+                                    $row->jumlah);
+                $rows[$id] = $array;
+                $i++;
+            }
+
+            $cache->rows = $rows;
+            $this->session->set_userdata('cache_tender', $cache);
+        }
+
+
+        $i = 0;
+        $response = new stdClass();
+        foreach($cache->rows as $key=>$cell){
+            $response->rows[$i]['id'] = $key;
+            $response->rows[$i]['cell'] = $cell;
+            $i++;
+        }
+
+        echo json_encode($response);
+    }
+
+    function cache_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //ambil kode di session
+        $cache = $this->session->userdata('cache_tender');
+
+        switch($this->input->post('oper')){
+            case "add":
+                $id = $this->input->post('id') . date("His"); //_empty.time
+                $cell = array('N',
+                              $this->input->post('uraian'),
+                              $this->input->post('volume'),
+                              $this->input->post('satuan'),
+                              $this->input->post('harga_satuan'),
+                              $this->input->post('jumlah'));
+                $cache->rows[$id] = $cell;
+                break;
+            case "edit":
+                $id = $this->input->post('id');
+                foreach($cache->rows as $key=>$cell){
+                    if($key == $id) {
+                        $cell = array($cell[0],
+                                      $this->input->post('uraian'),
+                                      $this->input->post('volume'),
+                                      $this->input->post('satuan'),
+                                      $this->input->post('harga_satuan'),
+                                      $this->input->post('jumlah'));
+                        $cache->rows[$key] = $cell;
+                        break;
+                    }
+                }
+                break;
+            case "del":
+                $id = $this->input->post('id');
+
+                foreach($cache->rows as $key=>$cell){
+                    //jangan pakai === disini karena $key bisa integer, sedang $id string
+                    if($key == $id) {
+                        if(strpos($id, 'cache') === FALSE &&
+                           strpos($id, 'empty') === FALSE ) {
+                            //jika bukan temporary dan bukan data baru, simpan di stack
+                            array_push($cache->del_stack, $id);
+                        }
+
+                        unset($cache->rows[$id]);
+                        break;
+                    }
+                }
+                break;
+        }
+
+        $this->session->set_userdata('cache_tender', $cache);
+    }
+
+    function ajax_delete_item_tender()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_dpt     = $this->input->post('id_dpt');
+		$hdr        = $this->input->post('hdr');
+        $ret = $this->m_dpt->delete_tender_item($id_dpt, $hdr);
+
+        if($ret === FALSE) {
+            $response['errno']  = 1;
+            $response['msg']    = "Hapus data tender item gagal. coba ulang kembali";
+        } else {
+            $response['errno']  = 0;
+            $response['msg']    = "Hapus data berhasil";
+        }
+
+        echo json_encode($response);
+    }
+
+    function save_tender()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //get cache
+        $cache = $this->session->userdata('cache_tender');
+        $id_dpt = $this->input->post('id_dpt');
+
+        //cek apakah ada status data belum disimpan
+        if(!empty($cache->rows) || !empty($cache->del_stack)) {
+            $cache->id_dpt = $id_dpt;
+            $ret = $this->m_dpt->save_cache_uraian($cache);
+
+            if($ret !== FALSE) {
+                $this->session->set_userdata('cache_tender', $ret);
+                echo "OK|Penyimpanan berhasil.";
+                return;
+            } else {
+                echo "NOK|Penyimpanan gagal.";
+                return;
+            }
+        }
+
+        echo "OK|Tidak ada data yang perlu disimpan.";
+    }
+
+    function ajax_get_form_insert_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        
+        $data['oper']   = $this->input->post('oper');
+		
+		$data['id_dpt']      = $this->input->post('id_dpt');
+		$data['kdgiat']     = $this->input->post('kdgiat');
+		$data['kdoutput']   = $this->input->post('kdoutput');
+		$data['kdkomponen'] = $this->input->post('kdkomponen');
+		$data['kdakun']     = $this->input->post('kdakun');
+		$data['hdr']        = $this->input->post('hdr');
+		
+		$tender         = $this->m_dpt->get_tender_by_id($data['id_dpt']);
+	
+		$data['kegiatans']  = $this->m_pok->get_list_kegiatan($ta, $cdsu, '%');
+		$this->load->view('dpt/form_input_uraian', $data);
+		return;
+
+    }
+
+    function ajax_get_list_dpt()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_dpt = $this->input->post('id_dpt');
+		$id_subunit = $this->input->post('id_subunit');
+        //$dpt	= $this->m_dpt->get_tender_by_id($id_dpt);
+		$dpt	= $this->m_dpt->get_tender_by_id_subunit($id_subunit);
+        $data['list_tender'] = $this->m_dpt->get_list_uraian_tender($id_subunit);
+
+        $this->load->view('dpt/form_list_dpt', $data);
+    }
+
+    function ajax_get_total_tender()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_dpt = $this->input->post('id_dpt');
+        echo $this->m_dpt->get_nilai_tender_by_id($id_dpt);
+    }
+
+    function ajax_get_uraian_item_tender()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/dpt');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_dpt	= $this->input->post('id_dpt');
+		$hdr	= $this->input->post('hdr');	
+				
+        $data['list_uraian']    = $this->m_dpt->get_list_uraian_item_tender($id_dpt,$hdr);
+        $this->load->view('dpt/list_uraian_item_tender', $data);
+    }
+
+    /**
+    * function untuk mengirim rincian UP yang telah dibuat ke Unit
+    */
+    function send_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $id_usulan = $this->input->post('id_usulan');
+
+        //cek ada uraian kegiatan yang dimasukkan, berdasarkan nilai_usulan
+        $usulan             = $this->m_usulan->get_usulan_by_id($id_usulan);
+
+        //
+        switch($usulan->sifat_bayar){
+            case Constant::JB_UP:
+                $nilai_max_usulan   = $this->m_logic->get_nilai_max_up($ta, $idsu);
+                break;
+            case Constant::JB_TUP:
+                $nilai_max_usulan    = $this->m_logic->get_sps($ta, $idsu);
+                $nilai_max_usulan   += $usulan->total_usulan;
+                break;
+        }
+
+        if($usulan->total_usulan == 0) {
+            //error, tidak bisa simpan, karena masih 0
+            $response['errno']  = 1;
+            $response['msg']    = "Belum ada uraian kegiatan yang dimasukkan. Penyimpanan dibatalkan";
+            echo json_encode($response);
+            return;
+        }
+
+        if($usulan->total_usulan > $nilai_max_usulan) {
+            //error, usulan yang dikirim melebihi max yang diperbolehkan
+            $response['errno']  = 2;
+            $response['msg']    = "Maaf, Uraian yang diajukan melebihi MAX Usulan yang diperbolehkan.";
+            echo json_encode($response);
+            return;
+        }
+
+        //kirim usulan untuk diverifikasi
+        $ret = $this->m_usulan->send_usulan($id_usulan);
+        if($ret) {
+            $response['errno'] = 0;
+            $response['msg'] = "Usulan berhasil dikirim ke Unit.";
+        } else {
+            $response['errno'] = 3;
+            $response['msg'] = "Usulan gagal dikirim. Tolong cek dan ulang kembali proses pengiriman.";
+        }
+
+        echo json_encode($response);
+    }
+
+    function otorisasi_su_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_usulan = $this->input->post('id_usulan');
+        $usulan = $this->m_usulan->get_usulan_by_id($id_usulan);
+
+        if($usulan !== FALSE) {
+
+        	$granted = FALSE;
+        	//cek apakah memiliki privilege untuk otorisasi
+        	if ( ($usulan->sifat_bayar == Constant::JB_UP && $this->_user->hasPrivilege('otorisasi_up')) ||
+        		 ($usulan->sifat_bayar == Constant::JB_TUP && $this->_user->hasPrivilege('otorisasi_tup')) )
+        		$granted = TRUE;
+
+        	if(!$granted) {
+	            $response['errno'] = 1;
+	            $response['msg'] = "Anda tidak memiliki privilege untuk melakukan aksi ini.";
+	            echo json_encode($response);
+	            return;
+        	}
+
+            //cek jika status nya disetujui (4), maka bisa diotorisasi, menjadi 5
+            if($usulan->id_status_usulan == 4) {
+                $ret = $this->m_usulan->set_status_usulan($id_usulan, 5);
+
+                if($ret) {
+                    $response['errno'] = 0;
+                    $response['msg'] = "Usulan berhasil diotorisasi.";
+
+                    echo json_encode($response);
+                    return;
+                }
+            }
+        }
+
+        $response['errno'] = 1;
+        $response['msg'] = "Proses otorisasi gagal.";
+        echo json_encode($response);
+    }
+
+    /**
+    * function untuk menampilkan detail rincian UP oleh verifikator unit
+    */
+    function rincian_usulan_subunit(){
+		$this->auth->restrict();
+
+
+		$id_unit = $this->session->userdata('id_unit');
+		$ta = $this->m_settings->get_tahun_anggaran();
+		   $non_kw = array('GU','LS','NHL','SAH','GU_NHL','TUP_NHL');
+		   $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+
+		    foreach($data['sifat_bayar'] as $key=>$val){
+		        if(in_array($val->kode_value, $non_kw)){
+		            unset($data['sifat_bayar'][$key]);
+		        }
+		    }
+		$this->template->load('template','usulan/rincian_usulan_subunit',$data);
+    }
+     /**
+    * function untuk menampilkan detail rincian usulan UP dan TUP oleh verifikator unit
+    */
+    function TampilListUsulan(){
+        $jns_usulan = $this->input->post('jns_usulan');
+        $id_unit = $this->session->userdata('id_unit');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        $daftar_unit = $this->m_usulan->getUnitList($id_unit);
+        $jumlah_gu=array();
+        foreach ($daftar_unit as $tgu){
+            $jumlah_gu[$tgu['id_subunit']]= $this->m_usulan->banyak_kb2($jns_usulan,$ta,$tgu['id_subunit']);
+            $banyak_usulan[$tgu['id_subunit']]=$this->m_usulan->banyak_list_usulan($jns_usulan,$ta,$tgu['id_subunit']);
+        }
+        $no = 1;
+        foreach($daftar_unit as $unit){
+            $nama_subunit = $unit["nama_subunit"];
+            $id_subunit = $unit["id_subunit"];
+            echo "<tr>";
+            echo "<td align='center'>".$no."</td>";
+            if ($banyak_usulan[$unit["id_subunit"]] < 1){
+                echo "<td align='left'>".$nama_subunit."</td>";
+            }else{
+                echo "<td align='left'><a href='".base_url()."usulan/get_veri_usulan/".$id_subunit."/".$jns_usulan."'>".$nama_subunit."(".$jumlah_gu[$unit["id_subunit"]].")</a></td>";
+            }
+            echo"</tr>";
+            $no++;
+        }
+     }
+
+    /**
+    * function untuk menampilkan detail rincian belanja per-subunit
+    */
+    function get_veri_usulan(){
+		$this->auth->restrict();
+		$id_subunit = $this->uri->segment(3);
+		$jns_usulan = $this->uri->segment(4);
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$data['nama_unit'] = $this->m_umum->get_nama_sunit_by_id($id_subunit);
+		$data['daftar_up'] = $this->m_usulan->daftar_veri_usulan($ta,$id_subunit,$jns_usulan);
+		$data['id_subunit']= $id_subunit;
+		$this->template->load('template','usulan/form_veri_usulan',$data);
+    }
+
+    /**
+    * function untuk menampilkan form untuk verifikasi detail rincian belanja Usulan per-subunit
+    */
+    function cek_usulan(){
+          $this->auth->restrict();
+
+          $th_usulan   = $this->uri->segment(3);
+          $id_subunit  = $this->uri->segment(4);
+          $id_usulan   = $this->uri->segment(5);
+          $jns_usulan  = $this->uri->segment(6);
+          $data['id_usulan'] = $id_usulan;
+
+          //fungsi untuk mengambil data usulan yang terpilih
+          $data['daftar_usulan'] = $this->m_usulan->daftar_veri_usulan_terpilih($th_usulan,$id_usulan,$jns_usulan);
+          $tot_up=0;
+		  $tot_rkakl=0;
+		  foreach($data['daftar_usulan']->result_array() as $row){
+              $kode_subunit = $row['kode_unit']; //ditanyakan sama pak bos
+              $id_subunit = $row['ref_id_subunit'];
+              $kdoutput = $row['kdoutput'];
+              $kdkomponen = $row['kdkomponen'];
+              $kdakun = $row['kdakun'];
+              $hdr = $row['hdr'];
+              //fungsi untuk mengambil total nominal dari usulan
+              $data['jum_up_tup'] = $this->m_usulan->cari_tot_usulan($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr,$jns_usulan);
+              foreach($data['jum_up_tup']->result_array() as $tes){
+                    $tot_up = $tes ['jumlah'];
+              };
+
+                  if($tot_up==NULL){
+                      $tot_up=0;
+                  }
+
+                    $data['tot_up'] = $tot_up;
+                    //fungsi untuk mengambil nilai POK dari t_rkakl
+                    $data['jum_rkakl'] = $this->m_usulan->get_pagu_rkakl($th_usulan,$id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);
+                      foreach($data['jum_rkakl']->result_array() as $tes2){
+                            $tot_rkakl = $tes2['sum(jumlah)'];
+                      };
+
+                          if($tot_rkakl==NULL){
+                              $tot_rkakl=0;
+                          }
+                          $data['rkakl'] = $tot_rkakl;
+          }
+          $data['nama_unit'] = $this->m_umum->get_nama_sunit_by_id($id_subunit);
+          $data['sisa_pagu'] =  $tot_rkakl-$tot_up;
+          $this->template->load('template','usulan/cek_usulan',$data);
+    }
+
+    /**
+    * function untuk melakukan verifikasi terhadap rincian belanja UP
+    */
+    function verifikasi_usulan(){
+         $this->auth->restrict();
+         $id_usulan_item= $this->input->post('id_usulan_item');
+         $id_subunit    = $this->input->post('id_subunit');
+         $ket_revisi    = $this->input->post('keterangan');
+         $val_submit    = $this->input->post('simpan');
+         $jns_usulan    = $this->input->post('jns_usulan');
+
+         if($val_submit == 'Setuju'){
+
+                $this->m_usulan->set_usulan_item_ok($id_usulan_item);
+         }else if($val_submit == 'Revisi Ke Subunit'){
+
+               $this->m_usulan->set_usulan_item_revisi($id_usulan_item, $ket_revisi);
+        }
+
+        redirect(site_url("usulan/get_veri_usulan/$id_subunit/$jns_usulan"));
+    }
+
+    /**
+    * function untuk menyetujui semua rincian belanja yang diajukan oleh subunit
+    */
+    function setuju_semua_rincian(){
+          $this->auth->restrict();
+          $waktu = date("Y-m-d H:i:s");
+          $ta = $this->m_settings->get_tahun_anggaran();
+          $id_usulan = $this->input->post('id_usulan');
+          $id_subunit = $this->input->post('id_subunit');
+          $jns_usulan = $this->input->post('jns_usulan');
+          $success = $this->m_usulan->cek_ada_revisi($ta,$id_usulan);
+
+          if ($success){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Pastikan setiap rincian UP sudah lengkap dan benar');
+                    redirect('usulan/get_veri_usulan/'.$id_subunit.'/'.$jns_usulan);
+
+           }else{
+                    $this->m_usulan->update_setuju_usulan($id_usulan,$ta);
+                    $this->m_usulan->log_history_usulan($id_usulan,4,'-');
+                    $this->session->set_userdata('msg_typ','ok');
+                    $this->session->set_userdata('msg', 'Rincian UP berhasil disetujui');
+                    redirect('usulan/get_veri_usulan/'.$id_subunit.'/'.$jns_usulan);
+           }
+
+     }
+
+     /**
+    * function untuk menampilkan list rincian UP yang telah diotorisasi oleh Kajur
+    */
+    function usulan_terotorisasi(){
+          $this->auth->restrict();
+          $data['nama_unit'] = $this->session->userdata('nama_unit');
+          //fungsi untuk membuat combobox pada tampilan
+           $non_kw = array('GU','LS','NHL','SAH','GU_NHL','TUP_NHL');
+                   $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+
+                    foreach($data['sifat_bayar'] as $key=>$val){
+                        if(in_array($val->kode_value, $non_kw)){
+                            unset($data['sifat_bayar'][$key]);
+                        }
+                    }
+          $this->template->load('template','usulan/daftar_usulan',$data);
+        }
+
+    /**
+     * fungsi ini dipergunakan untuk menampilkan data dari ajax pada tampilan usulan terotorisasi
+    */
+      function get_usulan_terotorisasi(){
+          //mengambil data session
+          $this->auth->restrict();
+
+          $kode_unit = $this->session->userdata('kode_unit');
+          $id_unit = $this->session->userdata('id_unit');
+
+          //mengambil data post
+          $jns_usulan = $this->input->post('jns_usulan');
+          $ta = $this->m_settings->get_tahun_anggaran();
+
+              //mencari data dari usulan yang telah terorisasi
+              $data['daftar_up'] = $this->m_usulan->usulan_terotorisasi($ta,$id_unit,$jns_usulan);
+              //$data['jum_daftar_up'] = $this->m_usulan->jum_up_terotorisasi($id_unit);
+
+              $telat= $this->m_usulan->usulan_belum_buat_rincian($id_unit,$jns_usulan);
+
+              $data['telat'] = $telat;
+              $data['daftar_up_belum'] = $this->m_usulan->daftar_sudah_buat($id_unit,$jns_usulan);
+              $data['nama_unit'] = $this->session->userdata('nama_unit');
+
+              $this->load->view('usulan/daftar_usulan_detail',$data);
+      }
+
+        /**
+        * function untuk melakukan pengecekan dokumen hardcopy oleh unit
+        */
+
+        function cek_dokumen(){
+              $this->auth->restrict();
+              $id_rekap = $this->input->post('id');
+          	  $th_rekap = $this->input->post('tahun');
+              $super = $this->m_usulan->update_dokumen($id_rekap,$th_rekap);
+              //echo "<meta http-equiv='refresh' content='0; url=".site_url()."usulan/usulan_terotorisasi'>";
+              if($super === false) {
+                    $response['errno']  = 1;
+                    $response['msg'] = "Proses penerimaan dokumen gagal mohon diulang kembali.";
+                    echo json_encode($response);
+                    return;
+              }else{
+                    $response['errno']  = 0;
+                    $response['msg'] = "Proses penerimaan dokumen berhasil.";
+                    echo json_encode($response);
+                    return;
+              }
+        }
+
+    /*
+	* function untuk menampilkan detail rincian UP yang telah diotorisasi oleh Kajur
+	*/
+    function detail_usulan_terotorisasi(){
+          $this->auth->restrict();
+          $ta=$this->uri->segment(3);
+          $id_usulan=$this->uri->segment(4);
+          $id_subunit=$this->uri->segment(5);
+          $jns_usulan=$this->uri->segment(6);
+          $data['jns_usulan']= $jns_usulan;
+          $data['ta']= $ta;
+
+          $kode_subunit = $this->session->userdata('kode_unit');
+          $data['nama_subunit'] = $this->m_umum->get_nama_sunit_by_id($id_subunit); //echo $data['nama_subunit'];
+
+                  $jum_up=$this->m_usulan->total_up($ta,$id_subunit,$jns_usulan);
+                          foreach($jum_up->result_array() as $jmlh_up)
+                             {
+                                $tot_up = $jmlh_up ['sum(jumlah)'];
+                             }
+                  $jum_rkakl=$this->m_logic->get_pok_sunit($ta, $id_subunit);
+
+                  $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan');
+                  $jum_non_adhoc=$this->m_usulan->total_keg_non_adhoc($ta,$kode_subunit,$satuan);
+                          foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                             {
+                                $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                             }
+                  $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');
+                  $jum_b_modal=$this->m_usulan->total_belanja_modal($ta,$kode_subunit,$kdakun);
+                          foreach($jum_b_modal->result_array() as $j_modal)
+                             {
+                                $tot_modal = $j_modal ['sum(jumlah)'];
+                             }
+
+                  $data['tem']= $jum_rkakl-$tot_modal-$tot_non_adhoc;
+                  $data['jum_up']=$tot_up;
+                  if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+                      $tot_sementara = 1/12 * $data['tem'];
+                      if($tot_sementara > 50000000){
+                          $data['tot_up'] = 50000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+                      $tot_sementara = 1/18 * $data['tem'];
+                      if($tot_sementara > 100000000){
+                          $data['tot_up'] = 100000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>2400000000){
+                      $tot_sementara = 1/24 * $data['tem'];
+                      if($tot_sementara > 200000000){
+                          $data['tot_up'] = 200000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }
+				  $data['maksimum_up']= $this->m_logic->get_nilai_max_up($ta, $id_subunit);
+                  $data['jum_tot_rkakl']=$jum_rkakl;
+                  $data['jum_up']=$tot_up;
+          $data['tot_pagu_realisasi']= $this->m_logic->get_pagu_real($ta,$id_subunit);
+          $data['daftar_up'] = $this->m_usulan->daftar_usulan_bk($ta,$id_usulan,$jns_usulan,'%');
+          $this->template->load('template','usulan/detail_usulan_terotorisasi',$data);
+    }
+
+    function tampil_pagu_persubunit_di_unit(){
+		$this->auth->restrict();
+		$kode_unit=$this->uri->segment(3);
+		$id_subunit=$this->uri->segment(4);
+		$jns_usulan=$this->uri->segment(5);
+		$ta=$this->uri->segment(6);
+
+		$data['spp']= $this->m_usulan->get_data_rkakl($ta,$id_subunit);
+
+		$total_spp_dulu2 = $this->m_usulan->jum_spp_terdahulu2($ta,$id_subunit,$jns_usulan);
+		//echo $this->db->last_query();
+		$spp2=array();
+		foreach($total_spp_dulu2 as $uraian2){
+		    $spp2=array_merge($spp2,array($uraian2->kdoutput.$uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+		}
+		$data['spp2']=$spp2;
+
+		$jumlah = $this->m_logic->get_pok_sunit($ta, $id_subunit);
+		$data['total_rkakl'] =  $jumlah;
+
+		$tot_up=$this->m_usulan->jum_tot_up($ta,$id_subunit,$jns_usulan);
+		//echo $this->db->last_query();
+		            foreach($tot_up->result_array() as $tot_kwi)
+		                 {
+		                    $nominal = $tot_kwi['sum(jumlah)'];
+		                 }
+		$data['total_up'] =  $nominal;
+
+		$data['pagu'] = $this->m_usulan->daftar_pagu($kode_unit);
+		//echo $this->db->last_query();
+		$this->load->view('usulan/tampil_cek_pagu',$data);
+
+    }
+
+
+    /**
+    * function untuk print rincian belanja UP
+    */
+    function print_up_baru($download_pdf = ''){
+             $id_subunit	= $this->session->userdata('id_subunit');
+             $id_usulan 	= $this->uri->segment(3);
+             $tahun 		= date('Y');
+             $tgl_skrg 		= date("Y-m-d");
+             $jam_skrg 		= date("H:i");
+             $ret 			= '';
+       		 $ta 			= $this->m_settings->get_tahun_anggaran();
+
+             $pdf_filename='daftar_rincian_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'usulan/print_up/true/','Download Pdf');
+
+			$usulan     = $this->m_usulan->get_usulan_by_id($id_usulan);
+			$data['id_status_usulan']   = $usulan->id_status_usulan;
+			$data['list_usulan']        = $this->m_usulan->get_list_uraian_usulan($id_usulan);
+            $data['unit'] = $this->m_usulan->daftar_unit($id_subunit);
+
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/printx', $data, true);
+
+             if($download_pdf==true)
+               generate_pdf_A4($output,$pdf_filename);
+             else
+                echo $output;
+    }
+
+    /**
+    * function untuk print rincian belanja UP
+    */
+    function print_up($download_pdf = ''){
+             $id_subunit	= $this->session->userdata('id_subunit');
+             $id_usulan 	= $this->uri->segment(3);
+             $tahun 		= date('Y');
+             $tgl_skrg 		= date("Y-m-d");
+             $jam_skrg 		= date("H:i");
+             $ret 			= '';
+       		 $ta 			= $this->m_settings->get_tahun_anggaran();
+
+             $pdf_filename='daftar_rincian_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'usulan/print_up/true/','Download Pdf');
+
+			 $total_up=$this->m_usulan->total_up($ta,$id_subunit,'UP');
+                  foreach($total_up->result_array() as $jmlh_up)
+                     {
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     }
+             $data['total_up'] = $tot_up;
+             $data['daftar_up'] = $this->m_usulan->print_daftar_up($id_subunit, $id_usulan, 'UP');
+             $data['unit'] = $this->m_usulan->daftar_unit($id_subunit);
+
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/print_rincian_up', $data,  true);
+
+             //if($download_pdf==true)
+             //   generate_pdf_A4($output,$pdf_filename);
+             //else
+                echo $output;
+    }
+
+    /**
+    * function untuk print surat pernyataan belanja UP
+    */
+    function print_surat_pernyataan_up($download_pdf = 'true'){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i");
+             $ret = '';
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf';
+             $pdf_filename='surat_pernyataan_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'usulan/print_surat_pernyataan_up/true/','Download Pdf');
+
+             $data['unit'] = $this->munit->daftar_unit();
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/print_surat_pernyataan_up', $data,  true);
+
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);
+             else
+                echo $output;
+             }
+    }
+
+    /**
+    * function untuk print surat pengantar dari subunit belanja UP
+    */
+    function print_surat_pengantar_sub($download_pdf = 'true'){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i");
+             $ret = '';
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf';
+             $pdf_filename='surat_pengantar_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(site_url().'usulan/print_surat_pengantar_sub/true/','Download Pdf');
+
+             $data['unit'] = $this->munit->daftar_unit();
+
+             $data['tgl'] = date("Y-m-d");
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/print_surat_pengantar_sub', $data,  true);
+
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);
+             else
+                echo $output;
+        }
+    }
+
+/*********************** MAX_UP ***********************/
+
+    function setup_max_up ()
+    {
+        //must login
+        $this->auth->restrict();
+
+        //cek privilege
+        $this->auth->has_privileges('setup_max_up');
+
+
+        $ta  = $this->m_settings->get_tahun_anggaran();
+        $idu = $this->session->userdata('id_unit');
+
+        $data['max_up'] = $this->m_max_up->get_tabel_pagu_real_max_up($ta, $idu);
+
+        $this->template->load('template','usulan/input_maks',$data);
+    }
+
+
+    /**
+     * AJAX
+     *
+     *
+     */
+    function save_max_up ()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //cek privilege
+        $this->auth->has_privileges('setup_max_up');
+
+        $ta         = $this->m_settings->get_tahun_anggaran();
+        $idsu       = $this->input->post('idsu');
+        $nilai_max  = $this->input->post('nilai_max');
+
+        $pagu_real  = $this->m_logic->get_pagu_real_sunit($ta, $idsu);
+
+        if($nilai_max > $pagu_real) {
+            //error
+            $response['errno']  = 1;
+            $response['message']= "Nilai Max UP tidak bisa melebihi nilai pagu real";
+            echo json_encode($response);
+            return;
+        }
+
+        //simpan max up
+        $ret = $this->m_max_up->simpan_max_up($ta, $idsu, $nilai_max);
+        if($ret === FALSE) {
+            $response['errno']  = 2;
+            $response['message']= "Proses Penyimpanan gagal. Mohon diulang kembali";
+            echo json_encode($response);
+            return;
+        }
+
+        $response['errno']  = 0;
+        $response['message']= "Penyimpanan berhasil";
+        echo json_encode($response);
+        return;
+
+    }
+	
+	// End Perpaikan Input DPT
+	
+	
+ }

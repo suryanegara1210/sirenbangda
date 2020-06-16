@@ -1,0 +1,71 @@
+<?php
+
+class Home extends CI_Controller {
+
+    public function __construct()
+	{
+		$this->CI =& get_instance();
+		parent::__construct();
+		$this->load->helper('url');
+		$this->load->model(array('m_pok','m_umum','m_logic'));
+	}
+
+	function index()
+	{
+		//jika lagi diperbaiki
+		$uc = $this->m_umum->get_under_construction();
+		if (empty($uc)) {
+			redirect('under_construction');
+		}
+		
+		$this->auth->restrict();
+
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $idu = $this->session->userdata('id_unit');
+
+        $data['idu']=$idu;
+        $data['idsu']=$idsu;
+        $data['link_unit']=base_url('users/unit/edit/'.$idu);
+        $data['link_subunit']=base_url('users/subunit/edit/'.$idsu);        
+
+		$data['pok_total']        = 0;
+		$data['penerimaan_total'] = 0;
+		$data['pagu_total']       = 0;
+		$data['sisa_pagu']  	  = 0;
+
+        if(!empty($cdsu)) {        	
+			$data['pok_total'] = $this->m_pok->get_nilai_pok_sunit($ta, $cdsu);
+			$data['penerimaan_total'] = $this->m_logic->get_penerimaan_total_sunit($ta, $idsu);			
+			$data['pagu_total'] = $this->m_logic->get_pagu_real_sunit($ta, $idsu);
+			$data['sisa_pagu']  = $this->m_logic->get_sisa_pagu_sunit($ta, $idsu);
+        }
+
+		$this->template->load('template', 'home', $data);
+	}
+
+	function index1()
+	{
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $data['daftar_pok'] = '';
+
+		if(!empty($cdsu)) {
+			$data['lists'] = $this->m_pok->get_daftar_pok($ta, $cdsu);
+			$data['unit']  = $this->m_umum->get_nama_sunit_by_code($cdsu);
+			$data['daftar_pok'] = $this->load->view('pok/list_dipa',$data, TRUE);
+		}
+
+		$this->template->load('template','home', $data);
+
+	}
+
+}
+
+?>

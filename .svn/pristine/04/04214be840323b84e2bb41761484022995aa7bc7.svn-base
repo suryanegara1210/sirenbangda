@@ -1,0 +1,2598 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class belanja dari belanja Langsung(LS)
+ * 
+ * Controller Class belanja dari belanja Langsung(LS) yang merupakan bagian dari
+ * Bisnis Belanja
+ * 
+ * @author Dwi Adi Jaya Antika
+ * @author Putu Ari Arjana
+ * @author I Wayan Sudharmika
+ * @author I Wayan Shandyasa
+ */
+class Ls extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+        {                                
+            $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->library(array('konversi','Formatting', 'constant'));
+			$this->load->model(array('m_ls', 'm_logic', 'm_settings','m_spj','m_umum')); 
+        }
+
+ function select_output()
+    {
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $data['output'] = $this->m_ls->getOutputList($jns_kwitansi);
+			echo $this->db->last_query();        
+            $this->load->view('ls/mak/getoutput',$data);
+	}
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK AUTO COMPLETE
+*/
+function lookup(){
+		// process posted form data (the requested items like province)
+        $keyword = $this->input->post('term');
+        $data['response'] = 'false'; //Set default response
+        $query = $this->m_ls->lookup($keyword); //Search DB
+        if( ! empty($query) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $query as $row )
+            {
+                $data['message'][] = array( 
+                                        'id'=>$row->id_pegawai,
+										'label'=>$row->nama_pegawai,
+										'value'=>$row->golongan,
+										'desc'=>$row->jabatan,
+                                        ''
+                                     );  //Add a row to array
+            }
+        }
+        if('IS_AJAX')
+        {
+            echo json_encode($data); //echo json string if ajax request
+        }
+        else
+        {
+             $this->template->load('template','ls/buat_kwitansi/kwitansi_honor',$data);
+        }
+	}
+/**
+* Fungsi untuk mendapatkan data output
+* @return list of object
+*/	
+ function getOutputList($jns_kwitansi)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('kdoutput','ASC');
+            $array_keys_values = $this->db->get();
+			if($array_keys_values[0]==""){
+				foreach ($array_keys_values->result() as $row)
+				{
+					$result[0]= '-Pilih Output-';
+				}
+			}else{
+				foreach ($array_keys_values->result() as $row)
+				{
+					$result[0]= '-Pilih Output-';
+					$result[$row->kdoutput]= ("$row->kdoutput - $row->nmoutput");
+				}
+			}
+            return $result;
+		   
+        }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN KOMPONEN
+*/
+   function select_komponen()
+    {
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['jns_kwitansi'] = $this->input->post('jns_kwitansi');
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $data['option_komponen'] = $this->m_ls->getKomponenList($jns_kwitansi);       
+            $this->load->view('ls/mak/getkomponen',$data);
+    }
+
+	function select_countsubkomponen()
+    {
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+			$kdkomponen = $this->input->post('kdkomponen');
+			$xxx = $this->m_ls->getCountSubKomponen($jns_kwitansi,$kdoutput,$kdkomponen);  
+			echo $xxx;
+			//echo $this->db->last_query();
+	}
+	 function select_subkomponen()
+    {
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+			$kdkomponen = $this->input->post('kdkomponen');
+			$data['option_komponen'] = $this->m_ls->getSubKomponenList($jns_kwitansi,$kdoutput,$kdkomponen); 
+			$this->load->view('ls/mak/getsubkomponen',$data);
+		
+	}
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN AKUN
+*/
+    function select_akun(){
+			$jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdkomponen = $this->input->post('kdkomponen');
+            $data['option_akun'] = $this->m_ls->getAkunList($jns_kwitansi,$kdoutput,$kdkomponen);      
+            $this->load->view('ls/mak/getakun',$data);
+    }
+	
+	function select_akun_test(){
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdkomponen = $this->input->post('kdkomponen');
+			$kdskomponen = $this->input->post('kdskomponen');
+            $data['option_akun'] = $this->m_ls->getAkunList_test($jns_kwitansi,$kdoutput,$kdkomponen,$kdskomponen);       
+            $this->load->view('ls/mak/getakun',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN HEADER
+*/	
+    function select_header(){
+            $kdkomponen = $this->input->post('kdkomponen');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $data['kdkomponen'] = $kdkomponen;
+            $data['kdoutput'] = $kdoutput;
+            $data['kdakun'] = $kdakun;
+            $kd=substr($kdakun,0,2); 
+            $data['option_header'] = $this->m_ls->getHeaderList($kdakun, $kdkomponen,$kdoutput);
+            $this->load->view('ls/mak/getheader',$data);
+    }
+
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PAJAK
+*/
+	function select_pajak()
+    {
+            $jns_pajak = $this->input->post('jns_pajak');
+			$data['hasil'] = $this->m_ls->get_nilai_pajak($jns_pajak);    
+			$data['id'] = $jns_pajak;
+			$this->load->view('ls/buat_kwitansi/gu_select_ppn',$data);
+    }	
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN FORM BUAT KWITANSI
+*/
+    function buat_kwitansi()
+    {
+		$su = $this->session->userdata('id_subunit');
+		$ta = $this->m_settings->get_tahun_anggaran();
+			
+		$cek_ada_pagu_real=$this->m_logic->cek_ada_pagu_real($ta,$su);
+		/*if($cek_ada_pagu_real<=0)
+		  {
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Maaf Pagu Real Masih Kosong, Kwitansi belum dapat dibuat');
+              redirect('');  			   
+	      }
+		else
+		{*/
+        $this->template->load('template','ls/buat_kwitansi/buat_kwitansi');
+		//}
+	}
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN JENIS KWITANSI
+*/	           
+    function asal(){
+        $this->load->view('ls/buat_kwitansi/rincian_honor/honor_2');
+    }
+    function jenis_kwitansi()
+    {
+		$jns_kwitansi = $this->input->post('jns_kwitansi');
+		$data['jns_pajak'] = $this->m_ls->get_jenis_pajak();
+	    $data['golongan'] = $this->m_ls->getGolongan();
+		/**$su = $this->session->userdata('id_subunit');
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$ta2 = $this->m_settings->get_tahun_anggaran2();
+		
+		$cek_ketersediaan_mp=$this->m_logic->cek_ketersediaan_mp($ta,$su);
+		$sps_true=$this->m_logic->get_sps($ta, $ta2, $su, TRUE);
+		$sps_false=	$this->m_logic->get_sps($ta, $ta2, $su, FALSE);;
+			
+		if($cek_ketersediaan_mp<=0)
+		{	$data['pembanding']=$sps_false;
+			$data['nama_pembanding']='SPS FALSE';
+		}
+		else
+		{	$data['pembanding']=$sps_true;
+			$data['nama_pembanding']='SPS TRUE';
+		}
+		**/
+
+		if($jns_kwitansi=='HONOR')
+		{ 
+		$jenis_kwitansi='HONOR';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputList($jenis_kwitansi);
+		$this->load->view('ls/buat_kwitansi/kwitansi_honor',$data); }
+		else
+		if($jns_kwitansi=='KONTRAK')
+		{ 
+		$jenis_kwitansi='KONTRAK';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputList($jenis_kwitansi); 
+		$this->load->view('ls/buat_kwitansi/kwitansi_kontraktual',$data); }
+		else
+		if($jns_kwitansi=='MODAL')
+		{ 
+		$jenis_kwitansi='MODAL';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputList($jenis_kwitansi);
+		$this->load->view('ls/buat_kwitansi/kwitansi_modal',$data); }
+		else
+		if($jns_kwitansi=='BANSOS')
+		{ 
+		$jenis_kwitansi='BANSOS';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputList($jenis_kwitansi);
+		$this->load->view('ls/buat_kwitansi/kwitansi_bansos',$data); }
+		else
+		if($jns_kwitansi=='PERJADIN')
+		{ 
+		$jenis_kwitansi='PERJADIN';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputList($jenis_kwitansi);   
+		$this->load->view('ls/buat_kwitansi/kwitansi_spd',$data); }
+		else
+		if($jns_kwitansi=='KONTRAK_PENELITIAN')
+		{ 
+		$jenis_kwitansi='KONTRAK_PENELITIAN';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputListKontrak('KONTRAK');   
+		$this->load->view('ls/buat_kwitansi/kwitansi_kontrak_penelitian',$data); }
+		else
+		if($jns_kwitansi=='KONTRAK_PENGABDIAN')
+		{ 
+		$jenis_kwitansi='KONTRAK_PENGABDIAN';
+	    $data['jns_kwitansi'] = $jenis_kwitansi;
+        $data['output'] = $this->m_ls->getOutputListKontrak('KONTRAK');   
+		$this->load->view('ls/buat_kwitansi/kwitansi_kontrak_pengabdian',$data); }
+
+
+
+		
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILAKAN JENIS HONOR
+*/
+    function jenis_honor()
+    {
+		$jns_honor = $this->input->post('jns_honor');
+
+		if($jns_honor=='1')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_1'); }
+		else
+		if($jns_honor=='2')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_2'); }
+		else
+		if($jns_honor=='3')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_3'); }
+		else
+		if($jns_honor=='4')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_4'); }
+		else
+		if($jns_honor=='5')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_5'); }
+		else
+		if($jns_honor=='6')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_6'); }
+		else
+		if($jns_honor=='7')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_7'); }
+		else
+		if($jns_honor=='8')
+		{ $this->load->view('ls/buat_kwitansi/rincian_honor/honor_8'); }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA KWITANSI
+*/
+ 	function simpan_kwitansi()
+    {
+		$jenis_kwitansi = $this->input->post('jenis_kwitansi'); 
+		$tgl_kwitansi = $this->input->post('tgl_kwitansi');
+		$tpt_kwitansi = $this->input->post('tpt_kwitansi');
+		$kode_subunit = $this->session->userdata('kode_subunit');
+		$kdoutput = $this->input->post('kdoutput'); 
+		$kdkomponen = $this->input->post('kdkomponen');
+		$kdakun =  $this->input->post('kdakun');
+		$hdr = $this->input->post('id_header');
+		$darne = $this->input->post('darne');
+		
+		if($darne == 0){
+		$nama = $this->m_ls->getnamaList($kode_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);
+			foreach($nama->result_array() as $row){
+				$nmoutput = $row['nmoutput'];
+				$nmkomponen = $row['nmkomponen'];
+				$nmakun = $row['nmakun'];
+				$nmsubkomponen = $row['nmskomponen'];
+				$nmheader = $row['hdr'];
+			}
+	    $kdskomponen='';
+		}else{
+			$kdskomponen = $this->input->post('kdskomponen');
+			$nama = $this->m_ls->getnamaListSub($kode_subunit,$kdoutput,$kdkomponen,$kdskomponen,$kdakun,$hdr);
+			foreach($nama->result_array() as $row){
+				$nmoutput = $row['nmoutput'];
+				$nmkomponen = $row['nmkomponen'];
+				$nmakun = $row['nmakun'];
+				$nmsubkomponen = $row['nmskomponen'];
+				$nmheader = $row['hdr'];
+			}
+		}
+		
+		$nominal = $this->input->post('nominal');
+		$jns_pajak = $this->input->post('jns_pajak');		
+		$p_ppn = $this->input->post('p_ppn');
+		$p_pph = $this->input->post('p_pph');
+		 $dpp = (100/110) * $nominal;
+		 $pph = ($p_pph/100) * $dpp;
+		 $ppn = ($p_ppn/100) * $dpp;		
+		$ket_kwitansi = $this->input->post('ket_kwitansi');
+		$pengambil = $this->input->post('pengambil');
+		$nip_pengambil = $this->input->post('nip_pengambil');
+		$penerima = $this->input->post('penerima');
+		$pp_spd = $this->input->post('pp_spd');
+		$no_sk_spd = $this->input->post('no_sk_spd');
+		$dari = $this->input->post('dari');
+		$tujuan = $this->input->post('tujuan');
+		$yg_bepergian = $this->input->post('yg_bepergian');
+		$nip = $this->input->post('nip');
+		$golongan_spd = $this->input->post('golongan_spd');
+		$maksud = $this->input->post('maksud');
+		$tgl_b = $this->input->post('tgl_b');
+		$tgl_k = $this->input->post('tgl_k');
+		$ket_spd = $this->input->post('ket_spd');
+        $ket_sptb= $this->input->post('ket_sptb');
+        $nip_penerima= $this->input->post('nip_penerima');
+        $no_sk= $this->input->post('no_sk');
+        $tgl_sk= $this->input->post('tgl_sk');
+        $kop_honor= $this->input->post('kop_honor');
+		$jns_honor= $this->input->post('jns_honor');
+        $namazz= $this->input->post('nama');
+        $jabatan= $this->input->post('jabatan');
+        $golongan= $this->input->post('golongan');
+        $jml_org= $this->input->post('jml_org');
+        $h_naskah= $this->input->post('h_naskah');
+        $nama_mhs= $this->input->post('nama_mhs');
+        $nim_mhs= $this->input->post('nim_mhs');
+		$kd_mk= $this->input->post('kd_mk');    
+        $m_kul= $this->input->post('m_kul');    
+        $kls= $this->input->post('kls');    
+        $jml_hadir= $this->input->post('jml_hadir');    
+        $jml_bln= $this->input->post('jml_bln');    
+        $ptkp= $this->input->post('ptkp'); 
+        $pkp= $this->input->post('pkp');    
+        $jml_hari= $this->input->post('jml_hari');    
+        $bruto= $this->input->post('bruto');
+		$perincianzz= $this->input->post('perincian');
+		$jumlah= $this->input->post('jumlah');
+		$pph_spd= $this->input->post('pph');
+		$id_subunit_rincian= $this->input->post('subunit');
+		$nama_barang= $this->input->post('nama_barang');
+		$jumlah= $this->input->post('jumlah');
+		$harga= $this->input->post('harga');
+		$judul_p= $this->input->post('judul_p');
+		$no_kontrak= $this->input->post('no_kontrak');
+		$jangka_waktu= $this->input->post('jangka_waktu');
+		$kode_bas = $this->input->post('kode_bas');
+
+		if($jenis_kwitansi=='HONOR')
+		{  
+			$this->m_ls->simpan_honor(	$tgl_kwitansi, $tpt_kwitansi, 
+										$kdoutput, $kdkomponen,$kdskomponen, $kdakun, $hdr, 
+										$nmoutput, $nmkomponen,$nmsubkomponen, $nmakun, $nmheader, 				
+										$ket_kwitansi, $pengambil, $nip_pengambil, $penerima,
+										$nip_penerima, $ket_sptb, $no_sk, $tgl_sk, $kop_honor, $jns_honor,  
+										$namazz, $jabatan, $golongan, $kd_mk, $m_kul, $kls,
+										$jml_org, $h_naskah, $nama_mhs, $nim_mhs,     
+										$jml_hadir, $jml_bln, $ptkp, $pkp, $jml_hari, $bruto, $kode_bas 
+										);
+		}
+		else if($jenis_kwitansi=='PERJADIN')
+		{  
+			$tiket = $this->input->post('tiket');
+			$board = $this->input->post('board');
+			$taxi  = $this->input->post('taxi');
+			$dll  = $this->input->post('dll');
+			$uang_saku  = $this->input->post('uang_saku');
+			$representatif  = $this->input->post('representatif');
+			$lama = $this->input->post('lama_hari');
+			$biaya = $this->input->post('biaya');
+			$pph21 = $this->input->post('pph21');
+
+			$this->m_ls->simpan_spd(	$tgl_kwitansi, $tpt_kwitansi, 
+					 $kdoutput, $kdkomponen,$kdskomponen, $kdakun, $hdr, 
+					 $nmoutput, $nmkomponen,$nmsubkomponen, $nmakun, $nmheader, 	
+					 $pp_spd, $no_sk_spd, $dari, $tujuan, $yg_bepergian, $nip, $golongan_spd, $maksud, $tgl_b, $tgl_k, $ket_spd, 				
+					 $biaya, $lama, $jumlah, $pph21, $tiket, $board, $taxi, $dll, $uang_saku, $representatif, $kode_bas );
+		}
+		else if($jenis_kwitansi=='KONTRAK_PENGABDIAN' || $jenis_kwitansi=='KONTRAK_PENELITIAN')
+		{  
+			$this->m_ls->simpan_kontraktual_Peng(	$jenis_kwitansi, $tgl_kwitansi, $tpt_kwitansi, 
+													$kdoutput, $kdkomponen,$kdskomponen, $kdakun, $hdr, 
+													$nmoutput, $nmkomponen,$nmsubkomponen, $nmakun, $nmheader, 					
+													$ket_kwitansi, $judul_p, $pengambil, $nip_pengambil,  
+													$nominal, $no_kontrak, $jangka_waktu, $kode_bas);
+		}
+		else if($jenis_kwitansi=='MODAL' || $jenis_kwitansi=='BANSOS')
+		{  
+			$this->m_ls->simpan_kontraktual_modal_bansos(	$jenis_kwitansi, $tgl_kwitansi, $tpt_kwitansi, 
+														$kdoutput, $kdkomponen,$kdskomponen, $kdakun, $hdr, 
+														$nmoutput, $nmkomponen,$nmsubkomponen, $nmakun, $nmheader, 					
+														$ket_kwitansi, $pengambil, $nip_pengambil, $penerima, 
+														$id_subunit_rincian, $nama_barang, $jumlah, $harga, 
+														$nominal, $jns_pajak, $pph, $ppn, $kode_bas );
+		}
+		else
+		{  
+		 echo "proses gagal";
+		}
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DAFTAR KWITANSI
+*/
+	function daftar_kwitansi_ls(){   
+        if($this->auth->is_logged_in() == true){         	
+		  $data['hasil']= $this->m_ls->data_kuitansi();
+          $this->template->load('template','ls/daftar_kwitansi/daftar_kuitansi',$data);
+		}
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENGIRIMKAN KWITANSI KE VERIFIKATOR
+*/
+    function kirim_kwitansi(){   
+        if($this->auth->is_logged_in() == true){        
+          $id_subunit = $this->session->userdata('id_subunit');
+          $th = date('y');
+          $bl = date('m');
+          $success = $this->m_ls->cek_ada_kwitansi($id_subunit,$th,$bl);
+          if($success){
+              $daftar_up = $this->m_ls->daftar_ls_subunit($id_subunit,$th,$bl);
+              foreach($daftar_up->result_array() as $row){
+                  $id_kwitansi = $row['id_kwitansi'];
+                  $this->m_ls->ubah_status_gu_ajukan($id_subunit,$id_kwitansi,$th);
+              }
+                
+              $this->m_ls->masuk_waktu_pengajuan($id_kwitansi,$th); 
+              ?>    
+                <script type="text/javascript" language="javascript">
+                alert("Kwitansi Berhasil dikirim ke Verifikator Unit");
+				window.location.href='daftar_kwitansi_ls';
+                </script> 
+              <?php        
+          $this->template->load('template','unit/index');
+          }else{
+              ?>    
+              <script type="text/javascript" language="javascript">
+              alert("Pengiriman Gagal... Tidak Ada Data yang dikirim!!");
+				window.location.href='daftar_kwitansi_ls';
+              </script> 
+              <?php        
+              $this->template->load('template','unit/index');
+          }
+        }
+    }
+    
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PREVIEW DARI KWITANSI
+*/
+    function preview_kwitansi()
+    {
+		 $id_unit = $this->session->userdata('id_unit');         
+		 $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+         $data['hasil'] = $this->m_ls->getKuitansi($id,$th); 
+         $data['data'] = $this->m_ls->getNamattd($id_unit);
+         $data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+         $this->template->load('template','ls/daftar_kwitansi/preview_kwitansi_subunit',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN STATUS VERIFIKASI DARI KWITANSI
+*/
+    function ver_kwitansi_ls(){
+         if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit');  
+          $data['daftar_unit'] = $this->m_ls->getUnitList($id_unit);
+          $jumlah_gu=array();
+           foreach ($data['daftar_unit'] as $tgu){
+             $jumlah_gu[]= $this->m_ls->banyak_kwitansi($tgu['id_subunit']);
+           }
+           $data['jumgu']= $jumlah_gu;  
+          $this->template->load('template','ls/ver_ls/unit/verifikasi',$data);  
+        }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILAN DATA VERIFIKASI KWITANSI
+*/
+ function view_ver_kwitansi(){
+    if($this->auth->is_logged_in() == true)
+        {   
+            $id_subunit = $this->uri->segment(3); 
+            $id_unit = $this->session->userdata('id_unit');
+            $data['cek_unit']=$this->m_ls->cek_unit($id_subunit,$id_unit);
+            $data['hasil']= $this->m_ls->data_kuitansi_verifikasi($id_subunit);
+            $data['nama_subunit']= $this->m_ls->nama_subunit($id_subunit);
+            $this->template->load('template','ls/ver_ls/unit/daftar_kuitansi',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW KWITANSI YANG DIVERIFIKASI
+*/
+ function preview_kwitansi_ver()
+    {
+        $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+		 $jenis_kwitansi = $this->uri->segment(5); 
+         $id_sifatpembayaran = $this->uri->segment(6); 
+		 $id_unit = $this->session->userdata('id_unit');
+         $data['hasil'] = $this->m_ls->getKuitansi_veri($id,$th);
+         $data['data'] = $this->m_ls->getNamattd($id_unit);
+         $data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+         $data['pajak'] = $this->m_ls->get_jenis_pajak_veri($id,$th);
+         $data['kelengkapan'] = $this->m_ls->kelengkapan($id,$th,$jenis_kwitansi,$id_sifatpembayaran);
+         $this->template->load('template','ls/ver_ls/unit/preview_kwitansi_unit',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN HISTORY VERIFIKASI
+*/
+ function verifikasi_history()
+     {       
+        $th = $this->uri->segment(3);
+        $id = $this->uri->segment(4);
+        $data['hasil'] = $this->m_ls->get_history($id,$th);
+        $this->load->view('ls/ver_ls/unit/ver_history',$data);   
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA VERIFIKASI KWITANSI
+*/
+function simpan_verifikasi()
+    {
+        $id = $this->input->post('id_kwitansi');
+        $th= $this->input->post('th_kwitansi');
+        $jenis_kwitansi = $this->input->post('jenis_kwitansi');
+        $id_sifatpembayaran= '4';
+        $status = $this->input->post('status');
+		if($status=='4')
+		{$stat_waktu='Siap dijadikan SPTB';}
+		else
+		{$stat_waktu='revisi ke subunit';}
+		
+        $comment = $this->input->post('comment');
+		if (isset($_POST['kwitansi']))
+            {$st_kwitansi ='1';}
+            else
+            {$st_kwitansi ='0';}
+        $this->m_ls->up_kwitansi($status,$id,$th,$st_kwitansi);
+		$get_id_ver = $this->m_ls->kelengkapan($id,$th,$jenis_kwitansi,$id_sifatpembayaran);
+              foreach($get_id_ver->result_array() as $row)
+			  {
+                  $nama = $row['id_ver']; 
+					if (isset($_POST[$nama]))
+            		{$flag ='1';}
+            		else
+            		{$flag ='0';}
+				$this->m_ls->up_kelengkapan($flag,$id,$th,$nama);	
+              }
+		$get_id = $this->m_ls->ambil_level_tertinggi($id,$th);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;
+        $success = $this->m_ls->masuk_kirim_hasil_revisi($id,$th,$level_terkini,$comment,$stat_waktu);
+
+		
+                redirect('ls/ver_kwitansi_ls');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK DATA KWITANSI YANG DIVERIFIKASI
+*/
+ function rev_ver_kwitansi(){
+    if($this->auth->is_logged_in() == true)
+        {   
+            $data['hasil']= $this->m_ls->data_rev_kuitansi();
+            $this->template->load('template','ls/ver_ls/subunit/rev_ver_kwitansi',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENGEDIT DATA REVISI KWITANSI
+*/
+ function update_revisi()
+    {
+         $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+         $data['hasil'] = $this->m_ls->getKuitansi_veri($id,$th);
+         $data['jns_pajak'] = $this->m_ls->edit_jenis_pajak();
+         $this->template->load('template','ls/ver_ls/subunit/edit_kwitansi',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA YANG DI-EDIT SEBELUMNYA
+*/
+function edit_kwitansi()
+    {
+        $id_kwitansi = $this->input->post('id_kwitansi');
+        $th_kwitansi = $this->input->post('th_kwitansi');
+		$id_status_kwi = $this->input->post('id_status_kwitansi');
+        $object->tgl_kwitansi = $this->input->post('tgl_kwitansi');
+        $object->ket_kwitansi = $this->input->post('ket_kwitansi');
+        $object->tpt_kwitansi = $this->input->post('tempat_kwitansi');
+        $object->penerima = $this->input->post('penerima');
+        $object->pengambil = $this->input->post('pengambil');
+        $object->id_pajak = $this->input->post('jns_pajak');
+		if($id_status_kwi==2)
+		{  $id_status_kwitansi=3;  }
+		else
+		if($id_status_kwi==18)
+		{  $id_status_kwitansi=19;  }
+		else
+		if($id_status_kwi==20)
+		{  $id_status_kwitansi=21;  }
+        $object->id_status_kwitansi = $id_status_kwitansi;
+        $id_pajak=$this->input->post('jns_pajak');
+        $nominal=$this->input->post('nominal');
+        $pph=$this->m_ls->get_pph($id_pajak);
+        $ppn=$this->m_ls->get_ppn($id_pajak);
+		$id_pajak = $this->input->post('jns_pajak');
+		if($id_pajak>0)
+		{
+			$object->nominal = $this->input->post('nominal');
+        	$object->pph=$nominal*$pph/100;
+        	$object->ppn=$nominal*$ppn/100;
+		}
+        $success = $this->m_ls->edit_kwitansi($object,$id_kwitansi,$th_kwitansi);
+        $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_kwitansi);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;
+        $success = $this->m_ls->masuk_kirim_hasil_revisi($id_kwitansi,$th_kwitansi,$level_terkini,'','perbaikan kwitansi');
+        redirect('ls/rev_ver_kwitansi');
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MEMBUAT DATA KWITANSI ONTRAK
+*/
+ function buat_kwitansi_kontrak()
+      {   
+        if($this->auth->is_logged_in() == true)
+        {
+         $id_unit = $this->session->userdata('id_unit');
+         $tahun = date('Y');
+         $th = date('y');
+         $bulan = date('m');
+         $data['sptb'] = $this->m_ls->output_list($tahun);
+         $jumlah_gu=array();
+           foreach ($data['sptb'] as $tgu){
+             $jumlah_gu[]= $this->m_ls->banyak_kwitansi_kontrak_subunit($tgu['kdoutput'],$tgu['kdakun'],$th,$bulan);
+           }
+           $data['jumgu']= $jumlah_gu;
+         $this->template->load('template','ls/pengadaan/buat_kwitansi_kontrak',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN KWITANSI KONTRAK
+*/
+ function view_kwitansi_kontrak()
+      {   
+        if($this->auth->is_logged_in() == true)
+        { 
+         $kdoutput = $this->uri->segment(3);
+         $id_akun = $this->uri->segment(4);
+         $bulan = date('m');
+         $th = date('y');
+         $data['hasil']= $this->m_ls->data_kuitansi_kontrak($kdoutput,$id_akun,$th);
+		 $data['jns_pajak'] = $this->m_ls->edit_jenis_pajak();
+         $this->template->load('template','ls/pengadaan/view_kwitansi_kontrak',$data);
+        }
+    }    
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA KWITANSI KONTRAK
+*/
+function simpan_kwitansi_kontrak()
+      {    
+        if($this->auth->is_logged_in() == true)
+        { 
+         $kdoutput = $this->input->post('kdoutput');
+         $kdkomponen = $this->input->post('kdkomponen');
+         $kdakun = $this->input->post('kdakun');
+         $hdr = $this->input->post('hdr');
+         $nmoutput = $this->input->post('nmoutput');
+         $nmkomponen = $this->input->post('nmkomponen');
+         $nmakun = $this->input->post('nmakun');
+         $nmheader = $this->input->post('nmheader');
+		 $tgl_kwitansi = $this->input->post('tgl_kwitansi');
+         $tpt_kwitansi = $this->input->post('tpt_kwitansi');
+         $ket_kwitansi = $this->input->post('ket_kwitansi');
+         $pengambil = $this->input->post('pengambil');
+         $nip_pengambil = $this->input->post('nip_pengambil');
+         $penerima = $this->input->post('penerima');
+         $sum_nominal = $this->input->post('sum_nominal');
+         $p_ppn = $this->input->post('p_ppn');
+         $p_pph = $this->input->post('p_pph');
+         $bulan = date('m');
+         $th = date('y');
+         $kwitansi = $this->m_ls->ambil_id($kdoutput,$kdakun,$bulan);
+         $this->m_ls->simpan_kwitansi_kontrak(	$kdoutput,$kdkomponen,$kdakun,$hdr,
+		 										$nmoutput,$nmkomponen,$nmakun,$nmheader, 
+		 										$bulan, $kwitansi, 
+		 										$tgl_kwitansi, $tpt_kwitansi, $ket_kwitansi, $pengambil, 
+												$nip_pengambil, $penerima, $sum_nominal, $p_ppn, $p_pph
+		 										);
+         redirect('ls/daftar_kwitansi_pengadaan'); 
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA KWITANSI DI PENGADAAN
+*/
+	function daftar_kwitansi_pengadaan(){   
+        if($this->auth->is_logged_in() == true){         	
+		  $data['hasil']= $this->m_ls->data_kuitansi_pengadaan();
+          $this->template->load('template','ls/pengadaan/daftar_kuitansi',$data);
+		}
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW KWITANSI PENGADAAN
+*/
+    function preview_kwitansi_pengadaan()
+    {
+         $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+		 $id_unit = $this->session->userdata('id_unit');         
+         $data['hasil'] = $this->m_ls->getKuitansiPengadaam($id,$th); 
+         $data['data'] = $this->m_ls->getNamattd($id_unit);
+		 echo $this->db->last_query();
+         $data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+         $this->template->load('template','ls/pengadaan/preview_kwitansi_pengadaan',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK DATA KWITANSI PENGADAAN
+*/
+    function kirim_kwitansi_pengadaan(){   
+        if($this->auth->is_logged_in() == true){        
+          $id_subunit = $this->session->userdata('id_subunit');
+          $th = date('y');
+          $bl = date('m');
+          $success = $this->m_ls->cek_ada_kwitansi_pengadaan($id_subunit,$th,$bl);
+          if($success){
+              $daftar_up = $this->m_ls->daftar_ls_kontrak_pengadaan($id_subunit,$th,$bl);
+              foreach($daftar_up->result_array() as $row){
+                  $id_kwitansi = $row['id_kwitansi_kontrak'];
+                  $this->m_ls->ubah_status_kirim_pengadaan($id_subunit,$id_kwitansi,$th);
+              }
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Kwitansi Berhasil dikirim ke Verifikatos Unit');
+              redirect(base_url());  
+          }else{
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Pengiriman Gagal... Tidak Ada Data yang dikirim!!');
+              redirect(base_url());   
+          }
+        }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW SPTB
+*/
+    function preview_sptb()
+    {
+         $this->template->load('template','ls/preview_sptb');
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MEMBUAT SPTB
+*/
+    function buat_sptb_ls()
+      {   
+        if($this->auth->is_logged_in() == true)
+        {
+         $id_unit = $this->session->userdata('kode_unit');
+         $tahun = date('Y');
+         $th = date('y');
+         $bulan = date('m');
+         $data['sptb'] = $this->m_ls->output_list_arick($id_unit,$tahun);
+		 //echo $this->db->last_query();
+         $jumlah_gu=array();
+           foreach ($data['sptb'] as $tgu){
+             $jumlah_gu[]= $this->m_ls->banyak_kwitansi_sptb($tgu['kdoutput'],$tgu['kdakun'],$th,$bulan);
+			 //echo $this->db->last_query();
+           }
+           $data['jumgu']= $jumlah_gu;
+         $this->template->load('template','ls/buat_sptb_gu',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA SPTB
+*/	
+    function view_buat_sptb_ls()
+      {   
+        if($this->auth->is_logged_in() == true)
+        { 
+         $kdoutput = $this->uri->segment(3);
+         $id_akun = $this->uri->segment(4);
+         $bulan = date('m');
+         $data['hasil']= $this->m_ls->data_kuitansi_sptb($kdoutput,$id_akun,$bulan);
+         $this->template->load('template','ls/view_sptb_gu',$data);
+        }
+    } 
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA SPTB
+*/
+    function simpan_sptb()
+      {    
+        if($this->auth->is_logged_in() == true)
+        { 
+         $this->m_ls->simpan_sptb();
+         redirect('ls/daftar_sptb_gu'); 
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DAFTAR SPTB
+*/	
+    function daftar_sptb_gu()
+      {   
+        if($this->auth->is_logged_in() == true)
+        {
+         $id_unit = $this->session->userdata('id_unit');
+         $th = date('y');
+         $bulan = date('m');
+         $data['nama_unit']= $this->m_ls->nama_unit($id_unit);
+         $data['hasil']= $this->m_ls->data_sptb($th,$bulan); 
+		 //echo $this->db->last_query(); 
+        }       
+         $this->template->load('template','ls/daftar_sptb_gu',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW DATA SPTB
+*/
+    function preview_sptb_gu()
+    {
+         $th = $this->uri->segment(3);
+         $id = $this->uri->segment(4);
+         $id_unit = $this->session->userdata('id_unit');
+         $unit=$this->m_ls->nama_unit_sptb($id_unit);
+         $data['nama_unit']=$unit->nama_unit;
+         $data['pd2']=$this->m_ls->ambil_nama_nip('m_ppk','id_ppk',$unit->id_pd2);
+         $data['bpp']=$this->m_ls->ambil_nama_nip('m_bpp','id_bpp',$unit->id_bpp);
+         $data['data'] = $this->m_ls->getNamattd($id_unit);
+         $data['nama_unit_singkat']= $this->m_ls->nama_unit($id_unit); 
+         $data['hasil'] = $this->m_ls->get_sptb_kwitansi($id,$th);
+         $data['detail']= $this->m_ls->get_sptb_kwitansi_detail($id,$th);
+         $this->template->load('template','ls/preview_sptb',$data);
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK AUTO COMPLETE
+*/	
+    function print_sptb($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+            $th = date('y');
+             $th=$this->uri->segment(3);
+             $id=$this->uri->segment(4);
+             $ret = '';
+             $ID = $id;
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='sptb_LS-'.$id.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'ls/print_sptb/true/','Download Pdf');
+            
+             $data['link'] = $link_download ;
+             $id_unit = $this->session->userdata('id_unit');
+             $unit=$this->m_ls->nama_unit_sptb($id_unit);
+             $data['nama_unit']=$unit->nama_unit;
+             $data['pd2']=$this->m_ls->ambil_nama_nip('m_ppk','id_ppk',$unit->id_pd2);
+             $data['bpp']=$this->m_ls->ambil_nama_nip('m_bpp','id_bpp',$unit->id_bpp);
+             $data['nama_unit_singkat']= $this->m_ls->nama_unit($id_unit); 
+             $data['hasil'] = $this->m_ls->get_sptb_kwitansi($id,$th);
+             $data['detail']= $this->m_ls->get_sptb_kwitansi_detail($id,$th);
+            $user_info = $this->load->view('ls/print_sptb_gu', $data,  true);
+             if($download_pdf==true)
+                 generate_pdf_A4($user_info,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA SPP
+*/
+    function simpan_spp(){
+       if($this->auth->is_logged_in() == true){
+          $id_unit = $this->session->userdata('id_unit');
+		  $kode_unit = $this->session->userdata('id_unit');
+          $th = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $sptb = $this->m_ls->cek_sptb($id,$id_unit,$th);
+          $success = $this->m_ls->sptb_diajukan($id,$id_unit,$th);
+          if($success){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'SPTB ini udah dibuatkan SPP, List SPP dapat dilihat 
+			  		<a href=list_spp_ls>
+					disini</a>');
+              redirect('ls/daftar_sptb_gu');   
+          }else{
+              
+              $this->m_ls->simpan_spp($id_unit,$sptb,$id,$kode_unit);
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'SPP berhasil disimpan, List SPP dapat dilihat 
+			  		<a href=list_spp_ls>
+					disini</a>');
+              redirect('ls/daftar_sptb_gu');
+          }
+       }
+   }
+   
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MELIHAT LIST DAFTAR SPP
+*/    
+   function list_spp_ls(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit');  
+          $daftar_spp = $this->m_ls->spp_gu($id_unit);
+          $data['daftar_spp'] = $this->m_ls->spp_gu($id_unit);
+          
+          //echo $this->db->last_query();        
+          $this->template->load('template','ls/list_spp_gu',$data);
+        }
+    }
+
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW DATA SPP
+*/
+function preview_spp(){         
+            $id_unit = $this->session->userdata('id_unit');
+            $kode_unit = $this->session->userdata('kode_unit');
+            $th_spp = $this->uri->segment(3);
+            $id_spp = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;                              
+            $detail_spp = $this->m_ls->detail_spp($id_unit,$id_spp,$th_spp);        
+            $data['detail_spp'] = $this->m_ls->detail_spp($id_unit,$id_spp,$th_spp);
+            $ta = $this->m_settings->get_tahun_anggaran();
+            
+            
+            //tabel bawah
+            $data['tabel_spp']= $this->m_spj->get_spp_table($ta, $id_unit, Constant::JB_LS, $id_spp);
+            $data['setting'] =  $this->m_ls->select_setting();
+            
+            $data['pagu_rkakl_unit']=$this->m_ls->pagu_rkakl_unit($id_unit,$ta);
+            
+            
+            $data['spp_terbayar_lalu_unit']=$this->m_ls->spp_terbayar_lalu_unit($id_spp,$id_unit,$ta);
+            
+            
+            $data['spp_ini_unit']=$this->m_ls->spp_ini_unit($id_spp,$id_unit,$ta);     
+            
+           
+            $this->template->load('template','ls/preview_spp2',$data);  
+        }
+
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT SPP
+*/
+        function print_spp($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_unit = $this->session->userdata('id_unit');
+             $th_spp = $this->uri->segment(3);
+             $id_spp = $this->uri->segment(4);
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i:s");
+             $data['tgl'] = $tgl_skrg;
+             $data['jam'] = $jam_skrg;
+             $ret = ''; 
+             $pdf_filename='SPP_LS_'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+             
+            $detail_spp = $this->m_ls->detail_spp($id_unit,$id_spp,$th_spp);        
+            $data['detail_spp'] = $this->m_ls->detail_spp($id_unit,$id_spp,$th_spp);
+            $ta = $this->m_settings->get_tahun_anggaran();
+            
+            
+            //tabel bawah
+            $data['tabel_spp']= $this->m_spj->get_spp_table($ta, $id_unit, Constant::JB_LS, $id_spp);
+            $data['setting'] =  $this->m_ls->select_setting();
+            
+            $data['pagu_rkakl_unit']=$this->m_ls->pagu_rkakl_unit($id_unit,$ta);
+            
+            
+            $data['spp_terbayar_lalu_unit']=$this->m_ls->spp_terbayar_lalu_unit($id_spp,$id_unit,$ta);
+            
+            
+            $data['spp_ini_unit']=$this->m_ls->spp_ini_unit($id_spp,$id_unit,$ta);  
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('ls/print_spp', $data,  true);     
+             //print_r($output);
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             } 
+    } 
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN SPP YANG SUDAH DIOTORISASI
+*/	
+    function otorisasi_spp_up(){   
+        if($this->auth->is_logged_in() == true){         
+          $th = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $this->m_ls->otorisasi_spp_up($id,$th);
+          $trans = $this->m_ls->selek_kwitansi($id,$th);
+            foreach($trans->result_array() as $row){
+                $id_sptb = $row['id_sptb'];
+                $id_kwitansi = $row['id_kwitansi'];
+                $this->m_ls->otorisasi_sptb_ppk($id_sptb,$th);
+                $this->m_ls->otorisasi_kwitansi_ppk($id_kwitansi,$th);
+                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->m_ls->masuk_waktu_otorisasi_ppk($id_kwitansi,$level_terkini,$th);
+            }       
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spp_ls'>";
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SPP
+*/	
+    function list_spp_ls_keu(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit'); 
+          $data['daftar_spp'] = $this->m_ls->spp_up_keu($id_unit);
+          $this->template->load('template','ls/list_spp_gu_keu',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN ISIAN SPM
+*/	
+    function pengisian_spm(){
+          if($this->auth->is_logged_in() == true){      
+          $id_unit = $this->session->userdata('id_unit');
+          $th_spp = $this->uri->segment(3);
+          $id_spp = $this->uri->segment(4);
+          $data['carabayar'] = $this->m_ls->get_carabayar();     
+          $data['tahun'] = date('Y');    
+          $data['spp']=$this->m_ls->spp($id_unit,$id_spp,$th_spp);
+          $data['setting']=$this->m_ls->select_setting(); 
+          $spp=$this->m_ls->spp($id_unit,$id_spp,$th_spp);
+          foreach($spp->result_array() as $tot_spp)
+                 {  
+                    $jumlah = $tot_spp ['jumlah'];
+                 }  
+          $data['terbilang'] = $this->konversi->terbilang ($jumlah) ; 
+          $this->template->load('template','ls/pengisian_spm',$data);
+          }   
+    }
+    function simpan_spm(){
+       if($this->auth->is_logged_in() == true){
+          $id_unit = $this->session->userdata('id_unit'); 
+          $id_spp = $this->input->post('id_spp'); 
+          $th_spp = $this->input->post('th_spp'); 
+          
+          $success = $this->m_ls->cek_spp_spm($id_spp,$th_spp);
+          //echo $this->db->last_query();
+          if($success){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'SPP ini sudah di spm-kan');
+              redirect('ls/list_spp_gu_keu');  
+          }else{
+                $kwitansi = $this->m_ls->selek_kwitansi($id_spp,$th_spp);    
+                $this->m_ls->simpan_spm($id_spp,$kwitansi,$id_unit,$th_spp);
+                $cek = "SPM berhasil disimpan, Untuk melihat Daftar SPM yang sudah dibuat, 
+                <a href='list_spm_ls'>Klik Disini</a>
+                 " ;
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', $cek);
+                redirect('ls/list_spp_ls_keu');
+          }
+       }
+   }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SPM
+*/   
+   function list_spm_ls(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit'); 
+          $data['daftar_spm'] = $this->m_ls->spm_gu($id_unit);
+          $total_pagu = $this->m_ls->spm_gu_jum($id_unit);
+		  $tot_jumlah=0;
+          foreach($total_pagu->result_array() as $jmlh)
+                 {  
+                    $tot_jumlah = $jmlh ['sum(nominal)'];
+                 }
+				 //echo $tot_jumlah;
+                 $data['jumlah']=$tot_jumlah;   
+				 //echo $this->db->last_query();
+          $this->template->load('template','ls/list_spm_up',$data);
+        }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW SPM
+*/	
+    function preview_spm(){
+            $id_unit = $this->session->userdata('id_unit');
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;            
+            $data['carabayar'] = $this->m_ls->get_carabayar();     
+            $data['detail_spm'] = $this->m_ls->detail_spm($id_unit,$id_spm,$th_spm);  
+            $detail_spm = $this->m_ls->detail_spm($id_unit,$id_spm,$th_spm); 
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    $id_spp=$row['id_spp']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;
+            $data['total_pagu'] = $this->m_ls->jum($id_unit,$id_spp,$th_spm);
+            $total_spp_kini = $this->m_ls->jum_kini_spm($id_unit, $id_spm,$th_spm);
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+            $total_spp_diajukan=$this->m_ls->total_spm_diajukan($id_unit,$id_spm,$th_spm); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(nominal)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan;
+            $this->template->load('template','ls/preview_spm',$data);    
+        }
+		
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT SPM
+*/		
+        function print_spm($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_unit = $this->session->userdata('id_unit');   
+             $th_spm = $this->uri->segment(3);   
+             $data['tgl'] = date('Y-m-d');
+             $ret = ''; 
+			 $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='SPM_LS/'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+             $this->load->model('m_ls');  
+            $id_spm = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;            
+            $data['carabayar'] = $this->m_ls->get_carabayar();     
+            $data['detail_spm'] = $this->m_ls->detail_spm($id_unit,$id_spm,$th_spm);  
+            $detail_spm = $this->m_ls->detail_spm($id_unit,$id_spm,$th_spm); 
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    $id_spp=$row['id_spp']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;
+            $data['total_pagu'] = $this->m_ls->jum($id_unit,$id_spp,$th_spm);
+            $total_spp_kini = $this->m_ls->jum_kini_spm($id_unit, $id_spm,$th_spm);
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            $data['spp_kini']=$spp_kini;  
+            $total_spp_diajukan=$this->m_ls->total_spm_diajukan($id_unit,$id_spm,$th_spm); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(nominal)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan;
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('ls/print_spm', $data,  true);     
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA UPDATE SPM
+*/	
+    function update_spm(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit'); 
+          $id_spm = $this->input->post('id_spm'); 
+          $th_spm = $this->input->post('th_spm'); 
+          $this->m_ls->update_spm($id_unit,$id_spm,$th_spm);
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/preview_spm/$th_spm/$id_spm'>";
+        }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT MP
+*/	
+    function print_mp($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_unit = $this->session->userdata('id_unit');
+             $kode_unit = $this->session->userdata('kode_unit');
+             $tgl = date("Y-m-d");
+             $tgl = date("Y-m-d");
+			 $jam_skrg = date("H:i");
+             $ret = ''; 
+             $pdf_filename='MP_'.$id_unit.'_'.$tgl.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_mp/true/','Download Pdf');
+             $data['fakultas'] = $this->m_ls->nama_fakultas($id_unit); 
+             $data['dipa'] = $this->m_ls->dipa(); 
+             $data['pengeluaran'] = $this->m_ls->mp_pengeluaran($id_unit); 
+             $data['link'] = $link_download ;  
+             $output = $this->load->view('ls/print_mp', $data,  true);    
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN SPM YANG TEROTORISASI
+*/	
+    function otorisasi_spm_up(){   
+        if($this->auth->is_logged_in() == true){          
+          $th = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $this->m_ls->otorisasi_spm_up($id,$th);
+          $trans = $this->m_ls->selek_kwitansi_spm($id,$th);
+            foreach($trans->result_array() as $row){
+                $id_kwitansi = $row['id_kwitansi'];
+                $id_sptb = $row['id_sptb'];
+                $id_spp = $row['id_spp'];
+                $this->m_ls->otorisasi_kwitansi_up2($id_kwitansi,$th);
+                $this->m_ls->otorisasi_sptb_up2($id_sptb,$th);
+                $this->m_ls->otorisasi_spp_up2($id_spp,$th);
+                $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->m_ls->masuk_waktu_otorisasi_dekan($id_kwitansi,$level_terkini,$th);
+            }
+           echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls'>"; 
+        }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SPM
+*/	
+    function list_spm_ls_pen(){   
+        if($this->auth->is_logged_in() == true){  
+        $th= date('y');       
+          $data['daftar_spm'] = $this->m_ls->spm_up_pen($th);
+          $detail_spm = $this->m_ls->spm_up_pen($th);
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;
+          $this->template->load('template','ls/list_spm_gu_pen',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK VERIFIKASI
+*/	
+    function veri(){
+            if($this->auth->is_logged_in() == true){ 
+            $th = $this->uri->segment(3);
+            $id = $this->uri->segment(4);
+            $success = $this->m_ls->cek_ada_veri($id,$th);
+            if($success){
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf SPM ini sudah dicek sebelumnya');
+                redirect('ls/data_terceklist/'.$th."/".$id);        
+            }else {
+                $data['umum'] = $this->m_ls->getSyaratUmum_up();
+                $data['khusus'] = $this->m_ls->getKhususList();
+                $data['daftar_spm'] = $this->m_ls->spm_up_pen4($id,$th);
+                $detail_spm = $this->m_ls->spm_up_pen4($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+                $this->template->load('template','ls/cek_kelengkapan', $data);
+            }
+            }
+        }
+		
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK CECKLIST DATA
+*/		
+        function data_terceklist(){
+            if($this->auth->is_logged_in() == true){       
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $th = $this->uri->segment(3); 
+            $id = $this->uri->segment(4); 
+            $data['detail_daftar']=$this->m_ls->detail_daftar($id,$th);
+            $detail_spm = $this->m_ls->detail_daftar($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['cek_umum']=$this->m_ls->ceklist_umum($id,$th);
+            $data['cek_khusus']=$this->m_ls->ceklist_khusus($id,$th);  
+            $data['setting']=$this->m_ls->select_setting();   
+            $this->template->load('template','ls/data_terceklist',$data);  
+        }}
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN VERIFIKASI
+*/		
+        function simpan_veri(){
+          if($this->auth->is_logged_in() == true){ 
+             $id = $this->input->post('id_spm');
+             $th = $this->input->post('th_spm');
+                  
+             $this->m_ls->update_penyerah($id,$th);      
+                    $this->m_ls->insert_detail($id,$th);
+                    if(isset($_POST['tes'] )){
+                                
+                            $this->m_ls->update_detail($id,$th);
+                            echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_pen'>"; 
+                    }else{
+                    echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_pen'>"; 
+          }   
+          } }
+		  
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT BUKTI PENERIMAAN
+*/		  
+        function print_bukti_penerimaan($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit'); 
+             $th = $this->uri->segment(3); 
+             $id = $this->uri->segment(4); 
+             $nomor = $this->uri->segment(5); 
+             $data['tgl'] = date('Y-m-d');
+             $ret = ''; 
+			 $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='BUKTI_PENERIMAAN_LS_'.$nomor.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i:s");
+             $data['tgl'] = $tgl_skrg;
+             $data['jam'] = $jam_skrg;
+             $data['detail_daftar']=$this->m_ls->detail_daftar($id,$th); 
+             $detail_spm = $this->m_ls->detail_daftar($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+             $data['cek_umum']=$this->m_ls->ceklist_umum($id,$th);
+            $data['cek_khusus']=$this->m_ls->ceklist_khusus($id,$th);  
+            $data['setting']=$this->m_ls->select_setting();        
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('ls/bukti_penerimaan', $data,  true);     
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK UPDATE DATA CHECKLIST
+*/	
+    function update_ceklist(){  
+            $id = $this->input->post('id_spm'); 
+            $th = $this->input->post('th_spm'); 
+            $tes = $this->input->post('tes');
+            if(isset($tes)){
+                $this->m_ls->update_kelengkapan($id,$th,$tes);
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_pen'>"; 
+            }else{
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_pen'>";
+            }   
+             
+        }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PENYETUJUAN SPM
+*/		
+    function setuju_spm_pen(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $sudah = $this->m_ls->cek_ada_veri($id_spm,$th_spm);
+            if($sudah){  
+                    $success = $this->m_ls->ada_flag_cek($id_spm,$th_spm);
+                    if($success){
+                            $this->session->set_userdata('msg_typ','err');
+                            $this->session->set_userdata('msg', 'Masih ada Kelengkapan yang belum terpenuhi');
+                            redirect('ls/list_spm_ls_pen');  
+                    }else{
+                            $this->m_ls->setuju_bak($id_spm,$th_spm);
+                            $trans = $this->m_ls->selek_spp_trans($th_spm,$id_spm);
+                            foreach($trans->result_array() as $row){
+                                    $id_kwitansi = $row['id_kwitansi'];
+                                    $id_sptb = $row['id_sptb'];
+                                    $id_spp = $row['id_spp'];
+                                    $this->m_ls->trans_stat_veri_blu($id_kwitansi,$th_spm);
+                                    $this->m_ls->spp_stat_veri_blu($id_spp,$th_spm);
+                                    $this->m_ls->sptb_stat_veri_blu($id_sptb,$th_spm);
+                                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_spm);
+                                    foreach($get_id->result_array() as $row){
+                                    $level = $row['level'];  
+                                    }
+                                    $level_terkini =  $level+1;           
+                                    $this->m_ls->masuk_waktu_dicek_petugas_penerima($id_kwitansi,$level_terkini,$th_spm);
+                            }
+                            echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_pen'>";  
+                    }
+            }else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'SPM ini belum dicek kelengkapan-nya.. mohon dicek terlebih dahulu!!!');
+                redirect('ls/veri/'.$th_spm."/".$id_spm); 
+            }
+         }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SPM
+*/	
+    function list_spm_ls_veri(){   
+        if($this->auth->is_logged_in() == true){
+        $th= date('y');       
+          $data['daftar_spm'] = $this->m_ls->spm_up_veri($th);
+          $detail_spm = $this->m_ls->spm_up_veri($th);
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;     
+          $this->template->load('template','ls/list_spm_up_veri',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DETAIL SPM
+*/	
+    function detail_spm(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);  
+            $id_spm = $this->uri->segment(4);  
+            $data['detail_spm'] = $this->m_ls->detail_spm2($id_spm,$th_spm);
+            $this->template->load('template','ls/detail_spm',$data);  
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYETUJUI VERIFIKASI SPM
+*/	
+    function setuju_spm_veri(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $this->m_ls->setuju_veri($id_spm,$th_spm);
+            $trans = $this->m_ls->selek_spp_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    $this->m_ls->trans_stat_subag_dm($id_kwitansi,$th_spm);
+                    $this->m_ls->sptb_stat_subag_dm($id_sptb,$th_spm);
+                    $this->m_ls->spp_stat_subag_dm($id_spp,$th_spm);
+                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->m_ls->masuk_waktu_otorisasi_verifikator_pusat($id_kwitansi,$level_terkini,$th_spm);
+            }
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_veri'>";  
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SPM
+*/	
+    function list_spm_ls_dm(){   
+        if($this->auth->is_logged_in() == true){
+        $th= date('y');       
+          $data['daftar_spm'] = $this->m_ls->spm_up_dm($th); 
+          $detail_spm = $this->m_ls->spm_up_dm($th);
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;       
+          $this->template->load('template','ls/list_spm_gu_dm',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYETUJUI SPM
+*/	
+    function setuju_spm_dm(){
+            if($this->auth->is_logged_in() == true){ 
+             $th_spm = $this->uri->segment(3);     
+             $id_spm = $this->uri->segment(4);     
+            $this->m_ls->setuju_dm($id_spm,$th_spm);
+            $trans = $this->m_ls->selek_spp_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    $this->m_ls->trans_stat_kabag_keu($id_kwitansi,$th_spm);
+                    $this->m_ls->sptb_stat_kabag_keu($id_sptb,$th_spm);
+                    $this->m_ls->spp_stat_kabag_keu($id_spp,$th_spm);
+                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->m_ls->masuk_waktu_otorisasi_subag_dm($id_kwitansi,$level_terkini,$th_spm);
+            }
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_dm'>";  
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SPM
+*/	
+    function list_spm_ls_kabag(){   
+        if($this->auth->is_logged_in() == true){ 
+        $th= date('y');      
+          $data['daftar_spm'] = $this->m_ls->spm_up_kabag($th);
+          $detail_spm = $this->m_ls->spm_up_kabag($th);
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;       
+          $this->template->load('template','ls/list_spm_gu_kabag',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYETUJUI SPM DI BAGIAN KABAG
+*/	
+    function setuju_spm_kabag(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);    
+            $id_spm = $this->uri->segment(4);    
+            $this->m_ls->setuju_kabag($id_spm,$th_spm);
+            $trans = $this->m_ls->selek_spp_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    $this->m_ls->trans_stat_ppsp2d($id_kwitansi,$th_spm);
+                    $this->m_ls->sptb_stat_ppsp2d($id_sptb,$th_spm);
+                    $this->m_ls->spp_stat_ppsp2d($id_spp,$th_spm);
+                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->m_ls->masuk_waktu_otorisasi_kabag_keu($id_kwitansi,$level_terkini,$th_spm);
+            }
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_kabag'>";  
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SP2D
+*/	
+    function list_spm_ls_sp2d(){   
+        if($this->auth->is_logged_in() == true){
+        $th= date('y');      
+          $data['daftar_spm'] = $this->m_ls->spm_up_sp2d($th); 
+          $detail_spm = $this->m_ls->spm_up_sp2d($th);
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;      
+          $this->template->load('template','ls/list_spm_gu_sp2d',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MEMBUAT SP2D
+*/	
+    function buat_sp2d(){
+            if($this->auth->is_logged_in() == true){
+            $th_spm = $this->uri->segment(3); 
+            $id_spm = $this->uri->segment(4); 
+            $success = $this->m_ls->cek_adasp2d($th_spm,$id_spm);
+            if($success){
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf SPM ini sudah dibuatkan SP2D');
+                redirect('ls/list_spm_ls_sp2d');
+            }else{                   
+                $trans = $this->m_ls->selek_spp_trans($th_spm,$id_spm);
+                $this->m_ls->buat_sp2d($id_spm,$trans,$th_spm);
+                $this->m_ls->setuju_sp2d($id_spm,$th_spm);
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'SP2D Berhasil Dibuat');
+                redirect('ls/list_spm_ls_sp2d');   
+           }
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW SP2D
+*/	
+    function preview_sp2d(){
+            if($this->auth->is_logged_in() == true){
+            $th_spm = $this->uri->segment(3); 
+            $id_spm = $this->uri->segment(4); 
+            $success = $this->m_ls->cek_adasp2d($th_spm,$id_spm);
+            if($success){
+                $data['tahun'] = date('Y');
+                $detail_spm = $this->m_ls->detail_sp2d($id_spm);
+                $data['setting'] = $this->m_ls->select_setting();
+                $data['detail_spm'] = $this->m_ls->detail_sp2d($id_spm);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor);
+                $this->template->load('template','ls/preview_sp2d',$data);
+            }else{ 
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf SPM ini belum dibuatkan SP2D..');
+                redirect('ls/list_spm_ls_sp2d');
+           }
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT SP2D
+*/	
+    function print_sp2d($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){   
+             $th_spm = $this->uri->segment(3); 
+             $id_spm = $this->uri->segment(4);   
+             $data['tahun'] = date('Y');
+                $detail_spm = $this->m_ls->detail_sp2d($id_spm);
+                $data['setting'] = $this->m_ls->select_setting();
+                $data['detail_spm'] = $this->m_ls->detail_sp2d($id_spm);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    $id_sp2d=$row['id_sp2d']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor);   
+                
+             $ret = ''; 
+			 $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='SP2D_LS/'.$id_sp2d.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'ls/print_sp2d/true/','Download Pdf');
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('ls/print_sp2d', $data,  true);     
+            
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYETUJUI SP2D
+*/	
+    function setuju_spm_sp2d(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $this->m_ls->otorisasi_pr2($th_spm,$id_spm);
+            $trans = $this->m_ls->selek_spp_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    $this->m_ls->trans_stat_pr2($id_kwitansi,$th_spm);
+                    $this->m_ls->sptb_stat_pr2($id_sptb,$th_spm);
+                    $this->m_ls->spp_stat_pr2($id_spp,$th_spm);
+                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->m_ls->masuk_waktu_otorisasi_pr2($id_kwitansi,$level_terkini,$th_spm);
+            }
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_spm_ls_sp2d'>";  
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN LIST SP2D
+*/	
+    function list_sp2d_ls(){   
+        if($this->auth->is_logged_in() == true){
+        $th = date('y');       
+          $data['daftar_sp2d'] = $this->m_ls->list_sp2d($th);
+          //echo $this->db->last_query();       
+          $this->template->load('template','ls/list_sp2d_bp',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MEMBUAT BG
+*/	
+    function buat_bg(){   
+        if($this->auth->is_logged_in() == true){
+          $th_sp2d = $this->uri->segment(3);       
+          $id_sp2d = $this->uri->segment(4);       
+          $data['daftar_sp2d'] = $this->m_ls->list_sp2d2($id_sp2d,$th_sp2d);
+          $data['nomor_bg'] = $this->m_ls->ambil_nomor_bg($th_sp2d);    
+          $this->template->load('template','ls/pengisian_bg',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN BG
+*/	
+    function simpan_bg(){   
+        if($this->auth->is_logged_in() == true){
+          $id_sp2d = $this->input->post('id_sp2d');       
+          $th_sp2d = $this->input->post('th_sp2d');       
+          $id_spm = $this->input->post('id_spm');       
+          $nomor_bg = $this->input->post('nomor_bg'); 
+          $id_bg = $this->input->post('id_bg'); 
+          $success = $this->m_ls->cek_adabg($nomor_bg);
+          if($success){  
+              $this->m_ls->buat_bg_sp2d($id_sp2d,$id_bg,$th_sp2d);
+              $this->m_ls->update_bg($id_bg,$th_sp2d);
+              $this->m_ls->buat_bg($id_spm,$th_sp2d);
+              $trans = $this->m_ls->selek_spp_trans($th_sp2d,$id_spm);
+                foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    $this->m_ls->trans_stat_telah_bg($id_kwitansi,$th_sp2d);
+                    $this->m_ls->sptb_stat_telah_bg($id_sptb,$th_sp2d);
+                    $this->m_ls->spp_stat_telah_bg($id_spp,$th_sp2d);
+                    $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_sp2d);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->m_ls->masuk_waktu_dibuatkan_bg($id_kwitansi,$level_terkini,$th_sp2d);
+                } 
+          }else{
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Maaf Nomor BG ini sudah dipakai untuk membayar SP2D yang sebelumnya..');
+              redirect('ls/buat_bg/'.$th_sp2d."/".$id_sp2d);
+          }     
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."ls/list_sp2d_ls'>"; 
+          }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW BG
+*/	
+    function preview_bg(){   
+        if($this->auth->is_logged_in() == true){
+          $th_sp2d = $this->uri->segment(3);       
+          $id_sp2d = $this->uri->segment(4);       
+          $data['daftar_sp2d'] = $this->m_ls->list_sp2d3($id_sp2d,$th_sp2d);
+          $this->template->load('template','ls/preview_bg',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK VERIFIKSI PENGADAAN
+*/    
+ function ver_kwi_pengadaan(){
+    if($this->auth->is_logged_in() == true)
+        {   
+            $data['hasil']= $this->m_ls->data_kuitansi_ver_pengadaan();
+            $this->template->load('template','ls/pengadaan/ver_ls/kantor_pusat/daftar_kuitansi',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW KWITANSI PENGADAAN
+*/ function preview_kwitansi_ver_pengadaan()
+    {
+        $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+		 $jenis_kwitansi = $this->uri->segment(5); 
+         $id_sifatpembayaran = $this->uri->segment(6); 
+
+         $data['hasil'] = $this->m_ls->getKuitansi_ver_pengadaan($id,$th);
+         $data['data'] = $this->m_ls->getNamattd('17');
+         $data['pajak'] = $this->m_ls->get_jenis_pajak_ver_pengadaan($id,$th);
+         $data['kelengkapan'] = $this->m_ls->kelengkapan($id,$th,$jenis_kwitansi,$id_sifatpembayaran);
+         $this->template->load('template','ls/pengadaan/ver_ls/kantor_pusat/preview_kwitansi_unit',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN DATA VERIFIKASI KWITANSI PENGADAAN
+*/
+function simpan_verifikasi_pengadaan()
+    {
+        $id = $this->input->post('id_kwitansi');
+        $th= $this->input->post('th_kwitansi');
+        $jenis_kwitansi = $this->input->post('jenis_kwitansi');
+        $id_sifatpembayaran= $this->input->post('id_sifatpembayaran');
+        $status = $this->input->post('status');
+        $comment = $this->input->post('comment');
+		if (isset($_POST['kwitansi']))
+            {$st_kwitansi ='1';}
+            else
+            {$st_kwitansi ='0';}
+        $this->m_ls->up_kwitansi_pengadaan($status,$id,$th,$st_kwitansi);
+        $this->m_ls->insert_comment($comment,$id,$th);
+		$get_id_ver = $this->m_ls->kelengkapan($id,$th,$jenis_kwitansi,$id_sifatpembayaran);
+              foreach($get_id_ver->result_array() as $row)
+			  {
+                  $nama = $row['id_ver']; 
+					if (isset($_POST[$nama]))
+            		{$flag ='1';}
+            		else
+            		{$flag ='0';}
+				$this->m_ls->up_kelengkapan($flag,$id,$th,$nama,$jenis_kwitansi,$id_sifatpembayaran);	
+              }
+                redirect('ls/ver_kwi_pengadaan');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA VERIFIKASI KWITANSI PENGADAAN
+*/
+ function rev_ver_kwitansi_pengadaan(){
+    if($this->auth->is_logged_in() == true)
+        {   
+            $data['hasil']= $this->m_ls->data_rev_kuitansi_pengadaan();
+            $this->template->load('template','ls/pengadaan/ver_ls/pengadaan/rev_ver_kwitansi',$data);
+        }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK AUTO COMPLETE
+*/
+ function update_revisi_pengadaan()
+    {
+         $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+         $data['hasil'] = $this->m_ls->getKuitansi_ver_pengadaan($id,$th);
+         $data['jns_pajak'] = $this->m_ls->edit_jenis_pajak();
+         $this->template->load('template','ls/pengadaan/ver_ls/pengadaan/edit_kwitansi',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN MENAMPILKAN EDIT PENGADAAN
+*/
+function edit_kwitansi_pengadaan()
+    {
+        $id_kwitansi = $this->input->post('id_kwitansi');
+        $th_kwitansi = $this->input->post('th_kwitansi');
+		$id_status_kwi = $this->input->post('id_status_kwitansi');
+        $object->tgl_kwitansi = $this->input->post('tgl_kwitansi');
+        $object->ket_kwitansi = $this->input->post('ket_kwitansi');
+        $object->tpt_kwitansi = $this->input->post('tempat_kwitansi');
+        $object->penerima = $this->input->post('penerima');
+        $object->pengambil = $this->input->post('pengambil');
+        $object->id_pajak = $this->input->post('jns_pajak');
+		if($id_status_kwi==2)
+		{  $id_status_kwitansi=3;  }
+		else
+		if($id_status_kwi==18)
+		{  $id_status_kwitansi=19;  }
+		else
+		if($id_status_kwi==20)
+		{  $id_status_kwitansi=21;  }
+        $object->id_status_kwitansi = $id_status_kwitansi;
+        $id_pajak=$this->input->post('jns_pajak');
+        $nominal=$this->input->post('nominal');
+        $pph=$this->m_ls->get_pph($id_pajak);
+        $ppn=$this->m_ls->get_ppn($id_pajak);
+		$id_pajak = $this->input->post('jns_pajak');
+		if($id_pajak>0)
+		{
+			$object->nominal = $this->input->post('nominal');
+        	$object->pph=$nominal*$pph/100;
+        	$object->ppn=$nominal*$ppn/100;
+		}
+        
+        $success = $this->m_ls->edit_kwitansi_pengadaan($object,$id_kwitansi,$th_kwitansi);
+        $get_id = $this->m_ls->ambil_level_tertinggi($id_kwitansi,$th_kwitansi);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;
+        $success = $this->m_ls->masuk_kirim_hasil_revisi($id_kwitansi,$th_kwitansi,$id_status_kwitansi,$level_terkini);
+        redirect('ls/rev_ver_kwitansi_pengadaan');
+                
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DAFTAR KWITANSI SIAP CETAK
+*/
+function daftar_siap_cetak(){   
+        if($this->auth->is_logged_in() == true){         	
+		  $data['hasil']= $this->m_ls->data_kuitansi_cetak();
+		  //echo $this->db->last_query();
+          $this->template->load('template','ls/daftar_kwitansi/daftar_kuitansi_siap_cetak',$data);
+		}
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENGIRIM KWITANSI YANG TELAH DICETAK
+*/	
+function kirim_kwitansi_cetak(){   
+        if($this->auth->is_logged_in() == true){         	
+		$th = $this->uri->segment(3); 
+        $id = $this->uri->segment(4); 
+		$jumUnduh=$this->m_ls->jumUnduh($th,$id);
+		if($jumUnduh==0)
+		{
+			  $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Silahkan Unduh Sebelum mengirim Kwitansi');
+			  redirect('ls/preview_kwitansi_cetak/'.$th.'/'.$id);
+			}
+		else
+		{
+				$this->m_ls->ubah_status_kwi_cetak($th,$id);
+				$get_id = $this->m_ls->ambil_level_tertinggi($id,$th);
+									foreach($get_id->result_array() as $row){
+									$level = $row['level'];  
+									}
+									$level_terkini =  $level+1;
+				$success = $this->m_ls->masuk_kirim_hasil_revisi($id,$th,$level_terkini);
+			    $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'Kwitansi berhasil dikirim ke verifikator unit');
+				redirect('ls/daftar_siap_cetak');
+			}
+		}
+		
+		
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN PREVIEW KWITANSI CETAK
+*/
+function preview_kwitansi_cetak()
+    {
+		 $id_unit = $this->session->userdata('id_unit');         
+		 $th = $this->uri->segment(3); 
+         $id = $this->uri->segment(4); 
+		 $jumUnduh=$this->m_ls->jumUnduh($th,$id);
+         $data['hasil'] = $this->m_ls->getKuitansi($id,$th); 
+         $data['data'] = $this->m_ls->getNamattd($id_unit);
+         $data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+         $data['jumUnduh'] = $jumUnduh;
+         $this->template->load('template','ls/daftar_kwitansi/preview_kwitansi_cetak',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DAFTAR HONOR
+*/
+ function view_honor()
+     {       
+        $id = $this->uri->segment(3); 
+        $th = $this->uri->segment(4); 
+        $get_jenis = $this->m_ls->ambil_jenis_honor($id,$th);
+		foreach ($get_jenis->result_array() as $row){
+			$jenis = $row['jns_honor'];
+		}
+        $data['hasil'] = $this->m_ls->view_honor($id);
+        $data['get_nama_subunit'] = $this->m_ls->get_nama_subunit();
+        $data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+		if($jenis=='1')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_1',$data);   
+			}
+		else
+		if($jenis=='2')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_2',$data);   
+			}
+		else
+		if($jenis=='3')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_3',$data);   
+			}
+		else
+		if($jenis=='4')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_4',$data);   
+			}
+		else
+		if($jenis=='5')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_5',$data);   
+			}
+		else
+		if($jenis=='6')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_6',$data);   
+			}
+		else
+		if($jenis=='7')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_7',$data);   
+			}
+		else
+		if($jenis=='8')
+		{
+        $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_8',$data);   
+			}
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT KWITANSI
+*/
+function print_kwitansi($download_pdf = true){
+        if($this->auth->is_logged_in () == true){
+            $th = date('y');
+             $th=$this->uri->segment(3);
+             $id=$this->uri->segment(4);
+             $ret = '';
+             $ID = $id;
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='KWITANSI_LS_-'.$id.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'ls/print_kwitansi/true/','Download Pdf');
+             $data['link'] = $link_download ;
+		 	$id_unit = $this->session->userdata('id_unit');         
+         	$data['hasil'] = $this->m_ls->getKuitansi($id,$th); 
+         	$data['data'] = $this->m_ls->getNamattd($id_unit);
+         	$data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+            $user_info = $this->load->view('ls/daftar_kwitansi/kwitansi_cetak',$data,true);
+             if($download_pdf==true)
+                 generate_pdf_A4($user_info,$pdf_filename);  
+             else
+                echo $output;
+             }
+		$this->m_ls->upJumUnduh($id,$th); 
+		redirect('ls/daftar_siap_cetak');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR
+*/
+function print_rincian_ho($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+            $th = date('y');
+            $th=$this->uri->segment(3);
+            $id=$this->uri->segment(4);
+			$ret = '';
+            $ID = $id;
+            $pdf_filename='honor.pdf';
+            $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'ls/print_rincian_honor/true/','Download Pdf');
+            $data['link'] = $link_download ;
+            $id_unit = $this->session->userdata('id_unit');
+			$data['data'] = $this->m_ls->getNamattd($id_unit);
+			$data['hasil'] = $this->m_ls->view_honor($id);
+        	$data['get_nama_subunit'] = $this->m_ls->get_nama_subunit();
+        	$data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+            $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_2', $data,  true);
+             if($download_pdf==true)
+                 generate_pdf_A4($user_info,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR
+*/	
+function print_rincian_honor($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $th = date('y');
+             $th=$this->uri->segment(3);
+             $id=$this->uri->segment(4);
+             $pdf_filename='rincian_honor.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'ls/print_rincian_honor/true/','Download Pdf');
+             $data['link'] = $link_download ;
+			//===============
+			$get_jenis = $this->m_ls->ambil_jenis_honor($id,$th);
+			foreach ($get_jenis->result_array() as $row){
+				$jenis = $row['jns_honor'];
+			}
+			$data['hasil'] = $this->m_ls->view_honor($id);
+			$data['get_nama_subunit'] = $this->m_ls->get_nama_subunit();
+			$data['get_nama_unit'] = $this->m_ls->get_nama_unit();
+			
+			if($jenis=='1')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_1', $data,  true);            
+				}
+			else
+			if($jenis=='2')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_2', $data,  true);            
+				}
+			else
+			if($jenis=='3')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_3', $data,  true);            
+				}
+			else
+			if($jenis=='4')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_4', $data,  true);            
+				}
+			else
+			if($jenis=='5')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_5', $data,  true);            
+				}
+			else
+			if($jenis=='6')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_6', $data,  true);            
+				}
+			else
+			if($jenis=='7')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_7', $data,  true);            
+				}
+			else
+			if($jenis=='8')
+			{
+				 $user_info = $this->load->view('ls/buat_kwitansi/rincian_honor/rincian_honor_8', $data,  true);            
+				}
+
+			//================
+             if($download_pdf==true)
+                 generate_pdf($user_info,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN RINCIAN TARIF
+*/
+function rincian_tarif(){
+            $data['pesan'] = $this->input->post('pesan');
+            $data['option_komponen'] = $this->m_ls->getTarifList();        
+			$this->load->view('ls/buat_kwitansi/rincian_tarif',$data); 
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENCARI RINCIN TARIF
+*/	
+function search_tarif(){
+            $tarif = $this->input->post('tarif');
+            $data['search'] = $this->m_ls->searchListTarif($tarif); 
+			$this->load->view('ls/buat_kwitansi/tampilan_tarif',$data); 
+    }
+
+//=============================================================  
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DAFTAR KWITANSI
+*/
+function info_kwitansi(){   
+        if($this->auth->is_logged_in() == true){ 
+		
+          $data['nama_subunit']= $this->m_ls->get_nm_subunit();
+          $data['hasil']= $this->m_ls->semua_data_kuitansi();
+		  //echo $this->db->last_query();
+          $data['jum_kwitansi']= $this->m_ls->info_jum_kwitansi();
+          $this->template->load('template','ls/info_daftar_kwitansi',$data);
+        }
+    }
+ 
+ 
+ //=======KONTRAK===============
+ /**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN KOMPONEN
+*/
+   function select_komponen_kontrak()
+    {
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['jenis_kwitansi'] = $this->input->post('jenis_kwitansi');
+            $jenis_kwitansi = $this->input->post('jenis_kwitansi');
+            $data['option_komponen'] = $this->m_ls->getKomponenListKontrak($jenis_kwitansi);        
+            $this->load->view('ls/mak/mak_kontrak/getkomponen',$data);
+    }
+
+	function select_countsubkomponen_kontrak()
+    {
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+			$kdkomponen = $this->input->post('kdkomponen');
+			$xxx = $this->m_ls->getCountSubKomponenKontrak($jns_kwitansi,$kdoutput,$kdkomponen);  
+			echo $xxx;
+			//echo $this->db->last_query();
+	}
+	 function select_subkomponen_kontrak()
+    {
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+			$kdkomponen = $this->input->post('kdkomponen');
+			$data['option_komponen'] = $this->m_ls->getSubKomponenListKontrak($jns_kwitansi,$kdoutput,$kdkomponen); 
+			$this->load->view('ls/mak/mak_kontrak/getsubkomponen',$data);
+		
+	}
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN AKUN
+*/
+    function select_akun_kontrak(){
+			$jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdkomponen = $this->input->post('kdkomponen');
+            $data['option_akun'] = $this->m_ls->getAkunListKontrak($jns_kwitansi,$kdoutput,$kdkomponen); 
+			//echo $this->db->last_query();       
+           $this->load->view('ls/mak/mak_kontrak/getakun',$data);
+    }
+	
+	function select_akun_test_kontrak(){
+            $jns_kwitansi = $this->input->post('jns_kwitansi');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdkomponen = $this->input->post('kdkomponen');
+			$kdskomponen = $this->input->post('kdskomponen');
+            $data['option_akun'] = $this->m_ls->getAkunList_testKontrak($jns_kwitansi,$kdoutput,$kdkomponen,$kdskomponen); 
+			//echo $this->db->last_query();        
+            $this->load->view('ls/mak/mak_kontrak/getakun',$data);
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN HEADER
+*/	
+    function select_header_kontrak(){
+            $kdkomponen = $this->input->post('kdkomponen');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $data['kdkomponen'] = $kdkomponen;
+            $data['kdoutput'] = $kdoutput;
+            $data['kdakun'] = $kdakun;
+            $kd=substr($kdakun,0,2); 
+            $data['option_header'] = $this->m_ls->getHeaderListKontrak($kdakun, $kdkomponen,$kdoutput);
+            $this->load->view('ls/mak/mak_kontrak/getheader',$data);
+    }
+ 
+    function select_bas(){
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $data['kode_bas'] = $this->m_ls->getBas($kdoutput,$kdakun);
+			//echo $this->db->last_query();    
+            $this->load->view('ls/mak/get_bas',$data);
+	}
+	function daftar_nominatif(){
+        $this->template->load('template','ls/daftar_kwitansi/daftar_nominatif'); 
+	}
+	function tampil_nominatif(){
+		$id_unit = $this->session->userdata('id_unit');
+		$bulan = $this->input->post('bulan');
+		$tahun = $this->input->post('tahun');
+			$data['hasil']= $this->m_ls->get_perjadin($id_unit,$bulan,$tahun);
+			$this->load->view('ls/daftar_kwitansi/tampil_nominatif',$data); 
+	}
+  
+	function buat_nominatif(){
+		  $id_unit = $this->session->userdata('id_unit'); 
+		  $cek = $this->input->post('cek'); 
+		  $jumlah_cek= count($cek); 
+		  $where = array();
+		  $id = array();
+		  for($i=0;$i<$jumlah_cek;$i++){
+			  $where[]= " no_kwitansi = ".$cek[$i]." ";
+		  } 
+		   
+		  //$sesi_data['where']= $where;
+		  //$this->session->set_userdata($sesi_data);
+		  //print_r($this->session->userdata('where'));
+		  
+		 $value=implode('OR',$where);
+		 $id = implode('sa',$cek);
+		 $data['id']= $id;
+		 $data['hasil']= $this->m_ls->detail_nominatif($value);
+		 $this->template->load('template','ls/daftar_kwitansi/detail_nominatif',$data);
+              
+    }
+	function print_nominatif($download_pdf = ''){
+		 $id=$this->uri->segment(3);
+		 $pdf_filename='daftar_nominatif.pdf';
+		 $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'ls/print_nominatif/true/','Download Pdf');
+		 $data['link'] = $link_download ;
+		 	$val=explode('sa',$id);
+			$count=count($val);
+			$where = array();
+				for($i=0;$i < $count;$i++){
+					 $where[]= " no_kwitansi = ".$val[$i]." ";
+				}
+			$value=implode('OR',$where);
+		 	$data['hasil']= $this->m_ls->detail_nominatif($value);
+		  	$user_info = $this->load->view('ls/daftar_kwitansi/print_nominatif', $data,  true);
+			
+             if($download_pdf==true){
+                 generate_pdf($user_info,$pdf_filename);  
+			 }else{
+                echo $output;
+             }
+	}
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK FUNGSI AUTO COMPLETE
+*/
+function lookup_bas(){
+		// process posted form data (the requested items like province)
+        $keyword = $this->input->post('term');
+        $kdakun = $this->input->post('kodeakun');
+		//echo $kdakun;
+        $data['response'] = 'false'; //Set default response
+        $query = $this->m_gup->lookup_bas($keyword, $kdakun); //Search DB
+        if( ! empty($query) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $query as $row )
+            {
+                $data['message'][] = array( 
+                                        'id'=>$row->akun_kode,
+										'label'=>$row->akun_kode.'  -- '.$row->akun_nama,
+										'value'=>$row->akun_kode,
+										'desc'=>$row->akun_nama ,
+                                        ''
+                                     );  //Add a row to array
+            }
+        }
+        if('IS_AJAX')
+        {
+            echo json_encode($data); //echo json string if ajax request
+        }
+        else
+        {
+             $this->template->load('template','gup/gu_buat_kuitansi',$data);
+        }
+	}
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN KOMPONEN
+*/
+    function preview_mp(){                                
+            $id_unit = $this->session->userdata('id_unit'); 
+            $id_spp = $this->uri->segment(3); 
+            
+            $data['fakultas'] = $this->m_ls->getDetailUnit($id_unit); 
+            $data['detail_mp'] = $this->m_ls->getMpUnit($id_spp); 
+              
+            
+            
+            $this->template->load('template','ls/preview_mp',$data);    
+   }
+
+
+
+	
+}

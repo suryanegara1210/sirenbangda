@@ -1,0 +1,25 @@
+	    
+        <article class="module width_full">
+    		<header><h3>Verifikasi MOU dan Surat Setor</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                MOU:<br />
+                <?php include_once ('mou_isi.php') ?>
+                <br />Surat Setor: <br />
+                <?php include_once ('../surat_setor/isi.php') ?>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="button" value="Cetak" onclick="cetak()">
+                    <script>
+                        function cetak(){
+                            var lokasi='<?php echo base_url();?>unit_usaha/mou_cetak/'+'<?php echo $th."/".$id ?>';
+                            location.href=lokasi;
+                        }
+                    </script>
+				</div>
+			</footer>
+   </form>
+        </article>
+        <!-- end of styles article --> 

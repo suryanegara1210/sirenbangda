@@ -1,0 +1,42 @@
+	    <article class="module width_full">
+    		<header><h3>Daftar Surat Setor</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table class="table-common" style="width: 98%;">
+                    <tr>
+                        <th>Nomor Rekening</th>
+                        <th>Nomor Kontrak</th>
+                        <!--<th>Unit</th>-->
+                        <th>Nama (NPWP)</th>
+                        <th>Alamat</th>
+                        <th>Kegiatan/<br/>Sub Kegiatan/<br/>Akun</th>
+                        <th>Jumlah Setor</th>
+                        <th>Keperluan</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                    <?php if (!$surat_setor){
+                        echo "<tr><td colspan=\"9\"><center><h3>Tidak Ada Data...</h3></center></td></tr>";
+                    }else{
+                        foreach($surat_setor as $ss){
+                            echo "<tr>
+                                    <td>$ss->nomor_rekening</td>
+                                    <td>$ss->nomor_kontrak</td>
+                                    <!--<td>$ s s - > nama_unit</td>-->
+                                    <td>$ss->nama<br/>($ss->npwp)</td>
+                                    <td>$ss->alamat</td>
+                                    <td>$ss->kegiatan/$ss->subkegiatan/$ss->akun</td>
+                                    <td>".$this->uang->angka($ss->jumlah_setor)."</td>
+                                    <td>$ss->keperluan</td>
+                                    <td>".$this->uang->tanggal($ss->tgl_setor)."</td>
+                                    <td><a href=".site_url('surat_setor/detail/'.$ss->id_setor)."><img src=\"".base_url()."asset/images/detail.png\"/></a></td>
+                           </tr>";
+                        }
+                    }
+                    ?>
+                </table>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->

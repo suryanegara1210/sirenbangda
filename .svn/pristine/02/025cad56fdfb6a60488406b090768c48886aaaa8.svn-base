@@ -1,0 +1,604 @@
+<?php include('kwitansi_js.php') ?>
+<script type="text/javascript">
+<!--
+	prepare_form();
+
+	var pajak_pph = $.parseJSON(<?php echo json_encode($pajak_pph) ?>);
+
+    function reset_pok()
+    {
+		$("#nilai_pok").autoNumeric('set', 0);
+		$("#nilai_pok_terpakai").autoNumeric('set', 0);
+		$("#nilai_pok_sisa").autoNumeric('set', 0);    	
+
+		$("#nilai_pok_akun").autoNumeric('set', 0);
+		$("#nilai_pok_terpakai_akun").autoNumeric('set', 0);
+		$("#nilai_pok_sisa_akun").autoNumeric('set', 0);    	
+
+		$('.pok_detail').hide();
+    }
+
+    function set_pok_label()
+    {
+    	$('#pok_akun').css('font-weight','bold');
+    	$('#pok_header').css('font-weight','bold');
+
+    	var pok_akun_label = new Array();
+    	pok_akun_label.push($('#kd_giat').val());
+    	pok_akun_label.push($('#kd_output').val());
+    	pok_akun_label.push($('#kd_komponen').val());
+    	pok_akun_label.push($('#kd_akun').val());
+
+    	$('#pok_akun').html(pok_akun_label.join('.'));
+
+    	pok_akun_label.push($('#kd_hdr').val().substr(0,100));
+		$('#pok_header').html(pok_akun_label.join('.'));    	
+    }
+
+    $(function() {
+		//start combo relasi
+		//inisialisasi array combo
+		var arCombo = new Array (
+			$("#kd_giat"), $("#kd_output"), $("#kd_komponen"),
+			$("#kd_akun"), $("#kd_hdr"), $("#kd_bas")
+		);    	
+
+		$('.pok_detail').hide();
+
+		function show_nilai_pok(postData) {
+			//ambil nilai POK yang berkaitan
+			$.when (
+				$.ajax({
+						type: "POST",
+						url : "<?php echo site_url('common/get_nilai_pok')?>",
+						data: postData,
+						success: function(data){
+
+							try {
+								var json = $.parseJSON(data);
+							
+								//set textbox nilai POK
+								$("#nilai_pok_akun").autoNumeric('set', parseFloat(json.pok_akun));
+								$("#nilai_pok_terpakai_akun").autoNumeric('set', parseFloat(json.pok_terpakai_akun));
+								
+								//set textbox nilai POK akun
+								$("#nilai_pok").autoNumeric('set', parseFloat(json.pok_header));
+								$("#nilai_pok_terpakai").autoNumeric('set', parseFloat(json.pok_terpakai_header));
+								
+								//hitung dan set sisa
+								var sisa = parseFloat(json.pok_header) - parseFloat(json.pok_terpakai_header);
+								var sisa_akun = parseFloat(json.pok_akun) - parseFloat(json.pok_terpakai_akun);
+								
+								$("#nilai_pok_sisa").autoNumeric('set', sisa);
+								$("#nilai_pok_sisa_akun").autoNumeric('set', sisa_akun);
+
+							} catch(e) {
+								alert(e);
+							}					
+						}
+				})
+			).done (function() {
+				$('.pok_detail').show('fast');
+				//$('#nominal').select();
+			});
+		}	
+
+		<?php if (!isset($id_kwitansi)) {?>
+
+		function make_postdata() {
+			var postData = { 
+							 jns_kwitansi: $("#jns_kwitansi").val(),
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val(),
+							 kdkomponen: $("#kd_komponen").val(),
+							 kdakun: $("#kd_akun").val(),
+							 kdhdr: $("#kd_hdr").val()
+							};
+			return postData;		
+		}
+
+		//set event change
+		$("#kd_giat").change( function() {
+			var postData = make_postdata();
+			
+			populate_combo(arCombo, 0, "<?php echo site_url('common/get_list_output')?>", postData);
+			reset_pok();
+			set_pok_label();		
+		});
+		
+		$("#kd_output").change( function() {
+			var postData = make_postdata();
+			
+			populate_combo(arCombo, 1, "<?php echo site_url('common/get_list_komponen')?>", postData);
+			reset_pok();
+			set_pok_label();
+		});	
+
+		$("#kd_komponen").change( function() {
+			var postData = make_postdata();
+			
+			populate_combo(arCombo, 2, "<?php echo site_url('common/get_list_akun')?>", postData);
+			reset_pok();
+			set_pok_label();
+		});	
+
+		$("#kd_akun").change( function() {
+			var postData = make_postdata();
+			
+			populate_combo(arCombo, 3, "<?php echo site_url('common/get_list_header')?>", postData);
+			reset_pok();
+			set_pok_label();
+		});
+
+		$("#kd_hdr").change( function() {
+			var postData = make_postdata();
+			
+			populate_combo(arCombo, 4, "<?php echo site_url('common/get_list_bas')?>", postData);
+			set_pok_label();
+			show_nilai_pok(postData);
+		});
+
+		//END combo relasi
+
+		//new
+		$("#kd_giat").trigger("change");
+		
+		<?php } else { ?>
+
+		//edit
+		var init_postData = {
+					jns_kwitansi: '<?php echo $jns_kwitansi?>',
+					kdgiat: '<?php echo $kdgiat?>',
+					kdoutput: '<?php echo $kdoutput?>',
+					kdkomponen: '<?php echo $kdkomponen?>',
+					kdakun: '<?php echo $kdakun?>',
+					kdhdr: '<?php echo $hdr?>',
+					akun_kode: '<?php echo $akun_kode?>',
+					id_kwitansi: '<?php echo $id_kwitansi?>'
+		};
+
+		//disable combo
+		$.each(arCombo, function() {
+			$(this).prop('disabled',true);
+		});
+
+		//init combo, defered method jquery
+		$.when (
+			$.post('<?php echo site_url('common/get_list_kegiatan')?>', init_postData)
+			.done( function(data) {
+				arCombo[0].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_output')?>', init_postData)
+			.done( function(data) {
+				arCombo[1].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_komponen')?>', init_postData)
+			.done( function(data) {
+				arCombo[2].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_akun')?>', init_postData)
+			.done( function(data) {
+				arCombo[3].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_header')?>', init_postData)
+			.done( function(data) {
+				arCombo[4].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_bas')?>', init_postData)
+			.done( function(data) {
+				arCombo[5].html(data);
+			})
+		).done (function() {
+			set_pok_label();
+			show_nilai_pok(init_postData);
+			$('#kd_bas').prop('disabled',false);
+			hitung_hari();
+		});
+
+		<?php } //end edit ?>
+
+		//START perhitungan pajak
+		function hitung_total_kwitansi() {
+			var tiket = parseFloat($("#tiket").autoNumeric('get'));
+			var board = parseFloat($("#board").autoNumeric('get'));
+			var taxi = parseFloat($("#taxi").autoNumeric('get'));
+			var dll = parseFloat($("#dll").autoNumeric('get'));
+			var uang_saku = parseFloat($("#uang_saku").autoNumeric('get'));
+			var representatif = parseFloat($("#representatif").autoNumeric('get'));
+
+			//hitung total
+			var total = tiket + board + taxi + dll + uang_saku + representatif;
+			$('#nominal').autoNumeric('set', total);
+
+			//hitung pajak jika ada
+			pph = 0;
+			if(uang_saku > 0) {
+		        keypajak = $('#golongan option:selected').text().trim().toUpperCase();
+		        if(pajak_pph[keypajak] !== undefined) {
+		            pph = parseFloat(pajak_pph[keypajak].pph_spd);
+		        }            		        
+			}
+			$('#nilai_pph').autoNumeric('set', pph); 			
+		}
+		
+		$("#tiket").change( hitung_total_kwitansi );
+		$("#board").change( hitung_total_kwitansi );
+		$("#taxi").change( hitung_total_kwitansi );
+		$("#dll").change( hitung_total_kwitansi );
+		$("#uang_saku").change( hitung_total_kwitansi );
+		$("#representatif").change( hitung_total_kwitansi );
+		$("#golongan").change( hitung_total_kwitansi );
+
+		function hitung_hari(){
+			var b = $('#tgl_b').datepicker('getDate');
+			var k = $('#tgl_k').datepicker('getDate');
+			if(b && k){
+				if(b > k){
+					alert("Tanggal kembali < Tanggal berangkat");
+					$('#tgl_k').select();
+				}else{
+					var diff = window.days_between(b, k);
+					$('#lama').val(diff+1);
+				}								
+			}
+		}
+		
+		$("#tgl_b").change( hitung_hari );
+		$("#tgl_k").change( hitung_hari );
+    
+        $.validator.addMethod('maxBelanja',
+			function(value, element, params) {
+				try {			
+					value 		= parseFloat($(element).autoNumeric('get'));
+					var nil1	= parseFloat(params);
+				} catch(e) { alert(e) }
+
+				return this.optional(element) || ( value >0 && value <= nil1);
+			}
+		);
+		
+        $("#form_kwitansi").validate({
+            rules: {
+                nominal: {
+					required:	true,					
+					maxBelanja: function() {
+							return $('#nilai_pok_sisa_akun').autoNumeric('get') 
+						}
+				}
+            },
+            messages: {
+                nominal: {
+					required: "Mohon diisi nominal kwitansi",
+					maxBelanja: "Mohon diisi nominal lebih dari '0' dan kurang dari atau sama dengan '{0}'"
+				},
+            },
+			submitHandler: function(form){
+				window.autoNumericOff('#nominal');
+				window.autoNumericOff('#nilai_pph');
+				window.autoNumericOff('#tiket');
+				window.autoNumericOff('#board');
+				window.autoNumericOff('#taxi');
+				window.autoNumericOff('#dll');
+				window.autoNumericOff('#uang_saku');
+				window.autoNumericOff('#representatif');
+				form.submit();
+			}
+        });		
+    });
+-->
+</script>
+
+<form method="post" name='form_kwitansi' id='form_kwitansi' action="<?php echo site_url('kwitansi/save')?>" enctype="multipart/form-data">
+<input name='call_from' type='hidden' id="call_from" value='<?php echo isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : ''?>'/>
+<input name='id_kwitansi' type='hidden' id="id_kwitansi" value="<?php echo isset($id_kwitansi) ? $id_kwitansi : ''?>"  />
+<input name='jns_kwitansi' type='hidden' id="jns_kwitansi" value="<?php echo isset($jns_kwitansi) ? $jns_kwitansi : ''?>"  />
+<input name='jns_belanja' type='hidden' id="jns_belanja"   value="<?php echo isset($jns_belanja) ? $jns_belanja : ''?>"  />
+<input name='max_belanja' type='hidden' id="max_belanja"   value="<?php echo isset($max_belanja) ? $max_belanja : ''?>"  />
+<input name='jenis_pajak' type='hidden' id="jenis_pajak"   value="<?php echo isset($jenis_pajak) ? $jenis_pajak : ''?>"  />
+
+<div id="div_barang_gu" class="box"> 
+      <table border="0">
+        <tr>
+          <td class="nm_col_hide" width="200px">Sub Unit </td>
+          <td >:</td>
+          <td><input name='unit_kerja' type='text' value="<?php echo isset($nama_sunit) ? $nama_sunit : ''; ?>" 
+            readonly id="unit_kerja" size="20"  /></td>            
+        </tr>
+        <tr>
+			<td class="nm_col_hide" >Tempat / Tanggal Kwitansi</td>
+			<td >:</td>
+			<td>
+				<input name='tempat_kwitansi' type='text' value="<?php echo isset($tpt_kwitansi) ? $tpt_kwitansi : ''?>" 
+				id="tempat_kwitansi" size="20" required placeholder="Lokasi kwitansi" title="Mohon diisi tempat kwitansi dibuat"> , 
+				<input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="12" class='date'
+          		value="<?php echo isset($tgl_kwitansi) ? $tgl_kwitansi : date("Y-m-d");  ?>" 
+          		title="Mohon diisi tanggal dibuat kwitansi"/>
+    		</td>
+        </tr>                 
+    <tr>
+    	<td>Kegiatan</td><td>:</td>
+        <td> 
+          <label for="select"></label>
+          <select name="kd_giat" id="kd_giat" title="Mohon diisi kode kegiatan" required>
+			<?php
+				foreach($kegiatans as $row){
+					$selected = '';
+					if(isset($kdgiat))
+						if($row == $kdgiat)
+							$selected = 'selected';
+						
+					echo "<option value='{$row->kdgiat}' $selected>{$row->nmgiat}</option>";
+				}
+			?>
+        </select></td>
+   </tr>  
+    <tr>
+        <td>Output</td>
+        <td>:</td>
+        <td>
+		<select name="kd_output" id="kd_output" title="Mohon diisi kode output" required>
+		    <option value=""></option>
+		</select>
+		</td>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+		<td>
+		<select name="kd_komponen" id="kd_komponen" title="Mohon diisi kode komponen kwitansi" required>
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+   <tr>
+        <td>Akun</td>
+        <td>:</td>
+		<td>
+		<select name="kd_akun" id="kd_akun" title="Mohon diisi kode akun kwitansi" required>
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>	
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+		<td>
+		<select name="kd_hdr" id="kd_hdr" title="Mohon diisi header kwitansi" required>
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+
+    <tr class="pok_detail">
+        <td></td>
+        <td valign='top'>:</td>
+        <td>
+        	<span id='pok_akun'></span><br>
+        	<div style='background-color: lightyellow'>
+        	Nilai POK : &nbsp;	
+        	<input name='nilai_pok_akun' type='text' id="nilai_pok_akun"  size="15" class='currency'
+				readonly="readonly" value="0"/>&nbsp;&nbsp;Terpakai : &nbsp;
+			<input name='nilai_pok_terpakai_akun' type='text' id="nilai_pok_terpakai_akun" class='currency'
+				   size="15" readonly="readonly" value="0"/> &nbsp;&nbsp; Sisa : &nbsp;
+			<input name='nilai_pok_sisa_akun' type='text' id="nilai_pok_sisa_akun" class='currency'
+				   size="15" readonly="readonly" value="0"/>
+			</div>
+			
+        	<span id='pok_header'></span><br>
+        	<div style='background-color: lightyellow'>
+        	Nilai POK : &nbsp;	
+        	<input name='nilai_pok' type='text' id="nilai_pok"  size="15" class='currency'
+				readonly="readonly" value="0"/>&nbsp;&nbsp;Terpakai : &nbsp;
+			<input name='nilai_pok_terpakai' type='text' id="nilai_pok_terpakai" class='currency'
+				   size="15" readonly="readonly" value="0"/> &nbsp;&nbsp; Sisa : &nbsp;
+			<input name='nilai_pok_sisa' type='text' id="nilai_pok_sisa" class='currency'
+				   size="15" readonly="readonly" value="0"/>
+			</div>
+		</td>
+    </tr>
+    <tr>
+        <td>Kode BAS</td>
+        <td>:</td>
+		<td>
+		<select name="kd_bas" id="kd_bas" title="Mohon diisi kode bas kwitansi" required>
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+
+         <tr>
+          <td>Nama Pejabat Pemberi Perintah</td>
+          <td >:</td><td><input name="pp_spd" type='text' size="50" 
+          id="pp_spd" placeholder="Nama Pejabat Pemberi Perintah Perjalanan Dinas" value="<?php echo isset($pp_spd) ? $pp_spd : ''?>"
+          title="Mohon diisi Nama Pejabat pemberi perintah perjalanan dinas" required/></td>          
+        </tr>
+
+         <tr>
+          <td>Kota Asal</td>
+          <td >:</td><td><input name="dari" type='text' size="20" 
+          id="dari" placeholder="Kota Asal" value="<?php echo isset($dari) ? $dari : ''?>"
+          title="Mohon diisi kota asal perjalanan" required/>
+          	&nbsp;&nbsp; Tgl Berangkat : &nbsp;&nbsp;
+			<input name='tgl_b' type='text' id="tgl_b"  size="12" class='date'
+      		value="<?php echo isset($tgl_b) ? Formatting::date_format($tgl_b, 'date_mysql') : '';  ?>" 
+      		title="Mohon diisi tanggal keberangkatan" required/>
+      	  </td>          
+        </tr>
+
+         <tr>
+          <td>Kota Tujuan</td>
+          <td >:</td><td><input name="tujuan" type='text' size="20" 
+          id="tujuan" placeholder="Kota Tujuan" value="<?php echo isset($tujuan) ? $tujuan : ''?>"
+          title="Mohon diisi kota tujuan perjalanan" required/>
+          	&nbsp;&nbsp; Tgl Kembali &nbsp;&nbsp; : &nbsp;&nbsp; 
+			<input name='tgl_k' type='text' id="tgl_k"  size="12" class='date'
+      		value="<?php echo isset($tgl_k) ? Formatting::date_format($tgl_k, 'date_mysql') : '';  ?>" 
+      		title="Mohon diisi tanggal kembali" required/>
+      		&nbsp;  
+			<input name='lama' type='text' id="lama" class="txt-center" size="3" readonly value="<?php echo isset($hari) ? $hari : '0'?>"/>
+      		&nbsp;Hari
+      	  </td>          
+        </tr>
+
+         <tr>
+          <td>Nama Yang Bepergian</td>
+          <td >:</td><td><input name="yg_bepergian" type='text' size="50" 
+          id="yg_bepergian" placeholder="Nama yang melakukan perjalanan dinas" value="<?php echo isset($yg_bepergian) ? $yg_bepergian : ''?>"
+          title="Mohon diisi nama yang melakukan perjalanan dinas" required/></td>          
+        </tr>
+
+         <tr>
+          <td>Nomor Identitas (NIP/NIM)</td>
+          <td >:</td><td><input name="nip" type='text' size="20" 
+          id="nip" placeholder="NIP/NIM yang bepergian" value="<?php echo isset($nip) ? $nip : ''?>"
+          title="Mohon diisi nomor identitas yang melakukan perjalanan dinas" required/></td>          
+        </tr>
+
+         <tr>
+          <td>Golongan</td>
+          <td >:</td><td>
+          <select name="golongan" id="golongan" title="Mohon dipilih golongan personal yang melakukan perjalanan" required>
+			<option value="">-- Pilih --</option>          	
+			<?php
+				foreach($list_golongan as $key=>$val){
+					$selected = '';
+					if(isset($gol))
+						if($key == $gol)
+							$selected = 'selected';
+						
+					echo "<option value='{$key}' $selected>{$val}</option>";
+				}
+			?>
+          </select>          
+          </td>          
+        </tr>
+        
+        <tr>
+          <td>Maksud Perjalanan Dinas</td>
+          <td >:</td><td><input name="maksud" type='text' style="width:450px;" 
+          id="maksud" placeholder="Maksud Perjalanan Dinas" value="<?php echo isset($maksud) ? $maksud : ''?>"
+          title="Mohon diisi maksud dari perjalanan dinas" required/></td>          
+        </tr>
+
+        <tr>       
+          <td>Keterangan</td>
+          <td >:</td><td colspan="5">
+            <textarea name="ket_kwitansi" id="ket_kwitansi" class="input1" style="width:450px;" 
+                placeholder="Keterangan Detail Mengenai Kwitansi SPD"
+				title="Mohon diisi keterangan detail kwitansi" required
+                ><?php echo isset($ket_kwitansi) ? $ket_kwitansi : ''?></textarea></td>
+        </tr>
+        <?php
+		if (!isset($file_daftar_nominatif)) {
+    	?>
+        <tr>
+          <td>Daftar Nominatif</td>
+          <td>:</td>
+          <td>
+          	<input type="file" id="daftar_nominatif" name="daftar_nominatif" accept="application/pdf" />
+          	<BR>
+          	<i>
+          		*Format lampiran Daftar Nominatif harus pdf, Ukuran Maksimum file = 1Mb.
+          	</i>
+          </td>
+        </tr>
+        	<?php
+        	}else{
+			?>
+		<tr>
+          <td>Daftar Nominatif</td>
+          <td>:<input type="hidden" name="daftar_nominatif_old" value="<?php echo $file_daftar_nominatif; ?>" /></td>
+          <td id="td_file_daftar_nominatif">          	
+          	<b>
+          	<?php
+          	echo $file_daftar_nominatif;
+          	?>
+          	</b>          	
+          	<input type="button" value="Ganti" onclick="ganti_file('daftar_nominatif','td_file_daftar_nominatif')" />
+          </td>
+        </tr>
+		<?php
+    	}
+    	?>
+        <tr>
+        	<td colspan="3" style="margin-top: 10px"><strong>Rincian Biaya</strong></td>
+        </tr>
+	    <tr>
+	      <td style="padding-left:20px">Tiket</td>
+	      <td>:</td>
+	      <td>
+	      	<input name='tiket' type='text' id="tiket" class='currency'
+	      	size="20" placeholder="Nominal biaya tiket" value="<?php echo isset($tiket) ? $tiket : '0' ?>">
+	      </td>	      
+	    </tr>
+	    <tr>
+	      <td style="padding-left:20px">Boarding Pass</td>
+	      <td>:</td>
+	      <td>
+	      	<input name='board' type='text' id="board" class='currency'
+	      	size="20" placeholder="Nominal biaya Boarding Pass" value="<?php echo isset($board) ? $board : '0' ?>">
+	      </td>	      
+	    </tr>
+	    <tr>
+	      <td style="padding-left:20px">Taxi</td>
+	      <td>:</td>
+	      <td>
+	      	<input name='taxi' type='text' id="taxi" class='currency'
+	      	size="20" placeholder="Nominal biaya Taxi" value="<?php echo isset($taxi) ? $taxi : '0' ?>">
+	      </td>	      
+	    </tr>
+	    <tr>
+	      <td style="padding-left:20px">Penginapan, UM, <br>Transport Lainnya</td>
+	      <td>:</td>
+	      <td>
+	      	<input name='dll' type='text' id="dll" class='currency'
+	      	size="20" placeholder="Nominal biaya lainnya" value="<?php echo isset($dll) ? $dll : '0' ?>">
+	      </td>	      
+	    </tr>
+	    <tr>
+	      <td style="padding-left:20px">Uang Saku</td>
+	      <td>:</td>
+	      <td>
+	      	<input name='uang_saku' type='text' id="uang_saku" class='currency'
+	      	size="20" placeholder="Nominal biaya Taxi" value="<?php echo isset($uang_saku) ? $uang_saku : '0' ?>">
+	      </td>	      
+	    </tr>	   
+	    <tr>
+	      <td style="padding-left:20px">Uang Representatif</td>
+	      <td>:</td>
+	      <td>
+	      	<input name='representatif' type='text' id="representatif" class='currency'
+	      	size="20" placeholder="Nominal biaya lainnya" value="<?php echo isset($representatif) ? $representatif : '0' ?>">
+	      </td>	      
+	    </tr>
+	    <tr>
+	      <td class='txt-center'><strong>Total</strong></td>
+	      <td>:</td>
+	      <td> <div style="border-top: 2px solid; height: 2px; width: 300px" />
+	      	<input name='nominal' type='text' id="nominal" class='currency'
+	      	size="20"  value="<?php echo isset($nominal) ? $nominal : '0' ?>"
+	      	required>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+          	PPH : <input name="nilai_pph" type="text" id="nilai_pph" class='currency' size="15" 
+          	readonly="readonly" value="<?php echo isset($pph) ? $pph : '0' ?>"/>
+	      </td>	      
+	    </tr>
+
+    </table>
+    <div class="submit_link" style="padding-top:18px">  
+      <input name="simpan" type='submit' id="simpan" value='Simpan' >
+      <?php if (empty($id_kwitansi)) { ?>
+      <input name="simpan_n_baru" type='submit' id="simpan_n_baru" value='Simpan - Buat Baru' >
+      <?php } ?>
+      <input type=button value=Batal onclick="window.location='<?php 
+      	$call_from = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+      	if(!empty($call_from) && strpos($call_from, 'kwitansi/create') == FALSE)
+      		echo $call_from;
+      	else 
+      		echo site_url('kwitansi/view');
+      ?>'">
+    </div> 
+  </div>
+
+</form>
+

@@ -1,0 +1,177 @@
+<!--==============================-->	 
+<script language="javascript">
+  
+  prepare_facebox();
+
+  function delete_kw(id) {
+    console.log('delete',id);
+
+    if(confirm('Apakah anda yakin untuk menghapus kwitansi ini?')) {
+
+      $.blockUI({
+                  message: 'Proses penghapusan sedang dilakukan, mohon ditunggu ...',
+                  css: window._css,
+                  overlayCSS: window._ovcss
+      });      
+
+      $.post("<?php echo site_url('kwitansi/delete')?>", {id_kwitansi: id})
+      .success(function(data) {
+        var result = parseJSON(data);
+        
+        //alert(result.message);
+        if(!result.message)
+          result.message = 'Terjadi kesalahan sistem, mohon diulang kembali';
+
+        $.blockUI({
+          message: result.message,
+          timeout: 2000,
+          css: window._css,
+          overlayCSS: window._ovcss
+        });
+
+        $('#search').trigger('click');
+      });
+    }
+  }
+
+  function edit_kw(id) {
+    console.log('edit',id);    
+    window.location = '<?php echo site_url('kwitansi/edit')?>/' + id;
+  }
+
+  function preview_kw(id) {
+    console.log('preview',id);
+    $.facebox({ajax: '<?php echo site_url('kwitansi/preview')?>/'+id})
+  }
+
+  function preview_history(id) {
+    console.log('preview history',id);
+    $.facebox({ajax: '<?php echo site_url('kwitansi/view_history')?>/'+id})
+  }
+
+  function preview_honor(id) {
+    console.log('preview_honor',id);
+    $.facebox({ajax: '<?php echo site_url('kwitansi/preview_honor')?>/'+id}) 
+  }
+
+  $(function() {
+    $('#tsearch').tablesorter(
+        {headers: {
+          0:{sorter:false},
+          //7:{sorter:false},
+          8:{sorter:false}
+        } 
+    });
+  });
+
+</script>
+
+<style type="text/css">
+.header {
+  text-indent: 0;
+  text-align: left;
+}
+
+</style>
+<table class='table-common tablesorter' style='width: 99.9%' id='tsearch'>  
+  <thead>
+  <tr>
+  	<th >No</th>
+  	<th >No Kwitansi</th>
+    <th >Mata Anggaran</th>
+    <th >Jenis Kwitansi</th>
+    <th >Tanggal</th>
+    <th >Keterangan</th>
+    <th >Jumlah</th>
+    <th>Status</th>
+    <th >Lampiran</th>
+    <th >Action</th>    
+  </tr>
+  </thead>
+  <tbody>
+  <?php if(!empty($rows)) {
+	$i=0;
+	foreach($rows as $row) : $i++;
+  ?>
+    <tr>
+        <td align="center"><?php echo $i;?></td>
+        <td ><a href="javascript:void(0)" onclick="preview_kw(<?php echo $row->id_kwitansi;?>)" 
+                title='preview kwitansi'><?php echo $row->no_kwitansi; ?></a>
+        </td>
+        <td ><?php echo "$row->kdgiat.$row->kdoutput.$row->kdkomponen.$row->kdakun"; ?></td>
+        <td ><?php echo $row->jenis_kwitansi; ?> </td>
+        <td align="center"><?php echo Formatting::date_format($row->tgl_kwitansi,'date'); ?> </td>
+        <td title="<?php echo $row->ket_kwitansi;?>">
+            <?php echo StrUtil::getShortStr($row->ket_kwitansi, 30);?> </td>
+        <td align="right"><?php echo Formatting::currency($row->nominal); ?> </td>
+        <td align="left"><a href="javascript:void(0)" onclick="preview_history(<?php echo $row->id_kwitansi;?>)" 
+                title='preview riwayat kwitansi'><?php echo $row->status_kwitansi;?></a>
+        </td>
+        <td align="center">
+          <?php
+          if (!empty($row->file_bast) && !empty($row->file_bap)) {
+            if (!empty($row->file_bast)) {
+            ?>
+              <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_bast); ?>" class='icon2-printer' title='Cetak Lampiran BAST.'/>
+            <?php
+            }
+            if (!empty($row->file_bap)){
+            ?>
+              <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_bap); ?>" class='icon2-printer' title='Cetak Lampiran BAP.'/>
+            <?php
+            }
+          }elseif (!empty($row->file_daftar_honor) && !empty($row->file_sk)) {
+            if (!empty($row->file_daftar_honor)) {
+            ?>
+              <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_daftar_honor); ?>" class='icon2-printer' title='Cetak Lampiran Daftar Honor.'/>
+            <?php
+            }
+            if (!empty($row->file_sk)){
+            ?>
+              <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_sk); ?>" class='icon2-printer' title='Cetak Lampiran SK.'/>
+            <?php
+            }
+          }elseif (!empty($row->file_daftar_nominatif)) {            
+            ?>
+              <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_daftar_nominatif); ?>" class='icon2-printer' title='Cetak Lampiran Daftar Nominatif.'/>
+            <?php            
+          }else{
+          ?>
+          -
+          <?php
+          }
+          ?>
+        </td>
+        <td align="center">            
+            <?php if(in_array($row->id_status_kwitansi, 
+                              array(Constant::KWITANSI_BARU, Constant::KWITANSI_REVISI))) { ?>
+              <a href="javascript:void(0)" onclick="delete_kw(<?php echo $row->id_kwitansi;?>)" class='icon2-delete' title='hapus kwitansi'/>
+              <a href="javascript:void(0)" onclick="edit_kw(<?php echo $row->id_kwitansi;?>)" class='icon2-page_white_edit' title='edit kwitansi'/>
+            <?php } ?>
+
+            <?php if(in_array($row->id_status_kwitansi, 
+                              array(Constant::KWITANSI_VERI_DOK, Constant::KWITANSI_TDKLKP, Constant::KWITANSI_VALID, Constant::KWITANSI_KWVALID, Constant::KWITANSI_DICAIRKAN))) { ?>
+              <a href="<?php echo site_url('kwitansi/cetak/'.$row->id_kwitansi); ?>" class='icon2-printer' title='Cetak kwitansi'/>
+            <?php } ?>
+              <!-- <a href="javascript:void(0)" onclick="preview_kw(<?php echo $row->id_kwitansi;?>)" 
+                class='icon-search' title='preview kwitansi'/> -->
+
+            <?php /* if($row->jenis_kwitansi == "HONOR") { ?>
+              <a href="javascript:void(0)" onclick="preview_honor(<?php echo $row->id_kwitansi;?>)" 
+                class='icon2-page_white_text' title='preview daftar honor'/>
+            <?php } */ ?>
+              
+	       </td>         
+    </tr>    
+  <?php endforeach;?>  
+  </tbody>
+</table>
+<br />
+<?php } else { ?>
+  <tr>
+    <td align='center' colspan="9" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td>
+  </tr>
+</table>
+<br/> 
+<?php } ?> 
+

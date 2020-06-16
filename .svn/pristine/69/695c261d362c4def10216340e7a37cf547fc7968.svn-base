@@ -1,0 +1,65 @@
+<div class="module width_full" id='container_usulan'>
+    <header><h3>Pengajuan Uang Persediaan (UP) dan Tambahan Uang Persediaan (TUP)</h3></header>
+    <div class="module_content">
+		<table cellspacing="0" >
+			<tr>
+				<td width="120px">Jenis Usulan</td>
+				<td>:</td>
+				<td>
+					<select name="usulan" id="usulan">
+						<?php
+							foreach($sifat_bayar as $sb){
+								echo "<option value='{$sb->kode_value}'>{$sb->nama_value}</option>";
+							}
+						?>
+					</select>
+				</td>
+				<td><input type='button' id='pilih_sb' value='set'></td>
+			</tr>
+		</table>
+		<div id="tampil"></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+    $("#pilih_sb").click( function() {
+            var usulan = $("#usulan").val();
+            if(usulan != ''){
+
+				$.blockUI({
+                    message: 'Permintaan sedang diproses, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+				});
+
+				$.post("<?php echo site_url('usulan/get_form_usulan')?>",
+					{
+						jns_usulan: usulan
+					},
+					function(data) {
+						try {
+							var json = $.parseJSON(data);
+
+							catch_expired_session(json);
+
+							if(json.errno != 0){
+								$.blockUI({
+									message: json.msg,
+									timeout: 2000,
+									css: window._css,
+									overlayCSS: window._ovcss
+								});
+							}
+
+						} catch(e) {
+							//jika bukan json object, do nothing
+							$('#tampil').html(data);
+							$.unblockUI();
+						} finally {
+
+						}
+					}
+				);
+            }
+      })
+</script>

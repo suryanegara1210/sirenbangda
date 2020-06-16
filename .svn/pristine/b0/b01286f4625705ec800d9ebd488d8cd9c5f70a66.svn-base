@@ -1,0 +1,70 @@
+<article class="module width_full">
+ <?php foreach($nama_unit->result_array() as $row){ $nama_unit = $row['nama_subunit'];$kd = $row['id_subunit'];}?>  
+            <header><h3>Rincian UP (Uang Persediaan) <?php echo "$nama_unit"; ?> </h3></header>
+                     
+            <div class="module_content">
+            <form method="post" name='formName4' action="" onSubmit='return validasi(this)'> 
+           
+            <?php if($banyak_up == 0 ){?> 
+            <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+                <thead> 
+                <tr >
+                    <th>No </th>
+                    <th>Kode Output / Kode Komponen / Kode Akun</th>
+                    <th>Jumlah (Rp.)</th>
+                    <th>Aksi</th> 
+                </tr>
+                </thead>
+                <tr>
+                    <td style='height:50px; padding-top: 15px; text-align:center; font-size:12px;' colspan='4'>
+                    <strong>Data Kosong</strong>    </td>
+                </tr>
+            </table>
+            <?php }else{ ?> 
+            <table  class="table-common" style="margin-left: 20px; width: 580px;" >  
+            <thead> 
+            <tr >
+                <th>No </th>
+                <th>Kode Output / Kode Komponen / Kode Akun</th>
+                <th>Status</th>
+                <th>Jumlah (Rp.)</th>  
+                <th>Aksi</th>
+                
+            </tr>
+            </thead>
+            
+            <?php $no = 1;       
+            foreach($daftar_up->result_array() as $row)
+            {  
+            $id_subunit=$row['id_subunit'];  
+            $id=$row['id_transaksi']; 
+            $kd_output= $row['kdoutput'];
+            $kd_komponen= $row['kdkomponen'];
+            $nama_output= $row['nmoutput'];
+            $nama_komponen= $row['nmkomponen'];
+            $kd_akun= $row['kdakun'];
+            $nmakun= $row['nmakun'];   
+            $status_transaksi= $row['status_transaksi'];   
+            $header= $row['nmheader'];    
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",",".");    
+            ?>    
+            <input type="hidden" name="kode_unit" value="<?php echo "$id_subunit"; ?>">   
+              <tr>
+                <td align="center"><?php echo "$no";?></td>
+                <td align='center'><?php echo "$kd_output / $kd_komponen / $kd_akun ";?></td> 
+                <td align='center'><?php echo "$status_transaksi ";?></td> 
+                <td align="right"><?php echo "$jumlah";?></td> 
+                <td align="center"><a href='<?php echo base_url()."index.php/unit/cek_up2/".$id;?>' title='Cek Detail UP' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+
+                
+              </tr>
+            <?php $no++ ;  }}  ?> 
+             </table>   
+             </div> 
+             <footer> 
+                    <div class="submit_link">     
+                        <input type="button" value="Kembali" onclick=self.history.back() > 
+                    </div>  
+            </footer>
+</article>

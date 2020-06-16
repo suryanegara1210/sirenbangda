@@ -1,0 +1,56 @@
+<article class="module width_full" style="width: 130%; margin-left: -15%;">
+	<header>
+	  <h3 style="width: auto;">
+	  	Evaluasi Renja BKD Kabupaten Klungkung
+	  </h3>
+	  <a href="<?php echo site_url('evaluasi_renja/preview_evaluasi_renja') ?>"><input style="margin: 5px 6px; float: right;" type="button" value="Preivew" /></a>
+	  <a href="<?php echo site_url('evaluasi_renja/preview_evaluasi_renja') ?>"><input style="margin: 5px 0px; float: right;" type="button" value="Cetak" /></a>	  
+	</header>    
+    <div id="table-renja" class="module_content" style="overflow:auto">    	
+    </div>
+</article>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#table-renja").on("click", ".edit-test", function(){
+			//var idr = $(this).parent().parent().attr("id-r");
+			
+			prepare_facebox();
+			$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+			$.ajax({
+				type: "POST",
+				url: '<?php echo site_url("evaluasi_renja/cru_evaluasi_renja"); ?>',
+				dataType: "json",
+				data: {idr:$(this).attr("idr")},
+				success: function(msg){
+					catch_expired_session2(msg);
+					$.facebox(msg.html);
+					$.unblockUI();
+				}
+			});			
+		});
+
+		reload_table();
+	});
+
+	function reload_table(){
+		$.blockUI({
+			css: window._css,
+			overlayCSS: window._ovcss
+		});
+		
+		$.ajax({
+			type: "POST",
+			url: '<?php echo site_url("evaluasi_renja/get_table_data"); ?>',
+			dataType: "json",
+			data: {},
+			success: function(msg){
+				catch_expired_session2(msg);
+				$("#table-renja").html(msg.html);
+				$.unblockUI();
+			}
+		});
+	}
+</script>

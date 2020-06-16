@@ -1,0 +1,63 @@
+
+</br>
+<article class="module width_full">
+<header>
+<style>
+.page
+{
+	font-size:14px;
+	font-weight:500;
+	color:#0000FF;
+	margin-right:50px;
+}
+</style>
+
+<h3>View Jurnal Umum</h3>
+
+<div class="submit_link">
+                    <input type="button" value="Cetak" onclick="cetak()">
+                    <script>
+                        function cetak(){
+                            var lokasi='<?php echo base_url();?>akuntansi/eksport_excel';
+                            location.href=lokasi;
+                        }
+                    </script>
+				</div>
+
+</header>
+<h3>Jurnal Umum</h3>
+<h3>Tahun : <?php echo date('Y'); ?></h3>
+<div align="right" class="page"> <?php echo $this->pagination->create_links(); ?> </div>
+<?php if(count($detail) > 0) { ?>
+<table width="100" border="1"  class="table-common" id="hasil" style="margin-left: 20px; width: 900px;" >  
+       	<thead>
+        	<tr> 
+                <th>No.</th>
+                <th>Tanggal Pembukuan</th>
+                <th>Tanggal Transaksi</th>
+                <th>Bukti</th>
+                <th>Keterangan</th>
+                <th>Kode Akun</th>
+                <th>Nama Akun</th>
+                <th width="100px">Debet</th>
+                <th width="100px">Kredit</th>
+                
+            </tr>
+        </thead>
+<?php $i=1;
+echo "wayan bagus";
+foreach($detail as $rows) { echo "<tr>";
+echo "
+<td>". $i++."</td>
+<td>". $rows['tgl_buku'] ."</td>
+<td>". $rows['tgl_transaksi']."</td>
+<td>". $rows['bukti'] ."</td>
+<td>". $rows['keterangan'] ."</td>
+<td>". $rows['kode_akun'] ."</td>
+<td>". $rows['nama_akun'] ."</td>
+<td align='right'>". $this->uang->angka($rows['debet']) ."</td>
+<td align='right'>". $this->uang->angka($rows['kredit']) ."</td>
+"; } ?>
+</table>
+<?php } ?>
+<div align="right" class="page"> <?php echo $this->pagination->create_links(); ?> </div>

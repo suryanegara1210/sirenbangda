@@ -1,0 +1,32 @@
+<thead>
+	<tr>
+		<th>No</th>
+		<th>Sasaran</th>
+		<th>Indikator Kinerja</th>
+		<th>Tahun I</th>
+		<th>Tahun II</th>
+		<th>Tahun III</th>
+		<th>Tahun IV</th>
+		<th>Tahun V</th>
+	</tr>
+</thead>
+<tbody>
+<?php
+	$i=0;
+	foreach ($sasaran as $row) {
+		$i++;
+?>
+	<tr>
+		<td align="center"><?php echo $i; ?></td>
+		<td><?php echo $row->sasaran; ?></td>
+		<td><?php echo $row->indikator; ?></td>
+		<td align="center"><?php echo $row->target_1." ".$row->nama_value; ?></td>
+		<td align="center"><?php echo $row->target_2." ".$row->nama_value; ?></td>
+		<td align="center"><?php echo $row->target_3." ".$row->nama_value; ?></td>
+		<td align="center"><?php echo $row->target_4." ".$row->nama_value; ?></td>
+		<td align="center"><?php echo $row->target_5." ".$row->nama_value; ?></td>
+	</tr>
+<?php					
+	}
+?>		
+</tbody>

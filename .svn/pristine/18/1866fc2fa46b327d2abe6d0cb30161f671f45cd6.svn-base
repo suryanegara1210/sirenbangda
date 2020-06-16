@@ -1,0 +1,4 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-02 03:59:55 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-02 04:00:30 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692

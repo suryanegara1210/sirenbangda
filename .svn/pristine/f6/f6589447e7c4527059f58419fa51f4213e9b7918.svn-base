@@ -1,0 +1,61 @@
+<div id="init_usulan">
+<center>
+<table  cellspacing="0" style="margin-top: 20px">
+    <tr>
+        <td style="text-align: center">
+			<div id="id" style="width: 400px">
+			Sub Unit <strong><?php echo $nm_sunit; ?></strong> belum membuat usulan
+			<?php echo $jns_usulan?>. Tekan <input type="button" id="create_usulan" value="Buat Usulan"> untuk membuat
+			Usulan <?php echo $jns_usulan?>.
+			</div>
+		</td>
+    </tr>
+</table>
+</center>
+</div>
+
+<script type="text/javascript">
+
+	$(function() {
+		$('#create_usulan').click( function () {
+			if (confirm('Usulan UP akan dibuat untuk Sub Unit `<?php echo $nm_sunit?>`. Lanjutkan?')) {
+
+				$.blockUI({
+                    message: 'Pembuatan usulan sedang diproses, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+				});
+
+				$.ajax({
+					type: "POST",
+					url : "<?php echo site_url('usulan/create_usulan')?>",
+					data: {jns_usulan: $('#usulan').val()},
+					success: function(msg){
+						try {
+							var json = $.parseJSON(msg);
+
+							catch_expired_session(json);
+
+							if(json.errno != 0){
+								$.blockUI({
+									message: json.msg,
+									timeout: 2000,
+									css: window._css,
+									overlayCSS: window._ovcss
+								});
+							}
+						} catch(e) {
+							$.unblockUI();
+
+							//jika bukan json object, do nothing
+							$('#init_usulan').parent('div').html(msg);
+						} finally {
+
+						}
+					}
+				});
+			}
+		});
+	});
+
+</script>

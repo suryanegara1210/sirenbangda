@@ -1,0 +1,47 @@
+<thead>
+    <tr>
+        <th style="font-size:14px" >No</th>
+        <th style="font-size:14px" >GROUP</th>
+        <?php if($check == 1) {?>
+        <th style="font-size:14px" >NAMA DEWAN</th>
+        <?php } ?>
+        <th style="font-size:14px" >SKPD TUJUAN</th>
+        <th style="font-size:14px" >KECAMATAN</th>
+        <th style="font-size:14px" >DESA</th>
+        <th style="font-size:14px" >JENIS PEKERJAAN</th>
+        <th style="font-size:14px" >VOLUME</th>
+        <th style="font-size:14px" >SATUAN</th>					
+        <th style="font-size:14px" >LOKASI</th>
+        <th style="font-size:14px" >STATUS</th>
+    </tr>				
+</thead>
+<tbody>
+	<?php 
+	 $i=0;
+	 	foreach($usulanpro as $row){
+			$i++;
+	?>
+    <tr>
+    	<td style="font-size:12px" align="center"><?php echo $i; ?></td>
+        <td style="font-size:12px" ><?php echo $row->nama_group;?></td>
+        <?php if($check == 1) {?>
+        <td style="font-size:12px" ><?php echo $row->nama_dewan;?></td>
+        <?php } ?>
+        <td style="font-size:12px" ><?php echo $row->nama_skpd;?></td>
+        <td style="font-size:11px" ><?php echo $row->nama_kec;?></td>
+        <td style="font-size:12px" ><?php echo $row->nama_desa;?></td>
+        <td style="font-size:12px" ><?php echo $row->jenis_pekerjaan;?></td>
+        <td style="font-size:12px" ><?php echo $row->volume;?></td>
+        <td style="font-size:12px" ><?php echo $row->satuan;?></td>					
+        <td style="font-size:12px" ><?php echo $row->lokasi;?></td>
+        <?php if($row->status == NULL){ 
+		?>
+        		<td style="font-size:12px" ><?php echo "Belum Ditentukan SKPD";?></td>
+        <?php } 
+				else {
+		?>	
+        <td style="font-size:12px" ><?php echo $row->status;?></td>
+        <?php } ?>
+    </tr>
+    <?php } ?>
+</tbody>

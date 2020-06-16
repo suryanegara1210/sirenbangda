@@ -1,0 +1,53 @@
+<table class="table-common tablesorter" style="width:99%" >
+	<thead>
+		<tr>
+			<th colspan="4">KODE</th>
+			<th>PROGRAM DAN KEGIATAN</th>
+			<th>INDIKATOR KINERJA PROGRAM / KEGIATAN</th>
+			<th>TW1</th>
+            <th>TW2</th>
+            <th>TW3</th>
+            <th>TW4</th>
+		</tr>
+	</thead>
+    <tbody>
+<?php    	
+    foreach ($renja['renja'] as $row) {
+?>
+    	<tr>
+        	<td><?= $row->kd_urusan ?></td>
+            <td><?= $row->kd_bidang ?></td>
+            <td><?= $row->kd_program ?></td>
+            <td><?= $row->kd_kegiatan ?></td>
+            <td><?= $row->nama_prog_or_keg ?></td>
+            <td>
+	<?php
+		if (!empty($renja['indikator'][$row->id])) {							
+			$no_indikator=0;
+			foreach ($renja['indikator'][$row->id] as $row_indikator) {
+				$no_indikator++;
+	?>
+				<?= $no_indikator.". ".$row_indikator->indikator ?> <i>(<?= $row_indikator->target." ".$row_indikator->satuan ?>)</i><BR>
+	<?php
+			}
+		}
+	?>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" title="Evaluasi Triwulan 1"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" title="Evaluasi Triwulan 2"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" title="Evaluasi Triwulan 3"/>
+            </td>
+            <td align="center">
+            	<a href="javascript:void(0)" class="icon-pencil edit-test" idr="<?= $row->id ?>" title="Evaluasi Triwulan 4"/>
+            </td>
+        </tr>
+<?php    	
+    }
+?>    	
+    </tbody>
+</table>

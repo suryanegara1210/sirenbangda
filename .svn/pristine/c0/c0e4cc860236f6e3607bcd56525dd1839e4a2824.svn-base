@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Login SIAKU</title>
+
+	<script language="javascript" src="<?php echo base_url();?>asset/js/jquery-1.5.2.min.js"></script>
+
+	<!-- Stylesheets -->
+	<!--<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet'>-->
+	<link rel="stylesheet" href="<?php echo base_url().'asset/themes/simple-admin/'; ?>css/style.css">
+
+	<!-- Optimize for mobile devices -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+</head>
+<body>
+	
+	<!-- HEADER -->
+	<div id="header">
+		
+		<div class="page-full-width cf">
+	
+			<div id="login-intro" class="fl">
+			
+				<h1>Sistem Informasi Akuntansi dan Keuangan</h1>
+				<h5>Masukan informasi login anda</h5>
+			
+			</div> <!-- login-intro -->			
+			<a href="#" id="company-branding" class="fr">
+				<img src="<?php echo base_url().'asset/themes/simple-admin/'; ?>images/unud-logo.png" alt="Universitas Udayana" /></a>
+			
+		</div> <!-- end full-width -->	
+
+	</div> <!-- end header -->
+		
+	
+	<!-- MAIN CONTENT -->
+	<div id="content">
+	
+		<form action="<?php echo site_url('authenticate/login'); ?>" method="POST" id="login-form">
+		<div class="error-box" style="display: none" id="error"></div>
+			<fieldset>
+
+				<p>
+					<label for="login-username">username</label>
+					<input type="text" id="login-username" name="username" required class="round full-width-input" autofocus />
+				</p>
+
+				<p>
+					<label for="login-password">password</label>
+					<input type="password" id="login-password" name="password" required class="round full-width-input" />
+				</p>
+				
+				<!--<p>I've <a href="#">forgotten my password</a>.</p>-->
+				
+				<input type="submit" class="button round blue image-right ic-right-arrow" value="LOG IN">
+
+			</fieldset>
+		</form>
+		
+	</div> <!-- end content -->
+	
+	
+	
+	<!-- FOOTER -->
+	<div id="footer">
+
+		<p>&copy; Copyright 2013 <a href="#">Divinkom Universitas Udayana</a>. All rights reserved.</p>
+	
+	</div> <!-- end footer -->
+
+</body>
+</html>
+
+<script type="text/javascript">
+	$( function () {
+		
+		$('#link-submit').click( function() {
+			$('#login-form').submit();
+		});
+		
+		$('#login-form').submit(function() {			
+			$.post ($(this).attr('action'),
+					$(this).serialize(),
+					function(data) {
+						try {
+							var response = $.parseJSON(data);
+							
+							if(response.errno != 0){
+								//tampilkan for error
+								$('input[type=text]').val('');
+								$('input[type=password]').val('');
+
+								$('#error').html(response.message);
+								$('#error').slideDown('fast');
+								
+								setTimeout(function () {
+									$('#error').slideUp('fast');
+									$('input[type=text]').focus()
+								}, 2000);
+								
+							} else {							
+								//redirect
+								window.location = response.message;
+							}
+						} catch(e) {
+							//log error, misal format json salah
+							console.log('System error : "' + e + '"');						
+						}					
+					});
+
+			return false;
+		});
+	});
+</script>

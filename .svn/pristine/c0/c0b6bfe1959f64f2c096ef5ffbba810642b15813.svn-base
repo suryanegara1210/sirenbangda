@@ -1,0 +1,144 @@
+<?php
+    if (!$is_posting) {
+?>
+<script type="text/javascript">
+    function viewsAll(){        
+        var akun_kode = $("#akun_kode").val();
+        var id_buku_besar = $("#id_buku_besar").val();
+        
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/get_list_bb')?>",
+            data: { id_buku_besar: id_buku_besar, akun_kode: akun_kode},
+            success: function(msg){
+                //alert(msg);
+                $('#tabel').html(msg);
+            }
+        });
+     }
+</script>
+<article class="module width_full">
+<header>
+    <h3>Buku Besar</h3>
+</header>
+<div class="module_content">
+<?php
+    if (isset($first)) {
+?>
+    <table cellspacing="0" >    
+        <tr>
+            <td>Akun</td>
+            <td> : </td>
+            <td>
+                <?php echo form_dropdown("akun_kode",$akun_kode,"","id='akun_kode' style='width:300px'"); ?>
+            </td>
+            <td>
+                <input  type="hidden" value="<?php echo $id_buku_besar; ?>" name="id_buku_besar" id="id_buku_besar">
+                <input  type="button" value="tampil" name="tampil" id="tampil" onClick="viewsAll()">
+            </td>
+        </tr>  
+    </table>
+    <div id='tabel'>
+<?php
+        }
+    }
+?>
+<div id="pesan"></div>
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="#" onSubmit='return validasi(this)'>
+<table  class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Kode</th>
+                <th>Akun</th>
+                <th>Debet</th>
+                <th>Kredit</th>
+                <th>Saldo</th> 
+            </tr>
+      </thead>
+           <tbody>           				
+           <?php if ( COUNT ($isi_bukti)<=0){
+                        echo "<tr><td colspan=\"6\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=0;                        
+
+                        $saldo=0;
+						foreach($isi_bukti as $row) : $i++;
+                        if ($row->saldo_normal=='K') {
+                            $saldo=($row->kredit)-($row->debet);
+                        }else{
+                            $saldo=($row->debet)-($row->kredit);
+                        }
+						
+                        if ($saldo < 0) {
+                            $saldo="(".Formatting::currency(abs($saldo),0,false).")";
+                        }else{
+                            $saldo=Formatting::currency($saldo,0,false);
+                        }
+
+						?>
+                        
+                        <tr>
+                            <td align="center"><?php echo $i;?></td>
+                            <td align="left"><?php echo $row->akun_bas; ?> </td>
+                            <td align="left"><?php echo $row->akun_nama; ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->debet,0,false);?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->kredit,0,false); ?> </td>
+                            <td align="right"><?php echo $saldo; ?> </td>
+                        </tr>
+                        <?php 
+                        endforeach; 						
+						?>
+                        <tr>
+                            <input type="hidden" id="saldo" value="<?php echo $saldo; ?>" />
+                        <?php
+                        if (!empty($id_buku_besar)) {
+                        ?>
+                            <input type="hidden" id="id_buku_besar" value="<?php echo $id_buku_besar; ?>" />
+                        <?php
+                        }
+                        ?>                            
+                            <input type="hidden" id="var_pendukung" value="<?php echo $tahun; ?>" />                            
+                        </tr>
+                        <?php
+                        if ($is_posting && isset($btn_posting)) {
+                        ?>
+                        <tr><td colspan="7" align="right"><input type="button" id="simpan" value="Posting" name="simpan" onclick="simpanlah()" /></td></tr>
+                        <?php
+                        }
+                        ?>
+            <?php } ?>
+        </tbody>
+</table>
+</form>
+</div>
+<?php
+    if (!$is_posting) {
+        if (isset($first)) {
+?>
+</div>
+<?php
+        }
+?>
+</div>
+<footer>
+    <div class="submit_link">
+        <script type="text/javascript">
+            function cetak(){
+                var id_buku_besar = document.getElementById('id_buku_besar').value;
+                var var_pendukung = document.getElementById('var_pendukung').value;
+                var link_site = "<?php echo site_url('report/cetak/bb'); ?>";
+                var link_cetak = link_site +"/"+ id_buku_besar +"/"+var_pendukung;                
+                //location.href = link_cetak;
+                window.open(link_cetak, 'Cetak Buku Besar...');
+            }
+        </script>
+        <a href="#" onclick="cetak()"><input type="button" id="cetak" class="alt_btn" value="Cetak"></a>
+        <input type="button" value="Kembali" onclick="self.history.back()">
+    </div>
+</footer>
+</article> 
+<?php
+    }
+?>

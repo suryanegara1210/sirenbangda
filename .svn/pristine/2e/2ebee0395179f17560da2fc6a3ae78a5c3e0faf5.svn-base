@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <noscript><meta http-equiv="refresh" content="0;url=<?php echo  base_url().'login/err/jserr' ?>"></noscript>
+    <script>
+        /*
+        var isFirefox19 = navigator.userAgent.toLowerCase().indexOf('firefox/19') > -1;
+        var isFirefox20 = navigator.userAgent.toLowerCase().indexOf('firefox/20') > -1;
+        if(isFirefox20 || isFirefox19){
+            window.location = "<?php echo  base_url().'login/err/brwerr' ?>";
+        }
+        */
+    </script>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Form Login SIAKU</title>    
+ <link href="<?php echo base_url();?>asset/css/style.css" rel="stylesheet" type="text/css" /> 
+<link rel="shortcut icon" href="<?php echo base_url();?>asset/images/favicon.ico" >
+
+<!--==============================-->
+<link rel="stylesheet" type="text/css" href="<?php echo base_url();?>application/views/unit/facebox/facebox.css" type="text/css" type="text/css" />
+<script language="javascript" src="<?php echo base_url();?>asset/js/jquery-1.5.2.min.js"></script>
+<script language="javascript" src="<?php echo base_url();?>application/views/unit/facebox/facebox.js"></script>
+	 
+<script language="javascript">
+ 
+$(document).ready(function() {
+    $.facebox.settings.closeImage = '<?php echo base_url(); ?>asset/images/closelabel.png';
+    $.facebox.settings.loadingImage = '<?php echo base_url(); ?>asset/images/loader.gif';
+    $('a[rel*=facebox]').facebox();
+})
+	                                                   
+</script>
+<!--==============================-->
+
+<script></script>
+
+<style>
+.link_divinkom {text-decoration:none;}
+.link_divinkom :hover {text-decoration:none;}
+.link_divinkom :visited  {text-decoration:none;}
+.link_divinkom :active   {text-decoration:none;}
+#facebox .body {width: 600px;}
+</style>
+</head> 
+<body>
+
+
+
+<?php echo form_open('login/');?> 
+
+
+<div style="background-color:#00FF00; height:800; width:680px; margin:0 auto;" >
+	<div style=" min-height:100px; width:150px; float:left; margin-top:70%">
+    <a style="margin-left:80px" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>asset/images/tualen.png" border="0" /></a>
+    </div>
+    <div style=" height:100%; width:380px; float:left;">
+<div id="box-login">
+<div id="bgc"></div>  
+<table style="margin-top: 80px;">
+<tr><td colspan="3"><a href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>asset/images/new.png" border="0" /></a></td></tr>
+</table>
+
+<table style="margin-left: 70px;">
+<tr>
+  <td colspan="3">
+    <?php // hanya untuk menampilkan informasi saja
+if(isset($login_info))
+{
+    echo "<span style='background-color:#eee; margin-left:10px; font-size:10px; color:#FF0000;'>";
+    echo $login_info;
+    echo '</span>';
+}
+?>  </td>
+  </tr>
+<tr>
+        <td width="20">Username</td>
+        <td width="20"></td><td> :
+            <?php echo form_input('username',set_value('username'));
+                echo form_error('username');
+            ?>
+        </td>
+    </tr>
+
+<tr>
+        <td >Password</td>
+        <td ></td><td>  :
+            <?php echo form_password('password');
+                echo form_error('password');
+            ?>    
+        </td>
+    </tr>
+
+    
+    <tr>
+        <td ></td>
+        <td ></td><td style="text-align:right"><?php echo form_submit('submit','Masuk'); echo form_reset('reset','Batal');?></td>
+    </tr>
+<tr><td colspan="3" align="center"><br /></td></tr>
+</table>
+<div style="text-align:center; margin-bottom:10px"><h9><a class="link_divinkom" href="<?php echo site_url();?>unit/facebox_history" rel="facebox"> Tim Siaku </a></h9></div>
+</div>
+  </div>
+    <div style=" min-height:100px; width:150px; float:left; margin-top:70%;">
+    <a style="margin-left:10px" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>asset/images/merdah.png" border="0" /></a>
+  </div>
+</div>
+
+</body>
+</html>
+<?php echo form_close();

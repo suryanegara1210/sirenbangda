@@ -1,0 +1,153 @@
+<article class="module width_full">
+            <header><h3>Daftar Tender Per MAK - UNIT - <?php foreach ($permak_unit as $unit){ $nama_unit = $unit["nama_unit"]; echo $nama_unit; }; ?></h3></header>
+                   
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' id="form" action="<?php echo base_url();?>tup/verifikasi" onSubmit='return validasi(this)'> 
+            <?php       
+               if($tes>0){?>
+                   <table style="margin-left: 20px;">
+                   	  <tr>
+                      	<td><input type="checkbox" name="cek" id="cek"></td>
+                        <td>Nomor kontrak baru : </td>
+                        <td><input name='kontrak' id='kontrak1' type='text' value=''></td>
+                        <td><input type="checkbox" name="cek1" id="cek1" checked="checked"></td>
+                        <td>Nomor kontrak yang tersedia :</td>	
+                        <td><?php echo form_dropdown("kontrak",$kontrak,"","id='kontrak2'") ?></td>					
+                      </tr>
+                   </table> 
+                   
+            <?php  }else{?>
+                   <table  class="table-common" style="margin-left: 20px; width: 400px;" > 
+                   <tr><td>Nomor Kontrak</td><td >:</td><td><input name='kontrak' id='kontrak' type='text' value=''></td></tr>
+                   </table> 
+            <?php } ?> 
+            
+            <table  class="table-common" style="margin-left: 20px; width: 640px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama Unit</th>
+                <th>Output / Akun</th>                                           
+        
+                <th>Jumlah POK (Rp.)</th> 
+                <th>Jumlah Realisasi </th> 
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+             
+              
+              
+            $no = 1; 
+            $kegu=0;
+              foreach($permak_unit as $unit){
+                  $nama_unit = $unit["nama_unit"];
+                  $id_unit = $unit["id_unit"];
+                  $kdoutput = $unit["kdoutput"];
+                  $kdakun = $unit["kdakun"];
+                  $jumlah = $unit["jumlah"];
+                  $jamilah = number_format($jumlah,0,",",".");
+                  $realisasi = $unit["realisasi"];
+                  $realisasi_angka = number_format($realisasi,0,",",".");
+                         
+            ?>
+             
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <?php if ($jumgu < 1){ ?>
+                <td align="left"> <?php echo "$nama_unit";?> </td>
+                <?php } else{ ?>
+                <td align="center"><a href='<?php echo base_url();?>dpt/daftar_tender_permak_unit_subunit/<?php echo "$kdoutput";?>/<?php echo "$kdakun";?>/<?php echo "$id_unit";?>' title='Usulan Tender'>  <?php echo "$nama_unit ($jumgu)";?> </a></td>
+                <?php }   $kegu++; ?>
+                <td align="right"> <?php echo "$kdoutput/$kdakun";?> </td>  
+                <td align="right"> <?php echo "$jamilah";?> </td>  
+                <td align="right"> <?php echo "$realisasi_angka";?> </td>  
+              </tr>
+              
+            <?php $no++; }    
+            ?>     
+ </table>   
+ </div>
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+                </form>
+
+            </footer>
+</article>
+
+<script type="text/javascript">
+         $("#kontrak1").attr("disabled",true);
+	     $("#kontrak2").attr("disabled",true);
+		
+		$(function () {
+			$('#cek').change( function(){
+				var checked = false;
+				$('#cek').each(function() {
+					if(this.checked) checked = true;
+					document.getElementById("cek1").checked=false;
+					$("#kontrak2").attr("disabled",true);
+				});
+				
+				if(checked){ 
+					  $("#kontrak1").attr("disabled",false)
+					  $("#kontrak1").keyup(function(){
+						var kontrak = {kontrak:$("#kontrak1").val()}; 
+							$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('dpt/simpan_session')?>",
+									data: kontrak,
+									success: function(msg){
+										$('#akun').html(msg);
+									}
+							  });  
+					  });
+				}else{ 
+					$("#kontrak1").attr("disabled",true);
+				}
+			});
+		});
+		
+		$(function () {
+			$('#cek1').change( function(){
+				var checked = false;
+				$('#cek1').each(function() {
+					if(this.checked) checked = true;
+					document.getElementById("cek").checked=false;
+					$("#kontrak1").attr("disabled",true);
+				});
+				
+				if(checked){ 
+					$("#kontrak2").attr("disabled",false);
+					$("#kontrak2").change(function(){
+						var kontrak = {kontrak:$("#kontrak2").val()}; 
+						$.ajax({
+								type: "POST",
+								url : "<?php echo site_url('dpt/simpan_session')?>",
+								data: kontrak,
+								success: function(msg){
+									$('#akun').html(msg);
+								}
+						  });  
+           		 	});
+				}else{ 
+					$("#kontrak2").attr("disabled",true);
+				}
+			});
+		});
+		
+         			$("#kontrak").change(function(){
+						var kontrak = {kontrak:$("#kontrak").val()}; 
+						$.ajax({
+								type: "POST",
+								url : "<?php echo site_url('dpt/simpan_session')?>",
+								data: kontrak,
+								success: function(msg){
+									$('#akun').html(msg);
+								}
+						  });  
+           		 	});	
+       </script>
+
+

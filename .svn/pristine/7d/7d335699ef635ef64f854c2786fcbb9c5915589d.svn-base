@@ -1,0 +1,128 @@
+<script type="text/javascript">
+	$( function () {
+	    //proses disable jns kwitansi berdasarkan GUP, TUP, LS
+		var arCombo_create = new Array (
+			$("#jenis_belanja"), $("#jns_kwitansi")
+		);    	
+	
+		//set event change
+		$("#jenis_belanja").change( function() {
+			//var postData = { jns_belanja: $("#jenis_belanja").val() };
+			//populate_combo(arCombo_create, 0, "<?php // echo site_url('common/get_jns_kwitansi_view')?>", postData);
+			$("#view_form_spj").empty();
+		});
+				
+	});	
+	
+	function load_view(){		
+		  var jeniskw = $("#jns_kwitansi").val();
+		  var jenisblj= $("#jenis_belanja").val();
+		  var status_kwitansi= $("#status_kwitansi").val();
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('kwitansi_view/get_form_spj')?>",
+			  data: { jns_kwitansi: jeniskw,
+					  jns_belanja: jenisblj,
+					  status_kwitansi: status_kwitansi},
+			  success: function(msg){
+				  $('#view_form_spj').html(msg);
+			  }
+		  });
+		}
+		
+	function create_spj_su(){
+		  var jenisblj= $("#jenis_belanja").val();
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('kwitansi_view/create_spjsu')?>",
+			  data: { jns_belanja: jenisblj},
+		  });
+		  alert('SPJ Berhasil Dibuat');
+		  load_view();
+		}
+		
+	function hapus(value){
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('kwitansi_view/hapus_kwi_spj')?>",
+			  data: { id: value },  
+		  });
+		  alert('Kwitansi batal diSPJ kan');
+		  load_view();
+		}
+		
+	function kirim_verunit(){
+		  var id_spj_su 	= $("#id_spj_su").val();
+		  var st_spj_su		= $("#st_spj_su").val();
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('kwitansi_view/kirim_spj_unit')?>",
+			  data: { id_spj_su: id_spj_su,
+					  st_spj_su: st_spj_su},
+					  
+		  });
+		  alert('SPJ Berhasil Dikirim');
+		  load_view();
+		}
+		
+	function cetak(value){
+			var win = window.open("<?php echo site_url()."kwitansi_view/cetak_kw";?>/"+value, "Cetak SPJ");		
+
+			win.onunload = function(){
+			    load_view()
+			};
+		}	
+
+	function cetak_honor(value){
+			window.print_doc('preview_honor/'+value, 'Rincian Honor', 'landscape');
+			load_view();	
+		}
+	
+</script> 
+<style>
+label.error {
+	margin-left: 2px;
+	width: auto;
+	display: block;
+	color:#F00;
+}
+</style>
+
+<article class="module width_full">
+<header>
+<h3> SPJ Kwitansi</h3>
+</header>             
+ <div class="module_content">      
+
+<table border='0' width='100%' >
+  <tr>
+    <td width="260">Sifat Pembayaran</td>
+    <td width="10" >&nbsp;:</td>
+    <td width="877">
+      <select name="jenis_belanja" id="jenis_belanja"  >
+<!--      	<option value="">Semua Jenis</option> -->		
+		<?php
+			foreach($sifat_bayar as $row){
+				echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+			}
+		?>
+      </select>
+      <input type="submit" name="cari" id="cari" value="Tampilkan" onclick="load_view()" /></td>
+  </tr>
+<!--<tr>
+    <td >Jenis Kwitansi</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <select name="jns_kwitansi" id="jns_kwitansi">
+    </select></td>
+  </tr>-->
+</table>
+   <div id="view_form_spj">
+  </div>
+
+
+
+
+
+
+

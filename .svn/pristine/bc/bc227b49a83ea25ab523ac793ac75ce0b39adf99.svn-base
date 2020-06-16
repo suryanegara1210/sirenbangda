@@ -1,0 +1,90 @@
+<?php
+/**
+ *
+ * Class ini digunakan sebagai common gateway ke internal data
+ *
+ *
+ */
+class Common extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {
+        $this->CI =& get_instance();
+        parent::__construct();        
+        $this->load->model(array('m_bidang', 'm_urusan', 'm_kegiatan', 'm_program', 'm_skpd', 'm_kecamatan', 'm_desa'));
+    }
+    
+    function autocomplete_kdurusan(){
+        $req = $this->input->post('term');      
+        $result = $this->m_urusan->get_value_autocomplete_kd_urusan($req);      
+        echo json_encode($result);
+    }
+
+    function autocomplete_kdbidang(){       
+        $kd_urusan = $this->input->post('kd_urusan');       
+        $req = $this->input->post('term');      
+        $result = $this->m_bidang->get_value_autocomplete_kd_bidang($req, $kd_urusan);      
+        echo json_encode($result);
+    }
+
+    function autocomplete_kdprog(){     
+        $kd_urusan = $this->input->post('kd_urusan');       
+        $kd_bidang = $this->input->post('kd_bidang');       
+        $req = $this->input->post('term');      
+        $result = $this->m_program->get_value_autocomplete_kd_prog($req, $kd_urusan, $kd_bidang);
+        echo json_encode($result);
+    }
+
+    function autocomplete_keg(){        
+        $kd_urusan  = $this->input->post('kd_urusan');      
+        $kd_bidang  = $this->input->post('kd_bidang');      
+        $kd_prog    = $this->input->post('kd_prog');        
+        $req = $this->input->post('term');      
+        $result = $this->m_kegiatan->get_value_autocomplete_kd_keg($req, $kd_urusan, $kd_bidang, $kd_prog);
+        echo json_encode($result);
+    }
+
+    function autocomplete_skpd(){                
+        $req = $this->input->post('term');      
+        $result = $this->m_skpd->get_skpd_autocomplete($req);
+        echo json_encode($result);
+    }
+
+    function autocomplete_kec(){
+        $req = $this->input->post('term');      
+        $result = $this->m_kecamatan->get_kec_autocomplete($req);
+        echo json_encode($result);
+    }
+
+    function autocomplete_desa(){
+        $req = $this->input->post('term');      
+        $id_kec = $this->input->post('id_kec');      
+        $result = $this->m_desa->get_desa_autocomplete($req, $id_kec);
+        echo json_encode($result);
+    }
+
+    function cmb_bidang(){
+        $kd_urusan = $this->input->post('kd_urusan');
+        $kd_bidang = array("" => "");
+        foreach ($this->m_bidang->get_bidang($kd_urusan) as $row) {
+            $kd_bidang[$row->id] = $row->id .". ". $row->nama;
+        }        
+        $cmb = form_dropdown('kd_bidang', $kd_bidang, NULL, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+        echo $cmb;
+    }
+
+    function cmb_program(){
+        $kd_urusan = $this->input->post('kd_urusan');
+        $kd_bidang = $this->input->post('kd_bidang');       
+
+        $kd_program = array("" => "");
+        foreach ($this->m_program->get_prog($kd_urusan, $kd_bidang) as $row) {
+            $kd_program[$row->id] = $row->id .". ". $row->nama;
+        }
+        $cmb = form_dropdown('kd_program', $kd_program, NULL, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+        echo $cmb;
+    }
+}
+
+?>

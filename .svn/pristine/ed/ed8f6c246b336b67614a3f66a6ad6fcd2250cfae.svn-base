@@ -1,0 +1,20 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_rka extends CI_Model
+{
+	var $table_rka = 't_rka';
+
+	function add_rka()
+	{
+		$data = $this->global_function->add_array($data, $add);		
+
+		$result = $this->db->insert($this->table_rka, $data);
+		return $result;
+	}
+	
+	function get_data($data,$table){
+        $this->db->where($data);
+        $query = $this->db->get($this->$table);
+        return $query->row();
+    }
+}

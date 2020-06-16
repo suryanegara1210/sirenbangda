@@ -1,0 +1,3188 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class belanja dari  Uang Persediaan (UP)
+ * 
+ * Controller Class belanja dari  Uang Persediaan (UP) yang merupakan bagian dari
+ * Bisnis Belanja
+ * 
+ * @author Putu Ari Arjana
+ */
+ 
+class Unit extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+        {                                
+            $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->library('konversi');
+			$this->load->model(array('munit','m_logic', 'm_settings')); 
+        }   
+    /**
+    * function untuk menampilkan dropdown menu komponen pada saat pembuatan rincian belanja
+    */
+    function select_komponen()
+    {
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['option_komponen'] = $this->munit->getKomponenList();        
+            $this->load->view('unit/getkomponen',$data);
+            
+    }
+	
+	 function select_countsubkomponen()
+    {
+            $kdoutput = $this->input->post('kdoutput');
+			$kdkomponen = $this->input->post('kdkomponen');
+			$xxx = $this->munit->getCountSubKomponen($kdoutput,$kdkomponen);  
+			echo $xxx;
+			//echo $this->db->last_query();
+	}
+	 function select_subkomponen()
+    {
+            $kdoutput = $this->input->post('kdoutput');
+			$kdkomponen = $this->input->post('kdkomponen');
+			$data['option_komponen'] = $this->munit->getSubKomponenList($kdoutput,$kdkomponen); 
+			$this->load->view('unit/getsubkomponen',$data);
+		
+	}
+    /**
+    * function untuk menampilkan dropdown menu akun pada saat pembuatan rincian belanja
+    */
+    function select_akun(){
+            $data['kdkomponen'] = $this->input->post('kdkomponen');
+			$data['kdskomponen'] ='';
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['option_akun'] = $this->munit->getAkunList();      
+            $this->load->view('unit/getakun',$data);
+            
+    }
+	function select_akun_test(){
+            $data['kdkomponen'] = $this->input->post('kdkomponen');
+            $data['kdoutput'] = $this->input->post('kdoutput');
+			$data['kdskomponen'] = $this->input->post('kdskomponen');
+            $data['option_akun'] = $this->munit->getAkunList_test(); 
+			//echo $this->db->last_query();        
+            $this->load->view('unit/getakun',$data);
+    }
+    /**
+    * function untuk menampilkan dropdown menu header pada saat pembuatan rincian belanja 
+    */
+    function select_header(){
+            $kdkomponen = $this->input->post('kdkomponen');
+			$kdskomponen = $this->input->post('kdskomponen');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $data['kdkomponen'] = $kdkomponen;
+			$data['kdskomponen'] = $kdskomponen;
+            $data['kdoutput'] = $kdoutput;
+            $data['kdakun'] = $kdakun;
+            $kd=substr($kdakun,0,2); 
+                if($kd=='53' or $kd=='51' ){ 
+                     ?>    
+                         <script type="text/javascript" language="javascript">
+                            alert("maaf belanja dengan kode akun <?php echo"$kdakun";?>,.. tidak bisa di-UP-kan !!");
+                         </script> 
+                     <?php
+                     //$data['option_header'] = $this->munit->getHeaderList($kdakun, $kdkomponen,$kdoutput); 
+                     echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/buat_up'>";     
+                }else{ 
+					if($kdskomponen==""){
+					 	$data['option_header'] = $this->munit->getHeaderList_val($kdakun,$kdkomponen,$kdoutput);
+					}else{
+						$data['option_header'] = $this->munit->getHeaderList($kdakun,$kdkomponen,$kdskomponen,$kdoutput);	
+					}
+                   
+                    $this->load->view('unit/getheader',$data);
+                }
+    }
+    /**
+    * function untuk menampilkan isian pada jqgrid
+    */
+    function select_tabel3(){
+          if($this->auth->is_logged_in() == true){
+            $kdkomponen = $this->input->post('kdkomponen');
+			$kdskomponen = $this->input->post('kdskomponen');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $hdr = $this->input->post('id_header');
+            $data['kdkom'] = $this->input->post('kdkomponen');
+			$data['kdsub'] = $this->input->post('kdskomponen');
+            $data['kdout'] = $this->input->post('kdoutput');
+            $data['kdak'] = $this->input->post('kdakun');
+            $data['id_header'] = $this->input->post('id_header');    
+            $data['id_subunit'] = $this->session->userdata('id_subunit'); 
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $id_subunit = $this->session->userdata('id_subunit');
+            $satuan=$this->munit->tampil_satuan();    
+                $varsatuan='';
+                foreach($satuan as $sat)  {
+                    $id_satuan= $sat->kode_value;
+                    $satuan = $sat->nama_value;
+                    $varsatuan.= "$id_satuan:'$satuan'," ;
+                }
+            $data['satuan']=$varsatuan ;
+           
+			if($kdskomponen == ""){
+				$total_pagu = $this->munit->jumlah_pagu_uraian_val($kode_subunit,$kdkomponen,$kdoutput,$kdakun,$hdr);  
+				$data['nama'] = $this->munit->getnamaList_val($kode_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);    
+				$data['jum_uraian'] = $this->munit->jum_uraian2_val($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr); 
+			}else{
+				 $total_pagu = $this->munit->jumlah_pagu_uraian($kode_subunit,$kdkomponen,$kdskomponen,$kdoutput,$kdakun,$hdr);  
+				 $data['nama'] = $this->munit->getnamaList($kode_subunit,$kdoutput,$kdkomponen,$kdskomponen,$kdakun,$hdr);
+            	 $data['jum_uraian'] = $this->munit->jum_uraian2($id_subunit,$kdoutput,$kdkomponen,$kdskomponen,$kdakun,$hdr); 
+			}
+			
+            foreach($total_pagu->result_array() as $jmlh)
+                 {  
+                    $tot_jumlah = $jmlh ['sum(jumlah)'];
+                 };
+            $data['jumlah'] = $tot_jumlah;
+			
+			$jum_up=$this->munit->total_up($id_subunit);   
+                  foreach($jum_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+
+            $tot_pagu_realisasi= $this->munit->tot_pagu_realisasi($id_subunit); 
+            $max_up= $this->munit->banyak_mp_max($id_subunit);
+                     foreach($max_up->result_array() as $jmlh_max)
+                     {  
+                        $nilai_max_up = $jmlh_max ['nilai_max'];
+                     }
+            
+            $data['nilai_max'] = $nilai_max_up;
+            //$data['sisa_pagu_realisasi'] = $tot_pagu_realisasi-$tot_up;
+            
+            $this->load->view('unit/geturaian',$data);
+          }   
+    } 
+    /**
+    * function untuk menambahkan uraian
+    */  
+    function tambah_uraian(){
+          if($this->auth->is_logged_in() == true){
+            $data['kdkomponen'] = $this->uri->segment(3);
+            $data['kdoutput'] = $this->uri->segment(4); 
+            $data['kdakun'] = $this->uri->segment(5); 
+            $data['hdr'] = $this->uri->segment(6);   
+            $kode_unit = $this->session->userdata('kode_unit');
+            
+            $this->load->view('unit/tambah_uraian',$data);
+          }   
+    }
+    /**
+    * function untuk menyimpan uraian yg telah dibuat
+    */ 
+    function simpan_uraian(){
+          if($this->auth->is_logged_in() == true){
+            $kode_unit = $this->session->userdata('kode_unit');
+            $kdkomponen = $this->input->post('kdkomponen');
+            $kdoutput = $this->input->post('kdoutput');
+            $kdakun = $this->input->post('kdakun');
+            $hdr = $this->input->post('hdr');
+            $uraian = $this->input->post('uraian');
+            $volume = $this->input->post('volume');
+            $satuan = $this->input->post('satuan');
+            $harga_satuan = $this->input->post('h_satuan');
+            $jumlah = $volume*$harga_satuan;
+            
+            $this->munit->insert_uraian($kode_unit,$kdoutput,$kdkomponen,$kdakun,$hdr,$uraian,$volume,$satuan,$harga_satuan,$jumlah);
+            
+            //echo $this->db->last_query();
+            $data['kdkomponen'] = $this->input->post('kdkomponen');
+            $data['kdoutput'] = $this->input->post('kdoutput');
+            $data['kdakun'] = $this->input->post('kdakun');
+            $data['hdr'] = $this->input->post('hdr'); 
+             
+            $this->load->view('unit/tambah_uraian',$data);
+          }   
+    }
+    /**
+    * function untuk menampilkan uraian yg telah dibuat
+    */     
+    function tampil_uraian(){
+            if($this->auth->is_logged_in () == true){                   
+                 $data['t_out'] = $this->munit->tampil_output();     
+                 $data['t_kom'] = $this->munit->tampil_komponen();     
+                 $data['t_akun'] = $this->munit->tampil_akun();     
+                 $data['t_heder'] = $this->munit->tampil_header();     
+                 $data['jumlah'] = $this->munit->tampil_jumlah();     
+                 //$data['berita'] = $this->munit->get_pengumuman();     
+                 $data['tampil_uraian'] = $this->munit->tampil_uraian();
+                 $this->template->load('template','unit/tampil_uraian',$data); 
+            }
+    } 
+    /**
+    * function untuk print rincian belanja UP
+    */   
+    function print_up($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_subunit = $this->session->userdata('id_subunit');
+             $th_rekap = $this->uri->segment(3);
+             $id_rekap = $this->uri->segment(4);
+             $tahun = date('Y');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='daftar_rincian_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_up/true/','Download Pdf');
+            
+             $this->load->model('munit');
+             $total_up=$this->munit->total_up($id_subunit, $tahun);  
+                  foreach($total_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+             $data['total_up'] = $tot_up;
+             $data['daftar_up'] = $this->munit->print_daftar_up($id_subunit,$id_rekap,$th_rekap); 
+             //print_r( $data['daftar_up']) ;
+             $data['unit'] = $this->munit->daftar_unit();
+             
+             $data['link'] = $link_download ;
+             $output = $this->load->view('unit/print_rincian_up', $data,  true);
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk print surat pernyataan belanja UP
+    */ 
+    function print_surat_pernyataan_up($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit'); 
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='surat_pernyataan_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';  
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_surat_pernyataan_up/true/','Download Pdf');
+            
+             $data['unit'] = $this->munit->daftar_unit(); 
+             $data['link'] = $link_download ;    
+             $output = $this->load->view('unit/print_surat_pernyataan_up', $data,  true);  
+            
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk print surat pengantar dari unit belanja UP
+    */ 
+    function print_surat_pengantar($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){           
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_unit = $this->session->userdata('id_unit');
+             $th_spm = $this->uri->segment(3);
+             $id_spm = $this->uri->segment(4);
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='surat_pengantar_up_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_surat_pengantar/true/','Download Pdf');
+            
+             $this->munit->spm_update_print_speng($id_spm,$th_spm); 
+             $data['fakultas'] = $this->munit->nama_fakultas($kode_unit);   
+             $data['tgl'] = date("d-m-Y"); 
+             $data['link'] = $link_download ;  
+             $output = $this->load->view('unit/print_surat_pengantar', $data,  true); 
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk print surat pengantar dari subunit belanja UP
+    */ 
+    function print_surat_pengantar_sub($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');  
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='surat_pengantar_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_surat_pengantar_sub/true/','Download Pdf');
+            
+             $data['unit'] = $this->munit->daftar_unit();
+             
+             $data['tgl'] = date("Y-m-d"); 
+             $data['link'] = $link_download ;   
+             $output = $this->load->view('unit/print_surat_pengantar_sub', $data,  true); 
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    
+    /**
+    * function untuk print maksimum pencairan dana belanja UP
+    */ 
+    function print_mp($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_unit = $this->session->userdata('id_unit');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='mp_up_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_surat_pengantar/true/','Download Pdf');
+            
+             
+             $data['fakultas'] = $this->munit->nama_fakultas($kode_unit); 
+             $data['dipa'] = $this->munit->dipa(); 
+             $data['pengeluaran'] = $this->munit->mp_pengeluaran($kode_unit); 
+             $data['link'] = $link_download ;  
+             $output = $this->load->view('unit/print_mp', $data,  true);    
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    function print_mp_unit($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_unit = $this->session->userdata('id_unit');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='mp_up_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_mp_unit/true/','Download Pdf');
+            
+             
+             $data['fakultas'] = $this->munit->nama_fakultas($kode_unit); 
+             $data['dipa'] = $this->munit->dipa(); 
+             $jum_mp_subunit = $this->munit->mp_unit($id_unit);
+             foreach($jum_mp_subunit->result_array() as $row)
+                             {  
+                                $pagu_pengeluaran = $row ['sum(pagu_pengeluaran)'];
+                                $alokasi_pnbp= $row ['sum(alokasi_pnbp)'];
+                                $tmb_alokasi_pnbp= $row ['sum(tmb_alokasi_pnbp)'];
+                                $spp_up= $row ['sum(spp_up)'];
+                                $spp_tup= $row ['sum(spp_tup)'];
+                                $spp_gu= $row ['sum(spp_gu)'];
+                                $spp_ls= $row ['sum(spp_ls)'];
+                                $spp_ini= $row ['sum(spp_ini)'];
+                             }
+            $data['pagu_pengeluaran'] =  $pagu_pengeluaran;
+            $data['alokasi_pnbp'] =  $alokasi_pnbp;
+            $data['tmb_alokasi_pnbp'] =  $tmb_alokasi_pnbp;
+            $data['spp_up'] =  $spp_up;
+            $data['spp_tup'] =  $spp_tup;
+            $data['spp_gu'] =  $spp_gu;
+            $data['spp_ls'] =  $spp_ls;
+            $data['spp_ini'] =  $spp_ini; 
+            
+            $spp_up_mp_kini_unit = $this->munit->spp_up_mp_kini_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_up_mp_kini_unit->result_array() as $row2)
+                             {  
+                                $up_kini = $row2 ['sum(jumlah)']; 
+                             }
+            $data['up_kini'] =  $up_kini;
+            
+            $spp_tup_mp_kini_unit = $this->munit->spp_tup_mp_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_tup_mp_kini_unit->result_array() as $row3)
+                             {  
+                                $tup_kini = $row3 ['sum(jumlah)']; 
+                             }
+            $data['tup_kini'] =  $tup_kini;
+            
+            $spp_gu_mp_kini_unit = $this->munit->spp_gu_mp_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_gu_mp_kini_unit->result_array() as $row4)
+                             {  
+                                $gu_kini = $row4 ['sum(nominal)']; 
+                             }
+            $data['gu_kini'] =  $gu_kini;
+            
+            $spp_ls_mp_kini_unit = $this->munit->spp_ls_mp_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_ls_mp_kini_unit->result_array() as $row5)
+                             {  
+                                $ls_kini = $row5 ['sum(nominal)']; 
+                             }
+            $data['ls_kini'] =  $ls_kini;
+            
+             $data['link'] = $link_download ;  
+             $output = $this->load->view('unit/print_mp_unit', $data,  true);    
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk print rekap UP dari unit
+    */ 
+    function print_rekap_up($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_unit = $this->session->userdata('id_unit');
+             $th_spm = $this->uri->segment(3);
+             $id_spm = $this->uri->segment(4);
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='daftar_rincian_up_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_up/true/','Download Pdf');
+            
+             $data['total_up'] = $this->munit->jum_rekap_up($id_unit,$th_spm);
+             $this->munit->spm_update_print_rekap($id_spm,$th_spm); 
+             $data['daftar_up'] = $this->munit->print_rekap_up($id_unit);   
+             $data['unit'] = $this->munit->detail_unit();
+             
+             $data['link'] = $link_download ;
+             $output = $this->load->view('unit/print_rekap_up', $data,  true);
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk menampilkan form untuk pembuatan rincian UP yang baru
+    */  
+    function buat_up(){
+        if($this->auth->is_logged_in() == true){
+        $id_subunit = $this->session->userdata('id_subunit');
+        $tahun = date('y');
+        $jum_mp = $this->munit->ada_mp_max($id_subunit);  
+        if($jum_mp>0){
+        
+            $banyak_max = $this->munit->banyak_mp_max($id_subunit);
+            foreach($banyak_max->result_array() as $jmlh_maks){  
+                $tot_mak = $jmlh_maks['nilai_max'];
+            } 
+            
+            if($tot_mak>0 or $tot_mak!=""){
+                $jum_terkirim = $this->munit->banyak_up_terkirim($id_subunit,$tahun);   
+                     if($jum_terkirim>0){
+                         $this->session->set_userdata('msg_typ','err');
+                         $this->session->set_userdata('msg', 'Maaf Subunit anda sudah mengajukan UP sebelumnya!!');
+                         redirect(base_url()); 
+                    } else {
+            
+          $id_subunit = $this->session->userdata('id_subunit');   
+          $kode_subunit = $this->session->userdata('kode_subunit');   
+          $data['kode_subunit'] = $this->session->userdata('kode_subunit');   
+          $tahun_sekarang= date("Y");
+          //$data['berita'] = $this->munit->get_pengumuman();
+          $data['output'] = $this->munit->getOutputList($kode_subunit);
+          //echo $this->db->last_query();   
+          $data['daftar_up'] = $this->munit->daftar_up($id_subunit);
+         
+          $data['banyak_up'] = $this->munit->banyak_up($id_subunit);     
+          $jum_up=$this->munit->total_up($id_subunit);   
+                  foreach($jum_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+          
+          $jum_rkakl=$this->munit->total_rkakl($kode_subunit); 
+                  foreach($jum_rkakl->result_array() as $j_rkakl)
+                     {  
+                        $tot_rkakl = $j_rkakl ['sum(jumlah)'];
+                     }
+          $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan'); 
+          $jum_non_adhoc=$this->munit->total_keg_non_adhoc($kode_subunit,$satuan); 
+                  foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                     {  
+                        $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                     }
+          $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');  
+          $jum_b_modal=$this->munit->total_belanja_modal($kode_subunit,$kdakun); 
+                  foreach($jum_b_modal->result_array() as $j_modal)
+                     {  
+                        $tot_modal = $j_modal ['sum(jumlah)'];
+                     }
+                             
+          $data['tem']= $tot_rkakl-$tot_modal-$tot_non_adhoc;
+          $data['jum_up']=$tot_up;
+          if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+              $tot_sementara = 1/12 * $data['tem']; 
+              if($tot_sementara > 50000000){
+                  $data['tot_up'] = 50000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+              $tot_sementara = 1/18 * $data['tem']; 
+              if($tot_sementara > 100000000){
+                  $data['tot_up'] = 100000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }elseif ($data['tem']>2400000000){
+              $tot_sementara = 1/24 * $data['tem']; 
+              if($tot_sementara > 200000000){
+                  $data['tot_up'] = 200000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }  
+          $data['jum_tot_rkakl']=$tot_rkakl;      
+          $data['selisih']=$data['tot_up'] - $tot_up ;
+          $data['spp']= $this->munit->rincian($id_subunit); 
+		  //-----------------------------------------------
+          $data['tot_pagu_realisasi']= $this->munit->tot_pagu_realisasi($id_subunit); 
+          $data['maksimum_up']= $this->munit->maksimum_up($id_subunit); 
+		  //echo $this->db->last_query();
+          $this->template->load('template','unit/pengajuan_up',$data);  
+        }}else{
+             $this->session->set_userdata('msg_typ','err');
+             $this->session->set_userdata('msg', 'Maaf Maksimum UP anda masih kosong!!');
+             redirect(base_url());
+        }
+        }else{
+             $this->session->set_userdata('msg_typ','err');
+             $this->session->set_userdata('msg', 'Maaf Subunit anda belum mempunyai maksimum UP!!');
+             redirect(base_url());
+        }
+    }
+    /**
+    * function untuk menampilkan rincian UP yang direvisi dari unit
+    */ 
+    function revisi_up(){
+        if($this->auth->is_logged_in() == true){ 
+          $kode_unit = $this->session->userdata('kode_unit');
+          $tahun_sekarang= date("Y");
+          //$data['berita'] = $this->munit->get_pengumuman();
+          $data['output'] = $this->munit->getOutputList();   
+          $data['daftar_up'] = $this->munit->daftar_up_revisi($kode_unit);
+               
+          $data['banyak_up'] = $this->munit->banyak_up2($kode_unit); 
+          $jum_up=$this->munit->total_up($kode_unit);  
+                  foreach($jum_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+          
+          $jum_rkakl=$this->munit->total_rkakl($kode_unit); 
+                  foreach($jum_rkakl->result_array() as $j_rkakl)
+                     {  
+                        $tot_rkakl = $j_rkakl ['sum(jumlah)'];
+                     }
+          $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan'); 
+          $jum_non_adhoc=$this->munit->total_keg_non_adhoc($kode_unit,$satuan); 
+                  foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                     {  
+                        $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                     }
+          $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');  
+          $jum_b_modal=$this->munit->total_belanja_modal($kode_unit,$kdakun); 
+                  foreach($jum_b_modal->result_array() as $j_modal)
+                     {  
+                        $tot_modal = $j_modal ['sum(jumlah)'];
+                     }
+                             
+          $data['tem']= $tot_rkakl-$tot_modal-$tot_non_adhoc; 
+          $data['jum_up']=$tot_up;
+          if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+              $tot_sementara = 1/12 * $data['tem']; 
+              if($tot_sementara > 50000000){
+                  $data['tot_up'] = 50000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+              $tot_sementara = 1/18 * $data['tem']; 
+              if($tot_sementara > 100000000){
+                  $data['tot_up'] = 100000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }elseif ($data['tem']>2400000000){
+              $tot_sementara = 1/24 * $data['tem']; 
+              if($tot_sementara > 200000000){
+                  $data['tot_up'] = 200000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }    
+          $data['jum_tot_rkakl']=$tot_rkakl;
+          $data['jum_up']=$tot_up;
+          $data['selisih']=$data['tot_up'] - $tot_up ;
+          $data['spp']= $this->munit->rincian($kode_unit);
+          $this->template->load('template','unit/edit_up',$data);  
+        }
+    }
+    }
+    /**
+    * function untuk menampilkan rincian UP yang telah diajukan ke unit
+    */ 
+    function list_up(){
+        if($this->auth->is_logged_in() == true){ 
+          $id_subunit = $this->session->userdata('id_subunit');
+          $kode_subunit = $this->session->userdata('kode_subunit');
+          $tahun_sekarang= date("Y");
+          $success = $this->munit->cek_ada_list_up($id_subunit);  
+          if($success){
+                  $data['list_up'] = $this->munit->list_up($id_subunit);   
+                  $data['list_up_mak'] = $this->munit->list_up_mak($id_subunit);
+                  $data['banyak_up'] = $this->munit->banyak_up2($id_subunit); 
+                  $jum_up=$this->munit->total_up($id_subunit);  
+                          foreach($jum_up->result_array() as $jmlh_up)
+                             {  
+                                $tot_up = $jmlh_up ['sum(jumlah)'];
+                             }   
+                  $jum_rkakl=$this->munit->total_rkakl($kode_subunit); 
+                          foreach($jum_rkakl->result_array() as $j_rkakl)
+                             {  
+                                $tot_rkakl = $j_rkakl ['sum(jumlah)'];
+                             }
+                  $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan'); 
+                  $jum_non_adhoc=$this->munit->total_keg_non_adhoc($kode_subunit,$satuan); 
+                          foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                             {  
+                                $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                             }
+                  $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');  
+                  $jum_b_modal=$this->munit->total_belanja_modal($kode_subunit,$kdakun); 
+                          foreach($jum_b_modal->result_array() as $j_modal)
+                             {  
+                                $tot_modal = $j_modal ['sum(jumlah)'];
+                             }
+                                     
+                  $data['tem']= $tot_rkakl-$tot_modal-$tot_non_adhoc; 
+                  $data['jum_up']=$tot_up;
+                  if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+                      $tot_sementara = 1/12 * $data['tem']; 
+                      if($tot_sementara > 50000000){
+                          $data['tot_up'] = 50000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+                      $tot_sementara = 1/18 * $data['tem']; 
+                      if($tot_sementara > 100000000){
+                          $data['tot_up'] = 100000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>2400000000){
+                      $tot_sementara = 1/24 * $data['tem']; 
+                      if($tot_sementara > 200000000){
+                          $data['tot_up'] = 200000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }
+                  $data['jum_tot_rkakl']=$tot_rkakl;
+                  $data['jum_up']=$tot_up;
+                  $data['selisih']=$data['tot_up'] - $tot_up ;
+				   $data['maksimum_up']= $this->munit->maksimum_up($id_subunit); 
+	               $this->template->load('template','unit/list_up',$data);
+          }else{
+          $data['list_up'] = $this->munit->list_up($id_subunit); 
+          $data['list_up_mak'] = $this->munit->list_up_mak($id_subunit); 
+          $data['banyak_up'] = $this->munit->banyak_up2($id_subunit);
+          $jum_up=$this->munit->total_up($id_subunit);  
+                  foreach($jum_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+          
+          $jum_rkakl=$this->munit->total_rkakl($kode_subunit); 
+                  foreach($jum_rkakl->result_array() as $j_rkakl)
+                     {  
+                        $tot_rkakl = $j_rkakl ['sum(jumlah)'];
+                     }
+          $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan'); 
+          $jum_non_adhoc=$this->munit->total_keg_non_adhoc($kode_subunit,$satuan); 
+                  foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                     {  
+                        $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                     }
+          $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');  
+          $jum_b_modal=$this->munit->total_belanja_modal($kode_subunit,$kdakun); 
+                  foreach($jum_b_modal->result_array() as $j_modal)
+                     {  
+                        $tot_modal = $j_modal ['sum(jumlah)'];
+                     }
+                             
+          $data['tem']= $tot_rkakl-$tot_modal-$tot_non_adhoc; 
+          $data['jum_up']=$tot_up;
+          if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+              $tot_sementara = 1/12 * $data['tem']; 
+              if($tot_sementara > 50000000){
+                  $data['tot_up'] = 50000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+              $tot_sementara = 1/18 * $data['tem']; 
+              if($tot_sementara > 100000000){
+                  $data['tot_up'] = 100000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }elseif ($data['tem']>2400000000){
+              $tot_sementara = 1/24 * $data['tem']; 
+              if($tot_sementara > 200000000){
+                  $data['tot_up'] = 200000000;
+              }else{
+                  $data['tot_up'] = $tot_sementara;
+              }
+          }  
+          $data['jum_tot_rkakl']=$tot_rkakl;
+          $data['jum_up']=$tot_up;
+          $data['selisih']=$data['tot_up'] - $tot_up ;
+		  //----------
+          $data['tot_pagu_realisasi']= $this->munit->tot_pagu_realisasi($id_subunit); 
+          $data['maksimum_up']= $this->munit->maksimum_up($id_subunit); 
+          $this->template->load('template','unit/list_up2',$data); 
+          } 
+        }
+    }
+    /**
+    * function untuk menyimpan rincian UP
+    */ 
+    function simpan_up(){
+          if($this->auth->is_logged_in() == true){
+             $kode_subunit = $this->session->userdata('kode_subunit');
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tahun = date('y'); 
+			 $validasi = $this->input->post('validasix');
+			 if($validasi == 0){
+				$subkomponen = '';
+			 }else{
+			    $subkomponen = $this->input->post('kdskomponen');
+			 }
+             $kdkomponen = $this->input->post('kdkomponen');
+             $kdoutput = $this->input->post('kdoutput');
+             $kdakun = $this->input->post('kdakun');
+             $hdr = $this->input->post('hdr');
+             $sat = $this->input->post('satuan');    
+             $pagu = $this->input->post('total_pagu');
+             $jum_terkirim = $this->munit->banyak_up_terkirim($id_subunit,$tahun);   
+             if($jum_terkirim>0){
+                 $this->session->set_userdata('msg_typ','err');
+                 $this->session->set_userdata('msg', 'Maaf Periode Pengisian UP sudah Berakhir!!');
+                 redirect('unit/buat_up'); 
+             }else{
+             $jum = $this->munit->cek_pagu_uraian_up($id_subunit,$kdkomponen,$kdoutput,$kdakun,$hdr); 
+             foreach($jum->result_array() as $jmlh)
+                             {  
+                                $tot_rencana = $jmlh ['sum(jumlah)'];
+                             }
+              
+             if($tot_rencana > $pagu){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Maaf dana yang diajukan melebihi pagu!!');
+                    redirect('unit/buat_up');   
+             }else{
+                 
+                
+             $jum = $this->munit->jum_uraian($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);
+             if($jum ==0){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Mohon Daftar Uraian jangan dikosongkan, silahkan input ulang lagi!!');
+                    redirect('unit/buat_up');     
+             }else{ 
+                     $detail_uraian = $this->munit->get_id_uraian($id_subunit,$kdkomponen,$subkomponen,$kdoutput,$kdakun,$hdr);
+                     $this->munit->insert_up($id_subunit,$detail_uraian);
+                     $this->session->set_userdata('msg_typ','ok');
+                     $this->session->set_userdata('msg', 'Rincian UP berhasil disimpan'); 
+                     redirect('unit/buat_up');
+             }
+          } } }
+    }
+    /**
+    * function untuk menyimpan rincian UP yang direvisi
+    */ 
+    function simpan_up2(){
+          if($this->auth->is_logged_in() == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $tahun = date('Y'); 
+             $kdkomponen = $this->input->post('kdkomponen');
+             $kdoutput = $this->input->post('kdoutput');
+             $kdakun = $this->input->post('kdakun');
+             $hdr = $this->input->post('hdr');
+             $sat = $this->input->post('satuan');
+             $id_rekap = $this->input->post('id_rekap');
+             $kd=substr($kdakun,0,2);  
+                if($kd=='53' or $kd=='51' ){
+                    $this->session->set_userdata('msg_typ','ok');
+                    $this->session->set_userdata('msg', 'Rincian UP berhasil dikirim ke unit'); 
+                     ?>    
+                         <script type="text/javascript" language="javascript">
+                            alert("maaf belanja dengan kode akun <?php echo "$kdakun";?>,.. tidak bisa di-UP-kan !!");
+                         </script> 
+                     <?php
+                     redirect('unit/revisi_up'); 
+                }else{ 
+                    if($sat=="Orang/Bulan" or $sat=="o/b" or $sat=="O-B" or $sat=="Orang-Bulan"){
+                        ?>    
+                         <script type="text/javascript" language="javascript">
+                            alert("Maaf Kegiatan ini tidak bisa di-UP-kan karena merupakan honor bukan adhoc!!");
+                         </script> 
+                        <?php
+                        redirect('unit/revisi_up');   
+                    }else{        
+                        $jum_bel=$this->munit->cek_jumbel($kode_unit,$kdkomponen,$kdoutput,$kdakun,$hdr); 
+                        foreach($jum_bel->result_array() as $jmlh)
+                             {  
+                                $tot_jumbel = $jmlh ['sum(jumlah)'];
+                             }
+                        $jum_up=$this->munit->total_up($kode_unit,$tahun);    
+                        foreach($jum_up->result_array() as $jmlh_up)
+                             {  
+                                $tot_up = $jmlh_up ['sum(jum_transaksi)'];
+                             } 
+                      
+                        $jum_rkakl=$this->munit->total_rkakl($kode_unit); 
+                        foreach($jum_rkakl->result_array() as $j_rkakl)
+                             {  
+                                $tot_rkakl = $j_rkakl ['sum(jumlah)'];
+                             }
+                        $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan');
+                        $jum_non_adhoc=$this->munit->total_keg_non_adhoc($kode_unit,$satuan); 
+                        foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                             {  
+                                $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                             }
+                      
+                        $jum_b_modal=$this->munit->total_belanja_modal($kode_unit); 
+                        foreach($jum_b_modal->result_array() as $j_modal)
+                             {  
+                                $tot_modal = $j_modal ['sum(jumlah)'];
+                             }
+                                         
+                        $tem = $tot_rkakl-$tot_modal-$tot_non_adhoc; 
+                        $anggaran_pagu_up = 1/12 * $tem;
+
+                        $prediksi = $tot_up + $tot_jumbel;
+                        
+                        if($prediksi > $anggaran_pagu_up) { 
+                            $this->session->set_userdata('msg_typ','err');
+                            $this->session->set_userdata('msg', 'Maaf Jika Belanja ini di UP-kan, akan melebihi pagu untuk UP!!');
+                            redirect('unit/revisi_up');  
+                        }else{   
+                            $success = $this->munit->cek_upmasuk($kode_unit,$kdkomponen,$kdoutput,$kdakun,$hdr);
+                            if($success) { 
+                                $this->session->set_userdata('msg_typ','err');
+                                $this->session->set_userdata('msg', 'Maaf Belanja ini telah di UP-kan');
+                                redirect('unit/revisi_up');    
+                            }else{
+                                 $this->munit->update_flag_cek($kode_unit,$kdkomponen,$kdoutput,$kdakun,$hdr);
+                                 $this->munit->insert_up2($kode_unit,$tot_jumbel,$id_rekap); 
+                                 $this->munit->insert_detail(); 
+                                 redirect('unit/revisi_up');
+                            }
+                         }
+                    }  
+            }   
+          }
+    }
+    /**
+    * function untuk simpan rincian UP yang telah direvisi dan diajukan kembali ke unit
+    */ 
+    function kirim_ulang_up(){   
+        if($this->auth->is_logged_in() == true){ 
+          $th_transaksi = $this->uri->segment(3);
+          $id_transaksi = $this->uri->segment(4);
+          $this->munit->ubah_status_up2($id_transaksi,$th_transaksi);
+          $get_id = $this->munit->ambil_level_tertinggi($id_transaksi,$th_transaksi); 
+               foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+               }
+               $level_terkini =  $level+1;
+          $this->munit->masuk_waktu_kirim_hasil_revisi($id_transaksi,$th_transaksi,$level_terkini); 
+          redirect('unit/list_up');       
+          }
+    }
+    /**
+    * function untuk mengirim rincian UP yang telah dibuat ke Unit
+    */ 
+    function kirim_up(){   
+        if($this->auth->is_logged_in() == true){        
+          $id_subunit = $this->session->userdata('id_subunit');
+          $th = date('y');
+          $success = $this->munit->cek_ada_transaksi($id_subunit,$th);
+          if($success){
+              $daftar_up = $this->munit->daftar_up2($id_subunit);
+              $this->munit->masuk_rekap($id_subunit,$daftar_up); 
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Rincian UP berhasil dikirm ke unit');  
+              redirect(base_url());
+          }else{
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Pengiriman Gagal... Tidak Ada Data yang dikirim');  
+              redirect(base_url());  
+          }
+        }
+    }
+    /**
+    * function untuk menghapus rincian UP
+    */ 
+    function hapus_up(){   
+        if($this->auth->is_logged_in() == true){ 
+          //$data['berita'] = $this->munit->get_pengumuman(); 
+          $id_transaksi = $this->uri->segment(3);  
+          $id_subunit = $this->session->userdata('id_subunit');
+          $idtdt = $this->munit->select_det_t($id_transaksi);     
+          foreach($idtdt->result_array() as $row){
+              $id = $row['id_uraian'];
+              $this->munit->hapus_uraian($id);
+          } 
+          $this->munit->hapus_up($id_transaksi);
+          $this->session->set_userdata('msg_typ','ok');
+          $this->session->set_userdata('msg', 'Rincian UP berhasil dihapus'); 
+          redirect('unit/buat_up');
+        }
+    }
+    /**
+    * function untuk menampilkan form UP direvisi
+    */ 
+    function verifikasi_up(){
+         if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit');
+          $th = date('y');  
+          $data['daftar_unit'] = $this->munit->getUnitList($id_unit);
+          $jumlah_gu=array();
+           foreach ($data['daftar_unit'] as $tgu){
+             $jumlah_gu[]= $this->munit->banyak_kb2($tgu['id_subunit'],$th);  
+           }
+           $data['jumgu']= $jumlah_gu;    
+          
+          $this->template->load('template','unit/verifikasi_up',$data);  
+        }
+    }
+    /**
+    * function untuk menampilkan detail rincian UP oleh verifikator unit
+    */
+    function rincian_up_subunit(){
+         if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit');
+          $th = date('y');   
+          $data['daftar_unit'] = $this->munit->getUnitList($id_unit);  
+          $jumlah_gu=array();
+           foreach ($data['daftar_unit'] as $tgu){
+             $jumlah_gu[]= $this->munit->banyak_kb2($tgu['id_subunit'],$th);  
+           }
+           $data['jumgu']= $jumlah_gu;    
+          
+          $this->template->load('template','unit/rincian_up_subunit',$data);  
+        }
+    }
+    /**
+    * function untuk menampilkan daftar rincian belanja per-subunit
+    */
+    function rincian_up_unit(){
+         if($this->auth->is_logged_in() == true){ 
+          //$data['berita'] = $this->munit->get_pengumuman();  
+          $data['daftar_unit'] = $this->munit->semua_unit();   
+          
+          $this->template->load('template','unit/rincian_up_unit',$data);  
+        }
+    }
+     /**
+    * function untuk menampilkan detail rincian belanja per-subunit
+    */
+    function get_rincian_up(){
+          if($this->auth->is_logged_in() == true){ 
+          $id_subunit=$this->uri->segment(3);  
+          $data['nama_unit'] = $this->munit->get_nama_unit($id_subunit);
+          $data['daftar_up'] = $this->munit->daftar_up_veri($id_subunit);
+          $data['banyak_up'] = $this->munit->banyak_up_veri($id_subunit);   
+          }   
+    }
+    /**
+    * function untuk menampilkan detail rincian belanja per-subunit
+    */
+    function get_rincian_up2(){
+          if($this->auth->is_logged_in() == true){ 
+          $id_subunit=$this->uri->segment(3);  
+          $data['nama_unit'] = $this->munit->get_nama_unit($id_subunit);
+          $data['daftar_up'] = $this->munit->daftar_up_veri3($id_subunit);
+          $data['banyak_up'] = $this->munit->banyak_up_veri3($id_subunit);   
+          $this->template->load('template','unit/get_rincian_up2',$data); 
+          }   
+    }
+    /**
+    * function untuk menampilkan form untuk verifikasi detail rincian belanja UP per-subunit
+    */
+    function cek_up(){
+          if($this->auth->is_logged_in() == true){   
+          $th_transaksi=$this->uri->segment(3);
+          $id_transaksi=$this->uri->segment(4);
+          $data['id_transaksi'] = $id_transaksi;
+          $data['daftar_up'] = $this->munit->daftar_up_veri2($id_transaksi,$th_transaksi);
+          foreach($data['daftar_up']->result_array() as $row){
+              $id_subunit = $row['id_subunit']; 
+              $kode_subunit = $row['kode_subunit']; 
+              $kdoutput = $row['kdoutput']; 
+              $kdkomponen = $row['kdkomponen']; 
+              $kdakun = $row['kdakun']; 
+              $hdr = $row['hdr']; 
+              $data['jum_up_tup'] = $this->munit->cari_tot_up($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);
+              //echo $this->db->last_query();
+              foreach($data['jum_up_tup']->result_array() as $tes)
+              {  
+                    $tot_up = $tes ['sum(jumlah)'];
+              };
+              if($tot_up==NULL){
+                  $tot_up=0;
+              }
+              $data['tot_up'] = $tot_up;
+              $data['jum_rkakl'] = $this->munit->get_pagu_rkakl($kode_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);
+              //echo $this->db->last_query();
+              foreach($data['jum_rkakl']->result_array() as $tes2)
+              {  
+                    $tot_rkakl = $tes2['sum(jumlah)'];
+              };
+              if($tot_rkakl==NULL){
+                  $tot_rkakl=0;
+              }
+              $data['rkakl'] = $tot_rkakl;  
+          }
+          
+          $data['sisa_pagu'] =  $tot_rkakl-$tot_up; 
+          $this->template->load('template','unit/cek_up',$data); 
+          }   
+    }
+    /**
+    * function untuk menampilkan form untuk verifikasi detail rincian belanja UP per-subunit
+    */
+    function cek_up2(){
+          if($this->auth->is_logged_in() == true){   
+          $id_transaksi=$this->uri->segment(3);
+          $data['id_transaski'] = $id_transaksi;
+          $data['daftar_up'] = $this->munit->daftar_up_subunit($id_transaksi);   
+          $this->template->load('template','unit/cek_up2',$data); 
+          }   
+    }
+    /**
+    * function untuk menampilkan pagu per subunit
+    */
+    function tampil_pagu(){
+          if($this->auth->is_logged_in() == true){
+            $kode_unit=$this->uri->segment(3);  
+            $data['pagu'] = $this->munit->daftar_pagu($kode_unit);        
+            $this->load->view('unit/cek_pagu',$data);
+          }   
+    }
+    function tampil_pagu_persubunit(){
+          if($this->auth->is_logged_in() == true){
+            $kode_unit=$this->uri->segment(3);
+            $id_subunit = $this->session->userdata('id_subunit') ;
+            
+            $data['spp']= $this->munit->all23($id_subunit);   
+            
+            
+            $total_spp_dulu2 = $this->munit->jum_spp_terdahulu2($id_subunit);
+            //echo $this->db->last_query();  
+            $spp2=array();
+            foreach($total_spp_dulu2 as $uraian2){
+                $spp2=array_merge($spp2,array($uraian2->kdoutput.$uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+            }       
+            $data['spp2']=$spp2;
+            
+            $total_pagu_subunit=$this->munit->total_rkakl($kode_unit); 
+                        foreach($total_pagu_subunit->result_array() as $tot_pagu)
+                             {  
+                                $jumlah = $tot_pagu ['sum(jumlah)'];
+                             }
+            $data['total_rkakl'] =  $jumlah;
+            
+            $tot_up=$this->munit->jum_tot_up($id_subunit);
+            //echo $this->db->last_query();  
+                        foreach($tot_up->result_array() as $tot_kwi)
+                             {  
+                                $nominal = $tot_kwi['sum(jumlah)'];
+                             }
+            $data['total_up'] =  $nominal;
+            //echo $this->db->last_query();
+            /*
+            $total_sebelumnya = $this->munit->jum_spp_terdahulu2($id_subunit);
+            $tot_seb=array();
+            foreach($total_sebelumnya as $uraian2){
+                $tot_seb=array_merge($tot_seb,array($uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+            }       
+            $data['tot_sebelumnya']=$tot_seb;
+             */
+              
+            $data['pagu'] = $this->munit->daftar_pagu($kode_unit);   
+            //echo $this->db->last_query();        
+            $this->load->view('unit/cek_pagu2',$data);
+          }   
+    }
+    function tampil_pagu_persubunit_di_unit(){
+          if($this->auth->is_logged_in() == true){
+            $kode_unit=$this->uri->segment(3);
+            $id_subunit=$this->uri->segment(4);       
+            
+            $data['spp']= $this->munit->all23($id_subunit);   
+            
+            
+            $total_spp_dulu2 = $this->munit->jum_spp_terdahulu2($id_subunit);
+            //echo $this->db->last_query();  
+            $spp2=array();
+            foreach($total_spp_dulu2 as $uraian2){
+                $spp2=array_merge($spp2,array($uraian2->kdoutput.$uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+            }       
+            $data['spp2']=$spp2;
+            
+            $total_pagu_subunit=$this->munit->total_rkakl($kode_unit); 
+                        foreach($total_pagu_subunit->result_array() as $tot_pagu)
+                             {  
+                                $jumlah = $tot_pagu ['sum(jumlah)'];
+                             }
+            $data['total_rkakl'] =  $jumlah;
+            
+            $tot_up=$this->munit->jum_tot_up($id_subunit);
+            //echo $this->db->last_query();  
+                        foreach($tot_up->result_array() as $tot_kwi)
+                             {  
+                                $nominal = $tot_kwi['sum(jumlah)'];
+                             }
+            $data['total_up'] =  $nominal;
+            //echo $this->db->last_query();
+            /*
+            $total_sebelumnya = $this->munit->jum_spp_terdahulu2($id_subunit);
+            $tot_seb=array();
+            foreach($total_sebelumnya as $uraian2){
+                $tot_seb=array_merge($tot_seb,array($uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+            }       
+            $data['tot_sebelumnya']=$tot_seb;
+             */
+              
+            $data['pagu'] = $this->munit->daftar_pagu($kode_unit);   
+            //echo $this->db->last_query();        
+            $this->load->view('unit/cek_pagu2',$data);
+          }   
+    }
+    /**
+    * function untuk melakukan verifikasi terhadap rincian belanja UP
+    */
+    function verifikasi(){
+        if($this->auth->is_logged_in() == true){ 
+         $id_rekap=$this->input->post('id_rekap');
+         $id_transaksi=$this->input->post('id_transaksi');
+         $th_transaksi=$this->input->post('th_transaksi');
+         $id_subunit=$this->input->post('id_subunit');
+         $ket=$this->input->post('keterangan');
+         $name=$this->input->post('simpan');
+         $tgl_skrg = date("Y-m-d"); 
+         $jam_skrg = date("H:i:s"); 
+         if($name=='Setuju'){
+          if (isset ($_POST['kelengkapan']) and $ket=='')
+             {                              
+               $get_id = $this->munit->ambil_level_tertinggi($id_transaksi,$th_transaksi);
+               foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+               }
+               $level_terkini =  $level+1;
+               $this->munit->masuk_waktu_setuju_veri_unit($id_transaksi,$level_terkini,$th_transaksi);
+               $this->munit->update_trans($id_transaksi,$th_transaksi);
+               echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/get_rincian_up/$id_subunit''>";     
+               } else {
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Mohon dicentang Pada Checkbox dan mengosongkan keterangan bila anda menyetujui Rincian ini');
+                    redirect('unit/cek_up/'.$th_transaksi."/".$id_transaksi);     
+               } 
+         }
+         else
+         if($name=='Revisi Ke Subunit'){
+           if ($ket=='' or  isset ($_POST['kelengkapan'])){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Untuk Mengembalikkan ke jurusan, Mohon mengisi kesalahan UP yang ditemukan Pada Textarea Keterangan, dan jangan mencentang text box');
+                    redirect('unit/cek_up/'.$th_transaksi."/".$id_transaksi);  
+           }
+           else 
+           {                   
+               $get_id = $this->munit->ambil_level_tertinggi($id_transaksi,$th_transaksi);  
+               foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+               }
+               $level_terkini =  $level+1;
+               $this->munit->masuk_waktu_revisi_veri_unit($id_transaksi,$level_terkini,$ket,$th_transaksi);
+               $this->munit->update_trans2($id_transaksi,$ket,$th_transaksi);          
+               echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/get_rincian_up/$id_subunit'>";     
+               
+           } 
+        }
+        }          
+    } 
+    /**
+    * function untuk menyetujui semua rincian belanja yang diajukan oleh subunit
+    */
+    function setuju_semua_rincian(){   
+        if($this->auth->is_logged_in() == true){     
+          $tgl_skrg = date("Y-m-d"); 
+          $jam_skrg = date("H:i:s");  
+          $th_rekap = $this->input->post('th_rekap'); 
+          $id_rekap = $this->input->post('id_rekap'); 
+          $kode_unit = $this->input->post('kode_unit'); 
+          $success = $this->munit->cek_ada_revisi($id_rekap,$th_rekap);
+           
+          if ($success){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Pastikan setiap rincian UP sudah lengkap dan benar');
+                    redirect('unit/get_rincian_up/'.$kode_unit);     
+         
+           }else{  
+                    $this->munit->update_setuju_rekap($id_rekap,$th_rekap); 
+                    $id_transaksi = $this->munit->get_id_transaksi($id_rekap,$th_rekap);
+                    foreach($id_transaksi->result_array() as $row){
+                            $id = $row['id_transaksi'];
+                            $this->munit->update_trans($id,$th_rekap);
+                    }
+                    $this->session->set_userdata('msg_typ','ok');
+                    $this->session->set_userdata('msg', 'Rincian UP berhasil disetujui');
+                    redirect('unit/verifikasi_up');
+           } 
+    }
+    /**
+    * function untuk mengirim hasil dari revisi
+    */
+    function kirim_revisi(){   
+        if($this->auth->is_logged_in() == true){ 
+          //$data['berita'] = $this->munit->get_pengumuman();
+          $tgl = date('Y-m-d');  
+          $kode_unit = $this->session->userdata('kode_unit');
+          $id = $this->input->post('id_rekap');
+          $this->munit->ubah_status_rekap($kode_unit,$id);
+          $id_transaksi = $this->munit->get_id_transaksi($id);
+          foreach($id_transaksi->result_array() as $row){
+                            $id = $row['id_transaksi'];
+                            $this->munit->update_trans4($id);
+               }
+          $this->session->set_userdata('msg_typ','ok');
+          $this->session->set_userdata('msg', 'Rincian UP sudah divalidasi Pimpinan Subunit');
+          redirect('unit/list_up');
+        }
+    }
+    /**
+    * function untuk mengotorisasi rincian UP oleh kajur
+    */ 
+    function up_otorisasi(){   
+        if($this->auth->is_logged_in() == true){      
+          $kode_unit = $this->session->userdata('kode_unit');
+          $id_subunit = $this->session->userdata('id_subunit');
+          $th_rekap = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $this->munit->ubah_otorisasi_kaprodi($id_subunit,$id,$th_rekap);
+          $id_transaksi = $this->munit->get_id_transaksi($id,$th_rekap);
+          foreach($id_transaksi->result_array() as $row){
+                            $id_trans = $row['id_transaksi'];
+                            $th_trans = $row['th_transaksi'];
+                            $this->munit->update_trans3($id_trans,$th_trans);
+                            
+                            $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_trans); 
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->munit->masuk_waktu_otorisasi_kaprodi($id_trans,$level_terkini,$th_trans);
+               }                            
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_up'>";
+        }
+    } 
+    /**
+    * function untuk menampilkan list rincian UP yang telah diotorisasi oleh Kajur
+    */
+    function up_terotorisasi(){   
+        if($this->auth->is_logged_in() == true){ 
+          $kode_unit = $this->session->userdata('kode_unit'); 
+          $id_unit = $this->session->userdata('id_unit');    
+          $data['daftar_up'] = $this->munit->up_terotorisasi($id_unit);  
+          $data['jum_daftar_up'] = $this->munit->jum_up_terotorisasi($id_unit);  
+          
+          $sudah= $this->munit->up_terotorisasi($id_unit);
+          foreach($sudah->result_array() as $row){
+              $unit_sudah = $row['id_subunit'];
+              $belum = $this->munit->up_belum_terotorisasi($unit_sudah,$id_unit);
+              
+          }
+          $telat= $this->munit->up_belum_buat_rincian($id_unit);
+
+          $data['telat'] = $telat;
+          $data['daftar_up_belum'] = $this->munit->daftar_sudah_buat($id_unit);
+          $data['nama_unit'] = $this->session->userdata('nama_unit');     
+             
+          $this->template->load('template','unit/tes_daftar',$data);
+        }
+    }
+    /**
+    * function untuk melakukan pengecekan dokumen hardcopy oleh unit
+    */
+    function cek_dokumen(){
+        if($this->auth->is_logged_in() == true){
+          $id_rekap=$this->uri->segment(4);
+          $th_rekap=$this->uri->segment(3);
+          $super=$this->munit->update_dokumen($id_rekap,$th_rekap);
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/up_terotorisasi'>";       
+        }
+    }
+    /**
+    * function untuk menampilkan list rincian UP yang telah diotorisasi oleh Kajur
+    */
+    function up_terotorisasi2(){   
+        if($this->auth->is_logged_in() == true){ 
+          $kode_unit = $this->session->userdata('kode_unit'); 
+          //$data['berita'] = $this->munit->get_pengumuman();              
+          $data['daftar_up2'] = $this->munit->up_terotorisasi2($kode_unit); 
+          $this->template->load('template','unit/up_terotorisasi2',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan detail rincian UP yang telah diotorisasi oleh Kajur
+    */
+   function detail_up_terotorisasi(){
+          if($this->auth->is_logged_in() == true){ 
+          $th_rekap=$this->uri->segment(3);        
+          $id_rekap=$this->uri->segment(4);        
+          $id_subunit=$this->uri->segment(5);
+          $kode_subunit = $this->session->userdata('user_unit'); 
+          $data['list_up'] = $this->munit->list_up($id_subunit);   
+                  $data['list_up_mak'] = $this->munit->list_up_mak($id_subunit);
+                  $data['banyak_up'] = $this->munit->banyak_up2($id_subunit); 
+                  $jum_up=$this->munit->total_up($id_subunit);  
+                          foreach($jum_up->result_array() as $jmlh_up)
+                             {  
+                                $tot_up = $jmlh_up ['sum(jumlah)'];
+                             }   
+                  $jum_rkakl=$this->munit->total_rkakl($kode_subunit); 
+                          foreach($jum_rkakl->result_array() as $j_rkakl)
+                             {  
+                                $tot_rkakl = $j_rkakl ['sum(jumlah)'];
+                             }
+                  $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan'); 
+                  $jum_non_adhoc=$this->munit->total_keg_non_adhoc($kode_subunit,$satuan); 
+                          foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                             {  
+                                $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                             }
+                  $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');  
+                  $jum_b_modal=$this->munit->total_belanja_modal($kode_subunit,$kdakun); 
+                          foreach($jum_b_modal->result_array() as $j_modal)
+                             {  
+                                $tot_modal = $j_modal ['sum(jumlah)'];
+                             }
+                                     
+                  $data['tem']= $tot_rkakl-$tot_modal-$tot_non_adhoc; 
+                  $data['jum_up']=$tot_up;
+                  if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+                      $tot_sementara = 1/12 * $data['tem']; 
+                      if($tot_sementara > 50000000){
+                          $data['tot_up'] = 50000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+                      $tot_sementara = 1/18 * $data['tem']; 
+                      if($tot_sementara > 100000000){
+                          $data['tot_up'] = 100000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>2400000000){
+                      $tot_sementara = 1/24 * $data['tem']; 
+                      if($tot_sementara > 200000000){
+                          $data['tot_up'] = 200000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }
+				  $data['maksimum_up']= $this->munit->maksimum_up($id_subunit); 
+                  $data['jum_tot_rkakl']=$tot_rkakl;
+                  $data['jum_up']=$tot_up;
+          $data['tot_pagu_realisasi']= $this->munit->tot_pagu_realisasi($id_subunit);           
+          $data['daftar_up'] = $this->munit->daftar_up_terotorisasi($id_rekap,$id_subunit,$th_rekap);       
+          $this->template->load('template','unit/detail_up_terotorisasi',$data);
+          }   
+    }
+    /**
+    * function untuk menampilkan list rincian UP yang telah diotorisasi oleh Kajur
+    */
+   function detail_up_terotorisasi2(){
+          if($this->auth->is_logged_in() == true){ 
+          $kode_unit=$this->uri->segment(3);
+          //$data['berita'] = $this->munit->get_pengumuman();  
+          $data['daftar_up'] = $this->munit->daftar_up_belum_terotorisasi($kode_unit); 
+           $this->template->load('template','unit/detail_up_terotorisasi',$data);
+          }   
+    }  
+    /**
+    * function untuk menyimpan SPP
+    */
+   function simpan_spp(){
+       if($this->auth->is_logged_in() == true){
+          $id_unit = $this->session->userdata('id_unit');
+          $th_rekap = $this->input->post('th_rekap');
+          $belum= $this->munit->cek_dokumen($id_unit,$th_rekap);     
+                if($belum){
+                            $this->session->set_userdata('msg_typ','err');
+                            $this->session->set_userdata('msg', 'Mohon Dicek terlebih dahulu, ada dokumen yang belum diterima!!');
+                            redirect('unit/up_terotorisasi/');     
+         
+                }else{
+          $transaksi = $this->munit->up_terotorisasi2($id_unit,$th_rekap); 
+          foreach($transaksi->result_array() as $row){
+            $id_spp = $row['id_spp']; } 
+          if($id_spp==NULL){
+                $this->munit->simpan_spp($id_unit,$transaksi);
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'SPP berhasil disimpan');
+                redirect(base_url());   
+          }else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Sudah dibuatkan SPP');
+                redirect(base_url()); 
+          }
+       }
+       }
+   } 
+   /**
+    * function untuk menampilkan list SPP UP 
+    */
+   function list_spp_up(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit');  
+          $daftar_spp = $this->munit->spp_up($id_unit);
+          $data['daftar_spp'] = $this->munit->spp_up($id_unit);
+          foreach($daftar_spp->result_array() as $row)
+            {                  
+            $nomor=$row['no_spp']; 
+            $tahun=$row['th_spp']; 
+            }
+          $data['th'] = '20'.$tahun;
+          $data['nomor'] = sprintf("%04d", $nomor);    
+          $this->template->load('template','unit/list_spp_up',$data);
+        }
+    }
+    /**
+    * function untuk meng-edit SPP
+    */
+    function update_spp(){   
+        if($this->auth->is_logged_in() == true){ 
+          $kode_unit = $this->session->userdata('kode_unit'); 
+          $id_spp = $this->input->post('id_spp');    
+          $sp = $this->input->post('sp');    
+          $this->munit->update_spp($id_spp,$sp);         
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/preview_spp/$id_spp'>";
+        }
+    }
+    /**
+    * function menampilkan preview SPP
+    */
+    function preview_spp(){         
+            //$data['berita'] = $this->munit->get_pengumuman();
+            $id_unit = $this->session->userdata('id_unit');
+            $th_spp = $this->uri->segment(3);
+            $id_spp = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;                              
+            $detail_spp = $this->munit->detail_spp($id_unit,$id_spp,$th_spp);
+            $data['detail_spp'] = $this->munit->detail_spp($id_unit,$id_spp,$th_spp);
+            foreach($detail_spp->result_array() as $row)
+            {                  
+            $nomor=$row['no_spp']; 
+            $tahun=$row['th_spp']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat']; 
+            }
+          $data['th'] = '20'.$tahun;
+          $data['singkat'] = $singkat;
+          $data['kode_digit'] = $kode_digit;
+          $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['total_pagu'] = $this->munit->jum($id_unit,$id_spp,$th_spp);
+            $total_sebagian = $this->munit->jum_sebagian($id_unit,$id_spp,$th_spp); 
+            foreach($total_sebagian as $sebagian){
+                $data['sebagian'] = $sebagian->jumlah; 
+            }
+            $total_spp_dulu = $this->munit->jum_spp_terdahulu($id_unit,$th_spp);  
+            $spp=array();
+            foreach($total_spp_dulu as $uraian){
+                $spp=array_merge($spp,array($uraian->kdoutput.$uraian->kdkomponen.$uraian->kdakun => $uraian->jumlah));
+            }       
+            $data['spp']=$spp;  
+            
+            $total_spp_kini = $this->munit->jum_kini($id_unit,$id_spp,$th_spp);    
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){
+                $out = $uraian_kini->kdoutput.$uraian_kini->kdakun;
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+            
+            $total_pagu_unit=$this->munit->pagu_tot_dipa($id_unit); 
+                        foreach($total_pagu_unit->result_array() as $tot_pagu)
+                             {  
+                                $jumlah = $tot_pagu ['sum(jumlah)'];
+                             }
+            $data['total_pagu_unit'] =  $jumlah;
+            
+            $total_spp_terbayar=$this->munit->total_spp_terbayar($id_unit,$th_spp); 
+                        foreach($total_spp_terbayar->result_array() as $tot_spp_terbayar)
+                             {  
+                                $jum_spp_terbayar = $tot_spp_terbayar ['sum(jumlah)'];
+                             }
+            $data['jum_spp_terbayar'] =  $jum_spp_terbayar;
+            
+            $total_spp_diajukan=$this->munit->total_spp_diajukan($id_unit,$id_spp,$th_spp); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan;
+            
+            $data['spp'] = $this->munit->all($id_unit,$id_spp); 
+            $total_sebelumnya = $this->munit->jum_spp_terdahulu($id_unit,$th_spp);
+            $tot_seb=array();
+            foreach($total_sebelumnya as $uraian2){
+                $tot_seb=array_merge($tot_seb,array($uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+            }       
+            $data['tot_sebelumnya']=$tot_seb;
+            
+            $total_kini = $this->munit->jum_kini($id_unit,$id_spp,$th_spp); 
+            $spp_kini2=array();
+            foreach($total_kini as $uraian_kini2){      ;
+                $spp_kini2=array_merge($spp_kini2,array($uraian_kini2->kdkomponen.$uraian_kini2->kdakun => $uraian_kini2->jumlah));
+             }
+            
+            $data['tot_kini']=$spp_kini2;
+             
+            $total_spp_terbayar_perunit=$this->munit->total_spp_terbayar_perunit($id_unit,$th_spp);
+                        foreach($total_spp_terbayar_perunit->result_array() as $tot_spp_terbayar_perunit)
+                             {  
+                                $jum_spp_terbayar_perunit = $tot_spp_terbayar_perunit ['sum(jumlah)'];
+                             }
+            $data['jum_spp_terbayar_perunit'] =  $jum_spp_terbayar_perunit;
+            
+            $total_spp_diajukan_perunit=$this->munit->total_spp_diajukan_perunit($id_unit,$th_spp);   
+                        foreach($total_spp_diajukan_perunit->result_array() as $tot_spp_diajukan_perunit)
+                             {  
+                                $jum_spp_diajukan_perunit = $tot_spp_diajukan_perunit ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan_perunit'] =  $jum_spp_diajukan_perunit;
+            
+            $total_spp_semua_diajukan_perunit=$this->munit->total_spp_semua_diajukan_perunit($id_unit,$th_spp);
+            
+                        foreach($total_spp_semua_diajukan_perunit->result_array() as $total_spp_semua_diajukan_perunit2)
+                             {  
+                                $total_spp_semua_diajukan_perunit3 = $total_spp_semua_diajukan_perunit2 ['sum(jumlah)'];
+                             }
+            $data['total_spp_semua_diajukan_perunit3'] =  $total_spp_semua_diajukan_perunit3; 
+            
+               
+            $this->template->load('template','unit/preview_spp2',$data);  
+        }
+    
+    
+    function preview_all(){         
+            //$data['berita'] = $this->munit->get_pengumuman();
+            $kode_unit = $this->session->userdata('kode_unit');
+            $id_spp = $this->uri->segment(3);            
+            $data['spp'] = $this->munit->all($id_spp, $kode_unit);   
+            $this->template->load('template','unit/preview_all',$data);  
+        }
+    /**
+    * function untuk print SPP
+    */
+    function print_spp($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_unit = $this->session->userdata('id_unit');
+             $th_spp = $this->uri->segment(3);
+             $id_spp = $this->uri->segment(4);
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i:s");
+             $data['tgl'] = $tgl_skrg;
+             $data['jam'] = $jam_skrg;
+             $detail_spp = $this->munit->detail_spp($id_unit,$id_spp,$th_spp);
+             $data['detail_spp'] = $this->munit->detail_spp($id_unit,$id_spp,$th_spp);
+             foreach($detail_spp->result_array() as $row)
+            {                  
+            $nomor=$row['no_spp']; 
+            $tahun=$row['th_spp']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat']; 
+            }
+          $data['th'] = '20'.$tahun;
+          $data['singkat'] = $singkat;
+          $data['kode_digit'] = $kode_digit;
+          $data['nomor'] = sprintf("%04d", $nomor); 
+             $ret = ''; 
+             $pdf_filename='SPP/'.$id_unit.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+                     
+            $data['total_pagu'] = $this->munit->jum($id_unit,$id_spp,$th_spp);     
+            $total_sebagian = $this->munit->jum_sebagian($id_unit,$id_spp,$th_spp); 
+            foreach($total_sebagian as $sebagian){
+                $data['sebagian'] = $sebagian->jumlah; 
+            }                      
+            $total_spp_dulu = $this->munit->jum_spp_terdahulu($id_unit,$th_spp);  
+            $spp=array();
+            foreach($total_spp_dulu as $uraian){
+                $spp=array_merge($spp,array($uraian->kdoutput.$uraian->kdkomponen.$uraian->kdakun => $uraian->jumlah));
+            }       
+            $data['spp']=$spp;  
+            
+            $total_spp_kini = $this->munit->jum_kini($id_unit,$id_spp,$th_spp);  
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){
+                $out = $uraian_kini->kdoutput.$uraian_kini->kdakun;
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+            
+            $total_pagu_unit=$this->munit->pagu_tot_dipa($id_unit); 
+                        foreach($total_pagu_unit->result_array() as $tot_pagu)
+                             {  
+                                $jumlah = $tot_pagu ['sum(jumlah)'];
+                             }
+            $data['total_pagu_unit'] =  $jumlah;
+            
+            $total_spp_terbayar=$this->munit->total_spp_terbayar($id_unit,$th_spp);
+                        foreach($total_spp_terbayar->result_array() as $tot_spp_terbayar)
+                             {  
+                                $jum_spp_terbayar = $tot_spp_terbayar ['sum(jumlah)'];
+                             }
+            $data['jum_spp_terbayar'] =  $jum_spp_terbayar;
+            
+            $total_spp_diajukan=$this->munit->total_spp_diajukan($id_unit,$id_spp,$th_spp); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan;
+            
+            $data['spp'] = $this->munit->all($id_unit,$id_spp); 
+            $total_sebelumnya = $this->munit->jum_spp_terdahulu($id_unit,$th_spp);
+            $tot_seb=array();
+            foreach($total_sebelumnya as $uraian2){
+                $tot_seb=array_merge($tot_seb,array($uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+            }       
+            $data['tot_sebelumnya']=$tot_seb;
+            
+            $total_kini = $this->munit->jum_kini($id_unit,$id_spp,$th_spp); 
+            $spp_kini2=array();
+            foreach($total_kini as $uraian_kini2){      ;
+                $spp_kini2=array_merge($spp_kini2,array($uraian_kini2->kdkomponen.$uraian_kini2->kdakun => $uraian_kini2->jumlah));
+             }
+            
+            $data['tot_kini']=$spp_kini2;
+             
+            $total_spp_terbayar_perunit=$this->munit->total_spp_terbayar_perunit($id_unit,$th_spp); 
+                        foreach($total_spp_terbayar_perunit->result_array() as $tot_spp_terbayar_perunit)
+                             {  
+                                $jum_spp_terbayar_perunit = $tot_spp_terbayar_perunit ['sum(jumlah)'];
+                             }
+            $data['jum_spp_terbayar_perunit'] =  $jum_spp_terbayar_perunit;
+            
+            $total_spp_diajukan_perunit=$this->munit->total_spp_diajukan_perunit($id_unit,$th_spp);
+                        foreach($total_spp_diajukan_perunit->result_array() as $tot_spp_diajukan_perunit)
+                             {  
+                                $jum_spp_diajukan_perunit = $tot_spp_diajukan_perunit ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan_perunit'] =  $jum_spp_diajukan_perunit;
+            
+            $total_spp_semua_diajukan_perunit=$this->munit->total_spp_semua_diajukan_perunit($id_unit,$th_spp);
+            
+                        foreach($total_spp_semua_diajukan_perunit->result_array() as $total_spp_semua_diajukan_perunit2)
+                             {  
+                                $total_spp_semua_diajukan_perunit3 = $total_spp_semua_diajukan_perunit2 ['sum(jumlah)'];
+                             }
+            $data['total_spp_semua_diajukan_perunit3'] =  $total_spp_semua_diajukan_perunit3;
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('unit/print_spp', $data,  true);
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             } 
+    } 
+    /**
+    * function untuk melakukan edit terhadap rincian belanja yang direvisi dari unit
+    */
+    function edit_rincian_up(){
+        if($this->auth->is_logged_in () == true){
+            $th_transaksi = $this->uri->segment(3);
+            $id_transaksi = $this->uri->segment(4);
+			$kode_subunit = $this->session->userdata('kode_subunit'); 
+            $id_subunit = $this->session->userdata('id_subunit');
+            $satuan=$this->munit->tampil_satuan(); 
+                $varsatuan='';
+                foreach($satuan as $sat)  {
+                    $id_satuan= $sat->kode_value;
+                    $satuan = $sat->nama_value;
+                    $varsatuan.= "$id_satuan:'$satuan'," ;
+                }
+            $data['satuan']=$varsatuan ;
+            $data['edit_rincian_up'] = $this->munit->edit_rincian_up($id_transaksi,$th_transaksi);
+            //echo $this->db->last_query();
+            $get_id = $this->munit->ambil_level_tertinggi2($id_transaksi,$th_transaksi);
+               foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+               }
+            $get_komentar = $this->munit->ambil_komentar($id_transaksi,$th_transaksi,$level);
+               foreach($get_komentar->result_array() as $row){
+                            $data['komentar'] = $row['komentar'];  
+               } 
+			foreach($data['edit_rincian_up']->result_array() as $row){
+					 $kdoutput = $row['kdoutput'];
+					 $kdkomponen = $row['kdkomponen'];
+					 $kdskomponen = $row['kdskomponen'];
+					 $kdakun = $row['kdakun'];
+					 $hdr = $row['hdr'];
+			}
+			//---PAGU
+            $total_pagu = $this->munit->jumlah_pagu_uraian($kode_subunit,$kdkomponen,$kdskomponen,$kdoutput,$kdakun,$hdr);     
+			//echo $this->db->last_query();               
+            foreach($total_pagu->result_array() as $jmlh)
+                 {  
+                    $tot_jumlah = $jmlh ['sum(jumlah)'];
+                 };
+            $data['jumlah'] = $tot_jumlah;
+			//-------------------
+			$jum_up=$this->munit->total_up($id_subunit);   
+                  foreach($jum_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+
+            $tot_pagu_realisasi= $this->munit->tot_pagu_realisasi($id_subunit); 
+            $data['sisa_pagu_realisasi'] = $tot_pagu_realisasi-$tot_up;
+            $this->template->load('template','unit/edit_rincian_up',$data);
+        }
+    }
+    /**
+    * function untuk melakukan edit terhadap rincian belanja yang direvisi dari unit
+    */
+    function edit_rincian_up2(){
+        if($this->auth->is_logged_in () == true){
+            $id_transaksi = $this->uri->segment(4);
+            $th_transaksi = $this->uri->segment(3);
+			$kode_subunit = $this->session->userdata('kode_subunit'); 
+            $id_subunit = $this->session->userdata('id_subunit');
+            $data['id_url'] = 1;
+            $satuan=$this->munit->tampil_satuan(); 
+                $varsatuan='';
+                foreach($satuan as $sat)  {
+                    $id_satuan= $sat->kode_value;
+                    $satuan = $sat->nama_value;
+                    $varsatuan.= "$id_satuan:'$satuan'," ;
+                }
+            $data['satuan']=$varsatuan ;
+            $data['edit_rincian_up'] = $this->munit->edit_rincian_up($id_transaksi,$th_transaksi);
+            //echo $this->db->last_query();  
+            $get_id = $this->munit->ambil_level_tertinggi2($id_transaksi,$th_transaksi);
+               foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+               }
+            $get_komentar = $this->munit->ambil_komentar($id_transaksi,$th_transaksi,$level);
+               foreach($get_komentar->result_array() as $row){
+                            $data['komentar'] = $row['komentar'];  
+               }   
+			foreach($data['edit_rincian_up']->result_array() as $row){
+					 $kdoutput = $row['kdoutput'];
+					 $kdkomponen = $row['kdkomponen'];
+					 $kdakun = $row['kdakun'];
+					 $hdr = $row['hdr'];
+                     $kdskomponen = $row['kdskomponen'];
+			}
+			//---PAGU
+            $total_pagu = $this->munit->jumlah_pagu_uraian($kode_subunit,$kdkomponen,$kdskomponen,$kdoutput,$kdakun,$hdr);     
+			//echo $this->db->last_query();               
+            foreach($total_pagu->result_array() as $jmlh)
+                 {  
+                    $tot_jumlah = $jmlh ['sum(jumlah)'];
+                 };
+            $data['jumlah'] = $tot_jumlah;
+
+			$jum_up=$this->munit->total_up($id_subunit);   
+                  foreach($jum_up->result_array() as $jmlh_up)
+                     {  
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     } 
+
+            $tot_pagu_realisasi= $this->munit->tot_pagu_realisasi($id_subunit); 
+            $data['sisa_pagu_realisasi'] = $tot_pagu_realisasi-$tot_up;
+            $this->template->load('template','unit/edit_rincian_up2',$data);
+        }
+    }
+    /**
+    * function untuk melakukan otorisasi SPP oleh PD2
+    */
+    function otorisasi_spp_up(){   
+        if($this->auth->is_logged_in() == true){         
+          $th = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $this->munit->otorisasi_spp_up($id,$th);
+          $trans = $this->munit->selek_trans($id,$th);
+            foreach($trans->result_array() as $row){
+                $id_trans = $row['id_transaksi'];
+                $this->munit->otorisasi_trans_up($id_trans,$th);
+                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->munit->masuk_waktu_otorisasi_ppk($id_trans,$level_terkini,$th);
+            }       
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spp_up'>";
+        }
+    }
+    /**
+    * function untuk menampilkan List SPP yang sudah diotorisasi oleh PD2
+    */
+   function list_spp_up_keu(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit'); 
+          $data['daftar_spp'] = $this->munit->spp_up_keu($id_unit);   
+          $this->template->load('template','unit/list_spp_up_keu',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan form pengisian SPM
+    */
+   function pengisian_spm(){
+          if($this->auth->is_logged_in() == true){      
+          $id_unit = $this->session->userdata('id_unit');
+          $th = date('y');
+          $belum= $this->munit->cek_dokumen($id_unit,$th); 
+                if($belum){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Mohon Dicek terlebih dahulu, ada dokumen yang belum diterima!!');
+                    redirect('unit/up_terotorisasi/');
+                }else{
+          $data['transaksi'] = $this->munit->up_terotorisasi2($id_unit,$th);
+          $data['setting'] = $this->munit->select_setting();
+          $data['carabayar'] = $this->munit->get_carabayar();
+          foreach($data['transaksi']->result_array() as $tot_spp)
+                 {  
+                    $jumlah = $tot_spp ['jumlah'];
+                 } 
+          $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;     
+          $this->template->load('template','unit/pengisian_spm',$data);
+                }
+          }   
+    }
+    /**
+    * function untuk menyimpan SPM
+    */
+   function simpan_spm(){
+       if($this->auth->is_logged_in() == true){
+          $id_unit = $this->session->userdata('id_unit'); 
+          $th_rekap = $this->input->post('th_rekap'); 
+          $id_rekap = $this->input->post('id_rekap'); 
+                                                                                                                   
+          $transaksi = $this->munit->up_terotorisasi_simpan($id_unit,$th_rekap);
+          $success = $this->munit->up_terotorisasi2_num($id_unit,$th_rekap);
+         
+          if($success){       
+                $this->munit->simpan_spm($transaksi,$id_unit,$th_rekap);
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'SPM berhasil disimpan');
+                redirect('unit/list_spm_up');
+          }else{
+                //$this->munit->simpan_spm($transaksi,$id_unit,$th_rekap);
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Rincian ini sudah di spm-kan');
+                redirect('unit/list_spm_up');
+          }    
+       }
+   }
+   /**
+    * function untuk menampilkan list SPM
+    */
+   function list_spm_up(){   
+        if($this->auth->is_logged_in() == true){ 
+          $id_unit = $this->session->userdata('id_unit'); 
+          $data['daftar_spm'] = $this->munit->spm_up($id_unit);
+          $total_pagu = $this->munit->spm_up_jum($id_unit);
+          foreach($total_pagu->result_array() as $jmlh)
+                 {  
+                    $tot_jumlah = $jmlh ['sum(jumlah)'];
+                 }
+                 $data['jumlah']=$tot_jumlah; 
+          //echo $this->db->last_query(); 
+          $this->template->load('template','unit/list_spm_up',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan preview SPM
+    */
+   function preview_spm(){
+            $id_unit = $this->session->userdata('id_unit');
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;            
+            $data['carabayar'] = $this->munit->get_carabayar();     
+            $data['detail_spm'] = $this->munit->detail_spm($id_unit,$id_spm,$th_spm);
+			$data['detail_bas'] = $this->munit->detail_bas($id_unit);  
+            $detail_spm = $this->munit->detail_spm($id_unit,$id_spm,$th_spm); 
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['tahun'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang($jumlah) ;
+            $data['total_pagu'] = $this->munit->jum($id_unit,$id_spm,$th_spm);   
+            $total_spp_kini = $this->munit->jum_kini_spm($id_unit, $id_spm,$th_spm);  
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){               
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+
+            
+            
+            $total_spp_diajukan=$this->munit->total_spm_diajukan($id_unit,$id_spm,$th_spm); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan; 
+            $this->template->load('template','unit/preview_spm',$data);    
+   }
+   /**
+    * function untuk menampilkan preview SPM
+    */
+   function preview_spm_pusat(){       
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $id_unit = $this->uri->segment(5);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;            
+            $data['carabayar'] = $this->munit->get_carabayar();     
+            $data['detail_spm'] = $this->munit->detail_spm($id_unit,$id_spm,$th_spm);  
+            $detail_spm = $this->munit->detail_spm($id_unit,$id_spm,$th_spm); 
+			$data['detail_bas'] = $this->munit->detail_bas($id_unit);  
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['tahun'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang($jumlah) ;
+            $data['total_pagu'] = $this->munit->jum($id_unit,$id_spm,$th_spm);   
+            $total_spp_kini = $this->munit->jum_kini_spm($id_unit, $id_spm,$th_spm);  
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){               
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+
+            
+            
+            $total_spp_diajukan=$this->munit->total_spm_diajukan($id_unit,$id_spm,$th_spm); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan; 
+            $this->template->load('template','unit/preview_spm_pusat',$data);    
+   }
+   function preview_spm2(){
+            $id_unit = $this->session->userdata('id_unit');
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;            
+            $data['carabayar'] = $this->munit->get_carabayar();     
+            $data['detail_spm'] = $this->munit->detail_spm($id_unit,$id_spm,$th_spm);
+			$data['detail_bas'] = $this->munit->detail_bas($id_unit);
+            echo $this->db->last_query();  
+            $detail_spm = $this->munit->detail_spm($id_unit,$id_spm,$th_spm); 
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['tahun'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang($jumlah) ;
+            $data['total_pagu'] = $this->munit->jum($id_unit,$id_spm,$th_spm);   
+            $total_spp_kini = $this->munit->jum_kini_spm($id_unit, $id_spm,$th_spm);  
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){               
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+
+            
+            
+            $total_spp_diajukan=$this->munit->total_spm_diajukan($id_unit,$id_spm,$th_spm); 
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan; 
+            $this->template->load('template','unit/preview_spm_pusat',$data);   
+   }
+   /**
+    * function untuk melakukan edit terhadap SPM yang telah dibuat
+    */
+   function update_spm(){   
+        if($this->auth->is_logged_in() == true){ 
+          $kode_unit = $this->session->userdata('kode_unit'); 
+          $id_spm = $this->input->post('id_spm'); 
+          $th_spm = $this->input->post('th_spm'); 
+          $this->munit->update_spm();           
+          echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/preview_spm/$th_spm/$id_spm'>";
+        }
+    } 
+    /**
+    * function untuk print SPM
+    */
+   function print_spm($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $id_unit = $this->session->userdata('id_unit');   
+             $th_spm = $this->uri->segment(3);   
+             $data['tgl'] = date('Y-m-d');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='spm_up_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+            
+            $this->load->model('m_tup');  
+            $id_spm = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg; 
+            $this->m_tup->update_print_spm($id_spm,$th_spm);           
+            $data['carabayar'] = $this->munit->get_carabayar();     
+            $data['detail_spm'] = $this->munit->detail_spm($id_unit,$id_spm,$th_spm); 
+            $detail_spm = $this->munit->detail_spm($id_unit,$id_spm,$th_spm); 
+                    foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['terbilang'] = $this->konversi->terbilang ($jumlah) ;
+            $data['total_pagu'] = $this->munit->jum($id_unit,$id_spm,$th_spm);
+            $total_spp_kini = $this->munit->jum_kini_spm($id_unit, $id_spm,$th_spm);  
+            $spp_kini=array();
+            foreach($total_spp_kini as $uraian_kini){
+                $out = $uraian_kini->kdoutput.$uraian_kini->kdakun;
+                $spp_kini=array_merge($spp_kini,array($uraian_kini->kdoutput.$uraian_kini->kdkomponen.$uraian_kini->kdakun => $uraian_kini->jumlah));
+             }
+            
+            $data['spp_kini']=$spp_kini;  
+            $total_spp_diajukan=$this->munit->total_spm_diajukan($id_unit,$id_spm,$th_spm);  
+                        foreach($total_spp_diajukan->result_array() as $tot_spp_diajukan)
+                             {  
+                                $jum_spp_diajukan = $tot_spp_diajukan ['sum(jumlah)'];
+                             }
+            $data['jum_spp_diajukan'] =  $jum_spp_diajukan;
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('unit/print_spm', $data,  true);     
+            
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk melakukan otorisasi SPM oleh Dekan
+    */
+    function otorisasi_spm_up(){   
+        if($this->auth->is_logged_in() == true){          
+          $th = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $id_unit = $this->session->userdata('id_unit');
+          
+          $recek_kel = $this->munit->recheck_kelengkapan($id,$th);
+          if($recek_kel >0){
+                 $this->session->set_userdata('msg_typ','err');
+                 $this->session->set_userdata('msg','Maaf SPM ini belum bisa di otorisasi karena ada Kelengkapan yang belum anda unduh!!');
+          }else{
+          $tot_rincian = $this->munit->data_dwh($id,$th); 
+          //echo $this->db->last_query();
+          foreach($tot_rincian->result_array() as $jmlh)
+                 {  
+                     $tot_jumlah = $jmlh ['sum(jumlah)'];
+                     //print_r($tot_jumlah);  
+                     $dwh = $this->munit->ambil_dwh($id_unit,$th);
+                     //print_r($jum_dwh); 
+                     if($dwh==1){
+                            $jum_dwh = $this->munit->ambil_data_dwh($id_unit,$th);
+                            foreach($jum_dwh->result_array() as $tes){
+                            $jumlah_up = $tes['jum_up_diajukan']; 
+                            $total=$jumlah_up+$tot_jumlah;   
+                            $this->munit->update_dwh($total,$id_unit,$th);
+                            //echo $this->db->last_query();
+                            }
+                     }else{
+                            $total =0+$tot_jumlah;
+                            $this->munit->masuk_dwh($total,$id_unit,$th);
+                     }      
+                 };             
+          $this->munit->otorisasi_spm_up($id,$th);   
+          $trans = $this->munit->selek_spm_trans($th,$id);
+            foreach($trans->result_array() as $row){
+                $id_trans = $row['id_transaksi'];
+                $id_rekap = $row['id_rekap'];
+                $this->munit->otorisasi_trans_up2($id_trans,$th);
+                $this->munit->otorisasi_rekap_up2($id_rekap,$th);
+                $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->munit->masuk_waktu_otorisasi_dekan($id_trans,$level_terkini,$th);
+                
+            }
+          }                           
+           echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up'>";  
+        }
+    }
+    /**
+    * function untuk manampilkan list SPM yang diajukan ke pusat
+    */
+    function list_spm_up_pen(){   
+        if($this->auth->is_logged_in() == true){  
+        $th= date('y');       
+          $data['daftar_spm'] = $this->munit->spm_up_pen($th);
+
+          $data['jum_daftar_spm'] = $this->munit->jum_spm_up_pen($th);
+          $jumlah_spm = $this->munit->jum_spm_up_pen($th);
+          if($jumlah_spm>0){          
+          foreach($data['daftar_spm']->result_array() as $row)
+            {      
+            $id=$row['id_spm'];
+            $dokumen = $this->munit->cek_detail_kelengkapan($id,$th);
+            $ada_belom_dicentang= $this->munit->cek_ada_veri_komplit($id,$th);
+            }
+            $data['ada_belom_dicentang'] =$ada_belom_dicentang;                              
+            $data['dokumen'] =$dokumen;                              
+          }
+          $this->template->load('template','unit/list_spm_up_pen',$data);        
+          
+        }
+    }
+    /**
+    * function untuk menampilkan SPM yang diajukan oleh pusat
+    */
+    function list_spm_revisi_pusat(){   
+        if($this->auth->is_logged_in() == true){
+        $id_unit = $this->session->userdata('id_unit');  
+        $th= date('y');       
+          $data['daftar_spm'] = $this->munit->spm_up_pen_revisi($th);
+          $data['jum_spm'] = $this->munit->jum_spm_revisi_pusat($id_unit);
+          //echo $this->db->last_query();  
+          $this->template->load('template','unit/revisi_pen_pusat',$data);
+        }
+    }
+     /**
+    * function untuk menampilkan list SPM yang akan dicek oleh verifikator pusat
+    */
+    function list_spm_up_veri(){   
+        if($this->auth->is_logged_in() == true){
+        $th= date('y');       
+          $data['daftar_spm'] = $this->munit->spm_up_veri($th);
+          $data['jum_daftar_spm'] = $this->munit->jum_spm_up_veri($th);    
+          $this->template->load('template','unit/list_spm_up_veri',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan list SPM yang akan dicek oleh Kasubag Dana Masyarakat
+    */
+    function list_spm_up_dm(){   
+        if($this->auth->is_logged_in() == true){
+        $th= date('y');       
+          $data['daftar_spm'] = $this->munit->spm_up_dm($th); 
+          $data['jum_daftar_spm'] = $this->munit->jum_spm_up_subagdm($th); 
+          //echo $this->db->last_query();      
+          $this->template->load('template','unit/list_spm_up_dm',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan list SPM yang akan dicek oleh Kabag Keuangan
+    */
+    function list_spm_up_kabag(){   
+        if($this->auth->is_logged_in() == true){ 
+        $th= date('y');      
+          $data['daftar_spm'] = $this->munit->spm_up_kabag($th);
+          $data['jum_daftar_spm'] = $this->munit->jum_spm_up_kabagkeu($th);       
+          $this->template->load('template','unit/list_spm_up_kabag',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan list SPM yang siap dibuatkan SP2D
+    */
+    function list_spm_up_sp2d(){   
+        if($this->auth->is_logged_in() == true){
+        $th= date('y');      
+          $data['daftar_spm'] = $this->munit->spm_up_sp2d($th); 
+          //$data['jum_daftar_spm'] = $this->munit->jum_spm_up_sp2d($th);      
+          $this->template->load('template','unit/list_spm_up_sp2d',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan form untuk melakukan cek syarat kelengkapan SPP
+    */
+    function veri(){
+            if($this->auth->is_logged_in() == true){ 
+            $th = $this->uri->segment(3);
+            $id = $this->uri->segment(4);
+            $success = $this->munit->cek_ada_veri($id,$th);
+            if($success){
+                $success2 = $this->munit->cek_ada_veri_komplit($id,$th);
+                if($success2){
+                   $this->session->set_userdata('msg_typ','err');
+                   $this->session->set_userdata('msg', 'Maaf SPM ini sudah dicek sebelumnya');
+                   redirect('unit/data_terceklist2/'.$th."/".$id); 
+                }else{
+                   $this->session->set_userdata('msg_typ','err');
+                   $this->session->set_userdata('msg', 'Maaf SPM ini sudah dicek sebelumnya');
+                   redirect('unit/data_terceklist/'.$th."/".$id);
+                }
+                        
+            }else {
+                $data['syarat'] = $this->munit->getSyaratList_up(); 
+                $data['daftar_spm'] = $this->munit->spm_up_pen4($id,$th);
+                $detail_spm = $this->munit->spm_up_pen4($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+                $this->template->load('template','unit/cek_kelengkapan', $data);
+            }
+            }
+        }
+    /**
+    * function untuk menyimpan syarat kelengkapan SPP
+    */ 
+    function simpan_kelengkapan(){
+            if($this->auth->is_logged_in() == true){ 
+            $id = $this->input->post('id_spm');
+            $th = $this->input->post('th_spm');
+                  
+            $this->munit->update_penyerah($id,$th); 
+            $this->munit->insert_detail_kel($id,$th); 
+            if(isset($_POST['tes'] )){   
+                $this->munit->update_detail_kel($id,$th);           
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>"; 
+            }else{                                             
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>"; 
+            }  
+        }
+    }
+    /**
+    * function untuk menampilkan data SPM yang telah dicek syarat kelengkapannya
+    */ 
+    function data_terceklist(){
+            if($this->auth->is_logged_in() == true){       
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $th = $this->uri->segment(3); 
+            $id = $this->uri->segment(4); 
+            $data['detail_daftar']=$this->munit->detail_daftar($id,$th); 
+            $detail_spm = $this->munit->detail_daftar($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['cek_umum']=$this->munit->ceklist_umum($id,$th); 
+            $data['setting']=$this->munit->select_setting();   
+            $this->template->load('template','unit/data_terceklist',$data);  
+        }}
+    function data_terceklist2(){
+            if($this->auth->is_logged_in() == true){       
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $th = $this->uri->segment(3); 
+            $id = $this->uri->segment(4); 
+            $data['detail_daftar']=$this->munit->detail_daftar($id,$th); 
+            $detail_spm = $this->munit->detail_daftar($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['cek_umum']=$this->munit->ceklist_umum($id,$th); 
+            $data['setting']=$this->munit->select_setting();   
+            $this->template->load('template','unit/data_terceklist2',$data);  
+        }}
+        /**
+    * function untuk menampilkan SPM yang kelengkapannya sudah dicek
+    */
+    function data_terceklist_unit(){
+            if($this->auth->is_logged_in() == true){       
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $th = $this->uri->segment(3); 
+            $id = $this->uri->segment(4); 
+            $data['detail_daftar']=$this->munit->detail_daftar($id,$th); 
+            $detail_spm = $this->munit->detail_daftar($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+            $data['cek_umum']=$this->munit->ceklist_umum($id,$th); 
+            $data['setting']=$this->munit->select_setting();   
+            $this->template->load('template','unit/data_terceklist_unit',$data);  
+        }
+    }
+    /**
+    * function untuk melakukan edit terhadap syarat kelengkapan SPP
+    */
+    function update_ceklist(){  
+            $id = $this->input->post('id_spm');  
+            if(isset($_POST['tes'] )){ 
+                $this->munit->update_kelengkapan($id);        
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>";  
+            }else{
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>";   
+            }    
+        }
+    /**
+    * function untuk kirim ulang hasil revisi kelengkepan oleh unit
+    */
+    function kirim_ulang_kepusat(){  
+            $th = $this->uri->segment(3); 
+            $id = $this->uri->segment(4);        
+            $this->munit->kirim_ulang_kepusat($id,$th);
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'SPM berhasil dikirim kembali ke Pusat');  
+            redirect(base_url());    
+        }
+     /**
+    * function untuk melakukan revisi SPM yang kelengkapannya kurang
+    */
+    function revisi_kelengkapan_penerima(){  
+            $th = $this->uri->segment(3); 
+            $id = $this->uri->segment(4);        
+            
+            //echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>"; 
+            $sudah = $this->munit->sudah_cek_kelengkapan($id,$th);
+            if($sudah){  
+                    $success = $this->munit->ada_flag_cek($id,$th); 
+                    if($success){
+                            $this->munit->revisi_spm_kelengkapan($id,$th);
+                            $this->session->set_userdata('msg_typ','ok');
+                            $this->session->set_userdata('msg', 'SPM berhasil dikembalikan ke unit');
+                            redirect('unit/list_spm_up_pen/');  
+                    }else{
+                            $this->session->set_userdata('msg_typ','err');
+                            $this->session->set_userdata('msg', 'kelengkapan sudah fix, tidak perlu direvisi');
+                            redirect('unit/list_spm_up_pen/');  
+                    }
+            }else{
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'SPM ini belum dicek kelengkapan-nya.. mohon dicek terlebih dahulu!!!');
+                    redirect('unit/veri/'.$th."/".$id); 
+            }
+        }
+    /**
+    * function untuk print formulir kelengkapan
+    */    
+    function print_bukti_penerimaan($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit'); 
+             $th = $this->uri->segment(3); 
+             $id = $this->uri->segment(4); 
+             $id_unit = $this->uri->segment(5);         
+             $data['tgl'] = date('Y-m-d');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='bukti_penerimaan_tup_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf' ;
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+            
+            
+             $this->munit->update_print_kelengkapan_spm($id,$th);
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i:s");
+             $data['tgl'] = $tgl_skrg;
+             $data['jam'] = $jam_skrg;
+             $data['detail_daftar']=$this->munit->detail_daftar($id,$th); 
+             $detail_spm = $this->munit->detail_daftar($id,$th);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor); 
+             $data['cek_umum']=$this->munit->ceklist_umum($id,$th); 
+             $data['setting']=$this->munit->select_setting();       
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('unit/bukti_penerimaan', $data,  true);     
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk melakukan revisi SPM yang kelengkapannya kurang
+    */ 
+    function revisi_spm_pen(){
+            if($this->auth->is_logged_in() == true){ 
+             $id_spm = $this->uri->segment(3);  
+                  
+            $this->munit->spm_revisi_keunit($id_spm);    
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>";  
+        }
+    }
+    /**
+    * function untuk menyetujui syarat kelengkapan oleh petugas penerima pusat
+    */
+    function setuju_spm_pen(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $sudah = $this->munit->sudah_cek_kelengkapan($id_spm,$th_spm);
+            if($sudah){
+                 $print_kel = $this->munit->cek_print_kel_spm($id_spm,$th_spm);
+                 if($print_kel>0){
+                     $this->session->set_userdata('msg_typ','err');
+                        $this->session->set_userdata('msg', 'Mohon Print Formulir Kelengkapan untuk SPM ini terlebih dahulu!');
+                        redirect('unit/list_spm_up_pen');
+
+                    }else{
+                        $success = $this->munit->ada_flag_cek($id_spm,$th_spm);  
+                    if($success){
+                            $this->session->set_userdata('msg_typ','err');
+                            $this->session->set_userdata('msg', 'Masih ada Kelengkapan yang belum terpenuhi');
+                            redirect('unit/list_spm_up_pen');
+                    }else{
+                            $this->munit->setuju_bak($id_spm,$th_spm);
+                            $trans = $this->munit->selek_spm_trans($th_spm,$id_spm);
+                            foreach($trans->result_array() as $row){
+                                    $id_trans = $row['id_transaksi'];
+                                    $id_rekap = $row['id_rekap'];
+                                    $this->munit->trans_stat_veri_blu($id_trans,$th_spm);
+                                    $this->munit->rekap_stat_veri_blu($id_rekap,$th_spm);
+                                    
+                                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_spm);
+                                    foreach($get_id->result_array() as $row){
+                                    $level = $row['level'];  
+                                    }
+                                    $level_terkini =  $level+1;           
+                                    $this->munit->masuk_waktu_dicek_petugas_penerima($id_trans,$level_terkini,$th_spm);
+                            }
+                            echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_pen'>";  
+                    }
+                        
+                    }    
+            }else{
+                  $this->session->set_userdata('msg_typ','err');
+                  $this->session->set_userdata('msg', 'SPM ini belum dicek kelengkapan-nya.. mohon dicek terlebih dahulu!');
+                  redirect('unit/veri/'.$th_spm."/".$id_spm);   
+            }
+         }
+    }
+    /**
+    * function untuk melakukan otorisasi SPM oleh verifikator pusat
+    */
+    function setuju_spm_veri(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $this->munit->setuju_veri($id_spm,$th_spm);
+            $trans = $this->munit->selek_spm_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_trans = $row['id_transaksi'];
+                    $id_rekap = $row['id_rekap'];
+                    $this->munit->trans_stat_subag_dm($id_trans,$th_spm);
+                    $this->munit->rekap_stat_subag_dm($id_rekap,$th_spm);
+                    
+                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->munit->masuk_waktu_otorisasi_verifikator_pusat($id_trans,$level_terkini,$th_spm);
+            }        
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_veri'>";  
+        }
+    }
+    /**
+    * function untuk melakukan otorisasi SPM oleh kasubag dana masyarakat
+    */
+    function setuju_spm_dm(){
+            if($this->auth->is_logged_in() == true){ 
+             $th_spm = $this->uri->segment(3);     
+             $id_spm = $this->uri->segment(4);     
+            $this->munit->setuju_dm($id_spm,$th_spm);
+            $trans = $this->munit->selek_spm_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_trans = $row['id_transaksi'];
+                    $id_rekap = $row['id_rekap'];
+                    $this->munit->trans_stat_kabag_keu($id_trans,$th_spm);
+                    $this->munit->rekap_stat_kabag_keu($id_rekap,$th_spm);
+                    
+                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->munit->masuk_waktu_otorisasi_subag_dm($id_trans,$level_terkini,$th_spm);
+            }                         
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_dm'>";  
+        }
+    }
+    /**
+    * function untuk melakukan otorisasi SPM kabag keuangan
+    */
+    function setuju_spm_kabag(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);    
+            $id_spm = $this->uri->segment(4);    
+            $this->munit->setuju_kabag($id_spm,$th_spm);
+            $trans = $this->munit->selek_spm_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_trans = $row['id_transaksi'];
+                    $id_rekap = $row['id_rekap'];
+                    $this->munit->trans_stat_ppsp2d($id_trans,$th_spm);
+                    $this->munit->rekap_stat_ppsp2d($id_rekap,$th_spm);
+                    
+                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->munit->masuk_waktu_otorisasi_kabag_keu($id_trans,$level_terkini,$th_spm);
+            }                        
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_kabag'>";  
+        }
+    }
+    /**
+    * function untuk melakukan otorisasi SPM oleh petugas penerbit sp2d
+    */
+    function setuju_spm_sp2d(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $this->munit->otorisasi_pr2($th_spm,$id_spm);
+            $trans = $this->munit->selek_spm_trans($th_spm,$id_spm);
+            foreach($trans->result_array() as $row){
+                    $id_trans = $row['id_transaksi'];
+                    $id_rekap = $row['id_rekap'];
+                    $this->munit->trans_stat_pr2($id_trans,$th_spm);
+                    $this->munit->rekap_stat_pr2($id_rekap,$th_spm);
+                    
+                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->munit->masuk_waktu_otorisasi_pr2($id_trans,$level_terkini,$th_spm);
+            }                          
+            echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_spm_up_sp2d'>";  
+        }
+    }
+    /**
+    * function untuk membuat SP2D
+    */
+    function buat_sp2d(){
+            if($this->auth->is_logged_in() == true){
+            $th_spm = $this->uri->segment(3); 
+            $id_spm = $this->uri->segment(4); 
+            $success = $this->munit->cek_adasp2d($th_spm,$id_spm);
+            if($success){
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf SPM ini sudah dibuatkan SP2D');
+                redirect('unit/list_spm_up_sp2d/');
+            }else{     
+                $trans = $this->munit->selek_spm_trans($th_spm,$id_spm);
+                $this->munit->buat_sp2d($id_spm,$trans,$th_spm);
+                $this->munit->setuju_sp2d($id_spm,$th_spm);
+                
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'SP2D Berhasil Dibuat');
+                redirect('unit/preview_sp2d/'.$th_spm."/".$id_spm); 
+           }
+        }
+    }
+    /**
+    * function untuk menmapilkan preview SP2D
+    */
+    function preview_sp2d(){
+            if($this->auth->is_logged_in() == true){
+            $th_spm = $this->uri->segment(3); 
+            $id_spm = $this->uri->segment(4); 
+            //$success = $this->munit->cek_adasp2d($th_spm,$id_spm); 
+            //if($success){
+                $data['tahun'] = date('Y');
+                $detail_spm = $this->munit->detail_sp2d($id_spm);
+                $data['setting'] = $this->munit->select_setting();
+                $data['detail_spm'] = $this->munit->detail_sp2d($id_spm);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor);
+                $this->template->load('template','unit/preview_sp2d',$data);
+            /*}else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf SPM ini belum dibuatkan SP2D');
+                redirect('unit/list_spm_up_sp2d');
+           //}*/
+        }
+    }
+    function preview_sp2d_tanpa_unduh(){
+            if($this->auth->is_logged_in() == true){
+            $th_spm = $this->uri->segment(3); 
+            $id_spm = $this->uri->segment(4); 
+            //$success = $this->munit->cek_adasp2d($th_spm,$id_spm); 
+            //if($success){
+                $data['tahun'] = date('Y');
+                $detail_spm = $this->munit->detail_sp2d($id_spm);
+                $data['setting'] = $this->munit->select_setting();
+                $data['detail_spm'] = $this->munit->detail_sp2d($id_spm);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor);
+                $this->template->load('template','unit/preview_sp2d_tanpa_unduh',$data);
+            /*}else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf SPM ini belum dibuatkan SP2D');
+                redirect('unit/list_spm_up_sp2d');
+           //}*/
+        }
+    }
+    /**
+    * function untuk print sp2d
+    */
+    function print_sp2d($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){   
+             $th_spm = $this->uri->segment(3); 
+             $id_spm = $this->uri->segment(4);   
+             $data['tahun'] = date('Y');
+                $detail_spm = $this->munit->detail_sp2d($id_spm);
+                $data['setting'] = $this->munit->select_setting();
+                $data['detail_spm'] = $this->munit->detail_sp2d($id_spm);
+                foreach($detail_spm->result_array() as $row)
+                    {                  
+                    $nomor=$row['no_spm']; 
+                    $tahun=$row['th_spm']; 
+                    $kode_digit=$row['kode_digit']; 
+                    $singkat=$row['singkat']; 
+                    $jumlah=$row['jumlah']; 
+                    $id_sp2d=$row['id_sp2d']; 
+                    }
+                  $data['th'] = '20'.$tahun;
+                  $data['singkat'] = $singkat;
+                  $data['kode_digit'] = $kode_digit;
+                  $data['nomor'] = sprintf("%04d", $nomor);   
+                
+             $id_unit = $this->uri->segment(5);        
+             $data['tgl'] = date('Y-m-d');
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='sp2d_up_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_sp2d/true/','Download Pdf');
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('unit/print_sp2d', $data,  true);     
+            
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+    /**
+    * function untuk menampilkan detail SPM
+    */
+    function detail_spm(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_spm = $this->uri->segment(3);  
+            $id_spm = $this->uri->segment(4);  
+            $data['detail_spm'] = $this->munit->detail_spm2($id_spm,$th_spm);
+            //echo $this->db->last_query(); 
+            $this->template->load('template','unit/detail_spm',$data);  
+        }
+    }
+    function detail_rincian(){
+            if($this->auth->is_logged_in() == true){ 
+            $th_rekap = $this->uri->segment(3);  
+            $id_rekap = $this->uri->segment(4);  
+            $data['detail_spm'] = $this->munit->detail_rincian_pusat2($id_rekap,$th_rekap);
+            //echo $this->db->last_query(); 
+            $this->template->load('template','unit/detail_rincian',$data);  
+        }
+    }
+    /**
+    * function untuk menampilkan list SP2D
+    */
+    function list_sp2d_up(){   
+        if($this->auth->is_logged_in() == true){
+        $th = date('y');       
+          $data['daftar_sp2d'] = $this->munit->list_sp2d($th);  
+          $this->template->load('template','unit/list_sp2d_bp',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan form isian pembuatan Bilyet Giro
+    */
+    function buat_bg(){   
+        if($this->auth->is_logged_in() == true){
+          $th_sp2d = $this->uri->segment(3);       
+          $id_sp2d = $this->uri->segment(4);       
+          $data['daftar_sp2d'] = $this->munit->list_sp2d2($id_sp2d,$th_sp2d);
+          $data['nomor_bg'] = $this->munit->ambil_nomor_bg($th_sp2d); 
+          //echo $this->db->last_query();   
+          $this->template->load('template','unit/pengisian_bg',$data);
+        }
+    }
+    /**
+    * function untuk menyimpan nomor BG
+    */
+   function simpan_bg(){   
+        if($this->auth->is_logged_in() == true){
+          $id_sp2d = $this->input->post('id_sp2d');       
+          $th_sp2d = $this->input->post('th_sp2d');       
+          $id_spm = $this->input->post('id_spm');       
+          $nomor_bg = $this->input->post('nomor_bg'); 
+          $id_bg = $this->input->post('id_bg');        
+          $id_unit = $this->input->post('id_unit');        
+          $tot_rincian = $this->munit->data_dwh($id_spm,$th_sp2d); 
+          //echo $this->db->last_query();
+          foreach($tot_rincian->result_array() as $jmlh)
+                 {  
+                     $tot_jumlah = $jmlh ['sum(jumlah)'];
+                     //print_r($tot_jumlah);  
+                     $dwh = $this->munit->ambil_dwh($id_unit,$th_sp2d); 
+                     if($dwh==1){
+                            $jum_dwh = $this->munit->ambil_data_dwh($id_unit,$th_sp2d);
+                            foreach($jum_dwh->result_array() as $tes){
+                            $jumlah_up = $tes['jum_up_dibayar']; 
+                            $total=$jumlah_up+$tot_jumlah;   
+                            $this->munit->update_dwh_dibayar($total,$id_unit,$th_sp2d);
+                            //echo $this->db->last_query();
+                            }
+                     }else{
+                            $total =0+$tot_jumlah;
+                            $this->munit->masuk_dwh($total,$id_unit,$th_sp2d);
+                     }      
+                 }; 
+          
+          $success = $this->munit->cek_adabg($nomor_bg);
+          if($success){
+              $this->munit->buat_bg_sp2d($id_sp2d,$id_bg,$th_sp2d);
+              $this->munit->update_bg($id_bg,$th_sp2d);
+              $this->munit->buat_bg($id_spm,$th_sp2d);
+              $trans = $this->munit->selek_spm_trans($th_sp2d,$id_spm);
+                foreach($trans->result_array() as $row){
+                    $id_trans = $row['id_transaksi'];
+                    $id_rekap = $row['id_rekap'];
+                    $this->munit->trans_stat_telah_bg($id_trans,$th_sp2d);
+                    $this->munit->rekap_stat_telah_bg($id_rekap,$th_sp2d);
+                    
+                    $get_id = $this->munit->ambil_level_tertinggi($id_trans,$th_sp2d);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->munit->masuk_waktu_dibuatkan_bg($id_trans,$level_terkini,$th_sp2d);
+                    
+                } 
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."unit/list_sp2d_up'>";
+          }else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Maaf Nomor BG ini sudah dipakai untuk membayar SP2D yang sebelumnya..');
+                redirect('unit/buat_bg/'.$id_sp2d);   
+          } 
+          }
+    }                                
+    /**
+    * function untuk menampilkan preview Bilyet Giro
+    */
+    function preview_bg(){   
+        if($this->auth->is_logged_in() == true){
+          $th_sp2d = $this->uri->segment(3);       
+          $id_sp2d = $this->uri->segment(4);       
+          $data['daftar_sp2d'] = $this->munit->list_sp2d3($id_sp2d,$th_sp2d); 
+          $this->template->load('template','unit/preview_bg',$data);
+        }
+    }
+    /**
+    * function untuk meload history dari transkasi
+    */
+    function history(){   
+        if($this->auth->is_logged_in() == true){
+          $th_transaksi = $this->uri->segment(3);       
+          $id_transaksi = $this->uri->segment(4);       
+          $data['history'] = $this->munit->history($id_transaksi,$th_transaksi);
+          $this->template->load('template','unit/history',$data);
+        }
+    }
+    /**
+    * function untuk menampilkan facebox history
+    */
+    function facebox_history(){            
+          $this->load->view('unit/divinkom');   
+    }
+	/**
+    * function untuk menampilkan notification
+    */
+	function countUp(){
+        if($this->auth->is_logged_in() == true){
+            $arr=array();
+            $id_subunit = $this->session->userdata('id_subunit');
+            $data['hitung'] = $this->munit->jumlahUp($id_subunit);
+            /*foreach($data['hitung']->result() as $row){
+            $arr[] = $row->hasil;
+            echo "[".$arr[0]."]";
+            }*/
+            echo $data['hitung'];
+        }
+    }
+    function input_maks(){
+        if($this->auth->is_logged_in() == true){
+            $id_unit = $this->session->userdata('id_unit');
+            $data['subunit'] = $this->munit->getUnitListawe($id_unit);
+            $maks = $this->munit->cari_jumlah($id_unit); 
+            //echo $this->db->last_query();
+            $maks34=array();
+            foreach($maks as $uraian2){
+                //$maks34=array_merge($maks34,array($uraian2->id_subunit.$uraian2->pagu_real=> $uraian2->nilai_max));
+                $maks34[$uraian2->id_subunit] = $uraian2->nilai_max;
+            } 
+            //print_r($maks34);      
+            $data['spp2']=$maks34;    
+            
+            $tes = $this->munit->cari_pagu_real($id_unit); 
+            //echo $this->db->last_query();
+            $makstes=array();
+            foreach($tes as $uraian){
+                //$maks34=array_merge($maks34,array($uraian2->id_subunit.$uraian2->pagu_real=> $uraian2->nilai_max));
+                $makstes[$uraian->id_subunit] = $uraian->pagu_real;
+            } 
+            //print_r($makstes);      
+            $data['spp3_1']=$makstes;
+             
+            $this->template->load('template','unit/input_maks',$data);
+        }
+    }
+    function tambah_maks(){
+        if($this->auth->is_logged_in() == true){
+            $id_subunit = $this->uri->segment(3);    
+            $data['subunit'] = $this->munit->detailgetSubUnitList($id_subunit);         
+            $data['maks_up'] = $this->munit->banyak_mp_max($id_subunit);         
+            $this->template->load('template','unit/tambah_maks',$data);
+        }
+    }
+    function edit_maks(){
+        if($this->auth->is_logged_in() == true){
+            $id_subunit = $this->uri->segment(3);         
+            $data['detail_maks'] = $this->munit->cari_jumlah_sesuai_subunit($id_subunit);         
+            $this->template->load('template','unit/edit_maks',$data);
+        }
+    }
+    function simpan_maks(){
+        if($this->auth->is_logged_in() == true){
+            $max_up = $this->input->post('maksimum');   
+            $this->munit->simpan_maks($max_up); 
+            //$id_subunit = $this->session->userdata('id_subunit');  
+            redirect('unit/input_maks'); 
+        }
+    }
+    function update_maks(){
+        if($this->auth->is_logged_in() == true){
+            $max_up = $this->input->post('maksimum');   
+            $subunit = $this->input->post('id_subunit');   
+            $this->munit->update_dummy_max($max_up,$subunit); 
+            //$id_subunit = $this->session->userdata('id_subunit');  
+            redirect('unit/input_maks'); 
+        }
+    }
+    function preview_maks_up(){
+		if($this->auth->is_logged_in() == true){
+            $max_up = $this->input->post('maksimum');   
+            $this->munit->simpan_maks($max_up); 
+			//$id_subunit = $this->session->userdata('id_subunit');  
+			$this->template->load('template','unit/index');
+		}
+	}
+   function preview_mp(){
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $id_subunit = $this->session->userdata('id_subunit');
+               
+             
+            $success = $this->munit->cek_ada_mp($id_subunit);
+            if($success){
+                $data['cek_mp'] = 1;
+            }else{
+                $data['cek_mp'] = 2;
+            } 
+            
+            
+            $data['fakultas'] = $this->munit->detail_subunit($id_subunit); 
+            $data['alokasi_real'] = $this->munit->pagu_real($id_subunit);
+            //print_r( $data['alokasi_real']) ;
+            $data['dipa'] = $this->munit->dipa(); 
+            $data['pengeluaran'] = $this->munit->mp_pengeluaran($kode_subunit);
+            
+            $jum_up = $this->munit->spp_up_mp($id_subunit);
+            foreach($jum_up->result_array() as $tot_up)
+                             {  
+                                $tot_up2 = $tot_up ['sum(jumlah)'];
+                             }
+            $data['jum_up_terbayar'] =  $tot_up2;
+            
+            $jum_tup = $this->munit->spp_tup_mp($id_subunit);
+            foreach($jum_up->result_array() as $tot_tup)
+                             {  
+                                $tot_tup2 = $tot_tup ['sum(jumlah)'];
+                             }
+            $data['jum_tup_terbayar'] =  $tot_tup2;
+            
+            $jum_gu = $this->munit->spp_gu_mp($id_subunit);
+            foreach($jum_gu->result_array() as $tot_gu)
+                             {  
+                                $tot_gu2 = $tot_gu ['sum(nominal)'];
+                             }
+            $data['jum_gup_terbayar'] =  $tot_gu2;
+            
+            $jum_ls = $this->munit->spp_ls_mp($id_subunit);
+            foreach($jum_ls->result_array() as $tot_ls)
+                             {  
+                                $tot_ls2 = $tot_ls ['sum(nominal)'];
+                             }
+            $data['jum_ls_terbayar'] =  $tot_ls2;
+            
+            $jum_up_kini = $this->munit->spp_up_mp_kini($id_subunit);
+            foreach($jum_up_kini->result_array() as $tot_up_kini)
+                             {  
+                                $tot_up_kini2 = $tot_up_kini ['sum(jumlah)'];
+                             }
+            $data['tot_up_kini'] =  $tot_up_kini2;
+            
+            $this->template->load('template','unit/preview_mp_subunit',$data);    
+   }
+   function simpan_mp(){
+        if($this->auth->is_logged_in() == true){      
+            $this->munit->simpan_mp(); 
+            //echo $this->db->last_query(); 
+            //$id_subunit = $this->session->userdata('id_subunit'); 
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'MP berhasil di simpan');  
+            redirect('unit/preview_mp'); 
+        }
+    }
+    function preview_mp_unit(){
+            //$kode_subunit = $this->session->userdata('kode_subunit');
+            $id_unit = $this->session->userdata('id_unit');
+            $kode_unit = $this->session->userdata('kode_unit');     
+            
+            $bulan = date('m');
+            $data['daftar_unit'] = $this->munit->getUnitList($id_unit);
+            $jumlah_gu=array();
+            foreach ($data['daftar_unit'] as $tgu){
+             $jumlah_gu[]= $this->munit->ada_di_mp($tgu['id_subunit'],$bulan);  
+             }
+             $data['jumgu']= $jumlah_gu;
+            
+            $data['fakultas'] = $this->munit->nama_fakultas($kode_unit); 
+             $data['dipa'] = $this->munit->dipa();
+            $jum_mp_subunit = $this->munit->mp_unit($id_unit);
+            foreach($jum_mp_subunit->result_array() as $row)
+                             {  
+                                $pagu_pengeluaran = $row ['sum(pagu_pengeluaran)'];
+                                $alokasi_pnbp= $row ['sum(alokasi_pnbp)'];
+                                $tmb_alokasi_pnbp= $row ['sum(tmb_alokasi_pnbp)'];
+                                $spp_up= $row ['sum(spp_up)'];
+                                $spp_tup= $row ['sum(spp_tup)'];
+                                $spp_gu= $row ['sum(spp_gu)'];
+                                $spp_ls= $row ['sum(spp_ls)'];
+                                $spp_ini= $row ['sum(spp_ini)'];
+                             }
+            $data['pagu_pengeluaran'] =  $pagu_pengeluaran;
+            $data['alokasi_pnbp'] =  $alokasi_pnbp;
+            $data['tmb_alokasi_pnbp'] =  $tmb_alokasi_pnbp;
+            $data['spp_up'] =  $spp_up;
+            $data['spp_tup'] =  $spp_tup;
+            $data['spp_gu'] =  $spp_gu;
+            $data['spp_ls'] =  $spp_ls;
+            $data['spp_ini'] =  $spp_ini;
+            
+            $spp_up_mp_kini_unit = $this->munit->spp_up_mp_kini_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_up_mp_kini_unit->result_array() as $row2)
+                             {  
+                                $up_kini = $row2 ['sum(jumlah)']; 
+                             }
+            $data['up_kini'] =  $up_kini;
+            
+            $spp_tup_mp_kini_unit = $this->munit->spp_tup_mp_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_tup_mp_kini_unit->result_array() as $row3)
+                             {  
+                                $tup_kini = $row3 ['sum(jumlah)']; 
+                             }
+            $data['tup_kini'] =  $tup_kini;
+            
+            $spp_gu_mp_kini_unit = $this->munit->spp_gu_mp_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_gu_mp_kini_unit->result_array() as $row4)
+                             {  
+                                $gu_kini = $row4 ['sum(nominal)']; 
+                             }
+            $data['gu_kini'] =  $gu_kini;
+            
+            $spp_ls_mp_kini_unit = $this->munit->spp_ls_mp_unit($id_unit);
+            //echo $this->db->last_query();
+            foreach($spp_ls_mp_kini_unit->result_array() as $row5)
+                             {  
+                                $ls_kini = $row5 ['sum(nominal)']; 
+                             }
+            $data['ls_kini'] =  $ls_kini;
+            
+            
+            $this->template->load('template','unit/preview_mp_unit',$data);    
+   }
+   function print_surat_pernyataan_unit($download_pdf = ''){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit'); 
+             $th_spm = $this->uri->segment(3);
+             $id_spm = $this->uri->segment(4); 
+             $id_unit = $this->session->userdata('id_unit');  
+              $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $ret = ''; 
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf'; 
+             $pdf_filename='surat_pernyataan_tup_u-'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf'; 
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'tup/print_surat_pernyataan_up/true/','Download Pdf');
+            
+             $this->munit->spm_update_print_sper($id_spm,$th_spm); 
+             $data['unit'] = $this->munit->detail_unit(); 
+             $data['link'] = $link_download ;    
+             $output = $this->load->view('tup/print_surat_pernyataan_unit', $data,  true);  
+            
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+             }
+    }
+}
+}
+?>

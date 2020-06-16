@@ -1,0 +1,100 @@
+<script type="text/javascript">
+$(function() {
+	load_detail();
+})
+function load_detail(){	
+            id_numbers = new Array();
+            var usulan = $("#usulan").val();
+            if(usulan != ''){
+              var jeniskw = $("#usulan").val();
+                $.ajax({
+                    url:"<?php echo site_url('usulan/get_usulan_terotorisasi')?>",
+                    type:"POST",
+                    data: { jns_usulan: usulan},
+                    success:function(msg){
+                       	$('#tampil').html(msg);	
+                    }
+                });
+            }
+		} 
+function otorisasi(tahun,id)
+{   
+    if(!confirm("Yakinkan semua kelengkapan dokumen telah diterima, Lanjutkan??")){
+      return false;  
+    }
+    
+    $.blockUI({
+        message: 'Proses sedang berlangsung, mohon ditunggu ...',
+        css: window._css,
+        overlayCSS: window._ovcss					
+	});
+
+    $.ajax({
+      type: "POST",
+      url : "<?php echo base_url()."usulan/cek_dokumen";?>",
+      data: { id: id, tahun: tahun },
+      success : function(data) {
+					try {
+						var json = $.parseJSON(data);
+						
+						$.blockUI({
+							message: json.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss									
+						});
+                        
+                        if(json.errno == 0){
+                            load_detail();
+						}
+                       						
+					} catch(e) {
+						//log error, misal format json salah
+						console.log('System error : "' + e + '"');						
+						$.blockUI({
+							message: 'Terjadi kesalahan sistem, mohon hubungi administrator.',
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});	
+					} finally {
+						
+					}
+				}
+                       
+      
+    });
+    
+}		   
+</script>
+<article class="module width_3,5_quarter">
+        <header><h3 class="tabs_involved">Daftar UP <?php echo"$nama_unit";?></h3>
+        </header>
+
+        <div class="modul_content">
+             <table style="padding-left: 20px;">   
+    			<tr>
+    				<td align='right'>Jenis Usulan</td>
+    				<td >:</td>
+    				<td>
+    					<select name="usulan" id="usulan">
+    						<?php
+    							foreach($sifat_bayar as $sb){
+    								echo "<option value='{$sb->kode_value}'>{$sb->nama_value}</option>";
+    							}
+    						?>
+    					</select>
+    				</td>
+    				<td><input type='button' id='pilih_sb' value='Set' onclick="load_detail()"/></td>
+    			</tr>	
+              </table>
+              <div id="tampil"></div>
+        </div><!-- end of .tab_container --> 
+        <footer>         
+            <div class="submit_link">  
+                <input type="button" value="Kembali" onclick= self.history.back() /> 
+            </div>
+        </footer>
+</article><!-- end of content manager article -->
+   
+

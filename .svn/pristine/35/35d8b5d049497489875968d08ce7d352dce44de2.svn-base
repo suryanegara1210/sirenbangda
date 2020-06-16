@@ -1,0 +1,37 @@
+<?php
+
+/**
+* 
+*/
+class M_status extends CI_Model
+{
+	
+	public function __construct()
+	{
+		parent::__construct();
+	}
+
+	function get_list_status($status) 
+	{
+		switch($status) {
+
+			case 'kwitansi':
+				$sql = "
+						SELECT id_status_kwitansi as kode_value, status_kwitansi as nama_value
+						FROM m_status_kwitansi
+					";
+				break;	
+		}
+
+		$query = $this->db->query($sql);
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->result();
+			}
+		}
+
+		return array();
+	}
+}
+?>

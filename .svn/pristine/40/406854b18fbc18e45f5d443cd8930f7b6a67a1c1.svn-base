@@ -1,0 +1,174 @@
+ <script language="javascript">
+  function validasi(form){
+  
+  if (form.status.value == "setuju_verifikasi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  }
+  if (form.status.value == "terotorisasi_kaprodi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  } 
+  return (true);
+}
+</script>
+ 
+<article class="module width_full">
+<header><h3>List UP (Uang Persediaan)</h3></header> 
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' onSubmit='return validasi(this)' action="<?php echo base_url();?>unit/kirim_revisi" > 
+    <?php $tot_pagu_rkakl = number_format($jum_tot_rkakl,0,",",".");  
+    $tot_up2 = number_format($tot_up,0,",",".");
+    $ju_up = number_format($jum_up,0,",",".");  
+    $sisa_up = number_format($selisih,0,",",".");  
+    ?>
+ </table>      
+</div>
+<table class="table-list" style="margin-left: 20px;">
+  <tr >
+    <th width='200px'>TOTAL PAGU POKOK</th>
+    <td>Rp.</td>
+    <td align="right"><?php echo "$tot_pagu_rkakl";?></td>
+  </tr>
+  <tr >
+    <th width='100px'>TOTAL PAGU REALISASI</th>
+    <td>Rp.</td>
+    <td align="right"><?php echo number_format($tot_pagu_realisasi,0,",",".");?></td>
+  </tr>
+  <tr >
+    <th width='100px'>MAKSIMUM UP</th>
+    <td>Rp.</td>
+    <td align="right"><?php echo number_format($maksimum_up,0,",",".");?></td>
+  </tr>
+  <tr >
+    <th width='100px'>UP YANG DIUSULKAN</th>
+    <td>Rp.</td>
+    <td align="right"><?php echo "$ju_up";?></td>
+  </tr>
+  <tr >
+    <th>SISA PAGU UP</th>
+    <td>Rp</td>
+    <td align="right"><?php echo number_format(($maksimum_up-$jum_up),0,",",".");?></td>
+  </tr>
+  <tr >
+    <th>SISA PAGU REALISASI</th>
+    <td>Rp</td>
+    <td align="right"><?php echo number_format(($tot_pagu_realisasi-$jum_up),0,",",".");?></td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<table>
+<tr><td></td></tr>  
+</table>
+
+<table style="margin-left: 20px;"><tr><td> Daftar Rincian UP</td></tr></table>
+<div id="sub-content">
+<table  class="table-common" style="margin-left: 20px; width: 880px;" >  
+             <thead> 
+            <tr >
+                <th>No </th>
+                <th>Kode Output /<br> Kode Komponen / Kode Akun</th>
+                <th>Output / Komponen / Akun</th>
+                <th>Jumlah</th>
+                <th>Status</th>  
+                <th colspan="3">Aksi</th>  
+                
+            </tr>
+            </thead>
+            
+            <?php $no = 1;
+            foreach($list_up_mak->result_array() as $row)
+            {  
+            $id=$row['id_transaksi'];
+            $id_rekap=$row['id_rekap'];
+            $id_uraian=$row['id_uraian'];
+            $kdoutput=$row['kdoutput'];
+            $nmoutput=$row['nmoutput'];
+            $kdkomponen=$row['kdkomponen'];
+            $nmkomponen=$row['nmkomponen'];
+            $kdakun=$row['kdakun'];
+            $nmakun=$row['nmakun'];
+            $nmakun=$row['nmakun'];
+            $nmheader=$row['nmheader'];
+            $status=$row['status_transaksi'];   
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",",".");   
+            ?>     
+               <tr>
+                <td> <?php echo "$no";?> </td>
+                <td align='left'> <?php echo "$kdoutput";?> </td>
+                <td><?php echo "$nmoutput";?></td> 
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td align='left'><?php echo "$kdoutput.$kdkomponen";?></td>
+                <td><?php echo "$nmkomponen";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td align='left'><?php echo "$kdoutput.$kdkomponen.$kdakun";?></td>
+                <td><?php echo "$nmakun";?></td>
+                <td>&nbsp;</td> 
+                <td>&nbsp;</td> 
+                <td>&nbsp;</td> 
+                <td>&nbsp;</td> 
+                <td>&nbsp;</td> 
+              </tr>
+              <?php if ($status == 'revisi_verifikator_unit') {?>
+              <tr>
+                <td>&nbsp;</td>
+                <td align='left'>Header</td>
+                <td><?php echo "$nmheader";?></td>
+                <td align="right"><?php echo "$jumlah";?></td>
+                <td align="center"> <?php echo "$status";?></td>
+                <td align="center"><a href='<?php echo base_url();?>unit/edit_rincian_up/<?php echo "$id_uraian";?>/' title='Edit Rincian UP'> <img src='<?php echo base_url();?>asset/images/edit-icon.gif'></a></td> 
+                <td align="center"><a href='<?php echo base_url();?>unit/kirim_ulang_up/<?php echo "$id";?>/<?php echo "$id_rekap";?>' title='Kirim Kembali Ke unit' onclick="return confirm('Apakah anda yakin ingin mengirim kembali Rincian UP ini ke Unit?')"> <img src='<?php echo base_url();?>asset/images/pict-ok.png'></a></td> 
+                <td align="center"><a href='<?php echo base_url();?>unit/history/<?php echo "$id";?>' title='History'> <img src='<?php echo base_url();?>asset/images/icn_categories.png'></a></td> 
+            
+              </tr>
+              <?php }else{ ?>
+                <tr>
+                <td>&nbsp;</td>
+                <td align='left'>Header</td>
+                <td><?php echo "$nmheader";?></td>
+                <td align="right"><?php echo "$jumlah";?></td>
+                <td align="center"> <?php echo "$status";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td align="center"><a href='<?php echo base_url();?>unit/history/<?php echo "$id";?>' title='History'> <img src='<?php echo base_url();?>asset/images/icn_categories.png'></a></td> 
+            
+              </tr>
+              <?php }?>
+              <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+            <?php $no++ ;}?> 
+</table> 
+<div><div> 
+<br><br><br>
+            <footer>     
+                <div class="submit_link">      
+                     <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>  
+<article>     

@@ -1,0 +1,29 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-08-26 12:45:36 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 23
+ERROR - 2013-08-26 12:46:54 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 23
+ERROR - 2013-08-26 12:48:04 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 24
+ERROR - 2013-08-26 12:53:47 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:53:47 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:53:47 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 32
+ERROR - 2013-08-26 12:56:22 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:56:22 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:56:22 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 32
+ERROR - 2013-08-26 12:56:44 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:56:44 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:56:44 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 32
+ERROR - 2013-08-26 12:57:14 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:57:14 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 12
+ERROR - 2013-08-26 12:57:14 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 32
+ERROR - 2013-08-26 12:58:33 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 32
+ERROR - 2013-08-26 12:59:28 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 32
+ERROR - 2013-08-26 13:23:14 --> 404 Page Not Found --> usulan/daftar_usulan
+ERROR - 2013-08-26 13:23:20 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 319
+ERROR - 2013-08-26 13:23:20 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 326
+ERROR - 2013-08-26 13:23:30 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 319
+ERROR - 2013-08-26 13:23:30 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 326
+ERROR - 2013-08-26 13:24:11 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 325
+ERROR - 2013-08-26 13:26:56 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 325
+ERROR - 2013-08-26 13:27:45 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 325
+ERROR - 2013-08-26 17:27:02 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 325
+ERROR - 2013-08-26 18:50:52 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 325

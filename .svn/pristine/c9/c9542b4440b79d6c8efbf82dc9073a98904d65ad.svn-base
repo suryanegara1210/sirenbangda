@@ -1,0 +1,43 @@
+	<style type="text/css">
+		.table-inner {
+			border-collapse: separate;
+			border-spacing: 1px;
+			border: none;
+		}
+	</style>
+
+	<?php if($lists !== FALSE) { ?>
+		<table  class='table-common table-inner' style='margin: 0px; width: 100%; ' >
+			<thead>
+				<tr>
+					<th width='25px'>No</th>
+					<th >Uraian</th>
+					<th width='40px'>Vol</th>
+					<th width='60px'>Sat</th>
+					<th width='100px'>Harga Sat</th>
+					<th width='100px'>Jumlah</th>
+					<th width='100px'>Jumlah Old</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				foreach($lists as $i=>$row) {
+					$i++;
+					echo "
+					<tr>
+						<td align='center'>{$i}</td>
+						<td align='left' title='{$row->uraian}'> " .
+						StrUtil::getShortStr($row->uraian,40) . "</td>
+						<td align='center'>{$row->vol}</td>
+						<td align='center'>{$row->sat}</td>
+						<td align='right'>" . Formatting::currency($row->hargasat,0,false) . "</td>
+						<td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>
+						<td align='right'>" . Formatting::currency($row->jumlah_old,0,false) . "</td>
+					</tr>";
+				}
+				?>
+			</tbody>
+		</table>
+	<?php } else { ?>
+	<center>uraian tidak ada</center>
+	<?php } ?>

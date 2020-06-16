@@ -1,0 +1,14 @@
+<script type="text/javascript">
+$(function () {
+	$("#btnPrintRincianHonor").click(function() {
+
+		window.print_doc('kwitansi/preview/247');
+	});	
+})
+</script>
+
+<div style="border: 1px solid; padding: 10px"> 
+<!--<input type="button" value="Contoh Print PopUp Rincian Honor" id="btnPrintRincianHonor"> 
+-->
+<a href="<?php echo base_url(); ?>sop/sop_up.pdf" target="_blank">SOP UP</a>
+</div>

@@ -1,0 +1,1465 @@
+<?php /**
+* @brief Model Class yang berhubungan dengan proses bisnis belanja pembuatan kwitansi
+*
+* Class Model ini digunakan untuk mengelola kwitansi
+* Long Description
+* @Package
+*/
+
+class M_kwitansi extends CI_Model {
+	   
+    public function __construct()
+    {
+        parent::__construct();
+        $this->table_name = 't_kwitansi';
+    }
+	
+	
+    function get_jns_kwitansi($jns_belanja) {
+        //DONE-TODO: Cari list kegiatan di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdgiat,nmgiat FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu
+        
+        $sql = "
+            SELECT * FROM m_lov, m_jeniskwitansi
+				WHERE 
+				m_lov.kode_value=m_jeniskwitansi.kw_type
+				AND m_jeniskwitansi.sifat_bayar=?
+				AND kode_app = '2'
+        ";
+        
+        $query = $this->db->query($sql, array($jns_belanja));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+        return NULL;
+    }
+    /**
+     * Nilai kwitansi yang diambil adalah semua kwitansi yang sudah dibuat tanpa
+     * memperhitungkan jenis nya (GUP, LS, TUP)
+     * 
+     */
+
+	function get_jenis_pajak()
+	{
+		$result = array();
+		$this->db->select('*');
+		$this->db->from('m_pajak');
+		$this->db->where('id_pajak !=',0);
+		$array_keys_values = $this->db->get();
+		
+		//$result[0] = '-Pilih Jenis Pajak-';
+		
+		foreach ($array_keys_values->result() as $row)
+		{	
+			$ppn	= $row->ppn;
+			$pph	= $row->pph;
+			$id		= $row->id_pajak;
+			$key	= "$ppn|$pph|$id";
+			$result[$key] = (" [PPN : $row->ppn % ] - [PPH : $row->pph% ] - $row->ket ");
+		}
+		
+		return $result;
+	}
+
+	function get_kwitansi_by_id($id_kwitansi)
+	{
+		$sql = "
+				SELECT *
+				FROM t_kwitansi
+				WHERE id_kwitansi = ?
+			";
+
+		$query = $this->db->query($sql, array($id_kwitansi));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return NULL;
+	}
+
+	function get_kwitansi_search($ta, $idsu, $no_kwitansi, $mata_anggaran, 
+						$sifat_bayar, $jenis_kwitansi, $status_kwitansi) 
+	{
+		$sql = "
+				SELECT a.id_kwitansi, a.tgl_kwitansi, a.no_kwitansi, a.tpt_kwitansi, a.jenis_kwitansi,
+					a.sifat_bayar, a.kdgiat, a.kdoutput, a.kdkomponen, a.kdakun, a.ket_kwitansi, 
+					a.nominal, a.jenis_honor, a.id_status_kwitansi, b.status_kwitansi, a.file_bast, a.file_bap, a.file_daftar_honor, a.file_sk, a.id_unit, a.file_daftar_nominatif
+				FROM t_kwitansi a LEFT JOIN m_status_kwitansi b USING(id_status_kwitansi)
+				WHERE tahun_anggaran = ?
+					AND id_subunit = ?
+					AND no_kwitansi LIKE ?
+					AND concat(kdgiat,'.',kdoutput,'.',kdkomponen,'.',kdakun) LIKE ?
+					AND sifat_bayar LIKE ?
+					AND jenis_kwitansi LIKE ?
+					AND id_status_kwitansi LIKE ?
+			";
+
+		$query = $this->db->query($sql, array($ta, $idsu, '%'.$no_kwitansi.'%', '%'.$mata_anggaran.'%', 
+						$sifat_bayar, $jenis_kwitansi, $status_kwitansi));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->result();
+			}
+		}
+
+		return NULL;			
+	}
+
+
+	function getnamaList_t_rkakl($kode_unit,$kdoutput,$komponen,$akun)
+        { 
+		$q=$this->db->query("  
+			SELECT * FROM (`t_rkakl`) 
+			WHERE `kdakun` = '$akun' AND 
+			`kdoutput` = '$kdoutput' AND 
+			`kdkomponen` = '$komponen' AND 
+			kode_unit = '$kode_unit' 
+			GROUP BY kdgiat");              
+		return $q;
+        }
+
+	function get_golongan() {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_pajak_golongan');
+            $this->db->order_by('id_pajak_gol','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {                
+                $result[$row->id_pajak_gol]= ("$row->golongan");
+            }
+            
+            return $result;
+        }
+
+	
+	function get_nilai_kwitansi_per_akun($ta, $idsu, $kdgiat,
+                        $kdoutput, $kdkomponen, $kdakun) {
+		$sql = "
+			SELECT IFNULL(SUM(nominal), 0) as jumlah
+			FROM t_kwitansi
+			WHERE YEAR(tgl_kwitansi) = ?
+				AND id_subunit = ?
+				AND kdgiat = ?
+				AND kdoutput = ?
+				AND kdkomponen = ?
+				AND kdakun = ?
+		";	
+
+		$query = $this->db->query($sql, array($ta, $idsu, $kdgiat,
+											  $kdoutput, $kdkomponen,
+											  $kdakun));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row()->jumlah;
+			}
+		}
+
+		return -1;				
+	}
+
+
+    function get_nilai_kwitansi_by_akun_detail($ta, $idsu, $kdgiat,
+                        $kdoutput, $kdkomponen, $kdakun, $hdr) {                  
+         
+        $this->db->select('IFNULL(SUM(nominal), 0) AS jumlah', FALSE);
+        $this->db->from('t_kwitansi');
+        $this->db->where('YEAR(tgl_kwitansi)',$ta);
+        $this->db->where('id_subunit',$idsu);
+        $this->db->where('kdgiat',$kdgiat);
+        $this->db->where('kdoutput',$kdoutput);
+        $this->db->where('kdkomponen',$kdkomponen);
+        $this->db->where('kdakun',$kdakun);
+        $this->db->where('nmheader',$hdr);
+                    
+        $query = $this->db->get();
+
+        if($query) {
+            if($query->num_rows() > 0){
+                return $query->row()->jumlah;
+            }
+        }
+
+        return -1;
+    }
+
+	function ambil_level_kwitansi_tinggi($idk)
+        {  
+		$this->db->select('MAX(level) as maksimal');
+        $this->db->from('t_kwitansi_history');    
+        $this->db->where('id_kwitansi',$idk);  
+        $result = $this->db->get();
+        $hasil 	= $result->row();
+        return $hasil->maksimal; 
+        }
+		
+	function simpan_history($idk, $sts_waktu, $comment, $levelKini)
+        {  
+		$history = new stdClass;
+		$history->id_kwitansi=$idk;
+		$history->tanggal_waktu=date('Y-m-d H:i:s');
+		$history->pengisi=$this->session->userdata('username');
+		$history->status_waktu=$sts_waktu;
+		$history->komentar=$comment;
+		$history->level=$levelKini;
+		$history->created_by=$this->session->userdata('username');;
+		$history->created_date=date('Y-m-d');
+		$this->db->insert('t_kwitansi_history',$history); 	
+        }
+
+function get_history($id_kwitansi)
+{	
+    $this->db->select('*, m_status_kwitansi.status_kwitansi as status_waktu');
+    $this->db->from('t_kwitansi_history');
+	$this->db->join("m_status_kwitansi",'m_status_kwitansi.id_status_kwitansi=t_kwitansi_history.status_waktu','inner');         
+    $this->db->where('id_kwitansi',$id_kwitansi);
+    $this->db->order_by('tanggal_waktu', 'desc');   
+    $query = $this->db->get(); 
+	if($query->num_rows() > 0)
+		return $query->result();
+    
+	return NULL;
+}
+
+/**
+* Fungsi untuk menampilkan data pegawai
+* @param keyword is varchar search auto complete
+* @return list of object
+*/		        		          																									           																					
+	function lookup($keyword){
+        $idu = $this->session->userdata('id_unit');
+		$this->db->select('*');
+        $this->db->from("m_pegawai");  
+		$this->db->join("m_unit",'m_pegawai.kode_unit=m_unit.kode_unit','inner');         
+        $this->db->like('m_pegawai.nama_pegawai',$keyword);
+        $this->db->where('m_unit.id_unit',$idu); 
+        $query = $this->db->get();    
+        return $query->result();
+}
+
+	//simpan kwitansi barang modal bansos kontrak 
+	function simpan_kwitansi_bmbk($kwitansi)			
+	{
+
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+        $id=$this->nomer->gen_no_kwitansi($kwitansi->tgl_kwitansi, $kwitansi->id_subunit, $kwitansi->sifat_bayar);
+
+		$kwitansi->created_date = Formatting::get_datetime();
+		$kwitansi->created_by	= $this->session->userdata('username');
+		$kwitansi->tahun_anggaran	= $this->m_settings->get_tahun_anggaran();
+
+		$this->db->where('id_kwitansi', $id['id_kwitansi']);
+    	$this->db->update('t_kwitansi', $kwitansi);
+		
+		//=== INSERT DATA KELENGKAAN ===
+    	$sql = "
+    		INSERT INTO t_verunit (id_kwitansi, id_ver, flag, jenis_kwitansi, sifat_bayar)
+    		SELECT ?, id_ver, 0, ?, ? FROM m_verunit a INNER JOIN t_kwitansi b USING(sifat_bayar, jenis_kwitansi)
+    		WHERE b.id_kwitansi = ?
+    	";
+
+    	$result = $this->db->query($sql, array($id['id_kwitansi'], $kwitansi->jenis_kwitansi, 
+    				$kwitansi->sifat_bayar, $id['id_kwitansi']));
+						
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id['id_kwitansi']);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id['id_kwitansi'], '0', '', $levelKini);
+
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();		
+	}
+
+	//simpan data kontrak pengabdian & penelitian
+	function simpan_KontrakModalBarangBansosHonor($object, $nominal, $idSu, $sifat_bayar, $ppn, $pph, $ta, $tgl_kwitansi, $jns_kwitansi)			
+	{
+
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		//echo $tgl_kwitansi." ".$idSu." ".$idSu;
+        $id=$this->nomer->gen_no_kwitansi($tgl_kwitansi, $idSu, $sifat_bayar);
+		//print_r($object);  
+        $this->db->set('nominal',$nominal);
+        $this->db->set('ppn',$ppn);
+        $this->db->set('pph',$pph);
+        $this->db->set('created_date','now()',FALSE);
+		$this->db->where('id_kwitansi', $id['id_kwitansi']);
+    	$this->db->update('t_kwitansi', $object);
+		//exit();
+			//=== INSERT DATA KELENGKAAN ===
+		$this->db->query("INSERT into t_verunit (id_kwitansi, id_ver, flag, jenis_kwitansi, sifat_bayar)
+						SELECT	".$id['id_kwitansi'].", id_ver, 0, '$jns_kwitansi', '$sifat_bayar'
+						FROM m_verunit, t_kwitansi
+						WHERE m_verunit.sifat_bayar=t_kwitansi.sifat_bayar
+						AND m_verunit.jenis_kwitansi=t_kwitansi.jenis_kwitansi
+						AND t_kwitansi.id_kwitansi=".$id['id_kwitansi']
+						);
+						
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id['id_kwitansi']);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id['id_kwitansi'], '0', '', $levelKini);
+
+
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === FALSE){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Kwitansi gagal disimpan');
+			  
+              //TODO: Jangan melakukan redirect di Model, lakukan di Controller
+			  //redirect(base_url());
+			  return FALSE;
+		}else{
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Kwitansi Berhasil disimpan');
+              //TODO: Jangan melakukan redirect di Model, lakukan di Controller
+			  //redirect(base_url());
+			  return TRUE;
+		}	
+		
+	}
+
+	function simpan_kwitansi_honor($kwitansi, $cache_honor)
+	{
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+        $id=$this->nomer->gen_no_kwitansi($kwitansi->tgl_kwitansi, $kwitansi->id_subunit, $kwitansi->sifat_bayar);
+
+		$kwitansi->created_date = Formatting::get_datetime();
+		$kwitansi->created_by	= $this->session->userdata('username');
+		$kwitansi->tahun_anggaran	= $this->m_settings->get_tahun_anggaran();		
+
+		$this->db->where('id_kwitansi', $id['id_kwitansi']);
+    	$this->db->update('t_kwitansi', $kwitansi);
+
+			//=== INSERT DATA KELENGKAAN ===
+    	$sql = "
+    		INSERT INTO t_verunit (id_kwitansi, id_ver, flag, jenis_kwitansi, sifat_bayar)
+    		SELECT ?, id_ver, 0, ?, ? FROM m_verunit a INNER JOIN t_kwitansi b USING(sifat_bayar, jenis_kwitansi)
+    		WHERE b.id_kwitansi = ?
+    	";
+
+    	$result = $this->db->query($sql, array($id['id_kwitansi'], $kwitansi->jenis_kwitansi, 
+    				$kwitansi->sifat_bayar, $id['id_kwitansi']));
+						
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id['id_kwitansi']);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id['id_kwitansi'], '0', '', $levelKini);
+
+		
+		if(!empty($cache_honor->rows)){
+			//insert honor
+			foreach($cache_honor->rows as $key=>$row) {
+				// insert tabel honor	
+				$honor   = new stdClass();
+				$honor->id_kwitansi 	= $id['id_kwitansi'];
+				$honor->jns_honor 		= $cache_honor->jns_honor;
+				$honor->nama 			= isset($row['nama']) ? $row['nama'] : NULL;
+				$honor->jabatan 		= isset($row['jabatan']) ? $row['jabatan'] : NULL;
+				$honor->golongan 		= isset($row['golongan']) ? $row['golongan'] : NULL;
+				$honor->nama_mhs 		= isset($row['nama_mhs']) ? $row['nama_mhs'] : NULL;
+				$honor->nim_mhs 		= isset($row['nim_mhs']) ? $row['nim_mhs'] : NULL;
+				$honor->kd_mk 			= isset($row['kd_mk']) ? $row['kd_mk'] : NULL;
+				$honor->m_kul 			= isset($row['m_kul']) ? $row['m_kul'] : NULL;
+				$honor->kls 			= isset($row['kls']) ? $row['kls'] : NULL;
+				$honor->volume 			= isset($row['volume']) ? $row['volume'] : NULL;
+				$honor->honor_naskah	= isset($row['h_naskah']) ? $row['h_naskah'] : NULL;
+				$honor->satuan 			= isset($row['satuan']) ? $row['satuan'] : NULL;
+				$honor->subtotal 		= isset($row['subtotal']) ? $row['subtotal'] : NULL;
+				$honor->pph 			= isset($row['pph']) ? $row['pph'] : NULL;
+				$honor->ptkp 			= isset($row['ptkp']) ? $row['ptkp'] : NULL;
+				$honor->pkp 			= isset($row['pkp']) ? $row['pkp'] : NULL;
+
+				$honor->created_by 		= $this->session->userdata('username');
+				$honor->created_date 	= Formatting::get_datetime();
+
+				$this->db->insert('t_honor',$honor); 					
+			}
+		}
+		
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	function update_kwitansi_honor($id_kwitansi, $kwitansi, $cache_honor)
+	{
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$kwitansi->changed_date = Formatting::get_datetime();
+		$kwitansi->changed_by	= $this->session->userdata('username');        
+
+		$this->db->where('id_kwitansi', $id_kwitansi);
+    	$this->db->update('t_kwitansi', $kwitansi);
+		
+		//TODO: hapus honor yang terdahulu sebagai cara tercepat
+		$this->db->where('id_kwitansi',$id_kwitansi);
+        $this->db->delete('t_honor');
+
+		if(!empty($cache_honor->rows)){
+			//insert honor
+			foreach($cache_honor->rows as $key=>$row) {
+				// insert tabel honor	
+				$honor   = new stdClass();
+				$honor->id_kwitansi 	= $id_kwitansi;
+				$honor->jns_honor 		= $cache_honor->jns_honor;
+				$honor->nama 			= isset($row['nama']) ? $row['nama'] : NULL;
+				$honor->jabatan 		= isset($row['jabatan']) ? $row['jabatan'] : NULL;
+				$honor->golongan 		= isset($row['golongan']) ? $row['golongan'] : NULL;
+				$honor->nama_mhs 		= isset($row['nama_mhs']) ? $row['nama_mhs'] : NULL;
+				$honor->nim_mhs 		= isset($row['nim_mhs']) ? $row['nim_mhs'] : NULL;
+				$honor->kd_mk 			= isset($row['kd_mk']) ? $row['kd_mk'] : NULL;
+				$honor->m_kul 			= isset($row['m_kul']) ? $row['m_kul'] : NULL;
+				$honor->kls 			= isset($row['kls']) ? $row['kls'] : NULL;
+				$honor->volume 			= isset($row['volume']) ? $row['volume'] : NULL;
+				$honor->honor_naskah	= isset($row['h_naskah']) ? $row['h_naskah'] : NULL;
+				$honor->satuan 			= isset($row['satuan']) ? $row['satuan'] : NULL;
+				$honor->subtotal 		= isset($row['subtotal']) ? $row['subtotal'] : NULL;
+				$honor->pph 			= isset($row['pph']) ? $row['pph'] : NULL;
+				$honor->ptkp 			= isset($row['ptkp']) ? $row['ptkp'] : NULL;
+				$honor->pkp 			= isset($row['pkp']) ? $row['pkp'] : NULL;
+
+				$honor->created_by 		= $this->session->userdata('username');
+				$honor->created_date 	= Formatting::get_datetime();
+
+				$this->db->insert('t_honor',$honor); 					
+			}
+		}
+		
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	// Fungsi simpan kwitansi honor
+	function simpan_honor($object, $idsu, $sifat_bayar, $honor_param, $jns_honor, $ta, $tgl_kwitansi, $jns_kwitansi )
+	{	
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+        $id=$this->nomer->gen_no_kwitansi($tgl_kwitansi, $idsu, $sifat_bayar);
+		//print_r($object);  
+        $this->db->set('created_date','now()',FALSE);
+		$this->db->where('id_kwitansi', $id['id_kwitansi']);
+    	$this->db->update('t_kwitansi', $object);
+		//exit();
+			//=== INSERT DATA KELENGKAAN ===
+		$this->db->query("INSERT into t_verunit (id_kwitansi, id_ver, flag, jenis_kwitansi, sifat_bayar)
+						SELECT	".$id['id_kwitansi'].", id_ver, 0, '$jns_kwitansi', '$sifat_bayar'
+						FROM m_verunit, t_kwitansi
+						WHERE m_verunit.sifat_bayar=t_kwitansi.sifat_bayar
+						AND m_verunit.jenis_kwitansi=t_kwitansi.jenis_kwitansi
+						AND t_kwitansi.id_kwitansi=".$id['id_kwitansi']
+						);
+						
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id['id_kwitansi']);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id['id_kwitansi'], '0', '', $levelKini);
+		
+		if(isset($honor_param['nama']) && $honor_param['nama'][0]!=''){
+			$nominal=0;
+			$pajak=0;
+				foreach ($honor_param['nama'] as $no=>$nam){
+					
+						$this->db->select("pph_honor");
+						$this->db->from('t_pajak_golongan');
+						$this->db->where('golongan', $honor_param['golongan'][$no]);
+						$result = $this->db->get();
+						$row = $result->row();	
+					$pphx = $row->pph_honor;		
+	
+					if($jns_honor=='1')
+					{
+						$jum_bruto=$honor_param['jml_bln'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*$jum_bruto/100;
+					}else
+					if($jns_honor=='2')
+					{
+						$jum_bruto=$honor_param['jum_hadir'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*$jum_bruto/100;
+					}else
+					if($jns_honor=='3')
+					{
+						$jum_bruto=$honor_param['jum_org'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*($jum_bruto + $honor_param['h_naskah'][$no])/100;
+					}else
+					if($jns_honor=='4' or $jns_honor=='7' or $jns_honor=='8' or $jns_honor=='5')
+					{
+						$jum_bruto=$honor_param['bruto'][$no];
+						$pph=$pphx*($jum_bruto)/100;
+					}else
+					if($jns_honor=='6')
+					{
+						$jum_bruto=$honor_param['jum_hari'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*$jum_bruto/100;
+					}
+					//menentukan nominal berdasarkan jumlah bruto
+					if($jns_honor=='3')
+					{
+						$nominal=($nominal + $jum_bruto + $honor_param['h_naskah'][$no]);
+						}
+						else
+					{
+						$nominal=($nominal + $jum_bruto);
+					}
+					
+					$pajak=($pajak + $pph);
+	
+					// insert tabel honor	
+					$honor   = new stdClass();
+					$honor->id_kwitansi=$id['id_kwitansi'];
+					$honor->jns_honor=$jns_honor;
+					$honor->nama=$nam;
+					$honor->jabatan=$honor_param['jabatan'][$no];
+					$honor->golongan=$honor_param['golongan'][$no];
+					$honor->nama_mhs=$honor_param['nama_mhs'][$no];
+					$honor->nim_mhs=$honor_param['nim_mhs'][$no];
+					$honor->kd_mk=$honor_param['kd_mk'][$no];
+					$honor->m_kul=$honor_param['m_kul'][$no];
+					$honor->kls=$honor_param['kls'][$no];
+					$honor->jum_hadir=$honor_param['jml_hadir'][$no];
+					$honor->jum_org=$honor_param['jml_org'][$no];
+					$honor->jum_hari=$honor_param['jml_hari'][$no];
+					$honor->jum_bln=$honor_param['jml_bln'][$no];                 
+					$honor->honor_naskah=$honor_param['h_naskah'][$no];
+					$honor->bruto=$honor_param['bruto'][$no];
+					$honor->jum_bruto=$jum_bruto;
+					$honor->pph=$pph;
+					$honor->ptkp=$honor_param['ptkp'][$no];
+					$honor->pkp=$honor_param['pkp'][$no];
+					$this->db->insert('t_honor',$honor); 	
+					
+				}
+					 $this->db->set('nominal',$nominal);
+					 $this->db->set('jenis_honor',$jns_honor);
+					 $this->db->set('pph',$pajak);
+					 $this->db->where('id_kwitansi', $id['id_kwitansi']);
+					 $this->db->update('t_kwitansi');
+
+		}
+		
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === FALSE){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Kwitansi gagal disimpan');
+              //TODO: Jangan melakukan redirect di Model, lakukan di Controller
+			  //redirect(base_url());
+			  return FALSE;  
+		}else{
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Kwitansi Berhasil disimpan');
+              //TODO: Jangan melakukan redirect di Model, lakukan di Controller
+			  //redirect(base_url());
+			  return TRUE;  
+		}	
+	}
+
+	//update data kwitansi barang, modal, bansos dan kontrak
+	function update_kwitansi_bmbk($kwitansi, $id_kwitansi)			
+	{
+
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$kwitansi->changed_date = Formatting::get_datetime();
+		$kwitansi->changed_by	= $this->session->userdata('username');        
+		$this->db->where('id_kwitansi', $id_kwitansi);
+    	$this->db->update('t_kwitansi', $kwitansi);
+
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id_kwitansi);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id_kwitansi, $kwitansi->id_status_kwitansi, '', $levelKini);
+
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();		
+	}
+
+	//update data kontrak pengabdian & penelitian
+	function update_KontrakModalBarangBansos($object, $nominal, $idSu, $sifat_bayar, 
+											$ppn, $pph, $ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi)			
+	{
+
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+        $this->db->set('nominal',$nominal);
+        $this->db->set('ppn',$ppn);
+        $this->db->set('pph',$pph);
+        $this->db->set('changed_date','now()',FALSE);
+		$this->db->where('id_kwitansi', $id_kwitansi);
+    	$this->db->update('t_kwitansi', $object);
+
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id_kwitansi);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id_kwitansi, $object->id_status_kwitansi, '', $levelKini);
+
+
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === FALSE){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Kwitansi gagal diupdate');
+			  
+			  return FALSE;
+		}else{
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Kwitansi Berhasil diupdate');
+			  return TRUE;
+		}	
+		
+	}
+
+	// Fungsi simpan kwitansi honor
+	function update_honor($object, $idsu, $sifat_bayar, $honor_param, $jns_honor, $ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi )
+	{	
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$honor->jenis_honor=$jns_honor;
+        $this->db->set('changed_date','now()',FALSE);
+		$this->db->where('id_kwitansi', $id_kwitansi);
+    	$this->db->update('t_kwitansi', $object);
+		//exit();
+						
+		// === INSERT HISTORY KWITANSI
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id_kwitansi);
+		$levelKini		= $levelTinggi +1;
+        $this->m_kwitansi->simpan_history($id_kwitansi, $object->id_status_kwitansi, '', $levelKini);
+		
+		// hapus honor yang terdahulu
+		$this->db->where('id_kwitansi',$id_kwitansi);
+        $this->db->delete('t_honor');
+		
+		if(isset($honor_param['nama']) && $honor_param['nama'][0]!=''){
+			$nominal=0;
+			$pajak=0;
+				foreach ($honor_param['nama'] as $no=>$nam){
+					
+						$this->db->select("pph_honor");
+						$this->db->from('t_pajak_golongan');
+						$this->db->where('golongan', $honor_param['golongan'][$no]);
+						$result = $this->db->get();
+						$row = $result->row();	
+					$pphx = $row->pph_honor;		
+	
+					if($jns_honor=='1')
+					{
+						$jum_bruto=$honor_param['jml_bln'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*$jum_bruto/100;
+					}else
+					if($jns_honor=='2')
+					{
+						$jum_bruto=$honor_param['jum_hadir'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*$jum_bruto/100;
+					}else
+					if($jns_honor=='3')
+					{
+						$jum_bruto=$honor_param['jum_org'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*($jum_bruto + $honor_param['h_naskah'][$no])/100;
+					}else
+					if($jns_honor=='4' or $jns_honor=='7' or $jns_honor=='8' or $jns_honor=='5')
+					{
+						$jum_bruto=$honor_param['bruto'][$no];
+						$pph=$pphx*($jum_bruto)/100;
+					}else
+					if($jns_honor=='6')
+					{
+						$jum_bruto=$honor_param['jum_hari'][$no]*$honor_param['bruto'][$no];
+						$pph=$pphx*$jum_bruto/100;
+					}
+					//menentukan nominal berdasarkan jumlah bruto
+					if($jns_honor=='3')
+					{
+						$nominal=($nominal + $jum_bruto + $honor_param['h_naskah'][$no]);
+						}
+						else
+					{
+						$nominal=($nominal + $jum_bruto);
+					}
+					
+					$pajak=($pajak + $pph);
+					
+
+					// insert honor yang baru	
+					$honor   = new stdClass();
+					$honor->id_kwitansi=$id_kwitansi;
+					$honor->jns_honor=$jns_honor;
+					$honor->nama=$nam;
+					$honor->jabatan=$honor_param['jabatan'][$no];
+					$honor->golongan=$honor_param['golongan'][$no];
+					$honor->nama_mhs=$honor_param['nama_mhs'][$no];
+					$honor->nim_mhs=$honor_param['nim_mhs'][$no];
+					$honor->kd_mk=$honor_param['kd_mk'][$no];
+					$honor->m_kul=$honor_param['m_kul'][$no];
+					$honor->kls=$honor_param['kls'][$no];
+					$honor->jum_hadir=$honor_param['jml_hadir'][$no];
+					$honor->jum_org=$honor_param['jml_org'][$no];
+					$honor->jum_hari=$honor_param['jml_hari'][$no];
+					$honor->jum_bln=$honor_param['jml_bln'][$no];                 
+					$honor->honor_naskah=$honor_param['h_naskah'][$no];
+					$honor->bruto=$honor_param['bruto'][$no];
+					$honor->jum_bruto=$jum_bruto;
+					$honor->pph=$pph;
+					$honor->ptkp=$honor_param['ptkp'][$no];
+					$honor->pkp=$honor_param['pkp'][$no];
+					$this->db->insert('t_honor',$honor); 	
+					
+				}
+					 $this->db->set('nominal',$nominal);
+					 $this->db->set('jenis_honor',$jns_honor);
+					 $this->db->set('pph',$pajak);
+					 $this->db->where('id_kwitansi', $id_kwitansi);
+					 $this->db->update('t_kwitansi');
+
+		}
+		
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === FALSE){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Kwitansi gagal diupdate');
+			  return FALSE;  
+		}else{
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Kwitansi Berhasil diupdate');
+			  return TRUE;  
+		}	
+	}
+
+
+	
+    function get_view_kwitansi($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi, $where="") {                  
+         
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+        $this->db->join("m_status_kwitansi",'t_kwitansi.id_status_kwitansi=m_status_kwitansi.id_status_kwitansi','left');
+		$this->db->where('t_kwitansi.id_subunit',$su);
+		$this->db->where('YEAR(tgl_kwitansi)',$ta);
+        $this->db->like('t_kwitansi.sifat_bayar',$sifat_bayar);
+		if($where!="")
+		{ $this->db->where($where);  }
+		else
+		{ $this->db->like('t_kwitansi.id_status_kwitansi',$status_kwitansi,'after');}
+        $this->db->like('t_kwitansi.jenis_kwitansi',$jenis_kwitansi);
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+        
+		return FALSE;
+    }
+	
+    function get_view_kwitansi_verifikasi($ta, $idU, $sifat_bayar, $jenis_kwitansi, $where, $subunit=null) {                  
+         
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+        $this->db->join("m_status_kwitansi",'t_kwitansi.id_status_kwitansi=m_status_kwitansi.id_status_kwitansi','left');
+		$this->db->where('t_kwitansi.id_unit',$idU);
+		$this->db->where('YEAR(tgl_kwitansi)',$ta);
+		$this->db->where($where);
+
+		if (!empty($subunit)) {
+			$this->db->where('t_kwitansi.id_subunit',$subunit);			
+		}
+		if (!empty($sifat_bayar)) {
+			$this->db->where('t_kwitansi.sifat_bayar',$sifat_bayar);
+		}
+		if (!empty($jenis_kwitansi)) {
+			$this->db->where('t_kwitansi.jenis_kwitansi',$jenis_kwitansi);
+		}
+        		        
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+        
+		return FALSE;
+    }
+	
+	function get_view_kwitansi_verifikasi_pusat($ta, $sifat_bayar, $jenis_kwitansi, $where, $id_unit=null) {                  
+         
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->join("m_unit",'t_kwitansi.id_unit=m_unit.id_unit','inner');
+        $this->db->join("m_status_kwitansi",'t_kwitansi.id_status_kwitansi=m_status_kwitansi.id_status_kwitansi','left');
+		$this->db->where('YEAR(tgl_kwitansi)',$ta);
+		$this->db->where($where);
+		if (!empty($id_unit)) {
+			$this->db->where('t_kwitansi.id_unit',$id_unit);			
+		}
+		if (!empty($sifat_bayar)) {
+			$this->db->where('t_kwitansi.sifat_bayar',$sifat_bayar);
+		}
+		if (!empty($jenis_kwitansi)) {
+			$this->db->where('t_kwitansi.jenis_kwitansi',$jenis_kwitansi);
+		}        
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+        
+		return FALSE;
+    }
+	
+	function get_id_unit($idk){
+		$this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->where('id_kwitansi',$idk);
+		$query = $this->db->get();
+		$result= $query->row();
+		//query buat dapatkan string 1 data id
+		$id_unit= $result->id_unit;
+		return $id_unit;
+	}
+	
+	function get_id_subunit($idk){
+		$this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->where('id_kwitansi',$idk);
+		$query = $this->db->get();
+		$result= $query->row();
+		//query buat dapatkan string 1 data id
+		$id_subunit= $result->id_subunit;
+		return $id_subunit;
+	}
+
+    function kirim_verunit($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi) {                  
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		// ubah status kirim kwitansi ke verifikator unit         		
+        $result=$this->db->query(" 	UPDATE t_kwitansi 
+									SET id_status_kwitansi='1'  
+									WHERE id_subunit=$su
+									AND YEAR(tgl_kwitansi)=$ta
+									AND id_status_kwitansi ='$status_kwitansi'
+									AND sifat_bayar LIKE '$sifat_bayar%'
+									AND jenis_kwitansi LIKE '$jenis_kwitansi%'
+									");
+		
+		$this->db->select('*');
+		$this->db->from('t_kwitansi');
+		$this->db->where('id_subunit', $su);
+		$this->db->where('YEAR(tgl_kwitansi)', $ta);
+		$this->db->where('id_status_kwitansi', $status_kwitansi);
+		$this->db->where('sifat_bayar', $sifat_bayar);
+		$this->db->where('jenis_kwitansi', $jenis_kwitansi);
+		$query=$this->db->get(); 
+		
+		$list_kwitansi = $query->result();		   
+		foreach($list_kwitansi as $kwitansi)
+		{
+			$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($kwitansi->id_kwitansi);
+			$levelKini		= $levelTinggi +1;
+			$this->m_kwitansi->simpan_history($kwitansi->id_kwitansi, '1', '', $levelKini);
+		}
+		
+		$this->db->trans_complete();		
+    }
+
+
+    function hapus_kwitansi($id) {  
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+	    
+		$this->db->where('id_kwitansi',$id);
+        $this->db->delete('t_kwitansi_history');
+
+        $this->db->where('id_kwitansi',$id);
+        $this->db->delete('t_verunit');
+
+        $this->db->where('id_kwitansi',$id);
+        $this->db->delete('t_honor');
+                
+        $this->db->where('id_kwitansi',$id);
+        $this->db->delete('t_kwitansi');
+		
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+    }
+
+    function get_munit_by_id($idu) {                  
+        $this->db->select('*');
+        $this->db->from('m_unit');
+		$this->db->where('id_unit',$idu);
+		$query = $this->db->get();
+        return $query;
+    }
+	
+    function get_kwitansi_preview($idk) {                  
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->where('id_kwitansi',$idk);
+		$query = $this->db->get();
+		
+		//yakinkan bahwa yang direturn itu adalah 1 baris
+		if($query->num_rows > 0)
+			return $query->row();
+        
+		return FALSE;
+    }
+
+    function get_jenis_honor_by_id_kwitansi($id_kwitansi) {
+    	$sql = "
+    		SELECT DISTINCT jns_honor
+    		FROM t_honor
+    		WHERE id_kwitansi = ? 
+    		LIMIT 1
+    	";
+
+    	$query = $this->db->query($sql, array($id_kwitansi));
+    	if($query) {
+    		if($query->num_rows() > 0)
+    			return $query->row()->jns_honor;
+    	}
+
+    	return NULL;
+    }
+
+    function get_list_honor_by_id_kwitansi($id_kwitansi, $jns_honor)
+    {
+    	$sql = "
+    		SELECT *
+    		FROM t_honor
+    		WHERE id_kwitansi = ? AND jns_honor = ?
+    	";
+
+    	$query = $this->db->query($sql, array($id_kwitansi, $jns_honor));
+    	if($query) {
+    		if($query->num_rows() > 0)
+    			return $query->result();
+    	}
+
+    	return NULL;
+    }
+	
+    function get_honor_by_idK($idk) {                  
+        $this->db->select('*');
+        $this->db->from('t_honor');
+		$this->db->where('id_kwitansi',$idk);
+		$query = $this->db->get();
+		
+		if($query->num_rows > 0)
+            return $query->result_array();
+        
+		return FALSE;
+    }
+	
+    function cek_kwi_available_preview($idk){
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->where('id_kwitansi',$idk);
+        $result = $this->db->count_all_results();
+        	return ($result > 0 ? true : false);
+    }
+
+    function up_jumUnduh_kwi($idk){
+        $result=$this->db->query(" 	UPDATE t_kwitansi 
+									SET jum_unduh=jum_unduh+1 
+									WHERE id_kwitansi=$idk
+									");
+        return $result;
+    }
+	
+/*    function up_kirirm_kwi_cetak($idk){
+        $result=$this->db->query(" 	UPDATE t_kwitansi 
+									SET id_status_kwitansi=19  
+									WHERE id_kwitansi=$idk
+									");
+        return $result;
+    }
+*/
+    function up_kirirm_kwi_cetak($id_spj_su,$id_status_kwitansi){
+        $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+		$result=$this->db->query(" 	UPDATE t_kwitansi 
+									SET id_status_kwitansi='$id_status_kwitansi'  
+									WHERE id_spj_su=$id_spj_su
+									");
+		$this->up_spj_su_byID('5',$id_spj_su);
+		
+		$this->db->select('*');
+		$this->db->from('t_kwitansi');
+		$this->db->where('id_spj_su', $id_spj_su);
+		$query=$this->db->get(); 
+		
+		$list_kwitansi = $query->result();		   
+		foreach($list_kwitansi as $kwitansi)
+		{
+			$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($kwitansi->id_kwitansi);
+			$levelKini		= $levelTinggi +1;
+			$this->m_kwitansi->simpan_history($kwitansi->id_kwitansi, $id_status_kwitansi, '', $levelKini);
+		}
+							
+		$this->db->trans_complete();		
+    }
+		
+ function kelengkapan($idk)
+     {            
+            $this->db->distinct();
+			$this->db->select("*");
+            $this->db->from('t_verunit');
+            $this->db->join("m_verunit",'m_verunit.id_ver=t_verunit.id_ver','inner');         
+            $this->db->where('t_verunit.id_kwitansi',$idk);
+            return $this->db->get(); 
+    }    
+
+ function up_kwitansi($status, $idk, $st_kwitansi,$id_spj_su)
+     {            
+		if($status!=''){
+		$this->db->set('id_status_kwitansi',$status);
+		}
+		if($st_kwitansi!=''){
+		$this->db->set('st_kwitansi',$st_kwitansi);
+		}
+		$this->db->set('id_spj_su',$id_spj_su);
+		$this->db->where('id_kwitansi', $idk);
+		$this->db->update('t_kwitansi'); 		   
+	 }
+
+  function up_kelengkapan($flag,$idk)
+     {            
+		$this->db->set('flag',$flag);
+		$this->db->where('id_kwitansi', $idk);
+		$this->db->update('t_verunit'); 		   
+	 }
+	 
+ function view_honor($idk)
+        {            
+            $this->db->select('*, year(t_kwitansi.tgl_kwitansi) as tahun, t_honor.pph as pph_honor');
+            $this->db->from('t_honor');
+            $this->db->join("t_kwitansi",'t_kwitansi.id_kwitansi=t_honor.id_kwitansi','inner');         
+            $this->db->where('t_honor.id_kwitansi',$idk);
+            return $this->db->get(); 
+        }
+
+ function simpan_spj_su($idSu, $idu, $status_spj, $sifat_bayar, $count, $id_kwitansi)
+        { 
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+		// buat spj su 
+		$isi->id_subunit=$idSu;
+		$isi->id_unit=$idu;
+		$isi->status_spj_su=$status_spj;
+		$isi->sifat_bayar=$sifat_bayar;
+		$isi->create_name=$this->session->userdata('username');;
+		$isi->create_date=date('Y-m-d');
+		$this->db->insert('t_spj_su',$isi); 
+		$id_spj_su	= $this->db->insert_id();	
+		
+		//update status kwitansi
+			for($i=0;$i<$count;$i++){
+				$this->m_kwitansi->up_kwitansi('1', $id_kwitansi[$i], '',$id_spj_su);
+				// simpan history
+				$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id_kwitansi);
+				$levelKini		= $levelTinggi +1;
+				$this->m_kwitansi->simpan_history($id_kwitansi, '1', '', $levelKini);
+			}
+			
+		$this->db->trans_complete();
+        }
+
+    function get_spjsu($su,$sifat_bayar,$where="") {                  
+         
+        $this->db->select('*');
+        $this->db->from('t_spj_su');
+		$this->db->join("m_status_spj_sunit",'t_spj_su.status_spj_su=m_status_spj_sunit.id_status_spj','inner');
+		$this->db->where('id_subunit',$su);
+		if($where!="")
+		{$this->db->where($where);}
+		$this->db->where('sifat_bayar',$sifat_bayar);
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+        
+		return FALSE;
+    }
+	
+    function get_kwi_tambahspj($su, $sifat_bayar, $where="")  {                  
+         
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+        $this->db->join("m_status_kwitansi",'t_kwitansi.id_status_kwitansi=m_status_kwitansi.id_status_kwitansi','inner');
+		$this->db->where('t_kwitansi.id_subunit',$su);
+		$this->db->where('t_kwitansi.id_spj_su',NULL);
+		$this->db->where('t_kwitansi.sifat_bayar',$sifat_bayar);
+		if($where!="")
+		{$this->db->where($where);}
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+        
+		return FALSE;
+    }
+
+    function get_view_kwitansi_spj($ta, $su, $sifat_bayar, $status_kwitansi,$status_spj_su, $jenis_kwitansi, $where="") {                  
+        $qf=$this->db->query("
+		SELECT a.id_kwitansi, a.id_subunit, a.id_unit, b.status_sptb, c.status_spp, d.status_spm, e.status_sp2d,
+			a.id_status_kwitansi, a.no_kwitansi, a.jenis_kwitansi, a.tgl_kwitansi, a.ket_kwitansi, y.nama_subunit,
+			a.nominal, x.status_spj_su, x.id_spj_su,a.jum_unduh,
+			IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+			IF(NOT ISNULL(d.id_status_spm),d.id_status_spm,
+			IF(NOT ISNULL(c.id_status_spp),c.id_status_spp,
+			IF(NOT ISNULL(b.id_status_sptb),b.id_status_sptb,
+			IF(NOT ISNULL(a.id_status_kwitansi),a.id_status_kwitansi,'')))))
+		AS status_id,
+			IF(NOT ISNULL(e.id_status_sp2d),e.status_sp2d,
+			IF(NOT ISNULL(d.id_status_spm),d.status_spm,
+			IF(NOT ISNULL(c.id_status_spp),c.status_spp,
+			IF(NOT ISNULL(b.id_status_sptb),b.status_sptb,(SELECT status_kwitansi FROM m_status_kwitansi n 
+					WHERE n.id_status_kwitansi=a.id_status_kwitansi)))))
+		AS status_kwitansi
+		FROM t_kwitansi a 
+		INNER JOIN m_subunit y ON a.id_subunit=y.id_subunit
+		INNER JOIN t_spj_su x ON x.id_spj_su=a.id_spj_su
+		LEFT JOIN (SELECT f.*, g.status_sptb FROM t_sptb f INNER JOIN m_status_sptb g 
+					ON f.id_status_sptb=g.id_status_sptb) b ON a.id_sptb=b.id_sptb
+		LEFT JOIN (SELECT h.*, i.status_spp FROM t_spp h INNER JOIN m_status_spp i 
+					ON h.id_status_spp=i.id_status_spp) c ON a.id_spp=c.id_spp
+		LEFT JOIN (SELECT j.*, k.status_spm FROM t_spm j INNER JOIN m_status_spm k 
+					ON j.id_status_spm=k.id_status_spm) d ON a.id_spm=d.id_spm
+		LEFT JOIN (SELECT l.*, m.status_sp2d FROM t_sp2d l INNER JOIN m_status_sp2d m 
+					ON l.id_status_sp2d=m.id_status_sp2d) e ON a.id_sp2d=e.id_sp2d
+		WHERE
+		YEAR(a.tgl_kwitansi)='$ta' AND
+		a.sifat_bayar='$sifat_bayar' AND
+		x.`id_subunit`='$su' AND
+		a.`id_spj_su` IS NOT NULL AND
+		x.status_spj_su < '8'
+		GROUP BY a.id_kwitansi
+				");
+		return $qf->result(); 
+		 
+        /*$this->db->select('*');
+        $this->db->from('t_kwitansi');
+        $this->db->join("m_status_kwitansi",'t_kwitansi.id_status_kwitansi=m_status_kwitansi.id_status_kwitansi','left');
+        $this->db->join("m_subunit",'t_kwitansi.id_subunit=m_subunit.id_subunit','inner');
+        $this->db->join("t_spj_su",'t_kwitansi.id_spj_su=t_spj_su.id_spj_su','inner');
+		$this->db->where('t_spj_su.id_subunit',$su);
+		$this->db->where('YEAR(tgl_kwitansi)',$ta);
+		$this->db->where("t_spj_su.id_spj_su = (SELECT MAX(id_spj_su) FROM t_spj_su WHERE t_spj_su.id_subunit = $su AND  `t_spj_su`.`sifat_bayar` = '$sifat_bayar')");
+		$this->db->where("t_spj_su.status_spj_su < '8'");
+        $this->db->where('t_spj_su.sifat_bayar',$sifat_bayar);
+		if($where!="")
+		{ $this->db->where($where);  }
+		else
+		{ $this->db->like('t_kwitansi.id_status_kwitansi',$status_kwitansi,'after');}
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+        
+		return FALSE;*/
+    }
+	
+	function get_list_subunit_sudah_spj($idu) {
+        
+        $sql = "
+            SELECT distinct m_subunit.id_subunit, m_subunit.nama_subunit
+            FROM m_subunit,t_spj_su
+            WHERE m_subunit.id_unit={$idu} AND
+			t_spj_su.id_subunit=m_subunit.id_subunit
+        ";
+        
+        $result = $this->db->query($sql);
+        if($result) {
+            return $result->result();
+        }
+        
+        return NULL;
+    }
+
+ function kirim_kwitansi_sptb($id_spj_su)
+     {            
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+		//up data kwitansi
+		$this->up_kirirm_kwi_cetak($id_spj_su,'22');
+		//up data spjsu
+		$this->up_spj_su_byID('7', $id_spj_su);
+		
+		// isi history kwitansi
+		$this->db->select('*');
+		$this->db->from('t_kwitansi');
+		$this->db->where('id_spj_su', $id_spj_su);
+		$query=$this->db->get(); 
+		
+		$list_kwitansi = $query->result();		   
+		foreach($list_kwitansi as $kwitansi)
+		{
+			$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($kwitansi->id_kwitansi);
+			$levelKini		= $levelTinggi +1;
+			$this->m_kwitansi->simpan_history($kwitansi->id_kwitansi, '22', '', $levelKini);
+		}
+
+		$this->db->trans_complete();
+	 }
+
+ function up_kwitansi_byidspj($id_status_kwitansi, $id_spj_su)
+     {            
+		$this->db->set('id_status_kwitansi',$id_status_kwitansi);
+		$this->db->where('id_spj_su', $id_spj_su);
+		$this->db->update('t_kwitansi'); 		   
+	 }
+	 
+ function up_spj_su_byID($status_spj_su, $id_spj_su)
+     {            
+		$this->db->set('status_spj_su',$status_spj_su);
+		$this->db->where('id_spj_su', $id_spj_su);
+		$this->db->update('t_spj_su'); 		   
+	 }
+	 
+ function create_spjsu($created_date, $idSu, $jenis_belanja, $idu, $created_by)
+     {  
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+        $id=$this->nomer->gen_no_spjsu($created_date, $idSu, $jenis_belanja);
+		$this->db->set('id_unit',$idu);
+		$this->db->set('status_spj_su','1');
+		$this->db->set('created_by',$created_by);
+		$this->db->where('id_spj_su', $id);
+		$this->db->update('t_spj_su'); 	
+		$this->db->trans_complete();
+	 }
+
+ function cek_semua_stKwitansi($id_status_kwitansi, $id_spj_su)
+     {  
+	 	//jumlah kwitansi yang berstatus sesuai id spj         
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->where('t_kwitansi.id_spj_su',$id_spj_su);
+		$query	= $this->db->get();
+		$jum 	= $query->num_rows;
+
+		//jumlah kwitansi yang berstatus "x"v, id spj tertentu          
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->where('t_kwitansi.id_status_kwitansi',$id_status_kwitansi);
+		$this->db->where('t_kwitansi.id_spj_su',$id_spj_su);
+		$query2 = $this->db->get();
+		$jum2 	= $query2->num_rows;
+		
+		// jika jumlah kwitansi spj = jumlah kwitansi spj yg berstatus "X" return true
+		if($jum==$jum2)
+		{
+			return TRUE;
+		}
+		return FALSE;
+				
+	 }
+
+ function get_kwi_by_idspjsu($id_spj_su)
+     {            
+		$this->db->select('*');
+		$this->db->from('t_kwitansi');
+		$this->db->where('id_spj_su', $id_spj_su);
+		$query=$this->db->get(); 
+		return $query->result();		   
+	 }
+
+ function get_spjsu_by_id($id_spj_su)
+     {            
+		$this->db->select('*');
+		$this->db->from('t_spj_su');
+		$this->db->where('id_spj_su', $id_spj_su);
+		$query=$this->db->get(); 
+		if($query->num_rows >0)
+		{
+			return $query->row();
+		}
+		return false;		   
+	 }
+	 
+ function set_status_kwitansi($id_kwi, $id_status)
+     {            
+		$this->db->set('id_status_kwitansi',$id_status);
+		$this->db->where('id_kwitansi', $id_kwi);
+		$result=$this->db->update('t_kwitansi'); 
+		return $result;		   
+	 }
+
+ function set_status_spjsu($id_spj_su, $id_status)
+     {            
+		$this->db->set('status_spj_su',$id_status);
+		$this->db->where('id_spj_su', $id_spj_su);
+		$result=$this->db->update('t_spj_su'); 
+		return $result;		   
+	 }
+
+ function verifikasi_simpan($idk, $status, $comment, $id_spj_su, $st_kwitansi)
+     {            
+	 	$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+		//kelengkapan
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($idk);
+		$levelKini		= $levelTinggi +1;
+		
+		$get_id_ver = $this->m_kwitansi->kelengkapan($idk);
+              foreach($get_id_ver->result_array() as $row)
+			  {
+                  $nama = $row['id_ver']; 
+					if (isset($_POST[$nama]))
+            		{$flag ='1';}
+            		else
+            		{$flag ='0';}
+				$this->m_kwitansi->up_kelengkapan($flag,$idk);	
+              }
+		
+		$this->m_kwitansi->simpan_history($idk, $status, $comment, $levelKini);
+		//===
+		// update status kwitansi dan status SPJ
+		//update status kwitansi
+		$this->up_kwitansi($status, $idk, $st_kwitansi, $id_spj_su);
+		$cek_semua	 	= $this->cek_semua_stKwitansi($status, $id_spj_su);
+		switch($status)
+		{
+			case 2:
+			//update kwitansi jadi 2
+			//update status spj jadi 2
+			$this->m_kwitansi->up_spj_su_byID('3', $id_spj_su);
+				break;
+				
+			case 18;
+			//update kwitansi jadi 18
+			//cek kwitansi yg spj-nya sama kalo semua status 18 :
+			//update status spj jadi 4 
+			if($cek_semua)
+			{$this->m_kwitansi->up_spj_su_byID('4', $id_spj_su);}
+				break; 
+				
+			case 21;
+			//update kwitansi jadi 21
+			//cek kwitansi yg spj-nya sama kalo semua status 21 :
+				//update status spj jadi 6 =>kalo tidak tidak update sattsu spj
+			if($cek_semua)
+			{$this->m_kwitansi->up_spj_su_byID('6', $id_spj_su);}
+				break; 
+				
+		}
+		//END update status kwitansi & SPJ ======
+		
+		$this->db->trans_complete();
+	 }
+	 
+ function kirim_spjsu($id_spj_su)
+     {  
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+		//update status SPJSU
+		$spjsu	= $this->get_spjsu_by_id($id_spj_su);
+		if(in_array($spjsu->status_spj_su,array(1,3)))
+		{
+			$this->set_status_spjsu($id_spj_su,'2');
+	 	}
+		else
+		if($spjsu->status_spj_su==4)
+		{
+			$this->set_status_spjsu($id_spj_su,'5');
+	 	}
+		
+		//get kwitansi berdasarkan id spj
+		$list_kwitansi	= $this->get_kwi_by_idspjsu($id_spj_su);
+		
+		//itrasi kwitansi
+		//var_dump($list_kwitansi,$spjsu);
+		foreach($list_kwitansi as $kwitansi)
+		{
+			$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($kwitansi->id_kwitansi);
+			$levelKini		= $levelTinggi +1;
+
+			if($kwitansi->id_status_kwitansi==0)
+			{
+				$this->set_status_kwitansi($kwitansi->id_kwitansi,'1');
+				$this->m_kwitansi->simpan_history($kwitansi->id_kwitansi, '1', '', $levelKini);
+			}
+			else
+			if($kwitansi->id_status_kwitansi==2)
+			{
+				$this->set_status_kwitansi($kwitansi->id_kwitansi,'3');
+				$this->m_kwitansi->simpan_history($kwitansi->id_kwitansi, '3', '', $levelKini);
+			}
+			else
+			if($kwitansi->id_status_kwitansi==18 && $spjsu->status_spj_su==4)
+			{
+				$this->set_status_kwitansi($kwitansi->id_kwitansi,'19');
+				$this->m_kwitansi->simpan_history($kwitansi->id_kwitansi, '19', '', $levelKini);
+			}
+		}
+		//jika status kwitansi = 0, update => 1
+		//jika status kwitansi = 2, update => 3
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	 }
+
+
+
+
+	//Fungsi untuk mengambil SPJ yang ada di masing-masing subunit
+	function list_view_spj($jb,$id_subunit){
+		$query = $this->db->query("
+		SELECT a.`id_spj_su`,a.`id_unit`,d.`nama_unit`,a.`id_subunit`,c.`nama_subunit`,a.`sifat_bayar`,b.`status_spj_su`,
+               e.`status_spj`, SUM(a.`nominal`)AS jml_spj
+		FROM t_kwitansi a
+		LEFT JOIN t_spj_su b ON a.`id_spj_su`=b.`id_spj_su`
+		INNER JOIN m_subunit c ON a.`id_subunit`=c.`id_subunit`
+		INNER JOIN m_unit d ON a.`id_unit`=d.`id_unit`
+		INNER JOIN m_status_spj_sunit e ON b.`status_spj_su`=e.`id_status_spj`
+		WHERE a.id_subunit='$id_subunit'
+		AND a.sifat_bayar='$jb'
+		GROUP BY a.`id_spj_su`
+		");
+		return $query; 
+
+	}
+	
+	function view_list_kwitansi($id_spj_su) {
+		$qf=$this->db->query("
+			SELECT a.id_kwitansi, a.id_subunit, a.id_unit, b.status_sptb, c.status_spp, d.status_spm, e.status_sp2d,
+			a.id_status_kwitansi, a.no_kwitansi, a.jenis_kwitansi, a.tgl_kwitansi, a.ket_kwitansi, y.nama_subunit,
+			a.nominal, x.status_spj_su, x.id_spj_su,a.jum_unduh,
+			IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+			IF(NOT ISNULL(d.id_status_spm),d.id_status_spm,
+			IF(NOT ISNULL(c.id_status_spp),c.id_status_spp,
+			IF(NOT ISNULL(b.id_status_sptb),b.id_status_sptb,
+			IF(NOT ISNULL(a.id_status_kwitansi),a.id_status_kwitansi,'')))))
+		AS status_id,
+			IF(NOT ISNULL(e.id_status_sp2d),e.status_sp2d,
+			IF(NOT ISNULL(d.id_status_spm),d.status_spm,
+			IF(NOT ISNULL(c.id_status_spp),c.status_spp,
+			IF(NOT ISNULL(b.id_status_sptb),b.status_sptb,(SELECT status_kwitansi FROM m_status_kwitansi n 
+					WHERE n.id_status_kwitansi=a.id_status_kwitansi)))))
+		AS status_kwitansi
+		FROM t_kwitansi a 
+		INNER JOIN m_subunit y ON a.id_subunit=y.id_subunit
+		INNER JOIN t_spj_su x ON x.id_spj_su=a.id_spj_su
+		LEFT JOIN (SELECT f.*, g.status_sptb FROM t_sptb f INNER JOIN m_status_sptb g 
+					ON f.id_status_sptb=g.id_status_sptb) b ON a.id_sptb=b.id_sptb
+		LEFT JOIN (SELECT h.*, i.status_spp FROM t_spp h INNER JOIN m_status_spp i 
+					ON h.id_status_spp=i.id_status_spp) c ON a.id_spp=c.id_spp
+		LEFT JOIN (SELECT j.*, k.status_spm FROM t_spm j INNER JOIN m_status_spm k 
+					ON j.id_status_spm=k.id_status_spm) d ON a.id_spm=d.id_spm
+		LEFT JOIN (SELECT l.*, m.status_sp2d FROM t_sp2d l INNER JOIN m_status_sp2d m 
+					ON l.id_status_sp2d=m.id_status_sp2d) e ON a.id_sp2d=e.id_sp2d
+		WHERE a.id_spj_su='$id_spj_su'
+		GROUP BY a.id_kwitansi
+		");
+		return $qf->result();
+	}
+	
+}?>

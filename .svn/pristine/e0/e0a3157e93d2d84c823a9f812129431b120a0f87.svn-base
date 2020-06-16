@@ -1,0 +1,213 @@
+<script type="text/javascript">
+    $( function() {
+		$("#nilai_sewa").autoNumeric(window.numOptions);
+        		
+    });
+
+    $( function() {
+        		
+        $("#resume").validate({
+            rules: {
+                no_mou: "required",
+                tgl_mou: "required",
+                penyewa: "required",
+                jenis_aset: "required",
+				lokasi: "required",
+                nilai_sewa: "required",
+                mulaix: "required",
+                akhirx: "required",
+                skema_bayar: "required"
+            },
+            messages: {
+                no_mou: "Mohon diisi nomor MOU yang diajukan ",
+                tgl_mou: "Mohon diisi tanggal MOU yang diajukan",
+                penyewa: "Mohon diisi nama penyewa aset yang diajukan",
+                jenis_aset: "Mohon diisi jenis aset yang diajukan",
+				lokasi: "Mohon diisi lokasi aset yang diajukan",
+                nilai_sewa: "Mohon diisi nilai sewa aset yang diajukan",
+                mulaix: "Mohon diisi tanggal awal aset yang diajukan",
+                akhirx: "Mohon diisi tanggal akhir aset yang diajukan",
+                skema_bayar: "Mohon diisi skema pembayaran yang diajukan"
+            },
+			submitHandler: function(form){
+                console.log('masuk submit');
+				$("#nilai_sewa").val($("#nilai_sewa").autoNumeric('get'));
+				form.submit();
+                return false;
+			}
+        });		
+    });
+</script>
+    <form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_ASET);?>" method="POST" id="resume" name="resume" accept-charset="UTF-8">
+	    <article class="module width_full">
+    		<header><h3>Input Ringkasan MOU Pendatapan Lainnya Penyewaan Aset</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+				</center>
+	<form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_ASET);?>" method="POST" id="resume" name="resume" accept-charset="UTF-8">
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_mou\" id=\"id_mou\" value=\"$isi_mou->id_mou\" />";
+        } ?>
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak Sewa Aset Insidentil</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Nomor MOU</td>
+                        <td><input type="text" id="no_mou" name="no_mou" 
+                        placeholder="Nomor MOU " size="40"
+                        <?php if(isset($isi_mou->no_mou)) echo "value=\"$isi_mou->no_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td><input type="text" id="tgl_mou" name="tgl_mou" 
+                        placeholder="Tanggal MOU" size="40"
+                        <?php if(isset($isi_mou->tgl_mou)) echo "value=\"$isi_mou->tgl_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Penyewa</td>
+                        <td><input type="text" id="penyewa" name="penyewa" 
+                        placeholder="Penyewa Aset" size="40"
+                        <?php if(isset($isi_mou->pemberi)) echo "value=\"$isi_mou->pemberi\""; ?>
+                        />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jenis Sewa Aset</td>
+                        <td><input type="text" id="jenis_aset" name="jenis_aset"
+                         placeholder="Jenis Sewa Aset" size="40"
+                         <?php if(isset($isi_mou->jenis)) echo "value=\"$isi_mou->jenis\""; ?>
+                         />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lokasi Aset</td>
+                        <td><input type="text" id="lokasi" name="lokasi" 
+                        placeholder="Lokasi Tempat Aset" size="40"
+                        <?php if(isset($isi_mou->tempat)) echo "value=\"$isi_mou->tempat\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Sewa</td>
+                        <td><input type="text" id="nilai_sewa" name="nilai_sewa"
+                        placeholder="Nilai Sewa Aset" size="40"
+                        <?php if(isset($isi_mou->nilai)) echo "value=\"$isi_mou->nilai\""; ?>
+                        />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Jangka Waktu Sewa</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Mulai</td>
+                        <td><input type="text" id="mulaix" name="mulaix"
+                        placeholder="Tanggal dimulainya penyewaan aset" 
+                        size="40" id="mulaix"
+                        <?php if(isset($isi_mou->mulai)) echo "value=\"$isi_mou->mulai\""; ?>
+                        /></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Berakhir</td>
+                        <td><input type="text" id="akhirx" name="akhirx"
+                         placeholder="Tanggal berakhirnya penyewaan aset"
+                         size="40" id="akhirx"
+                         <?php if(isset($isi_mou->akhir)) echo "value=\"$isi_mou->akhir\""; ?>
+                         /></td>
+                    </tr>
+                     <tr>
+                    <?php
+                        if(isset($isi_mou->skema_bayar)){
+                            $skb=$isi_mou->skema_bayar;
+                        }else{
+                            $skb='';
+                        }
+                    ?>
+                        <td>Skema Pembayaran</td>
+                        <td><?php echo form_dropdown("skema_bayar",$skema_bayar,$skb,"id='skema_bayar'"); ?></td>
+                    </tr>
+                    
+                </table>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+
+        </article>
+      </form>
+        <!-- end of styles article --> 
+        <script>
+            $(function() {
+        				$( "#tgl_mou" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+                        $( "#mulaix" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+                        $( "#akhirx" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+        
+		 var counter=0;
+            		function addRow(tableID) {
+            		  
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount);
+            
+            			var nama = row.insertCell(0);
+            			var inp_nama = document.createElement("input");
+            			inp_nama.type="text";
+                        inp_nama.name= "nama["+counter+"]";
+            			nama.appendChild(inp_nama);
+                        
+                        var unit = row.insertCell(1);
+            			var inp_unit = '<select name="unit['+counter+']">'+$('#unit').html()+'</select>';
+            			unit.innerHTML=inp_unit;
+                        
+                       /** var fee = row.insertCell(2);
+            			var inp_fee = document.createElement("input");
+            			inp_fee.type="text";
+                        inp_fee.name= "fee["+counter+"]";
+            			fee.appendChild(inp_fee);
+                       **/ 
+            			var cell4 = row.insertCell(2);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_nama.focus();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+                    
+                    $(function() {
+        				$( "#tgl_sk" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+        </script>

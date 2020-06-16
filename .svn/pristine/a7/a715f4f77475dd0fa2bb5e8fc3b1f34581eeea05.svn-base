@@ -1,0 +1,38 @@
+<table><br></table>  
+    <table  class="table-common" id="hasil" style= "width: 870px"; >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Kode MAK</th>
+                <th>No. SPTB</th>
+                <th>Tanggal</th>
+                <th>Jumlah</th>
+                <th colspan="2">Action</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil ==""){
+                 echo "<tr><td colspan='6' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;
+                      $tes = $row->no_sptb;
+                      $nomor = substr("$tes",19);
+                ?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="center"><?php echo $row->kdgiat;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td align="center"><?php echo $row->no_sptb; ?> </td>
+                    <td align="center"><?php echo $row->tgl_sptb; ?> </td>
+                    <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>    
+                    <?php if( $row->id_status_sptb==32){?>  
+                    <td align="center"><a href="<?php echo base_url();?>sptb/preview_sptb/<?php echo $row->id_sptb;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                    <td align="center"><a href="<?php echo base_url();?>spp/simpan_spp/<?php echo $row->sifat_bayar; ?>/<?php echo $row->id_sptb;?>" title="Buat SPP" onclick="return confirm('Apakah Anda Yakin untuk Membuat SPP ... ?')" ><img src="<?php echo base_url(); ?>asset/images/add.png"/></a></td>
+                    <?php }else {?>
+                    <td align="center"><a href="<?php echo base_url();?>sptb/preview_sptb/<?php echo $row->id_sptb;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                    <td align="center"><a href='#' title='Buatkan SPP' onclick="return alert('SPTB ini sudah dibuatkan SPP')"><img src='<?php echo base_url();?>asset/images/like.png'></a></td>
+                    <?php } ?>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+</table>      

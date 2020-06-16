@@ -1,0 +1,31 @@
+<article class="module width_full">
+    <header><h3><?php echo $judul; ?></h3></header>
+        <div class="module_content">
+            <div id="jpen" style="margin-right: 10px; float:left; ">
+                Jenis Penerimaan<br/>
+                <?php echo form_dropdown("je_pen",$jen_pen,"","id='je_pen'"); ?>
+            </div>
+            <div id="cr" style="margin-right: 10px;float:left;">
+                Tampilkan:<br/>
+                <input type="button" id="cri" value="Tampilkan" onclick="ambildata()" />
+            </div>
+        </div>
+</article>
+
+<div id="inp_frm"></div>
+
+<script type="text/javascript">
+    function ambildata(){
+        var jp= $("#je_pen").val();
+        $('#inp_frm').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+        $.ajax({
+                type: "POST",
+                url : "<?php echo $link;?>",
+                data: { jen_pen: jp},
+                success: function(msg){
+                        $('#inp_frm').html('');
+                        $('#inp_frm').html(msg);
+                }
+        });
+    }
+</script>

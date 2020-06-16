@@ -1,0 +1,159 @@
+<script type="text/javascript">
+<!--
+    $( function() {
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+		
+		$("#nilai_rencana").autoNumeric(numOptions);
+        		
+    });
+
+    $().ready( function() {
+        		
+        $("#resume").validate({
+            rules: {
+                no_mou: "required",
+                tgl_mou: "required",
+                no_rencana: "required",
+                jenis_investasi: "required",
+				nama_rencana: "required",
+                uraian_rencana: "required",
+                jangka_waktu: "required",
+                nilai_rencana: "required",
+                skema_bayar: "required",
+				periode: "required"
+				                
+            },
+            messages: {
+                no_mou: "Mohon diisi nomor MOU yang diajukan ",
+                tgl_mou: "Mohon diisi tanggal MOU yang diajukan",
+                no_rencana: "Mohon diisi nomor investasi yang diajukan",
+                jenis_investasi: "Mohon diisi jenis investasi yang diajukan",
+				nama_rencana: "Mohon diisi nama rencana investasi yang diajukan",
+                uraian_rencana: "Mohon diisi uraian rencana investasi yang diajukan",
+                jangka_waktu: "Mohon diisi jangka waktu investasi yang diajukan",
+                nilai_rencana: "Mohon diisi nilai rencana investasi yang diajukan",
+                skema_bayar: "Mohon diisi skema pembayaran yang diajukan",
+				periode: "Mohon diisi periode investasi yang diajukan"
+				
+            },
+			submitHandler: function(form){
+				$("#nilai_rencana").val($("#nilai_rencana").autoNumeric('get'));
+				form.submit();
+			}
+        });		
+    });
+-->
+</script>
+    <form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_INVESTASI);?>" method="POST" id="resume" name="resume" accept-charset="UTF-8">
+	    <article class="module width_full">
+    		<header>
+  <h3>Input Ringkasan MOU Pendapatan Lain</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+				</center>
+	
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_mou\" id=\"id_mou\" value=\"$isi_mou->id_mou\" />";
+        } ?>
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak Investasi Idle Cash</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No MOU</td>
+                        <td><input type="text" id="no_mou" name="no_mou" 
+                        placeholder="Nomor untuk MOU" size="40"
+                        <?php if(isset($isi_mou->no_mou)) echo "value=\"$isi_mou->no_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td><input type="text" id="tgl_mou" name="tgl_mou" 
+                        placeholder="Tanggal pembuatan MOU" size="40"
+                        <?php if(isset($isi_mou->tgl_mou)) echo "value=\"$isi_mou->tgl_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                    	<td>No Rencana</td>
+                        <td><input type="text" id="no_rencana" name="no_rencana" 
+                        placeholder="Nomor rencana investasi" size="40" 
+                        <?php if(isset($isi_mou->no_rencana)) echo "value=\"$isi_mou->no_rencana\""; ?>
+                        /></td>
+                    </tr>
+                    <?php
+                        if(isset($isi_mou->jenis)){
+                            $jnsinv=$isi_mou->jenis;
+                        }else
+                            $jnsinv='';
+                    ?>
+                    <tr>
+                    	<td>Jenis Investasi</td>
+                        <td><?php echo form_dropdown("jenis_investasi",$jenis_investasi,$jnsinv,"id='jenis_investasi'"); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Nama Rencana</td>
+                        <td><textarea name="nama_rencana" id="nama_rencana" 
+                        cols="35" rows="3" placeholder="Nama Rencana Investasi Idle Cash"/><?php if(isset($isi_mou->pemberi)) echo $isi_mou->pemberi; ?></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>Uraian Rencana</td>
+                        <td><textarea name="uraian_rencana" id="uraian_rencana" 
+                        cols="35" rows="3" placeholder="Uraian Rencana Investasi Idle Cash"><?php if(isset($isi_mou->uraian)) echo $isi_mou->uraian; ?></textarea></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jangka Waktu</td>
+                        <td><input type="text" id="jangka_waktu" name="jangka_waktu"
+                         placeholder="Jangka Waktu Investasi" size="40"
+                         <?php if(isset($isi_mou->jangka_waktu)) echo "value=\"$isi_mou->jangka_waktu\""; ?>
+                         />*)bulan</td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Rencana</td>
+                        <td><input type="text" id="nilai_rencana" name="nilai_rencana" 
+                        placeholder="Nilai dari rencana Investasi Idle Cash" size="40"
+                        <?php if(isset($isi_mou->nilai)) echo "value=\"$isi_mou->nilai\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <?php
+                            if(isset($isi_mou->skema_pembayaran)){
+                                $skp=$isi_mou->skema_pembayaran;
+                            }else
+                                $skp='';
+                        ?>
+                        <td>Skema Penerimaan</td>
+                        <td><?php echo form_dropdown("skema_bayar",$skema_bayar,$skp,"id='skema_bayar'"); ?></td>
+                    </tr>
+                    <tr>
+                    	<td>Periode</td>
+                        <td><input type="text" id="periode" name="periode" 
+                        placeholder="Periode penerimaan rencana Investasi Idle Cash" size="40"
+                        <?php if(isset($isi_mou->periode)) echo "value=\"$isi_mou->periode\""; ?>
+                        /></td>
+                    </tr>
+                </table>
+                
+                <script language="javascript">
+                    $(function() {
+        				$( "#tgl_mou" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+            
+            	</script>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+        </article>
+    </form>
+        <!-- end of styles article --> 

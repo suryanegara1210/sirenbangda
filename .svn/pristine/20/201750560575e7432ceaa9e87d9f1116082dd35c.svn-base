@@ -1,0 +1,47 @@
+<?php echo form_dropdown("kdkomponen2", $option_komponen2,'',"id='kdkomponen2' style='width:450px;' "); ?> 
+<script type="text/javascript">
+          $("#kdkomponen2").change(function(){
+                var selectValues = $("#kdkomponen2").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"kdkomponen2\" disabled><option value=\"Pilih Komponen\">Pilih komponen Dahulu</option></select>";
+                    $('#akun').html(msg);
+                }else{
+                    var kdoutput = $("#kdoutput2").val();
+                    var jns_kwitansi = $("#jns_kwitansi").val();
+                    var kdkomponen = $("#kdkomponen2").val();
+					//alert(kdoutput, jns_kwitansi);
+					var dataString  = 'kdoutput2='+ kdoutput + '&jns_kwitansi=' + jns_kwitansi + '&kdkomponen2=' + kdkomponen;	
+                    $('#id_akun').attr("disabled",true);
+                    $.ajax({
+                           type: "POST",
+                            url : "<?php echo site_url('gup/select_countsubkomponen2')?>",
+                            data: dataString,
+                            success: function(msg){
+                               count = msg;	
+							   var A = '';
+							   var B = '';
+							   //alert(count);
+							   if(count==0){
+								   $('#val').val(0);
+								   A = "<?php echo site_url('gup/select_akun2')?>";
+								   B = '#akun3';
+								   $('#kdskomponen2').val(0);
+								   $('#kdskomponen2').attr("disabled",true);
+							   }else{
+								   $('#val').val(1);
+								   A = "<?php echo site_url('gup/select_subkomponen2')?>";
+								   B = '#subkomponen2';
+							   }
+							   		$.ajax({
+										type: "POST",
+										url : A,
+										data: dataString,
+										success: function(msg){
+											$(B).html(msg);
+										}
+									});
+                            }
+                      });
+                }
+        });
+       </script>

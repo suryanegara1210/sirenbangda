@@ -1,0 +1,19 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_desa extends CI_Model 
+{
+	var $table = 'm_desa';
+    public function __construct()
+    {
+        parent::__construct();           
+    }    
+
+	function get_desa_autocomplete($search, $id_kec){		
+		$this->db->select('id_desa AS id, nama_desa AS label');		
+		$this->db->where('id_kec', $id_kec);
+		$this->db->like('nama_desa', $search);
+		$result = $this->db->get($this->table);
+		return $result->result();
+	}
+}
+?>

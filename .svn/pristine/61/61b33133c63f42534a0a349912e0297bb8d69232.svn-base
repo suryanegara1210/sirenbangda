@@ -1,0 +1,66 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Evaluasi_renja extends CI_controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));        
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_urusan', 'm_bidang', 'm_program', 'm_kegiatan','m_kendali','m_skpd'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();
+		//$data['url_delete_data'] = site_url('cik/delete_cik');
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		//$data['program'] =  $this->m_kendali->get_program_rka_4_cetak($id_skpd,$tahun);
+		$this->template->load('template','evaluasi/evaluasi_renja_view');
+	}
+	
+	function cru_evaluasi_renja(){
+		//$this->output->enable_profiler(true);
+		//$id 	= $this->input->post('id');
+		//$tahun	= $this->m_settings->get_tahun_anggaran();
+
+		//$data['id_kendali'] = $id;
+		//$data['kendali'] = $this->m_kendali->get_kendali_renja($id,$tahun);
+		//echo $this->db->last_query();
+
+		$this->load->view("evaluasi/cru_evaluasi_renja");
+	}
+	
+	private function cetak_evaluasi_renja_func($id_skpd){
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$data['evaluasi_type'] = "EVALUASI RENJA";
+		
+		
+		$data1['ta'] = $tahun;
+		//$data1['program'] = $this->m_kendali->get_program_rka_4_cetak($id_skpd,$tahun);
+		$data['ta'] = $tahun;
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+		$data['evaluasi'] = $this->load->view('evaluasi/cetak/isi_evaluasi_renja', $data1, TRUE);
+		return $data;
+	}
+	function preview_evaluasi_renja(){
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+
+		/*$skpd = $this->m_kendali->get_one_kendali_renja($id_skpd, TRUE);
+		if (!empty($skpd)) {
+			$data = $this->cetak_kendali_renja_func($id_skpd);
+			$this->template->load('template', 'kendali_renja/preview_kendali_renja', $data);
+		}else{
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'Data kendali renja tidak tersedia.');
+			redirect('home');
+		}*/
+		$data = $this->cetak_evaluasi_renja_func($id_skpd);
+		$this->template->load('template', 'evaluasi/preview_evaluasi_renja',$data);
+	}
+
+}

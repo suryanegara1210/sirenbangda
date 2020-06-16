@@ -1,0 +1,312 @@
+<?php class Jq_uraian_tup extends CI_Controller {
+
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->helper(array('url'));
+        $this->load->model('m_uraian_tup');
+        $this->load->database();
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA DARI INDEX URAIAN TUP
+*/ 
+    function index()
+    {
+            $this->load->view('user_grid');
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA USER DARI URAIAN TUP
+*/
+   function tampil_datauser(){
+        $id_subunit = $this->uri->segment(3);
+        $kdoutput = $this->uri->segment(4);
+        $kdkomponen = $this->uri->segment(5);
+		$kdskomponen = $this->uri->segment(6);
+        $kdakun = $this->uri->segment(7);
+        $id_header = $this->uri->segment(8);    
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_uraian'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+            $where.="and id_subunit='$id_subunit' and kdoutput='$kdoutput' and kdkomponen='$kdkomponen' and kdskomponen='$kdskomponen' and kdakun='$kdakun' and hdr='$id_header'";
+        } else{
+            $where.=" id_subunit='$id_subunit' and kdoutput='$kdoutput' and kdkomponen='$kdkomponen' and kdskomponen='$kdskomponen' and kdakun='$kdakun' and hdr='$id_header'";
+        }                                          
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->m_uraian_tup->banyak_semua(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->m_uraian_tup->ambilDatauser($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        $responce = new stdClass();
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_uraian;
+            $responce->rows[$i]['cell']=array($row->uraian,$row->volume,$row->satuan,$row->harga_satuan,$row->jumlah); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+	
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA USER URAIAN TUP
+*/
+    function crud(){ 
+        $this->load->model('m_uraian_tup');
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];
+        $id_subunit=$_POST['id_subunit'];  
+        $kdoutput=$_POST['kdoutput'];  
+        $kdkomponen=$_POST['kdkomponen'];
+		$kdskomponen=$_POST['kdskomponen'];    
+        $kdakun=$_POST['kdakun'];  
+        $hdr=$_POST['hdr'];  
+        $nmoutput=$_POST['nmoutput'];  
+        $nmkomponen=$_POST['nmkomponen'];
+		$nmskomponen=$_POST['nmskomponen'];  
+        $nmakun=$_POST['nmakun'];  
+        $nmheader=$_POST['header'];  
+        $uraian=$_POST['uraian']; 
+        $volume=$_POST['volume']; 
+        $satuan=$_POST['satuan']; 
+        $harga_satuan=$_POST['harga_satuan']; 
+        $id_jenisbelanja=$_POST['id_jenisbelanja']; 
+        $jumlah= $volume*$harga_satuan;   
+                
+        switch ($oper) {
+            case 'add':
+                $user->id_subunit=$id_subunit;
+                $user->id_jenisbelanja=$id_jenisbelanja;
+                $user->kdoutput=$kdoutput;
+                $user->nmoutput=$nmoutput;
+                $user->kdkomponen=$kdkomponen;
+				$user->kdskomponen=$kdskomponen;
+                $user->nmkomponen=$nmkomponen;
+				$user->nmskomponen=$nmskomponen;
+                $user->kdakun=$kdakun;
+                $user->nmakun=$nmakun;
+                $user->hdr=$hdr;
+                $user->nmheader=$nmheader;
+                $user->uraian=$uraian;
+                $user->volume=$volume;
+                $user->kode_value=$satuan;
+                $user->harga_satuan=$harga_satuan;
+                $user->jumlah=$jumlah;   
+                $this->m_uraian_tup->add_artis($user);
+                break;
+            case 'edit':  
+                $user->uraian=$uraian;
+                $user->volume=$volume;
+                $user->kode_value=$satuan;
+                $user->harga_satuan=$harga_satuan;
+                $user->jumlah=$jumlah; 
+                $this->m_uraian_tup->update_artis($user, $id);
+                break;
+            case 'del':
+                $this->m_uraian_tup->delete_artis($id);
+            break;
+        }
+    }  
+	
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA TABEL URAIAN TUP
+*/
+    function tampil_uraian(){
+        $id_subunit = $this->uri->segment(3);
+        $kdoutput = $this->uri->segment(4);
+        $kdkomponen = $this->uri->segment(5);
+		$kdskomponen = $this->uri->segment(6);
+        $kdakun = $this->uri->segment(7);
+        $id_header = $this->uri->segment(8);    
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_uraian'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+            $where.="and id_subunit='$id_subunit' and kdoutput='$kdoutput' and kdkomponen='$kdkomponen' and kdakun='$kdakun' and hdr='$id_header' and id_jenisbelanja=2";
+        } else{
+            $where.=" id_subunit='$id_subunit' and kdoutput='$kdoutput' and kdkomponen='$kdkomponen' and kdakun='$kdakun' and hdr='$id_header' and id_jenisbelanja=2";
+        }                                   
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->m_uraian_tup->banyak_semua(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->m_uraian_tup->ambilDatauser($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query(); 
+         
+        $responce = new stdClass(); 
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_uraian;
+            $responce->rows[$i]['cell']=array($row->uraian,$row->volume,$row->satuan,$row->harga_satuan,$row->jumlah); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL URAIAN TUP
+*/
+    function crud_uraian(){ 
+        $this->load->model('m_uraian_tup');
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];
+        $kode_unit=$_POST['id_subunit'];  
+        $id_transaksi=$_POST['id_transaksi'];  
+        $kdoutput=$_POST['kdoutput'];  
+        $kdkomponen=$_POST['kdkomponen'];  
+        $kdakun=$_POST['kdakun'];  
+        $hdr=$_POST['hdr'];  
+        $nmoutput=$_POST['nmoutput'];  
+        $nmkomponen=$_POST['nmkomponen'];  
+        $nmakun=$_POST['nmakun'];  
+        $nmheader=$_POST['header'];  
+        $uraian=$_POST['uraian']; 
+        $volume=$_POST['volume']; 
+        $satuan=$_POST['satuan']; 
+        $flag_cek=1; 
+        $harga_satuan=$_POST['harga_satuan']; 
+        $id_jenisbelanja=$_POST['id_jenisbelanja']; 
+        $jumlah= $volume*$harga_satuan;   
+        
+        
+        switch ($oper) {
+            case 'add':
+                $user->id_subunit=$kode_unit;
+                $user->id_jenisbelanja=$id_jenisbelanja;
+                $user->kdoutput=$kdoutput;
+                $user->nmoutput=$nmoutput;
+                $user->kdkomponen=$kdkomponen;
+                $user->nmkomponen=$nmkomponen;
+                $user->kdakun=$kdakun;
+                $user->nmakun=$nmakun;
+                $user->hdr=$hdr;
+                $user->nmheader=$nmheader;
+                $user->uraian=$uraian;
+                $user->volume=$volume;
+                $user->kode_value=$satuan;
+                $user->harga_satuan=$harga_satuan;
+                $user->jumlah=$jumlah;   
+                $user->flag_cek=$flag_cek;   
+                $user->id_transaksi=$id_transaksi;   
+                $this->m_uraian_tup->add_artis($user);   
+                break;
+            case 'edit':  
+                $user->uraian=$uraian;
+                $user->volume=$volume;
+                $user->kode_value=$satuan;
+                $user->harga_satuan=$harga_satuan;
+                $user->jumlah=$jumlah; 
+                $this->m_uraian_tup->update_artis($user, $id);
+                break;
+            case 'del':
+                $this->m_uraian_tup->delete_artis($id);
+            break;
+        }
+    }  
+}  

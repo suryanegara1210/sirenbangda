@@ -1,0 +1,1083 @@
+<?php
+
+/**
+ *
+ */
+class Spm extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {
+        $this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_spm', 'm_usulan',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas'));
+								 
+		date_default_timezone_set('Etc/GMT-8');
+    }
+
+    function create()
+    {
+        $this->auth->restrict();
+
+        $idu                    = $this->session->userdata('id_unit');
+        $su                     = $this->session->userdata('id_subunit');
+        $ta                     = $this->m_settings->get_tahun_anggaran();
+        $data['nama_unit']      = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit']     = $this->m_umum->get_nama_sunit_by_id($su);
+
+        $non_kw                 = array('SAH');
+        $data['sifat_bayar']    = $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+
+        }
+
+         $jb                    = $this->uri->segment(3);
+         $id_unit               = $this->session->userdata('id_unit');
+         $data['jns_usulan']    = $jb;         
+         $ta                    = $this->m_settings->get_tahun_anggaran();
+
+         if($jb != ""){
+             if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP ){
+                 $id_status             = 52;
+                 $sum_usulan=$this->m_spm->get_sum_usulan($ta,$jb,$id_unit);
+                 $data['sum_usulan']    = $sum_usulan->jumlah;
+                 $data['max_up']        = $this->m_spm->get_max_up($id_unit, $ta)/2;
+                 $data['hasil']         = $this->m_spm->get_view_list_spm_usulan($ta,$jb,$id_unit,5);
+             }else{
+                 $id_status     = 42;
+                 $data['hasil'] = $this->m_spm->get_view_list_spm($ta,$jb,$id_unit,$id_status);
+             }
+         }
+         echo $this->db->last_query();
+        $this->template->load('template','spm/buat_spm',$data);
+    }
+
+    function get_view_list_spp()
+    {
+         $this->auth->restrict();
+
+         $jb = $this->input->post('jenisblj');
+         $id_unit = $this->session->userdata('id_unit');
+         $data['jns_usulan'] = $jb;         
+         $ta = $this->m_settings->get_tahun_anggaran();
+
+             if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP ){
+                 $id_status             = 52;
+                 $data['sum_usulan']    = $this->m_spm->get_sum_usulan($ta,$jb,$id_unit);
+                 $data['max_up']        = $this->m_spm->get_max_up($id_unit, $ta);
+                 $data['hasil']         = $this->m_spm->get_view_list_spm_usulan($ta,$jb,$id_unit,5);
+             } else {
+                 $id_status             = 42;
+                 $data['hasil']         = $this->m_spm->get_view_list_spm($ta,$jb,$id_unit,$id_status);
+             }
+
+         $this->load->view('spm/view_spp',$data);
+    }
+
+    function pengisian_spm(){
+          $this->auth->restrict();
+
+          $id_unit              = $this->session->userdata('id_unit');
+          $jb                   = $this->uri->segment(3);
+          $data['jb']           = $jb;
+          $id                   = $this->uri->segment(4);
+          $data['cara_bayar']   = $this->m_lov->get_list_lov(Constant::KAP_CARA_BAYAR);
+          $data['nama_unit']    = $this->m_umum->get_nama_unit_by_id($id_unit);
+          $ta                   = $this->m_settings->get_tahun_anggaran();
+
+          if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP){
+             $data['sum_usulan']    = $this->m_spm->get_sum_usulan($ta,$jb,$id_unit);
+             $data['spp']           = $this->m_spm->isi_spm_usulan($id_unit,$ta,$jb);
+          }else{
+             $data['spp']           = $this->m_spm->spp($id,$id_unit,$ta,$jb);
+             $query = $data['spp'];
+             $spp = $query->row();
+          }
+
+          $data['uraian_spm']=null;
+          if($jb == Constant::JB_UP){
+            $data['uraian_spm'] = 'Pembayaran Uang Persedian (UP) pada '. $data['nama_unit'] .'.';
+          }elseif($jb == Constant::JB_TUP){
+            $data['uraian_spm'] = 'Pembayaran Tambahan Pembayaran Uang Persedian (UP) pada '. $data['nama_unit'] .'.';
+          }elseif($jb == Constant::JB_GUP){
+            $data['uraian_spm'] = 'Penggantian Uang Persedian (UP) untuk keperluan '. $spp->nmakun .' pada '. $data['nama_unit'] .'.';
+          }elseif($jb == Constant::JB_LS){
+            $data['uraian_spm'] = 'Pembayaran '. $spp->nmakun .' pada '. $data['nama_unit'] .' Sesuai Daftar Honor.';
+          }
+
+          $this->template->load('template','spm/pengisian_spm',$data);
+    }
+
+    function simpan_spm(){
+		//$this->output->enable_profiler(true);
+       $this->auth->restrict();
+          $id_unit = $this->session->userdata('id_unit');
+          $id      = $this->input->post('id');
+          $ta      = $this->m_settings->get_tahun_anggaran();
+          $jb      = $this->input->post('jb');
+          $id_spp  = $id;
+            if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP){
+                    $kwitansi       = 0;
+                    $status_where   = 5;
+                    $status_set     = 6;
+                    $this->m_spm->simpan_spm($ta,$id,$id_unit,$jb,$kwitansi,$status_set,$status_where);
+                    // to do log history spm
+                    $this->session->set_userdata('msg_typ','ok');
+                    $this->session->set_userdata('msg', 'SPM berhasil disimpan');
+                    redirect('spm/create');
+            }else{
+                $success = $this->m_spm->cek_spp_spm($id_spp,$ta);
+                if($success){
+                  $this->session->set_userdata('msg_typ','err');
+                  $this->session->set_userdata('msg', 'SPP ini sudah di spm-kan');
+                  redirect('spm/create');
+                }else{
+                    $kwitansi = $this->m_spm->selek_kwitansi($id_spp,$ta);
+                    $this->m_spm->simpan_spm($ta,$id_spp,$id_unit,$jb,$kwitansi);
+                     // to do log history spm
+                    $this->session->set_userdata('msg_typ','ok');
+                    $this->session->set_userdata('msg', 'SPM berhasil disimpan');
+                    redirect('spm/create/'.$jb.'');
+                }
+           }
+
+   }
+   function daftar_spm_filter(){
+        $level = $this->session->userdata('level');
+        //echo $this->session->userdata('level');
+        /*if($level == 3){ //untuk BK
+            $data['id_status'] = '2,3,4,5,6,7,8,9';
+        }else if($level == 4){ // untuk penerima
+            $data['id_status'] = '3,4,5,6,7,8,9';
+        }else if($level == 5){ // untuk verifikasi pusat
+            $data['id_status'] = '4,5,6,7,8,9';
+        }else if($level == 6){ // untuk subag dm
+            $data['id_status'] = '5,6,7,8,9';
+        }else if($level == 7){ // untuk kabag keu
+            $data['id_status'] = '6,7,8,9';
+        }else if($level == 8){ // untuk ppsp2d
+            $data['id_status'] = '7,8,9';
+        }*/
+        $this->template->load('template','spm/daftar_spm_filter');
+    }
+
+    function tampil_spm(){
+        $this->auth->restrict();
+        $id_status = $this->input->post('id_status');
+        $id_unit   = $this->session->userdata('id_unit');
+        if($id_unit!=""){
+            $bulan = $this->input->post('bulan');
+            $tahun = $this->input->post('tahun');
+            $data['hasil']= $this->m_spm->get_spp_filter($tahun,$bulan,$id_unit,$id_status);
+			//echo $this->db->last_query();
+            $this->load->view('spm/tampil_spm',$data);
+        }else{
+            $bulan = $this->input->post('bulan');
+            $tahun = $this->input->post('tahun');
+            $data['hasil']= $this->m_spm->get_spp_filter($tahun,$bulan,0,$id_status);
+			//echo $this->db->last_query();
+            $this->load->view('spm/tampil_spm',$data);
+        }
+
+    }
+
+    function preview_spm()
+    {
+    	$this->auth->restrict();
+        $id_unit = $this->session->userdata('id_unit');
+        $id_spm = $this->uri->segment(3);
+        $jns_usulan = $this->uri->segment(4);
+        $tgl_skrg = date("Y-m-d");
+        $jam_skrg = date("H:i:s");
+        $data['tgl'] = $tgl_skrg;
+        $data['jam'] = $jam_skrg;
+        $data['tahun_anggaran']  = $this->m_settings->get_tahun_anggaran();
+        $ta  = $this->m_settings->get_tahun_anggaran();
+
+        if($jns_usulan == Constant::JB_UP  || $jns_usulan == Constant::JB_TUP){
+
+            $detail_spm = $this->m_spm->detail_spm_usulan($id_spm,$ta);
+            $data['detail_spm']=$detail_spm;            
+            //echo $this->db->last_query();
+        }else{
+            $detail_spm = $this->m_spm->detail_spm_kwitansi($id_spm,$ta);
+            $data['detail_spm']=$detail_spm;
+            //echo $this->db->last_query();
+        }
+        $cb_list  = $this->m_lov->get_list_lov(Constant::KAP_CARA_BAYAR);
+        foreach($detail_spm->result_array() as $row){
+            $cb[] = $row['cara_bayar'];
+        }
+        foreach ($cb_list as $row) {
+            if (in_array($row->kode_value, $cb)) {
+                $data['carabayar']  = $row->nama_value;
+            }
+        }        
+
+        $this->template->load('template','spm/preview_spm',$data);
+    }
+
+	function preview_spm2(){
+        $this->auth->restrict();
+            $id_unit = $this->session->userdata('id_unit');
+            $id_spm = $this->uri->segment(3);
+            $jns_usulan = $this->uri->segment(4);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $data['tahun_anggaran']  = $this->m_settings->get_tahun_anggaran();
+            $ta  = $this->m_settings->get_tahun_anggaran();
+
+            if($jns_usulan == Constant::JB_UP  || $jns_usulan == Constant::JB_TUP){
+                $data['detail_spm'] = $this->m_spm->detail_spm_usulan($id_spm,$ta);
+                //echo $this->db->last_query();
+            }else{
+                $data['detail_spm'] = $this->m_spm->detail_spm_kwitansi($id_spm,$ta);
+                //echo $this->db->last_query();
+            }
+
+            $this->template->load('template','spm/preview_spm2',$data);
+        }
+
+    function print_spm($download_pdf = ''){
+             $this->auth->restrict();
+             $id_unit = $this->session->userdata('id_unit');
+             $sp = $this->uri->segment(3);
+             $id_spm = $this->uri->segment(4);
+             $ta  = $this->m_settings->get_tahun_anggaran();
+             $data['tgl'] = date('Y-m-d');
+             $ret = '';
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i");
+             $pdf_filename='SPM_'.$sp.'/'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'spm/print_spm/true/','Download Pdf');
+
+            //$this->load->model('m_gup');
+            $this->m_spm->update_print_spm($id_spm,$ta);
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $data['tahun_anggaran']  = $this->m_settings->get_tahun_anggaran();
+            //$data['carabayar'] = $this->m_gup->get_carabayar();
+            
+            if($sp == Constant::JB_UP  || $sp == Constant::JB_TUP){
+                $detail_spm = $this->m_spm->detail_spm_usulan($id_spm,$ta);
+                $data['detail_spm']=$detail_spm;            
+                //echo $this->db->last_query();
+            }else{
+                $detail_spm = $this->m_spm->detail_spm_kwitansi($id_spm,$ta);
+                $data['detail_spm']=$detail_spm;
+                //echo $this->db->last_query();
+            }
+            $cb_list  = $this->m_lov->get_list_lov(Constant::KAP_CARA_BAYAR);
+            foreach($detail_spm->result_array() as $row){
+                $cb[] = $row['cara_bayar'];
+            }
+            foreach ($cb_list as $row) {
+                if (in_array($row->kode_value, $cb)) {
+                    $data['carabayar']  = $row->nama_value;
+                }
+            }
+
+             $data['link'] = $link_download ;
+             $output = $this->load->view('spm/print_spm', $data,  true);
+
+             if($download_pdf==true)
+                generate_pdf_portrait($output,$pdf_filename);
+             else
+                echo $output;
+    }
+
+    function otorisasi_spm()
+    {
+		$this->auth->restrict();
+
+		$id = $this->uri->segment(3);
+		$jb = $this->uri->segment(4);
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$recek_kel = $this->m_spm->recheck_kelengkapan($id,$ta);
+
+		if($recek_kel>0){
+		     $this->session->set_userdata('msg_typ','err');
+		     $this->session->set_userdata('msg', 'Anda Belum Mengunduh SPM');
+		     redirect('spm/otorisasi');
+		} else {
+			$this->m_spm->update_status_spm($id,52);
+
+			//TODO: log history spm
+			//$trans = $this->m_spm->selek_data_spm($id,$ta,$jb);
+			//
+			//if(!in_array($jb, array(Constant::JB_UP, Constant::JB_TUP))){
+			//  foreach($trans->result_array() as $row){
+			//    $id_kwitansi = $row['id_kwitansi'];
+			//    $id_sptb     = $row['id_sptb'];
+			//    $id_spp      = $row['id_spp'];
+			//    //$this->m_spm->update_status_kwitansi($id_kwitansi,$ta,8);
+			//    //$this->m_spm->update_status_sptb($id_sptb,$ta,5);
+			//    //$this->m_spm->update_status_spp($id_spp,$ta,4);
+			//  }
+			//}
+
+			$this->session->set_userdata('msg_typ','ok');
+			$this->session->set_userdata('msg', 'SPM Berhasil Diotorisasi');
+			redirect('spm/otorisasi');
+		}
+    }
+
+    function verifikasi()
+    {
+    	//$this->output->enable_profiler(true);
+        //harus login
+    	$this->auth->restrict();
+
+    	//get user object
+    	$user  = $this->auth->get_user();
+        $ta    = $this->m_settings->get_tahun_anggaran();
+
+        $data['user'] = $user;
+
+	    if ($user->hasPrivilege('verify_spm_level_1')) {
+
+            $data['hasil']	= $this->m_spm->get_spm_siap_verifikasi($ta, Constant::SPM_LENGKAP);
+
+        } else if ($user->hasPrivilege('verify_spm_level_2')) {
+
+            $data['hasil']	= $this->m_spm->get_spm_siap_verifikasi($ta, Constant::SPM_VERIBLU);
+
+        } else if ($user->hasPrivilege('verify_spm_level_3')) {
+
+            $data['hasil']	= $this->m_spm->get_spm_siap_verifikasi($ta, Constant::SPM_VERIDM);
+
+        } else {
+
+	        $this->auth->has_no_privilege();
+	        return;
+        }
+
+        $this->template->load('template','spm/verifikasi_spm',$data);
+    }
+
+    function otorisasi()
+    {
+    	//harus login
+    	$this->auth->restrict();
+
+    	//pengecekan didepan, karena hanya satu saja
+    	$this->auth->has_privileges('otorisasi_spm');
+
+        $ta             = $this->m_settings->get_tahun_anggaran();
+        $idu			= $this->session->userdata('id_unit');
+        $data['hasil']  = $this->m_spm->get_spm_siap_otorisasi($ta, $idu);
+        $data['user']	= $this->auth->get_user();
+
+        $this->template->load('template','spm/otorisasi_spm',$data);
+    }
+
+    function siap_terotorisasi_x()
+    {
+    	//harus login
+    	$this->auth->restrict();
+
+    	//harus memiliki privilige verify_spm_level_1,
+    	//verify_spm_level_2, verify_spm_level_3
+    	$user = $this->auth->get_user();
+
+        $ta             = $this->m_settings->get_tahun_anggaran();
+
+        //TODO: Otorisasi SPM tidak berdasarkan id_unit user, semua unit harusnya
+        //terlihat. namun khusus untuk otorisasi dekan, khusus unit itu saja
+
+        $id_unit        = $this->session->userdata('id_unit');
+        $level          = $this->session->userdata('level');
+        $data['level']  = $this->session->userdata('level');
+
+        if($id_unit!=""){
+            $data['hasil']= $this->m_spm->siap_terotorisasi($id_unit,$ta,51);
+            $this->template->load('template','spm/siap_terotorisasi',$data);
+        }else{
+            if($level == "5"){
+                $data['hasil']= $this->m_spm->siap_terotorisasi(0,$ta,55);
+                $this->template->load('template','spm/siap_terotorisasi',$data);
+            }elseif($level == "6"){
+                $data['hasil']= $this->m_spm->siap_terotorisasi(0,$ta,56);
+                $this->template->load('template','spm/siap_terotorisasi',$data);
+            }elseif($level == "7"){
+                $data['hasil']= $this->m_spm->siap_terotorisasi(0,$ta,57);
+                $this->template->load('template','spm/siap_terotorisasi',$data);
+            }
+        }
+    }
+
+    function update_spm()
+    {
+          $this->auth->restrict();
+
+          $ta       = $this->m_settings->get_tahun_anggaran();
+          $id_spm   = $this->input->post('id_spm');
+          $this->m_spm->update_spm($id_spm,$ta);
+          redirect('spm/preview_spm/'.$id_spm);
+    }
+
+
+
+    //cek kelengkapan di petugas penerima Pusat
+    function list_spm_penerima()
+    {
+        $this->auth->restrict();
+
+        $ta                     = $this->m_settings->get_tahun_anggaran();
+        $data['sifat_bayar']    = $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+
+        $unit= $this->m_umum->unit_semua($tipe=constant::WITHOUT_ALL);
+        $unit['']='Semua Unit';
+        $data['unit']=$unit;
+
+        $this->template->load('template','spm/list_spm_penerima',$data);
+    }
+
+    function view_list_spm_penerima()
+    {
+         //$this->output->enable_profiler(TRUE);
+		 $this->auth->restrict();
+
+         $ta = $this->m_settings->get_tahun_anggaran();
+
+         $unit = $this->input->post('fak');
+         $jb = $this->input->post('jenisblj');
+         $data['jb']= $jb;
+         $bulan=DATE('m');
+         
+         if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP){            
+            $id_status = "52,54";
+            $data['hasil']= $this->m_spm->get_list_spm_usulan($ta, $id_status, $jb, $unit);
+             // to do log history spm
+         }else{            
+            $id_status = "53,54";
+            $data['hasil']= $this->m_spm->get_view_list_spm2($ta, $jb, $unit, $id_status);
+			//echo $this->db->last_query();
+             // to do log history spm
+         }
+         //$this->output->enable_profiler(true);         
+         $this->load->view('spm/view_daftar_spm',$data);
+    }
+    function veri(){
+            $this->auth->restrict();
+            $id = $this->uri->segment(3);
+            $jb = $this->uri->segment(4);
+            $ta  = $this->m_settings->get_tahun_anggaran();
+            $data['jenis_belanja'] = $this->uri->segment(4);
+            $success = $this->m_spm->cek_ada_veri($id,$ta);
+            if($success){
+                $success2 = $this->m_spm->cek_ada_veri_komplit($id,$ta);
+                if($success2){
+                   $this->session->set_userdata('msg_typ','err');
+                   $this->session->set_userdata('msg', 'Silahkan isi kembali kelengkapan yang akan direvisi');
+                   redirect('spm/data_terceklist2/'.$id."/".$jb);
+                }else{
+                   $this->session->set_userdata('msg_typ','err');
+                   $this->session->set_userdata('msg', 'Maaf SPM ini sudah dicek sebelumnya');
+                   redirect('spm/data_terceklist/'.$id."/".$jb);
+                }
+            }else {
+                if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                    $jenis  = 7;
+                    $status = 52;
+                }else{
+                    $jenis  = 8;
+                    $status = 53;
+                }
+                $data['umum'] = $this->m_spm->getSyaratUmum($jenis);
+                $data['khusus'] = $this->m_spm->getKhususList();
+                $data['daftar_spm'] = $this->m_spm->get_spm_pusat($id,$ta,$jb,$status);
+                $this->template->load('template','spm/cek_kelengkapan', $data);
+            }
+        }
+    function select_uraian(){
+          $this->auth->restrict();
+            $data['khusus'] = $this->m_spm->select_khusus();
+            $this->load->view('spm/get_khusus',$data);
+        }
+    function simpan_veri(){
+          $this->auth->restrict();
+             $id = $this->input->post('id_spm');
+             $jb = $this->input->post('jenis_belanja');
+             $ta  = $this->m_settings->get_tahun_anggaran();
+                    $this->m_spm->update_penyerah($id,$ta);
+                    $this->m_spm->insert_detail($id,$ta);
+                    if(isset($_POST['tes'] )){
+                        $this->m_spm->update_detail($id,$ta); // update checklist pd tabel detail veri
+                        $success = $this->m_spm->cek_ada_veri($id,$ta);
+                            if($success == true){
+                                $success2 = $this->m_spm->cek_ada_veri_komplit($id,$ta);
+                                if($success2){
+                                   $this->m_spm->update_status_spm($id,54);
+                                    // to do log history spm
+                                }
+                            }
+
+                        echo "<meta http-equiv='refresh' content='0; url=".site_url()."spm/list_spm_penerima/$jb'>";
+                    }else{
+                        echo "<meta http-equiv='refresh' content='0; url=".site_url()."spm/list_spm_penerima/$jb'>";
+                    }
+    }
+   function data_terceklist(){
+            $this->auth->restrict();
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $id = $this->uri->segment(3);
+            $jb = $this->uri->segment(4);
+            $data['jenis_belanja'] = $jb;
+            $ta  = $this->m_settings->get_tahun_anggaran();
+                $data['detail_daftar']= $this->m_spm->selek_data_spm($id,$ta,$jb);
+                $data['cek_umum']=$this->m_spm->ceklist_umum($id,$ta);
+                $data['cek_khusus']=$this->m_spm->ceklist_khusus($id,$ta);
+                    $this->template->load('template','spm/data_terceklist',$data);
+        }
+   function data_terceklist2(){
+            $this->auth->restrict();
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;
+            $id = $this->uri->segment(3);
+            $jb = $this->uri->segment(4);
+            $data['jenis_belanja'] = $jb;
+            $ta  = $this->m_settings->get_tahun_anggaran();
+            $data['detail_daftar']=$this->m_spm->selek_data_spm($id,$ta,$jb);
+            $data['cek_umum']=$this->m_spm->ceklist_umum($id,$ta);
+            $data['cek_khusus']=$this->m_spm->ceklist_khusus($id,$ta);
+            $this->template->load('template','spm/data_terceklist2',$data);
+            //$this->output->enable_profiler(true);
+        }
+
+   function update_ceklist(){
+        $this->auth->restrict();
+            $id = $this->input->post('id_spm');
+            $ta  = $this->m_settings->get_tahun_anggaran();
+            $jb = $this->input->post('jenis_belanja');
+            if(isset($_POST['tes'] )){
+                $this->m_spm->update_kelengkapan($id,$ta);
+                $success = $this->m_spm->cek_ada_veri($id,$ta);
+                    if($success == true){
+                        $success2 = $this->m_spm->cek_ada_veri_komplit($id,$ta);
+                        if($success2){
+                           $this->m_spm->update_status_spm($id,54);
+                            //to do log history spm
+                        }
+                    }
+
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'Kelengkapan berhasil di update');
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."spm/list_spm_penerima/$jb'>";
+            }else{
+                echo "<meta http-equiv='refresh' content='0; url=".site_url()."spm/list_spm_penerima/$jb'>";
+            }
+        }
+   function print_bukti_penerimaan($download_pdf = ''){
+        $this->auth->restrict();
+             $kode_unit = $this->session->userdata('kode_unit');
+             $ta = $this->uri->segment(3);
+             $id = $this->uri->segment(4);
+             $id_unit = $this->uri->segment(5);
+             $jb = $this->uri->segment(6);
+             $data['jb'] = $jb;
+
+			$sudah = $this->m_spm->cek_ada_veri($id,$ta);
+            if(!$sudah){
+                 $this->session->set_userdata('msg_typ','err');
+                 $this->session->set_userdata('msg', 'Kelengkapan belum di-cek');
+				 redirect('spm/list_spm_penerima/'.$jb);
+			}
+             $ada_belom_dicentang= $this->m_spm->cek_ada_veri_komplit($id,$ta);
+             if ($ada_belom_dicentang){
+                 $this->session->set_userdata('msg_typ','err');
+                 $this->session->set_userdata('msg', 'Masih ada kelengkapan yang kurang mohon di cek kembali');
+                 redirect('spm/list_spm_penerima/'.$jb);
+             }else{
+                 $data['tgl'] = date('Y-m-d');
+                 $tgl_skrg = date("Y-m-d");
+                 $jam_skrg = date("H:i");
+                 $ret = '';
+                 $pdf_filename='bukti_penerimaan-'.$jb.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf' ;
+                 $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+
+
+                 $this->m_spm->update_print_kelengkapan_spm($id,$ta);
+                 $tgl_skrg = date("Y-m-d");
+                 $jam_skrg = date("H:i:s");
+                 $data['tgl'] = $tgl_skrg;
+                 $data['jam'] = $jam_skrg;
+                 $data['detail_daftar']=$this->m_spm->selek_data_spm($id,$ta,$jb);
+                 $data['cek_umum']=$this->m_spm->ceklist_umum($id,$ta);
+
+
+                 if($jb == Constant::JB_GUP || $jb == Constant::JB_LS || $jb || Constant::JB_NHL || $jb == Constant::JB_SAH) {
+                      $data['cek_khusus']=$this->m_spm->ceklist_khusus($id,$ta);
+                 }
+
+                 //$data['setting']=$this->munit->select_setting();
+
+                 $data['link'] = $link_download ;
+                 $output = $this->load->view('spm/bukti_penerimaan', $data,  true);
+
+                 if($download_pdf==true)
+                     generate_pdf_A4($output,$pdf_filename);
+                 else
+                    echo $output;
+             }
+
+    }
+
+    function revisi_kelengkapan_penerima()
+    {
+        $this->auth->restrict();
+        $id = $this->uri->segment(3);
+        $jb = $this->uri->segment(4);
+        $ta  = $this->m_settings->get_tahun_anggaran();
+        $sudah = $this->m_spm->cek_ada_veri($id,$ta);
+        if($sudah){
+                $success = $this->m_spm->cek_ada_veri_komplit($id,$ta);
+                if($success){
+                        $this->m_spm->update_status_spm($id,54);
+                        $this->session->set_userdata('msg_typ','ok');
+                        $this->session->set_userdata('msg', 'SPM berhasil dikembalikan ke unit');
+                         // to do log history spm
+                        redirect('spm/list_spm_penerima/'.$jb);
+                }else{
+                        $this->session->set_userdata('msg_typ','err');
+                        $this->session->set_userdata('msg', 'kelengkapan sudah fix, tidak perlu direvisi');
+                        redirect('spm/list_spm_penerima/'.$jb);
+                }
+        }else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'SPM ini belum dicek kelengkapan-nya.. mohon dicek terlebih dahulu!!!');
+                redirect('spm/veri/'.$id."/".$jb);
+        }
+    }
+
+    function setuju_spm_pen()
+    {
+        $this->auth->restrict();
+
+        $id_spm = $this->uri->segment(3);
+        $jb = $this->uri->segment(4);
+        $id_spj = $this->uri->segment(5);
+        $ta  = $this->m_settings->get_tahun_anggaran();
+        $sudah = $this->m_spm->cek_ada_veri($id_spm,$ta);
+        if($sudah){
+             $print_kel = $this->m_spm->cek_print_kel_spm($id_spm,$ta);
+             if($print_kel>0){
+                 $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Mohon Print Formulir Kelengkapan untuk SPM ini terlebih dahulu!');
+                    redirect('spm/list_spm_penerima/'.$jb);
+
+                }else{
+                    $success = $this->m_spm->cek_ada_veri_komplit($id_spm,$ta);
+                    if($success){
+                        $this->session->set_userdata('msg_typ','err');
+                        $this->session->set_userdata('msg', 'Masih ada Kelengkapan yang belum terpenuhi');
+                        redirect('spm/list_spm_penerima/'.$jb);
+                    }else{
+                         if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                            $this->m_spm->update_status_spm($id_spm,55);
+                             // to do log history spm
+                         }else{
+                         	//TODO: ini error, salah logic
+                            //$this->m_spm->update_spm_spj($ta,$id_spm,$id_spj,55,3);
+                            $this->m_spm->set_spm_diterima($id_spm);
+
+                            // $trans = $this->m_spm->selek_data_spm($id,$ta,$jb);
+                            // foreach($trans->result_array() as $row){
+                            //    $id_kwitansi = $row['id_kwitansi'];
+                            //    $id_sptb = $row['id_sptb'];
+                            //    $id_spp = $row['id_spp'];
+                            //    $this->m_spm->update_status_kwitansi($id_kwitansi,$ta,10);
+                            //     // to do log history spm
+                            //    //$this->m_spm->update_status_sptb($id_sptb,$ta,6);
+                            //    //$this->m_spm->update_status_spp($id_spp,$ta,5);
+                            //    /*$get_id = $this->m_gup->ambil_level_tertinggi($id_kwitansi,$th);
+                            //                foreach($get_id->result_array() as $row){
+                            //                $level = $row['level'];
+                            //                }
+                            //                $level_terkini =  $level+1;
+                            //                $this->m_gup->masuk_waktu_otorisasi_dekan($id_kwitansi,$level_terkini,$th);*/
+							//
+                            //}
+                        }
+
+                        $this->session->set_userdata('msg_typ','ok');
+                        $this->session->set_userdata('msg', 'SPM telah dikirim ke Verifikator Pusat');
+                        redirect('spm/list_spm_penerima/'.$jb);
+                    }
+
+                }
+        }else{
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'SPM ini belum dicek kelengkapan-nya.. mohon dicek terlebih dahulu!');
+              redirect('spm/veri/'.$id_spm."/".$jb);
+        }
+    }
+
+    function otorisasi_spm_veri(){
+            $this->auth->restrict();
+            $jb     = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $id_spj = $this->uri->segment(5);
+            $ta     = $this->m_settings->get_tahun_anggaran();
+            $ta  = $this->m_settings->get_tahun_anggaran();
+
+             if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                $this->m_spm->update_status_spm($id_spm,56);
+                 // to do log history spm
+             }else{
+                $this->m_spm->update_status_spm($id_spm,56);
+                 // to do log history spm
+                $this->m_spm->update_status_spj($id_spj,4);
+                $trans = $this->m_spm->selek_data_spm($id_spm,$ta);
+                foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    //$this->m_spm->update_status_kwitansi($id_kwitansi,$ta,11);
+                    //$this->m_spm->update_status_sptb($id_sptb,$ta,7);
+                    //$this->m_spm->update_status_spp($id_spp,$ta,6);
+                }
+             }
+
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'SPM berhasil diotorisasi');
+            redirect('spm/verifikasi');
+    }
+
+    function otorisasi_spm_subagdm(){
+            $this->auth->restrict();
+            $jb     = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $id_spj = $this->uri->segment(5);
+            $ta     = $this->m_settings->get_tahun_anggaran();
+
+            if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                $this->m_spm->update_status_spm($id_spm,57);
+                 // to do log history spm
+            }else{
+                $this->m_spm->update_status_spm($id_spm,57);
+                 // to do log history spm
+                $this->m_spm->update_status_spj($id_spj,4);
+                $trans = $this->m_spm->selek_data_spm($id_spm,$ta);
+                foreach($trans->result_array() as $row){
+                        $id_kwitansi = $row['id_kwitansi'];
+                        $id_sptb = $row['id_sptb'];
+                        $id_spp = $row['id_spp'];
+                      //  $this->m_spm->update_status_kwitansi($id_kwitansi,$ta,12);
+                       // $this->m_spm->update_status_sptb($id_sptb,$ta,8);
+                       // $this->m_spm->update_status_spp($id_spp,$ta,7);
+                }
+            }
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'SPM berhasil diotorisasi');
+            redirect('spm/verifikasi');
+    }
+
+    function otorisasi_spm_kabag(){
+         $this->auth->restrict();
+		 //$this->output->enable_profiler(true);
+         //TODO:harusnya pake transaction ya bro...
+            $jb     = $this->uri->segment(3);
+            $id_spm = $this->uri->segment(4);
+            $id_spj = $this->uri->segment(5);
+
+            $ta     = $this->m_settings->get_tahun_anggaran();
+
+                 if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                    $this->m_spm->update_status_spm($id_spm,58);
+                     // to do log history spm
+                 }else{
+                    $this->m_spm->update_status_spm($id_spm,58);
+					$this->m_spm->update_spm_spj($ta,$id_spm,$id_spj,58,5);
+                     // to do log history spm
+                 }
+            
+            //FIXME: ini buat apaan ya? kadang2 bikin error
+            /*
+            $trans = $this->m_spm->selek_data_spm($id_spm,$ta,$jb);
+            foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    //$this->m_spm->update_status_kwitansi($id_kwitansi,$ta,13);
+                    //$this->m_spm->update_status_sptb($id_sptb,$ta,9);
+                    //$this->m_spm->update_status_spp($id_spp,$ta,8);
+            }
+            */
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'SPM berhasil diotorisasi');
+            redirect('spm/verifikasi');
+    }
+	
+	
+	//Pencairan kwitansi dari SPM - SPJ yg sudah dicairkan
+	function cair_kwitansi(){
+		$non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }
+		$this->template->load('template','spm/cair_kwitansi',$data);
+		
+	}
+	
+	function get_list_spm_cair() {
+		//$this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+        $jb = $this->input->post('jenisblj');
+        $data['jenis_belanja'] = $this->input->post('jenisblj');
+        $id_unit = $this->session->userdata('id_unit');
+		$id_spm = $this->input->post('id_spm');
+        
+        $bulan = date('m');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        
+        $data['hasil']= $this->m_spm->list_spm_cair($jb,$id_unit);
+        
+        $this->load->view('spm/view_spm_cair',$data);
+	}
+	
+	function ajax_get_kwitansi(){
+		//$this->output->enable_profiler(TRUE);
+		$id_spm = $this->input->post('id_spm');
+		$jenis_belanja = $this->input->post('jenis_belanja');
+		
+		$result = $this->m_spm->view_list_kwitansi($id_spm);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Tgl Kwitansi</th>
+					<th>No Kwitansi</th>
+					<th>Sub Unit</th>
+					<th>Jenis</th>
+					<th>Ket Kwitansi</th>
+					<th>Nominal</th>
+					<th>Aksi</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		//total kwitansi dalam spm
+		$total_kwitansi = $result->num_rows()-1;
+		//Total kwitansi yang telah dicairkan
+		$total_kwitansi_sdh_cair=0;
+		foreach($result->result() as $row){			
+			if (!empty($row->id_kwitansi)) {
+				if ($row->id_status_kwitansi=='22'){
+	            	//$has="<a href =". base_url()."spm/cairkan/".$row->id_kwitansi."
+	             	//title='Cairkan Kwitansi'> <img src='". base_url()."asset/images/add.png'/>"; 
+					$has="<img src='". base_url()."asset/images/add.png' onclick='cairkan(".$row->id_kwitansi.",".$row->id_spj_su.",this)'/>"; 
+				}else{
+					$has="<img src='". base_url()."asset/images/like.png'/>";
+					$total_kwitansi_sdh_cair++;
+				}
+				$str = "
+	                <tr>
+	                	<td align='center'>{$i}</td>
+	                    <td align='left'>{$row->tgl_kwitansi}</td>
+	                    <td align='left'>{$row->no_kwitansi}</td>
+	                    <td align='left'>{$row->nama_subunit}</td>
+	                    <td align='center'>{$row->ket}</td>					
+	                    <td align='center'>{$row->ket_kwitansi}</td>		
+	                    <td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>
+						<td align='center' id='aksi'>
+						".$has."
+	                    </td>				
+	                </tr>
+	        	";        
+				$i++;
+				$table .= $str;
+			}
+		}
+
+		//apabila semua kwitansi telah di cairkan dalam spm, fitur cairkan semua tidak aktif
+		if ($total_kwitansi_sdh_cair==$total_kwitansi) {
+			$has="<img src='". base_url()."asset/images/like.png'/>";
+		}else{
+			$has="<img src='". base_url()."asset/images/add.png' onclick='cairkan_semua(".$id_spm.")'/>"; 
+		}
+		$str = "
+            <tr>
+            	<td align='center' colspan='7'>Cairkan Semua Kwitansi Dalam SPM Ini. . .</td>
+				<td align='center' id='aksi'>
+				".$has."
+                </td>				
+            </tr>
+    	";
+    	$table .= $str;
+
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	} 
+	
+	function cairkan(){
+		$id_kwitansi	= $this->input->post('id');
+		$id_spj_su		= $this->input->post('id_spj_su');
+		
+		$hasil=$this->m_spm->cairkan_kwitansi($id_kwitansi,$id_spj_su);
+		
+		if($hasil){
+			$response['errno'] 	= 0;
+			$response['message']= 'Berhasil Mencairkan Kwitansi';
+		}else{
+			$response['errno'] 	= 1;
+			$response['message']= 'GAGAL Mencairkan Kwitansi';
+		}
+		
+		echo json_encode($response);
+	}
+
+	function cairkan_semua(){
+		$id_spm	= $this->input->post('id_spm');
+		$hasil=$this->m_spm->cairkan_kwitansi_semua($id_spm);
+
+		if($hasil){
+			$response['errno'] 	= 0;
+			$response['message']= 'Berhasil Mencairkan Kwitansi';
+		}else{
+			$response['errno'] 	= 1;
+			$response['message']= 'GAGAL Mencairkan Kwitansi';
+		}
+		
+		echo json_encode($response);	
+	}
+	// selesai pencairan kwitansi dari SPM - SPJ yg sudah dicairkan
+	//Pencairan Usulan dari SPM - SP2D yg sudah dicairkan
+	function cair_usulan(){
+		$non_kw = array(Constant::JB_GUP,
+						Constant::JB_GUP_NHL,
+						Constant::JB_TUP_NHL,
+						Constant::JB_LS,
+						Constant::JB_NHL,
+						Constant::JB_SAH);
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }
+		$this->template->load('template','spm/cair_usulan',$data);
+		
+	}
+	
+	function getlist_spm_cair() {
+		//$this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+        $jb = $this->input->post('jenisblj');
+        $data['jenis_belanja'] = $this->input->post('jenisblj');
+        $id_unit = $this->session->userdata('id_unit');
+		$id_spm = $this->input->post('id_spm');
+        
+        $bulan = date('m');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        
+        $data['hasil']= $this->m_spm->list_spmcair_usulan($jb,$id_unit);
+        
+        $this->load->view('spm/viewspm_cairusulan',$data);
+	}
+	
+	function ajax_get_usulan(){
+		//$this->output->enable_profiler(TRUE);
+		$id_spm = $this->input->post('id_spm');
+		$jenis_belanja = $this->input->post('jenis_belanja');
+		
+		$result = $this->m_spm->view_list_usulan($id_spm);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Tgl Usulan</th>
+					<th>Sub Unit</th>
+					<th>Jenis</th>
+					<th>Nominal</th>
+					<th>Aksi</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			if ($row->id_status_usulan=='6'){
+                    	//$has="<a href =". base_url()."spm/cairkan/".$row->id_kwitansi."
+                     	//title='Cairkan Kwitansi'> <img src='". base_url()."asset/images/add.png'/>"; 
+						$has="<img src='". base_url()."asset/images/add.png' onclick='cairkan(".$row->id_usulan.",this)'/>"; 
+					}else{
+						$has="<img src='". base_url()."asset/images/like.png'/>";
+					}
+			$str = "
+                <tr>
+                	<td align='center'>{$i}</td>
+                    <td align='left'>{$row->tgl_usulan}</td>
+                    <td align='left'>{$row->nama_subunit}</td>
+                    <td align='center'>{$row->ket}</td>					
+                    <td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>
+					<td align='center'>
+					".$has."
+                    </td>				
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	} 
+	
+	function cairkan_usulan(){
+		$id_usulan	= $this->input->post('id');
+		
+		$hasil=$this->m_spm->cairkan_usulan($id_usulan);
+		
+		if($hasil){
+			$response['errno'] 	= 0;
+			$response['message']= 'Berhasil Mencairkan Kwitansi';
+		}else{
+			$response['errno'] 	= 1;
+			$response['message']= 'GAGAL Mencairkan Kwitansi';
+		}
+		
+		echo json_encode($response);
+	}
+	
+	// selesai pencairan kwitansi dari SPM - SPJ yg sudah dicairkan
+	
+}
+
+/* End of file spm.php */
+/* Location: /application/controllers/spm.php */
+?>

@@ -1,0 +1,1002 @@
+<script>
+$(document).on("focus keyup","input#nama_peg",function(event){
+
+    $(this).autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>gup/lookup",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+		          		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+					event.preventDefault();
+            		this.value = ui.item.label;
+            		//$(this).next().val(ui.item.value);
+					//$("#golongan0" ).val( ui.item.value );
+					//=========
+					var nama_baris=this.name;
+					var id_baris=nama_baris.split('[');
+					id_baris=id_baris[1].split(']');
+					id_baris=id_baris[0];
+					var nama_field= '#golongan'+id_baris;
+					$( nama_field ).val( ui.item.value );
+					//===========
+					
+         		},		
+    		});
+    
+});
+</script>
+
+<script language="javascript">
+  function validasi(form){
+	  var sum = form.sum_up.value;
+  if (form.tgl_kwitansi.value == ""){
+    alert("Anda belum mengisikan Isian tanggal kuitansi.");
+    form.tgl_kwitansi.focus();
+    return (false);
+  }
+  if (form.jns_kwitansi.value == "0"){
+    alert("Anda belum mengisikan Isian jenis kuitansi.");
+    form.jns_kwitansi.focus();
+    return (false);
+  }
+ else if(form.jns_kwitansi.value == "1"){ 
+ 
+	  if (form.tempat_kwitansi.value == ""){
+		alert("Anda belum mengisikan Isian Tempat kuitansi.");
+		form.tempat_kwitansi.focus();
+		return (false);
+	  }
+	  if (form.kdoutput.value == "0"){
+		alert("Anda belum mengisikan Isian output.");
+		form.kdoutput.focus();
+		return (false);
+	  }
+	  if (form.kdkomponen.value == "0"){
+		alert("Anda belum mengisikan Isian Komponen.");
+		form.kdkomponen.focus();
+		return (false);akun
+	  }
+	  if (form.kdakun.value == "0"){
+		alert("Anda belum mengisikan Isian Akun.");
+		form.kdakun.focus();
+		return (false);
+	  }
+	   if (form.id_header.value == ""){
+		alert("Anda belum mengisikan Isian Header.");
+		form.id_header.focus();
+		return (false);
+	  }
+	   if (form.ket_kwitansi.value == ""){
+		alert("Anda belum mengisikan Isian keterangan kuitansi.");
+		form.ket_kwitansi.focus();
+		return (false);
+	  }
+	   if (form.nominal_bb.value == ""){
+		alert("Nominal tidak boleh kosong");
+		form.nominal_bb.focus();
+		return (false);
+	  }
+	  if (!Number(form.nominal_bb.value)){
+		alert("Nominal harus angka");
+		form.nominal_bb.focus();
+		return (false);
+	  }
+
+/*
+	  var nom = parseFloat(form.nominal_bb.value);
+	  if (nom>sum){
+			alert("Nominal Melebihi dari UP yang diajukan");
+			form.nominal_bb.focus();
+			return (false);
+	  }
+*/
+
+	  if (form.nominal_bb.value >20000000){
+		alert("Nominal melebihi Rp. 20 juta, tidak tepat diterapkan pada GUP");
+		form.nominal_bb.focus();
+		return (false);
+	  }
+	  
+	  if (form.jns_pajak.value == "0"){
+		alert("Anda belum mengisikan Isian Jenis Pajak");
+		form.jns_pajak.focus();
+		return (false);
+	  }
+	  if (form.pelaksana.value == ""){
+		alert("Anda belum mengisikan Isian Pelaksana Kegiatan");
+		form.pelaksana.focus();
+		return (false);
+	  }
+	  if (form.nip_pelaksana.value == ""){
+		alert("Anda belum mengisikan Isian NIP Pelaksana Kegiatan");
+		form.nip_pelaksana.focus();
+		return (false);
+	  }
+	  if (form.penerima_bb.value == ""){
+		alert("Anda belum mengisikan Isian penerima");
+		form.penerima_bb.focus();
+		return (false);
+	  } 
+ } else if(form.jns_kwitansi.value == "2"){
+	 if (form.tmpt.value == "0"){
+		alert("Anda belum mengisikan Isian tempat pembuatan kuitansi.");
+		form.tmpt.focus();
+		return (false);
+	  }
+	 if (form.kdoutput2.value == "0"){
+		alert("Anda belum mengisikan Isian output.");
+		form.kdoutput2.focus();
+		return (false);
+	  }
+	  if (form.kdkomponen2.value == "0"){
+		alert("Anda belum mengisikan Isian Komponen.");
+		form.kdkomponen2.focus();
+		return (false);akun
+	  }
+	  if (form.kdakun2.value == "0"){
+		alert("Anda belum mengisikan Isian Akun.");
+		form.kdakun2.focus();
+		return (false);
+	  }
+	   if (form.id_header2.value == ""){
+		alert("Anda belum mengisikan Isian Header.");
+		form.id_header2.focus();
+		return (false);
+	  }
+ 	  if (form.pp_sppd.value == ""){
+		alert("Anda belum mengisikan isian pejabat pemberi perintah");
+		form.pp_sppd.focus();
+		return (false);
+	  }  
+	  if (form.dari.value == ""){
+		alert("Anda belum mengisikan Isian dari");
+		form.dari.focus();
+		return (false);
+	  } 
+	  if (form.tujuan.value == ""){
+		alert("Anda belum mengisikan Isian tujuan");
+		form.tujuan.focus();
+		return (false);
+	  } 
+	  if (form.yg_bepergian.value == ""){
+		alert("Anda belum mengisikan Isian penerima");
+		form.yg_bepergian.focus();
+		return (false);
+	  } 
+	  if (form.nip.value == ""){
+		alert("Anda belum mengisikan Isian NIP/NIM");
+		form.nip.focus();
+		return (false);
+	  } 
+	  if (form.golongan_spd.value == ""){
+		alert("Anda belum mengisikan Isian maksud");
+		form.golongan_spd.focus();
+		return (false);
+	  }  
+	  if (form.maksud.value == ""){
+		alert("Anda belum mengisikan Isian maksud");
+		form.maksud.focus();
+		return (false);
+	  } 
+	  if (form.tgl_b.value == ""){
+		alert("Anda belum mengisikan Isian tanggal berangkat");
+		form.tgl_b.focus();
+		return (false);
+	  }
+	  if (form.tgl_k.value == ""){
+		alert("Anda belum mengisikan Isian tanggal kembali");
+		form.tgl_k.focus();
+		return (false);
+	  } 
+	  if (form.ket_spd.value == ""){
+		alert("Anda belum mengisikan Isian Keterangan Surat Perjalanan Dinas");
+		form.ket_spd.focus();
+		return (false);
+	  } 
+		
+ } else if(form.jns_kwitansi.value == "3"){
+	 
+	 if (form.tpt_kwitansi3.value == ""){
+		alert("Anda belum mengisikan Isian tempat pembuatan kuitansi.");
+		form.tpt_kwitansi3.focus();
+		return (false);
+	  }
+	 if (form.kdoutput3.value == "0"){
+		alert("Anda belum mengisikan Isian output.");
+		form.kdoutput3.focus();
+		return (false);
+	  }
+	  if (form.kdkomponen3.value == "0"){
+		alert("Anda belum mengisikan Isian Komponen.");
+		form.kdkomponen3.focus();
+		return (false);akun
+	  }
+	  if (form.kdakun3.value == "0"){
+		alert("Anda belum mengisikan Isian Akun.");
+		form.kdakun3.focus();
+		return (false);
+	  }
+	   if (form.id_header3.value == ""){
+		alert("Anda belum mengisikan Isian Header.");
+		form.id_header3.focus();
+		return (false);
+	  }
+ 	  if (form.ket_kwitansi3.value == ""){
+		alert("Anda belum mengisikan isian keterangan Kuitansi");
+		form.ket_kwitansi3.focus();
+		return (false);
+	  }  
+	  if (form.pelaksana_honor.value == ""){
+		alert("Anda belum mengisikan Isian Pelaksana kegiatan");
+		form.pelaksana_honor.focus();
+		return (false);
+	  } 
+	  if (form.nip_pelaksana_honor.value == ""){
+		alert("Anda belum mengisikan Isian NIP pelaksana kegiatan");
+		form.nip_pelaksana_honor.focus();
+		return (false);
+	  } 
+	  if (form.penerima_honor.value == ""){
+		alert("Anda belum mengisikan Isian penerima");
+		form.penerima_honor.focus();
+		return (false);
+	  } 
+	}
+  return (true);
+}
+
+//<<<<============================================>>>>>
+
+$(document).ready(function(){
+    $('.box').hide();
+    	
+		var value2 =  $('#jns_kwitansi').val();
+    
+	// First Way :
+    $('#HiddenInput').empty();
+    $('#HiddenInput').val($('#jns_kwitansi').val());
+    var value =  $('#HiddenInput').val();
+    $('#jns_kwitansi').val(value);
+	
+	 if (value2 == "1"  )
+	{
+   		$('#div_barang_gu').show();
+  	} 
+	 if (value2 == "2" )
+	{
+   		$('#div_sppd_gu').show();
+  	}
+	if(value2 == "3" ){
+		$('#div_honor_gu').show();
+	}
+ 
+    
+    //Second Way just get dropdown value show value of the DIv:
+  //  var value2 =  $('#dropdown').val();
+   // $('#div' + value2).show();
+    
+   $('#jns_kwitansi').change(function() {
+      $('.box').hide();
+      $('#HiddenInput').val($(this).val());
+      
+	  //$('#div' + $(this).val()).show();
+	  
+	  var value3 = $(this).val();
+	  
+	 if (value3 == "1"  )
+	{
+   		$('#div_barang_gu').show();
+  	} 
+	 if (value3 == "2" )
+	{
+   		$('#div_sppd_gu').show();
+  	} 
+	if (value3 == "3" )
+	{
+   		$('#div_honor_gu').show();
+  	} 
+	  
+ });
+});
+</script>
+
+
+<style>
+.nm_col 
+{
+	width:132px;
+}
+.nm_col_hide 
+{
+	width:180px;
+}
+.nm_col2 
+{
+	width:18x;
+}
+.input1
+{
+	width:416px;
+}
+.col_akhir
+{
+	width:50px;	
+}
+</style>
+
+<?php foreach($get_nama_unit->result() as $row){
+  $nama_unit=$row->nama_unit;
+ } 
+  $nama_subunit = $this->session->userdata('nama_subunit');
+?>
+<?php foreach($get_sum_up->result() as $row){
+  $sum_up=$row->sum_up;
+ } 
+  $nama_subunit = $this->session->userdata('nama_subunit');
+?>
+<article class="module width_full">
+  <header><h3>Buat Kwitansi Baru GUP</h3></header>             
+    <div class="module_content">  
+<form method="post" name='form' id='form' action="<?php echo base_url();?>index.php/gup/simpan_kwitansi" onSubmit='return validasi(this)'> 
+<input name='sum_up' type="hidden" value="<?php echo $sum_up; ?>" id="sum_up" >    
+  <table border='0' width='100%' >          
+        <tr>
+          <td width="228" height="29">&nbsp;</td>
+          <td width="10">&nbsp;</td>
+          <td width="560">&nbsp;</td>
+          <td width="138">Unit Kerja</td>
+          <td width="5">:</td>
+          <td class="col_akhir"><input type="text" name="unit_kerja" id="unit_kerja" value="<?php echo $nama_unit; ?>" readonly="readonly" size="18" /></td>
+        </tr>
+         <tr>
+          <td width="228" height="29">&nbsp;</td>
+          <td width="10">&nbsp;</td>
+          <td width="560">&nbsp;</td>
+           <td>Tanggal</td>
+           <td>:</td>
+           <td width="109" class="col_akhir"><label for="unit_kerja">
+             <input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="18" />
+           </label></td>
+        </tr>
+         <tr>
+           <td>Jenis Kwitansi</td>
+           <td >&nbsp;:</td><td><label for="jenis_kwitansi"></label>
+             <select name="jns_kwitansi" id="jns_kwitansi"  >
+               <option value="0">-</option>
+               <option value="1">BELANJA BARANG (GU)</option>
+               <option value="2">BELANJA BARANG (SPD)</option>
+               <option value="3">BELANJA BARANG (HONOR GU)</option>
+             </select>
+         </tr>
+         <input name="Hidden" id="Hidden" type="hidden" />
+  </table>
+        
+       <div id="div_barang_gu" class="box"> 
+      <table border="0" width="100%">
+        
+        <tr>
+          <td class="nm_col_hide" >Sub Unit</td>
+          <td >:</td>
+          <td><input name='unit_kerja' type='text' value="<?php echo $nama_subunit; ?>" readonly="readonly" id="unit_kerja" size="50" style="width:450px;" ></td>
+            <td></td>
+            <td colspan="3">&nbsp;</td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+          <td >:</td>
+          <td><input name='tempat_kwitansi' type='text' value='' id="tempat_kwitansi" style="width:450px;" ></td>
+            <td></td>
+            <td colspan="3"></td>
+        </tr>
+                 
+    <tr>
+    	<td>Kegiatan</td><td>:</td>
+        <td> 
+          <input name="kegiatan" type="text" disabled="disabled" style="width:450px;" value="Layanan Tridharma di Perguruan Tinggi" size="100px" >
+        </td>
+   </tr>  
+    <tr>
+    	<div id="propinsi">
+            <td>Output</td>
+            <td>:</td>
+            <td><?php echo form_dropdown("kdoutput",$output,"","id='kdoutput' style='width:450px;'") ?>
+            </td>
+        </div>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="komponen">
+				<?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Output Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Akun</td>
+        <td>:</td>
+        <td>
+            <div id="akun">
+                <?php echo form_dropdown("akun",array('Pilih Akun'=>'Pilih Komponen Dahulu'),'',' style= "width:450px;" disabled');?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+        <td>
+            <div id="header5">
+                <?php //echo form_dropdown("hdr",array('Pilih Header'=>'Pilih Akun Dahulu'),'',' style="width:450px;" disabled');?>
+                <input name='id_header' type='text' id="id_header" style="width:450px;"/>
+            </div>
+            
+        </td>
+    </tr>
+
+        <tr>       
+          <td>Keterangan Kwitansi</td>
+          <td >:</td><td colspan="5"><textarea name="ket_kwitansi" id="ket_kwitansi" class="input1" style="width:450px;"></textarea></td>
+        </tr>
+        <tr>
+          <td>Nominal</td>
+          <td >:</td><td><input name='nominal_bb' type='text' id="nominal_bb" style="width:450px;"/></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+
+		<tr>
+          <td>Jenis Pajak</td>
+          <td >:</td><td colspan="5"><?php echo form_dropdown("jns_pajak",$jns_pajak,"","id='jns_pajak' style='width : 450px'") ?></td>
+        </tr>
+        
+        <tr>
+          <td>PPN</td>
+          <td >:</td><td colspan="5"><div id="ppn">
+           <input name='p_ppn' type='' value='' size="31" id="p_ppn" readonly="readonly" />
+             PPH : 
+           <input name='p_pph' type='' value='' size="31" id="p_pph" readonly="readonly" />
+        </tr>
+        <tr>
+          <td>Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='pelaksana' type='' value='' size="65" id="pelaksana" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+         <tr>
+          <td>NIP Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='nip_pelaksana' type='' value='' size="65" id="nip_pelaksana" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Penerima</td>
+          <td >:</td><td><input name='penerima_bb' type='' value='' size="65" id="penerima_bb" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>             
+    </table>
+    <div style="height:100px;" ></div>
+  </div>
+	
+  <div id="div_sppd_gu" class="box"> 
+    <table border="0" width="100%">
+    <tr>
+    	<div id="propinsi2">
+            <td>Output</td>
+            <td>:</td>
+            <td><?php echo form_dropdown("kdoutput2",$output,"","id='kdoutput2' style='width:450px;'") ?>
+            </td>
+        </div>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="komponen2">
+				<?php echo form_dropdown("komponen2",array('Pilih Komponen'=>'Pilih Output Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Akun</td>
+        <td>:</td>
+        <td>
+            <div id="akun2">
+                <?php echo form_dropdown("akun2",array('Pilih Akun'=>'Pilih Komponen Dahulu'),'',' style= "width:450px;" disabled');?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+        <td>
+            <div id="header2">
+                <?php //echo form_dropdown("hdr2",array('Pilih Header'=>'Pilih Akun Dahulu'),'',' style="width:450px;" disabled');?>
+            <input name='id_header2' type='text' id="id_header2" style="width:450px;"/>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Tempat Pembuatan Kuitansi</td>
+          <td >:</td><td><input name='tmpt' type='text' value='' size="65" id="dari" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td width="232">Pejabat Pemberi perintah</td>
+          <td width="10" >:</td><td width="736"><input name='pp_spd' type='text' value='' size="65" id="pp_sppd" style="width:450px;"/></td>
+          <td width="3">&nbsp;</td>
+          <td width="3">&nbsp;</td>
+          <td width="7">&nbsp;</td>
+          <td width="51" class="col_akhir">&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Dari</td>
+          <td >:</td><td><input name='dari' type='text' value='' size="65" id="dari" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Tujuan</td>
+          <td >:</td><td><input name='tujuan' type='text' value='' size="65" id="tujuan" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Yang Bepergian (Nama)</td>
+          <td >:</td><td><input name='yg_bepergian' type='text' value='' size="65" id="yg_bepergian" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>NIP / NIM</td>
+          <td >:</td><td><input name='nip' type='text' value='' size="65" id="nip" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+         <tr>
+          <td>Golongan</td>
+          <td >:</td>
+           <td>
+            	<?php echo form_dropdown("golongan_spd",$golongan,"","id='golongan' style='width:150px;'") ?>
+           </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        
+        <tr>
+          <td>Maksud Perjalanan Dinas</td>
+          <td >:</td><td><input name='maksud' type='text' value='' size="65" id="maksud" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Tanggal Berangkat</td>
+          <td >:</td><td><input name='tgl_b' type='text' value='' size="65" id="tgl_b" style="width:200px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Tanggal Kembali</td>
+          <td >:</td><td><input name='tgl_k' type='text' value='' size="65" id="tgl_k" style="width:200px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Keterangan SPD</td>
+          <td >:</td><td><textarea name="ket_spd" id="ket_spd" style="width:450px; height:100px;"></textarea></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td><p>&nbsp;</p>
+          <p></p></td>
+          <td></td>
+          <td>&nbsp;</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        </table>
+        <div style="float:left; padding-top:20px;"><strong>RINCIAN BIAYA</strong></div>
+  <table name="nama_rincian" class="table-common" id="nama_rincian" style="width: 780px;" >  
+            <tr>
+                <th>Perincian Biaya</th>
+                <th>Jumlah(Rp)</th>
+                <th>Pph</th>
+                <th>Action</th>
+            </tr>
+        <tr>
+            <td><textarea name="perincian[0]" style="width:450px; height:100px;"></textarea></td>
+            <td><input name="jumlah[0]" type="text"/></td>            
+            <td><input name="pph[0]" type="text"/></td>      
+            <td align="center"><input type="button" value="   +   " onclick="tambahRow('nama_rincian')" /></td>
+        </tr>
+  </table>
+  <script language="javascript">
+                var counter=0;
+            		function tambahRow(tableID) {
+            		  
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount);
+            
+            			var perincian = row.insertCell(0);
+            			var inp_perincian = document.createElement("textarea");
+            			inp_perincian.type="text";
+						inp_perincian.style="width:450px";
+						inp_perincian.style="height:100px";
+                        inp_perincian.name= "perincian["+counter+"]";
+            			perincian.appendChild(inp_perincian);
+                        
+                        var jumlah = row.insertCell(1);
+            			var inp_jumlah = document.createElement("input");
+            			inp_jumlah.type="text";
+                        inp_jumlah.name= "jumlah["+counter+"]";
+            			jumlah.appendChild(inp_jumlah);
+						
+						var pph = row.insertCell(2);
+            			var inp_pph = document.createElement("input");
+            			inp_pph.type="text";
+                        inp_pph.name= "pph["+counter+"]";
+            			pph.appendChild(inp_pph);
+                        
+            			var cell4 = row.insertCell(3);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_perincian.focus();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+					
+            
+            	</script>
+  
+</div>
+
+
+
+
+<div id="div_honor_gu" class="box">
+ <table border="0" width="100%">
+        
+        <tr>
+          <td class="nm_col_hide" >Sub Unit</td>
+          <td >:</td>
+          <td><input name='unit_kerja' type='text' value="<?php echo $nama_subunit; ?>" readonly="readonly" id="unit_kerja" size="50" style="width:450px;" ></td>
+            <td></td>
+            <td colspan="3">&nbsp;</td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+          <td >:</td>
+          <td><input name='tpt_kwitansi3' type='text' value='' id="tpt_kwitansi3" style="width:450px;" ></td>
+            <td></td>
+            <td colspan="3"></td>
+        </tr>  
+    <tr>
+    	<div id="propinsi">
+            <td>Output</td>
+            <td>:</td>
+            <td><?php echo form_dropdown("kdoutput3",$output,"","id='kdoutput3' style='width:450px;'") ?>
+            </td>
+        </div>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+        <td>
+       	  <div id="komponen3">
+				<?php echo form_dropdown("komponen3",array('Pilih Komponen'=>'Pilih Output Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Akun</td>
+        <td>:</td>
+        <td>
+          <div id="akun3">
+                <?php echo form_dropdown("akun3",array('Pilih Akun'=>'Pilih Komponen Dahulu'),'',' style= "width:450px;" disabled');?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+        <td>
+          <div id="header3">
+                <?php // echo form_dropdown("hdr3",array('Pilih Header'=>'Pilih Akun Dahulu'),'',' style="width:450px;" disabled');?>
+                <input name='id_header3' type='text' id="id_header3" style="width:450px;"/>
+            </div>
+        </td>
+    </tr>
+        <tr>       
+          <td>Keterangan Kwitansi</td>
+          <td >:</td><td colspan="5"><textarea name="ket_kwitansi3" id="ket_kwitansi3" class="input1" style="width:450px;"></textarea></td>
+        </tr>  
+        <tr>
+          <td>Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='pelaksana_honor' type='' value='' size="65" id="pelaksana_honor" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+         <tr>
+          <td>NIP Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='nip_pelaksana_honor' type='' value='' size="65" id="nip_pelaksana_honor" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+        <tr>
+          <td>Penerima</td>
+          <td >:</td><td><input name='penerima_honor' type='' value='' size="65" id="penerima_honor" style="width:450px;"/></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="col_akhir"></td>
+        </tr>
+                     
+    </table>
+    <div style="float:left; padding-top:20px;"><strong>RINCIAN HONOR</strong></div>
+  <table name="nama_honor" class="table-common" id="nama_honor" style="width: 780px;" >  
+            <tr>
+                <th>Nama</th>
+                <th>Jabatan</th>
+                <th>Golongan</th>
+                <th>Bruto</th>
+                <th>Action</th>       
+            </tr>
+        <tr>
+            <td><input name="nama[0]" type="text" id="nama_peg" autocomplete="on" value=""/></td>
+            <td>
+            	<select name="jabatan[0]" id="jabatan" >
+                    <option value=""><<- Pilihan ->></option>
+                    <option value="1"> - </option>
+                    <option value="2">Penanggung Jawab</option>
+                    <option value="3">Pelindung</option>
+                    <option value="4">Ketua</option>
+                    <option value="5">Sekretaris</option>
+                    <option value="6">Bendahara</option>
+                    <option value="7">Koordinator</option>
+                    <option value="8">Anggota</option>
+                </select>
+            </td>
+            <td>
+            	<?php // echo form_dropdown("golongan[0]",$golongan,"","id='golongan' style='width:200px;'") ?>
+                <input name="golongan[0]" type="text" id="golongan0" readonly="readonly" />
+            </td>
+            <td><input name="bruto[0]" type="text" id="bruto"/></td>
+            <td><input type="button" value="   +   " onclick="addRow('nama_honor')" /></td>
+        </tr>
+  </table>
+ 
+  <script language="javascript">
+                var counter=0;
+			
+            		function addRow(tableID) {
+						
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount);
+            
+            			var nama = row.insertCell(0);
+            			var inp_nama = document.createElement("input");
+            			inp_nama.type="text";
+            			inp_nama.id="nama_peg";
+            			inp_nama.autocomplete="on";
+            			inp_nama.value="";
+                        inp_nama.name= "nama["+counter+"]";
+            			nama.appendChild(inp_nama);
+                        
+                        var jabatan = row.insertCell(1);
+            			var inp_jab = '<select name="jabatan['+counter+']">'+$('#jabatan').html()+'</select>';
+            			jabatan.innerHTML=inp_jab;
+						
+						 var golongan = row.insertCell(2);
+            			var inp_gol = document.createElement("input");
+            			inp_gol.type="text";
+                        inp_gol.name= "golongan["+counter+"]";
+						inp_gol.id= "golongan"+counter;
+						inp_gol.readOnly = "readonly" ;
+            			golongan.appendChild(inp_gol);
+
+                        
+                        var bruto = row.insertCell(3);
+            			var inp_bruto = document.createElement("input");
+            			inp_bruto.type="text";
+                        inp_bruto.name= "bruto["+counter+"]";
+            			bruto.appendChild(inp_bruto);
+                        
+            			var cell4 = row.insertCell(4);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_nama.focus();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+					
+            
+</script>
+                 <div style="height:100px;" ></div>
+</div>
+</div>
+   <footer>
+                
+    <div class="submit_link">  
+      <input name="simpan" type='submit' id="simpan" value='Simpan'>
+      <input type=button value=Batal onclick=self.history.back()>
+    </div> 
+    </footer> 
+    <div id="kosong" class="box"> </div>  
+  </form>
+   
+</article>
+       
+        <script type="text/javascript">
+		/*===DROPDOWN UNTUK JENIS PAJAK===*/
+				  $("#jns_pajak").change(function(){
+					var jns_pajak1 = $("#jns_pajak").val();
+					var jns_pajak = {jns_pajak:$("#jns_pajak").val()};
+						if(jns_pajak1 != 0){
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('gup/select_pajak')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}else{
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo base_url('application/views/unit/gu_select_ppn.php')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}
+							
+				});
+		
+		</script>
+        
+        <script type="text/javascript">
+          $("#kdoutput").change(function(){
+                var selectValues = $("#kdoutput").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen').html(msg);
+                }else{
+                    var kdoutput = {kdoutput:$("#kdoutput").val()};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_komponen')?>",
+                            data: kdoutput,
+                            success: function(msg){
+                                $('#komponen').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>
+       
+        <script type="text/javascript">
+          $("#kdoutput2").change(function(){
+                var selectValues = $("#kdoutput2").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen2\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen2').html(msg);
+                }else{
+                    var kdoutput2 = {kdoutput2:$("#kdoutput2").val()};
+                    $('#id_komponen2').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_komponen2')?>",
+                            data: kdoutput2,
+                            success: function(msg){
+                                $('#komponen2').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>
+       
+       <script type="text/javascript">
+          $("#kdoutput3").change(function(){
+                var selectValues = $("#kdoutput3").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen3\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen3').html(msg);
+                }else{
+                    var kdoutput3 = {kdoutput3:$("#kdoutput3").val()};
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_komponen3')?>",
+                            data: kdoutput3,
+                            success: function(msg){
+                                $('#komponen3').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>
+       
+
+         
+ 
+
+
+
+
+
+
+

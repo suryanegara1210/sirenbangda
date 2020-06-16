@@ -1,0 +1,220 @@
+<?php		
+	// if (!empty($jendela_kontrol->baru) || !empty($jendela_kontrol->baru2) || !empty($jendela_kontrol->revisi) || !empty($jendela_kontrol->revisi2) || (empty($jendela_kontrol->baru) && empty($jendela_kontrol->baru2) && empty($jendela_kontrol->revisi) && empty($jendela_kontrol->revisi2) && empty($jendela_kontrol->kirim) && empty($jendela_kontrol->kirim2))) {
+	// 	$enable_add = TRUE;
+	// }else{
+	// 	$enable_add = FALSE;
+	// }
+?>
+<style type="text/css">
+	.misi{
+		margin: 5px;
+	}
+
+	.tujuan{
+		margin-top: 2px;
+		margin-bottom: 2px;
+	}
+	tr.tr-click:hover{		
+		background-color: pink;
+	}
+	td.td-click{
+		cursor: pointer;
+	}
+
+	#kegiatan-frame{
+		margin-bottom: 25px;
+	}
+
+	#jendela_kontrol header, #jendela_kontrol footer, #jendela_kontrol h3{
+		background: #337ab7;
+		color: white;
+	}
+
+	#jendela_kontrol, #jendela_kontrol .module_content{
+		background: #d9edf7;
+	}
+</style>
+<script type="text/javascript">
+	var element;
+	$(document).ready(function(){
+		$("td.td-click").click(function(){
+			close_all();
+			if($(this).parent().next().is(":visible")){
+				$(this).parent().next().fadeOut();
+				return false;
+			};
+
+			$("tr.tr-frame").hide();
+			$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+
+			element = $(this).parent();
+			var idt = element.attr("id-t");
+			var idr = element.attr("id-r");
+			var this_element = $(this);
+			$.ajax({
+				type: "POST",
+				url: '<?php echo site_url("renja/get_sasaran_skpd"); ?>',
+				data: {id_renja: idr, id_tujuan: idt},
+				success: function(msg){
+					if (msg!="") {
+						element.next().children().html(msg);
+						element.next().fadeIn();
+						element = this_element;						
+						$.blockUI({
+							timeout: 1000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					};	
+				}
+			});
+		});
+
+
+		$(document).on("click", "#kirim_renja", function(){
+			prepare_facebox();
+			$.facebox({div: '<?php echo site_url("renja/kirim_renja"); ?>'});
+		});
+
+		$(document).on("click", "#cetak", function(){
+			$.blockUI({
+				message: 'Cetak dokumen sedang di proses, mohon ditunggu hingga file terunduh secara otomatis ...',
+				css: window._css,
+				timeout: 2000,
+				overlayCSS: window._ovcss
+			});
+			var link = '<?php echo site_url("renja/do_cetak_renja"); ?>';
+			$(location).attr('href',link);
+		});
+
+		reload_jendela_kontrol();
+	});
+
+	function edit_renja(id){
+		window.location = "<?php echo site_url('renja/edit_renja');?>/" + id;		
+	}
+	function tbh_kegiatan(id){
+		window.location = "<?php echo site_url('renja/cru_kegiatan_renja');?>/" + id;		
+	}
+
+	function reload_jendela_kontrol(){
+		$("#jendela_kontrol").load("<?php echo site_url('renja/get_jendela_kontrol'); ?>");
+	}
+
+</script>
+
+<article class="module width_full" id="jendela_kontrol"> 	
+</article>
+
+<article class="module width_full">
+ 	<header>
+ 		<h3>
+			Renja <?php echo $nama_skpd; ?>
+		</h3>
+ 	</header>
+ 	<div class="module_content">
+ 		<div style='float:right'>
+ 		<a href="<?php echo 'renja/cru_renja'?>"><input type="button" class="button-action" id="tbh-program" value="Tambah Program Renja" /></a>
+ 	</div><br>
+		<table class="fcari" width="100%">
+			<tbody>
+			
+			<tr>
+				<td width="20%">SKPD</td>
+				<td width="80%"><?php echo $nama_skpd; ?></td>
+			</tr> 					
+			<!-- <tr>
+				<td>Visi</td>
+				<td>
+					<?php echo $renja->visi; ?>
+				</td>
+			</tr>
+			<tr>
+				<td>Misi</td>
+				<td>
+				<?php							
+					$i=0;
+					foreach ($renja_misi->result() as $row) {
+						$i++;
+				?>
+					<div class="misi"><?php echo $i.". ".$row->misi; ?></div>
+				<?php
+					}	
+				?>
+				</td>
+			</tr>	 -->				
+			</tbody>
+		</table>
+		<table class="table-common" style="width: 99%">
+			<thead>
+				<tr>
+					<th>No </th>
+					<th>Kode</th>
+					<th>Nama Program/Kegiatan</th>
+					<th>Tahun</th>
+					<th>Indikator Kinerja</th>
+					<th>Lokasi</th>
+					<th>Nominal</th>
+					<th>Target</th>
+					<th>Catatan</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php
+				$i=0;
+				foreach ($data_renja as $row) {
+					$i++;
+			?>
+
+				<!-- <tr class="tr-click" id-r="<?php echo $row->id; ?>" id-t="<?php echo $row->id; ?>"> -->
+					<td ><?php echo $i; ?></td>
+					<?php 
+						if($row->is_prog_or_keg=='1'){ 
+					?>
+						<td ><?php echo $row->kd_urusan.".".$row->kd_bidang.".".$row->kd_program;?></td>
+					<?php 
+						}else{ 
+					?>	
+						<td ><?php echo $row->kd_urusan.".".$row->kd_bidang.".".$row->kd_program.".".$row->kd_kegiatan;?></td>
+					<?php 
+						} 
+					?>
+					<td><?php echo $row->nama_prog_or_keg;?></td>
+					<td ><?php echo $row->tahun; ?></td>
+					<td ><?php echo $row->indikator_kinerja; ?></td>
+					<td ><?php echo $row->lokasi; ?></td>
+					<td class="currency"><?php echo "Rp".$row->nominal; ?></td>
+					<td ><?php echo $row->target; ?></td>
+					<td ><?php echo $row->catatan; ?></td>
+					<td align="center" width="50px">
+						<a href="javascript:void(0)" onclick="edit_renja('<?php echo $row->id;?>')" class="icon2-page_white_edit" title="Edit Renja"/>
+						<?php
+						if(empty($row->parent)){
+							?>
+						<a href="javascript:void(0)" onclick="tbh_kegiatan('<?php echo $row->id;?>')" class="icon-plus-sign" title="Tambah Kegiatan"/>
+						<?php
+							}
+						?>
+					</td>
+				</tr>
+				<!-- <tr class="tr-frame" style="display: none">
+					<td colspan="3"></td>
+				</tr> -->
+			<?php
+				}
+			?>
+			<?php
+				if($i==0) {
+			?>
+				<td colspan="10" align="Center"> DATA KOSONG </td>
+			<?php  
+				}
+			?>
+			</tbody>
+		</table>
+ 	</div> 	 	
+</article>

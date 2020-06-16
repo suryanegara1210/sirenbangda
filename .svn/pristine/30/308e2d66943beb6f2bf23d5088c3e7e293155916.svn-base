@@ -1,0 +1,18 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-14 09:10:56 --> 404 Page Not Found --> rbac/rbac-index
+ERROR - 2013-06-14 09:11:05 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-06-14 09:11:08 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-06-14 09:12:26 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-06-14 09:12:36 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-14 09:24:39 --> 404 Page Not Found --> report/tutup_buku
+ERROR - 2013-06-14 10:15:40 --> Severity: Notice  --> Undefined variable: nilai_sp2d_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 246
+ERROR - 2013-06-14 10:46:09 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-14 10:46:17 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-14 10:46:33 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-14 17:21:36 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\views\spm\viewspm_cairusulan.php 31
+ERROR - 2013-06-14 17:21:36 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\views\spm\viewspm_cairusulan.php 31
+ERROR - 2013-06-14 17:23:31 --> Severity: Notice  --> Undefined property: stdClass::$status_sp2d C:\xampp\htdocs\siaku\application\views\spm\viewspm_cairusulan.php 31
+ERROR - 2013-06-14 17:23:31 --> Severity: Notice  --> Undefined property: stdClass::$status_sp2d C:\xampp\htdocs\siaku\application\views\spm\viewspm_cairusulan.php 31
+ERROR - 2013-06-14 17:55:35 --> Severity: Notice  --> Undefined property: stdClass::$id_status_usulan C:\xampp\htdocs\siaku\application\controllers\spm.php 941
+ERROR - 2013-06-14 17:55:35 --> Severity: Notice  --> Undefined property: stdClass::$tgl_usulan C:\xampp\htdocs\siaku\application\controllers\spm.php 951

@@ -1,0 +1,41 @@
+<article class="module width_full">
+            <header><h3>Daftar TUP yang terotorisasi</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/tup/pengisian_spp" onSubmit='return validasi(this)'> 
+                <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+                 <thead> 
+                <tr >
+                    <th>Nomor</th>
+                    <th>Status</th> 
+                    <th colspan="2">Aksi</th>
+                    
+                </tr>
+                </thead>
+                <?php $no=1;
+                foreach($daftar_up->result_array() as $row)
+                {  
+                $id=$row['id_rekap'];
+                $nm_unit=$row['nama_unit']; 
+                $status=$row['status'];
+                $keterangan=$row['keterangan'];     
+                ?>
+                  <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>"> 
+                  <input type="hidden" name="status" value="<?php echo "$status"; ?>"> 
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="center"><?php echo "$nm_unit";?></td> 
+                    <td align="center" width="10px"><a href='<?php echo base_url()."index.php/tup/detail_up_terotorisasi/".$id;?>' title='Detail TUP'><img src='<?php echo base_url();?>asset/images/detail.png'></a></td> 
+                <?php $no++;}?>
+                    </table>
+   <table><div id='tabel'></div> </table>
+   
+                 </div>    
+                <footer> 
+                <div class="submit_link">
+                    <?php echo form_submit("submit","Buatkan SPP"); ?>   
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>       

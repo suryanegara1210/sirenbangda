@@ -1,0 +1,26 @@
+<?php echo form_dropdown("id_header",$option_header,'',"id='id_header'"); ?>
+<input type="hidden" name="kdkomponen" value="<?php echo"$kdkomponen" ?>"> 
+<input type="hidden" name="kdoutput" value="<?php echo"$kdoutput" ?>">   
+<input type="hidden" name="kdakun" value="<?php echo"$kdakun" ?>">  
+<input type="hidden" name="kdskomponen" value="<?php echo $kdskomponen ?>"> 
+ 
+<script type="text/javascript">
+          $("#id_header").change(function(){
+                var selectValues = $("#id_header").val();
+                if (selectValues == 0){
+                    var msg = "";
+                    $('#tabel').html(msg);
+                }else{
+                    var id_header = {id_header:$("#id_header").val(),kdkomponen:'<?php echo"$kdkomponen" ?>',kdskomponen:'<?php echo"$kdskomponen" ?>', kdoutput:'<?php echo"$kdoutput" ?>', kdakun:'<?php echo"$kdakun" ?>'}; 
+                    $('#tabel').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('tup/select_tabel3')?>",
+                            data: id_header,
+                            success: function(msg){
+                                $('#tabel').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>

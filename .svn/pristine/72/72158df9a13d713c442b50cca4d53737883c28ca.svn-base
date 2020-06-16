@@ -1,0 +1,222 @@
+<script type="text/javascript">
+  $(document).ready(function(){
+   
+
+    jQuery.validator.addMethod("kode_autocomplete", function(value, element, params){
+        if ($("input[name="+ params +"]").val()=="") {
+          return false;
+        }else{
+          return true;
+        }
+    }, "Data tidak valid/belum di pilih, mohon pilih data setelah melakukan pencarian pada kolom ini."); 
+
+    $("form#pendapatan").validate({
+      rules: {
+        kd_jenis_autocomplete : {
+          required : true,
+          kode_autocomplete : "kd_jenis"
+        },
+        kd_asal_autocomplete : {
+          required : true,
+          kode_autocomplete : "kd_asal"
+        }
+        
+      }
+      });
+        $("#simpan").click(function(){      
+        var valid = $("form#pendapatan").valid();
+
+          $("form#pendapatan").submit();
+          });
+
+
+  // $(document).on("change", "#id_bulan", function () {    
+  //       $.ajax({
+  //           type: "POST",
+  //           url: '<?php echo site_url("common/cmb_bulan"); ?>',
+  //           data: {id_bulan: $(this).val()},
+  //           success: function(msg){
+  //             prepare_chosen();
+  //           }
+  //       });
+    
+  
+  // });
+
+    $("#kd_jenis_autocomplete").autocomplete({
+      minLength: 0,
+      source: 
+      function(req, add){
+          $("#kd_jenis").val("");                            
+          $("#kd_asal_autocomplete").val("");
+
+          $.ajax({
+              url: "<?php echo base_url('common/autocomplete_jenispendapatan'); ?>",
+              dataType: 'json',
+              type: 'POST',
+              data: req,
+              success:    
+              function(data){                      
+                add(data);                      
+              },
+          });
+      },
+      select: 
+      function(event, ui) {                        
+        $("#kd_jenis").val(ui.item.id);              
+      }
+    }).focus(function(){            
+        $(this).trigger('keydown.autocomplete');
+    });
+
+    $("#kd_asal_autocomplete").autocomplete({
+      minLength: 0,
+      source: 
+      function(req, add){
+          $("#kd_asal").val("");                            
+          req.kd_jenis   = $("#kd_jenis").val();
+          $.ajax({
+              url: "<?php echo base_url('common/autocomplete_asalpendapatan'); ?>",
+              dataType: 'json',
+              type: 'POST',
+              data: req,
+              success:    
+              function(data){                      
+                add(data);                      
+              },
+          });
+      },
+      select: 
+      function(event, ui) {                        
+        $("#kd_asal").val(ui.item.id);              
+      }
+    }).focus(function(){            
+        $(this).trigger('keydown.autocomplete');
+    });
+  });
+   
+</script>
+
+<article class="module width_full">
+ 	<header>
+ 		<h3>
+		<?php
+			if (isset($isEdit) && $isEdit){
+			    echo "Edit Data Pendapatan";
+			} else{
+			    echo "Input Data Pendapatan";
+			}
+		?>
+		</h3>
+ 	</header>
+ 	<div class="module_content">
+    <form action="<?php echo $url_save_data;?>" method="POST" name="pendapatan" id="pendapatan" accept-charset="UTF-8" enctype="multipart/form-data" >
+      <input type="hidden" name="id_pendapatan" value="<?php if(!empty($id_pendaptan)){echo $id_pendapatan;} ?>" />
+      <table id="musrembang_input" class="fcari" width="100%">  
+           <tr>
+                <td>jenis pendapatan</td>
+                <td>            
+                    <label for="kd_jenis"></label>
+                    <input type="text" id="kd_jenis_autocomplete" name="kd_jenis_autocomplete" class="autocomplete_field" value="<?php if(!empty($kd_jenis)){echo $kd_jenis;} ?>" />
+                    <input type="hidden"id="kd_jenis" name="kd_jenis" value="<?php if(!empty($kd_jenis)){echo $kd_jenis;} ?>"/>            
+                </td>
+            </tr>
+            <tr>
+                <td>asal pendapatan</td>
+                <td>            
+                    <label for="kd_asal"></label>
+                    <input type="text" id="kd_asal_autocomplete" name="kd_asal_autocomplete" class="autocomplete_field" value="<?php if(!empty($kd_asal)){echo $kd_asal;} ?>" />
+                    <input type="hidden"id="kd_asal" name="kd_asal" value="<?php if(!empty($kd_asal)){echo $kd_asal;} ?>"/>            
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Tahun I</td>
+                <td>
+                    <input type="text" name="tahun1" id="tahun1" placeholder="Tahun I" 
+                    value="<?php echo isset($tahun1) ? $tahun1 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Realisasi Tahun I</td>
+                <td>
+                    <input type="text" name="realisasi_1" id="realisasi_1" placeholder="Realisasi Tahun 1" 
+                    value="<?php echo isset($realisasi_1) ? $realisasi_1 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Tahun II</td>
+                <td>
+                    <input type="text" name="tahun2" id="tahun2" placeholder="Tahun II" 
+                    value="<?php echo isset($tahun2) ? $tahun2 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Realisasi Tahun II</td>
+                <td>
+                    <input type="text" name="realisasi_2" id="realisasi_2" placeholder="Realisasi Tahun 2" 
+                    value="<?php echo isset($realisasi_2) ? $realisasi_2 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Tahun III</td>
+                <td>
+                    <input type="text" name="tahun3" id="tahun3" placeholder="Tahun III" 
+                    value="<?php echo isset($tahun3) ? $tahun3 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Proyeksi Tahun III</td>
+                <td>
+                    <input type="text" name="proyeksi_3" id="proyeksi_3" placeholder="Proyeksi Tahun 3" 
+                    value="<?php echo isset($proyeksi_3) ? $proyeksi_3 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Tahun IV</td>
+                <td>
+                    <input type="text" name="tahun4" id="tahun4" placeholder="Tahun IV" 
+                    value="<?php echo isset($tahun4) ? $tahun4 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Pagu</td>
+                <td>
+                    <input type="text" name="proyeksi_4" id="proyeksi_4" placeholder="Pagu" 
+                    value="<?php echo isset($proyeksi_4) ? $proyeksi_4 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Tahun V</td>
+                <td>
+                    <input type="text" name="tahun5" id="tahun5" placeholder="Tahun V" 
+                    value="<?php echo isset($tahun5) ? $tahun5 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Realisasi Tahun V</td>
+                <td>
+                    <input type="text" name="proyeksi_5" id="proyeksi_5" placeholder="Proyeksi Tahun 5" 
+                    value="<?php echo isset($proyeksi_5) ? $proyeksi_5 : ''; ?>" style="width:40%"/>
+                </td>
+            </tr>
+
+          </table>
+ 		</form> 		
+ 	</div> 	
+ 	<footer>
+		<div class="submit_link">  
+  			<input type='button' id="simpan" name="simpan" value='Simpan' />
+  			<input type="button" value="Keluar" onclick="window.location.href='<?php echo site_url('pendapatan_daerah'); ?>'" />
+		</div> 
+	</footer>
+</article>

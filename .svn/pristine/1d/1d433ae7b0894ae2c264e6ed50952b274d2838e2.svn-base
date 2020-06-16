@@ -1,0 +1,21 @@
+<?php echo form_dropdown("kode_bas",$kode_bas,'',"id='kode_basx' style='width:450px;'"); ?>
+
+<script type="text/javascript">
+          $("#kode_bas").change(function(){
+                    var kode_bas = $("#kode_basx").val();
+			  		//alert(kode_bas);
+					var jn_bi=kode_bas.substring(6,8);
+					var jns_bi='';
+					if(jn_bi==51)
+					{jns_bi='Biaya Layanan';}
+					else
+					if(jn_bi==55)
+					{jns_bi='Biaya Administrasi Umum';}
+					else
+					if(jn_bi==59)
+					{jns_bi='Biaya Lainnya';}
+					
+                    $('#jn_biaya').html(jns_bi);
+        });
+       </script>  
+

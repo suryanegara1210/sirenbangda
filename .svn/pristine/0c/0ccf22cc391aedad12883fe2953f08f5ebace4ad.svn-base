@@ -1,0 +1,323 @@
+	    <article class="module width_full">
+    		<header><h3>Pendapatan Uang Kuliah</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <div id="unit" style="margin-right: 10px; float:left; max-width: 250px;">
+                    Fakultas : <br/>
+                    <?php if ($this->session->userdata('id_unit')!=''){
+                            echo form_dropdown("unit_drp",$option_unit,$this->session->userdata('id_unit'),"id='unit_drp' disabled style=\"max-width: 250px;\"");
+                        }else {
+                            echo form_dropdown("unit_drp",$option_unit,"","id='unit_drp' style=\"max-width: 250px;\"");
+                        }
+                    ?>
+                </div>
+                <div id="sub_unit" style="margin-right: 10px; float:left; ">
+                    Jurusan :<br/>
+                    <select name="sub_unit_drp" id="sub_unit_drp" style="max-width: 150px;" disabled>
+                        <option value="Pilih unit Dahulu !!!">Pilih unit Dahulu !!!</option>
+                    </select>
+                </div>
+                <div id="tahun" style="margin-right: 10px;float:left;">
+                    Tahun :<br/>
+                    <select name="tahun_drp"  id="tahun_drp" disabled>
+                        <!--<option value="-1">Semua</option>-->
+                        <option value="0">Pilih Jurusan Dahulu !!!</option>
+                    </select>
+                </div>
+                <div id="semester" style="margin-right: 10px; float:left;" >
+                    Semester :<br/>
+                    <select name="semester_drp"  id="semester_drp" disabled>
+                        <!--<option value="-1">Semua</option>-->
+                        <option value="GANJIL">Ganjil</option>
+                        <option value="GENAP">Genap</option>
+                    </select>
+                </div>
+                <!-- <div id="jenis_penerimaan" style="margin-right: 10px; float:left;" >
+                    Jenis Penerimaan :<br/>
+                    <select name="jenis_penerimaan_drp"  id="jenis_penerimaan_drp">
+                        <option value="-1">Semua</option>
+                        <option value="E">BELUM JALAN</option>
+                        <option value="O">SPP</option>
+                        <option value="E">SDPP</option>
+                        <option value="E">UKT</option>
+                    </select>
+                </div>
+                -->
+                <div style="margin-right: 10px; float:left;">
+                    Tampilkan:<br />
+                    <input type="button" id="tampil" value="Tampilkan" onclick="tampil()" /></center>
+                </div>
+                
+                <div>
+                    Cetak:<br />
+                    <input type="button" id="cetak" value="Cetak" onclick="cetak_realisasi()"/>
+                </div>
+                
+                </form> <br /><br />
+
+               <div id="ringkasan_masuk" style="margin-top: 20px;"></div>
+               <div id="bayar" style="display: none; width:900px;">
+                    <table id="sudah_bayar" ></table>
+                    <div id="pager_bayar"></div>
+               </div>
+
+               <div id="ringkasan_tunggakan" style="margin-top: 20px;"></div>
+               <div id="tunggakan" style="display: none; width:900px;">
+                    <table id="grid_tunggakan" ></table>
+                    <div id="pager_tunggakan"></div>
+               </div>
+            </div>
+        </article>
+        
+         <script>
+             $('#tampil').attr('disabled','disabled');
+             $('#cetak').attr('disabled','disabled');
+             
+        //var kode_prodi='<?php echo $this->session->userdata('kode_prodi_unit');?>';
+            var id_subunit='<?php echo $this->session->userdata('id_subunit');?>';
+            var id_unit='<?php echo $this->session->userdata('id_unit');?>';
+            $(document).ready(function () {
+                if(id_subunit.length>0){
+                    sub_unit_pilih(id_subunit); //ambil nama subunit
+                    tahun_ambil($("#unit_drp").val(),$("#sub_unit_drp").val());
+                }else{
+                    sub_unit(); //ambil semua subunit
+                }
+            });
+            
+            $("#unit_drp").change(function(){
+                $('#tahun_drp').attr('disabled','disabled');
+                $('#semester_drp').attr('disabled','disabled');
+                $('#tampil').attr('disabled','disabled');
+                $('#cetak').attr('disabled','disabled');
+                $('#sub_unit_drp').html("<option value='0'>L O A D I N G . . .</option>");
+                hide_grid();
+                sub_unit();
+            });
+            
+            $("#sub_unit_drp").change( function(){ //ketika sub-unit dirubah 
+                $('#semester_drp').attr('disabled','disabled');
+                $('#tampil').attr('disabled','disabled');
+                $('#cetak').attr('disabled','disabled');
+                hide_grid();
+                if($("#sub_unit_drp").val()==0){
+                    $('#tahun_drp').attr('disabled','disabled');
+                } else{
+                    $("#tahun_drp").html("<option value='0'>L O A D I N G . . .</option>");
+                    tahun_ambil($("#unit_drp").val(),$("#sub_unit_drp").val());
+                }
+                
+            });
+            
+            $("#tahun_drp").change( function(){ //ketika tahun dirubah 
+                $('#semester_drp').attr('disabled','disabled');
+                $('#tampil').attr('disabled','disabled');
+                $('#cetak').attr('disabled','disabled');
+                hide_grid();
+                if($("#tahun_drp").val()==0){
+                    $('#semester_drp').attr('disabled','disabled');
+                    $('#tampil').attr('disabled','disabled');
+                } else{
+                    $("#semester_drp").removeAttr('disabled');
+                    $("#tampil").removeAttr('disabled');
+                }
+                
+            });
+            
+            $("#semester_drp").change( function(){ //ketika tahun dirubah 
+                hide_grid();
+                $('#cetak').attr('disabled','disabled');
+                
+            });
+            
+            function cetak_realisasi(){
+                var base='<?php echo base_url();?>';
+                var lokasi='ladik/realisasi_cetak/'+$("#unit_drp").val()+'/'+$("#sub_unit_drp").val()+'/'+$("#tahun_drp").val()+'/'+$("#semester_drp").val();
+                location.href=base+escape(lokasi);
+            }
+            
+            //ambil semua sub unit berdasar unit yg login
+            function sub_unit(){ 
+                var kode_unit = $("#unit_drp").val();
+                if (kode_unit == 0){ //tidak memilih unit
+	    			var msg = "sub_unit :<br><select name=\"sub_unit_drp\" disabled><option value=\"Pilih unit Dahulu !!!\">Pilih unit Dahulu !!!</option></select>";
+	    			$('#sub_unit_drp').html(msg);
+	    		} else{
+	    		    if (kode_unit==-1){ //unit dipilih: seluruh fakultas
+	    		        var msg = "sub_unit :<br><select name=\"sub_unit_drp\" disabled><option value=\"-1\">Seluruh Fakultas</option></select>";
+	    			    $('#sub_unit_drp').html(msg);
+                        $('#sub_unit_drp').attr('disabled','disabled');
+	    		    } else{ //unit dipilih bukan : seluruh fakultas
+	    		        var fakultas = {fakultas:escape($("#unit_drp").val())};
+                        $.ajax({ //post id unit
+							type: "POST",
+							url : "<?php echo site_url('ladik/select_sub_unit')?>",
+							data: fakultas,
+							success: function(msg){
+								$('#sub_unit_drp').html(msg); //masukkan list sub-unit
+                                $("#sub_unit_drp").removeAttr('disabled'); //aktifkan pilihan sub-unit
+							}
+    				  	});
+                        
+	    		    }
+	    		}
+            }
+            function sub_unit_pilih(kode_sub_unit){
+	    		        var sub_unit = {sub_unit:escape(kode_sub_unit)};
+                        $.ajax({ //post id unit
+							type: "POST",
+							url : "<?php echo site_url('ladik/sub_unit_pilih')?>",
+							data: sub_unit,
+							success: function(msg){
+								$('#sub_unit_drp').html(msg); //masukkan list sub-unit
+                                //$("#sub_unit_drp").removeAttr('disabled'); //aktifkan pilihan sub-unit
+							}
+    				  	});
+            }
+            
+            //ambil tahun
+            function tahun_ambil(unit,sub_unit){ 
+               var fakultas = {unit:unit, subunit:sub_unit,tipe:'2' };
+                $.ajax({ //post id unit
+                    type: "POST",
+                    url : "<?php echo site_url('ladik/select_tahun')?>",
+                    data: fakultas,
+                    success: function(msg){
+                        $('#tahun_drp').html(msg); //masukkan list sub-unit
+                        $("#tahun_drp").removeAttr('disabled'); //aktifkan pilihan tahun
+                    }
+                });
+            }
+            function hide_grid(){
+                $('#ringkasan_masuk').hide(400);
+                $('#bayar').hide(400);
+                $('#ringkasan_tunggakan').hide(400);
+                $('#tunggakan').hide(400);
+            }
+            
+            function tampil(){
+                hide_grid();
+                $('#ringkasan_masuk').show(400);
+                $('#ringkasan_tunggakan').show(400);
+                $('#ringkasan_masuk').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+                $('#ringkasan_tunggakan').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+                var unit=escape($("#unit_drp").val());
+                var sub_unit=escape($("#sub_unit_drp").val());
+                var tahun=escape($("#tahun_drp").val());
+                var semester=escape($("#semester_drp").val());
+                post_request_ringkasan(unit, sub_unit, tahun, semester);
+                grid_bayar(unit, sub_unit, tahun, semester);
+                grid_tunggakan(unit, sub_unit, tahun, semester);
+                $('#cetak').removeAttr('disabled');
+            }
+            
+            function post_request_ringkasan(unit, sub_unit, tahun, semester){
+                var kode_permintaan = {unit:unit, sub_unit:sub_unit, tahun:tahun, semester:semester};
+                $.ajax({
+    				type: "POST",
+    				url : "<?php echo site_url('ladik/realisasi_bayar_ringkas')?>",
+    				data: kode_permintaan,
+    				success: function(msg){
+    					$('#ringkasan_masuk').html(msg);
+                    }
+  			  	});
+                $.ajax({
+					type: "POST",
+					url : "<?php echo site_url('ladik/realisasi_tunggakan_ringkas')?>",
+					data: kode_permintaan,
+					success: function(msg){
+						$('#ringkasan_tunggakan').html(msg);
+					}
+                });
+            }
+            function grid_bayar(unit, sub_unit, tahun, semester){
+                $("#sudah_bayar").setGridParam({url:'<?php echo base_url()?>'+'ladik/realisasi_bayar_ambil/'+unit+'/'+sub_unit+'/'+tahun+'/'+semester});
+                $("#sudah_bayar").trigger("reloadGrid");
+                
+                jQuery("#sudah_bayar").jqGrid({
+                    url:'<?php echo base_url().'ladik/realisasi_bayar_ambil'?>/'+unit+'/'+sub_unit+'/'+tahun+'/'+semester,
+                    mtype : "POST",
+                    datatype: "json",
+                    colNames:['NIM','Nama','Tanggal','Semester','Jenis Penerimaan','Jumlah'],
+                    colModel:[
+                        {name:'nim',index:'t_pen_mhs.nim',  width:80, align:"center",searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'nama',index:'nama', width:280, align:"left",searchoptions: { sopt: ['cn','eq', 'ne']}},
+                        {name:'tgl_pembayaran',index:'tgl_pembayaran', width:120, align:"left", search:true, stype:'text', searchoptions:{dataInit:datePick, attr:{title:'Select Date'},sopt: ['eq', 'ne', 'cn']}},
+                        {name:'th_ajaran',index:'th_ajaran', width:80, align:"left", searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'title_pen',index:'title_pen', width:100, align:"left", searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'jumlah',index:'jumlah', width:130, align:"right", formatter:'currency',search:false, formatoptions:{decimalSeparator:",", thousandsSeparator: ".", decimalPlaces: 0, prefix: "Rp. "} },
+						
+                    ],
+                    rowNum:30,
+                    width: 900,
+                    height: 350,
+                    rowList:[10,20,30,40,50,60,70],
+                    autowidth: true,
+                    rownumbers: true,
+                    pager: '#pager_bayar',
+                    sortname: 't_pen_mhs.nim',
+                    viewrecords: true,
+					sortorder: "asc",
+					multiselect: false,
+                    //scrollOffset: 0,
+                    caption:""
+                }).navGrid('#pager_bayar',{edit:false,add:false,del:false},
+                {closeAfterEdit:true},//edit
+                {closeAfterAdd:true},//add
+                {},//del
+                {closeAfterSearch:true}//search
+                );
+            }
+            function grid_tunggakan(unit, sub_unit, tahun, semester){
+                $("#grid_tunggakan").setGridParam({url:'<?php echo base_url()?>'+'ladik/tunggakan_tampil_data/'+unit+'/'+sub_unit+'/'+tahun+'/'+semester});
+                $("#grid_tunggakan").trigger("reloadGrid");
+                
+                jQuery("#grid_tunggakan").jqGrid({
+                    url:'<?php echo base_url().'ladik/tunggakan_tampil_data'?>/'+unit+'/'+sub_unit+'/'+tahun+'/'+semester,
+                    mtype : "POST",
+                    datatype: "json",
+                    colNames:['NIM','Nama', 'Th. Ajaran','Jenis Penerimaan', 'Jumlah'],
+                    colModel:[
+                        {name:'nim',index:'t_pen_mhs.nim',  width:80, align:"center",searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'nama',index:'nama', width:300, align:"left",searchoptions: { sopt: ['cn','eq', 'ne']}, summaryType:'count',summaryTpl:'<b>Total Tunggakan</b>'},
+                        {name:'th_ajaran',index:'th_ajaran', width:125, align:"left", summaryType:'count', summaryTpl:'<b>{0} Tunggakan</b>',searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'title_pen',index:'title_pen', width:150, align:"left", searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'jumlah',index:'jumlah', width:170, align:"right", formatter:'currency', summaryType:'sum', formatoptions:{decimalSeparator:",", thousandsSeparator: ".", decimalPlaces: 0, prefix: "Rp. "}, search:false },
+                    ],
+                    /** **/
+                    grouping:true, 
+                      groupingView : { 
+                         groupField : ['nim'],
+                         groupSummary: ['jumlah'],
+                         groupDataSorted : false,
+                         groupCollapse : true,
+                         groupSummary : [true],
+                         groupText :['<b>{0} Sebanyak {1} tunggakan']
+                      }, 
+                    
+                    rowNum:30,
+                    width: 900,
+                    height: 400,
+                    rowList:[10,20,30,40,50,60,70],
+                    autowidth: true,
+                    rownumbers: true,
+                    pager: '#pager_tunggakan',
+                    sortname: 't_pen_mhs.nim',
+                    viewrecords: true,
+					sortorder: "asc",
+					multiselect: false,
+                    caption:""
+                }).navGrid('#pager_tunggakan',{edit:false,add:false,del:false},
+                {closeAfterEdit:true},//edit
+                {closeAfterAdd:true},//add
+                {},//del
+                {closeAfterSearch:true}//search
+                );
+            }
+            datePick = function(elem)
+            {
+               jQuery(elem).datepicker({dateFormat: 'yy-mm-dd'});
+            }
+        </script>
+		
+        <!-- end of styles article --> 

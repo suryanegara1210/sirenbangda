@@ -1,0 +1,1080 @@
+<?php /**
+* @brief Model Class yang berhubungan dengan proses bisnis belanja pembuatan kwitansi
+*
+* Class Model ini digunakan untuk mengelola kwitansi
+* Long Description
+* @Package
+*/
+
+class M_spm extends CI_Model {
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->table_name = 't_kwitansi';
+    }
+    function get_view_list_spm($ta, $jb,$id_unit,$id_status)
+        {
+            if($id_unit==0){
+                $this->db->select('*, YEAR(tgl_spm) as thn, sum(nominal) as jumlah');
+                $this->db->from("t_spm");
+                $this->db->join("t_kwitansi as m",'m.id_spm=t_spm.id_spm','inner');
+                $this->db->join("m_unit as n",'t_spm.id_unit=n.id_unit','inner');
+                $this->db->join("m_status_spm as a",'t_spm.id_status_spm = a.id_status_spm','inner');
+                $this->db->where('t_spm.id_status_spm IN ('.$id_status.')');
+                $this->db->where('t_spm.sifat_bayar',$jb);
+                $this->db->where('YEAR(tgl_spm)='.$ta);
+                $this->db->group_by('t_spm.id_spm');
+                $result = $this->db->get();
+                return $result;
+            }else{
+                $this->db->select('*, YEAR(tgl_spp) as thn, sum(nominal) as jumlah');
+                $this->db->from("t_spp");
+                $this->db->join("t_kwitansi as m",'m.id_spp=t_spp.id_spp','inner');
+                $this->db->join("m_unit as n",'t_spp.id_unit=n.id_unit','inner');
+                $this->db->where('n.id_unit',$id_unit);
+                $this->db->where('id_status_spp',$id_status);
+                $this->db->where('t_spp.sifat_bayar',$jb);
+                $this->db->where('t_spp.tahun_anggaran',$ta);
+                $this->db->group_by('t_spp.id_spp');
+                $result = $this->db->get();
+                return $result;
+            }
+
+        }
+    function get_view_list_spm2($ta, $jb,$id_unit,$id_status)
+        {
+            $this->db->select('*, YEAR(tgl_spm) as thn, sum(nominal) as jumlah');
+            $this->db->from("t_spm");
+            $this->db->join("t_kwitansi as m",'m.id_spm=t_spm.id_spm','inner');
+            $this->db->join("m_unit as n",'t_spm.id_unit=n.id_unit','inner');
+            $this->db->join("m_status_spm as a",'t_spm.id_status_spm = a.id_status_spm','inner');
+            $this->db->where('t_spm.id_status_spm IN ('.$id_status.')');
+            $this->db->where('t_spm.sifat_bayar',$jb);
+            if (!empty($id_unit)) {
+                $this->db->where('t_spm.id_unit',$id_unit);
+            }            
+            $this->db->where('YEAR(tgl_spm)='.$ta);
+            $this->db->group_by('t_spm.id_spm');
+            $result = $this->db->get();
+            return $result;
+        }
+    function get_view_list_spm_usulan($ta,$jb,$id_unit,$id_status){
+        $sql = "
+                SELECT id_usulan,nama_subunit,(IFNULL(t_usulan.total_usulan,0))AS jumlah,
+                       (IFNULL(status_usulan, 'Tidak Ada'))AS status_usulan, (IFNULL(status_dokumen, 'Tidak Ada'))AS status_dokumen, t_usulan.id_status_usulan
+                    FROM m_subunit
+                    LEFT JOIN t_usulan
+                        ON t_usulan.`id_subunit`= m_subunit.`id_subunit`
+                            AND YEAR(tgl_usulan)= ?
+                            AND sifat_bayar = ?
+                            AND ref_id_spm IS NULL
+                            AND id_status_usulan  in (?)
+                    LEFT JOIN m_status_usulan ON t_usulan.`id_status_usulan` = `m_status_usulan`.`id_status_usulan`
+                    WHERE m_subunit.id_unit = ?
+                    GROUP BY m_subunit.id_subunit
+        ";
+        $query = $this->db->query($sql, array($ta, $jb, $id_status, $id_unit));
+        return $query;
+    }
+
+     function get_list_spm_usulan($ta, $id_status, $jb, $unit=NULL){
+        if (!empty($unit)) {
+            $where="AND `t_spm`.`id_unit` ='".$unit."'";
+        }else{
+            $where="";
+        }
+        $sql = "
+                SELECT `t_spm`.sifat_bayar, `t_spm`.id_unit,no_spm, t_spm.`id_spm`, tgl_spm, id_spj,
+                        SUM(total_usulan) AS jumlah, status_spm, akun_kode as kdakun, YEAR(tgl_spm) as thn, nama_unit
+                FROM t_spm
+                INNER JOIN `t_usulan`
+                        ON `t_usulan`.`ref_id_spm`=`t_spm`.`id_spm`
+                INNER JOIN `m_status_spm`
+                        ON `m_status_spm`.`id_status_spm`=`t_spm`.`id_status_spm`
+                JOIN m_unit ON t_spm.id_unit = m_unit.id_unit
+                WHERE YEAR(tgl_spm)= ?
+                	AND `t_spm`.`id_status_spm` IN ($id_status)
+                    AND `t_spm`.`sifat_bayar` = ? 
+                ".$where."
+                GROUP BY `t_spm`.`id_spm`
+        ";
+        $query = $this->db->query($sql, array($ta, $jb));
+        return $query;
+     }
+
+     function get_sum_usulan($ta,$jb,$id_unit){
+        $query = $this->db->query("
+                    SELECT SUM(t_usulan.total_usulan)AS jumlah
+                    FROM t_usulan,m_subunit
+                    WHERE t_usulan.`id_subunit`= m_subunit.`id_subunit`
+                        AND YEAR(tgl_usulan)= '$ta'
+                        AND sifat_bayar = '$jb'
+                        AND m_subunit.id_unit = '$id_unit'
+                    GROUP BY t_usulan.id_unit
+        ");
+        return $query->row();
+    }
+
+    function spp($id,$id_unit,$ta,$jb)
+        {
+            $q=$this->db->query("SELECT *, SUBSTRING(akun_kode,7,2) as j_belanja, sum(nominal) as jumlah
+            FROM t_kwitansi,t_spp, m_status_spp, m_unit
+            WHERE t_spp.id_unit=m_unit.id_unit and m_status_spp.id_status_spp=t_spp.id_status_spp
+            and t_kwitansi.id_spp=t_spp.id_spp
+            and t_spp.id_unit ='$id_unit' and t_spp.id_spp ='$id' and t_spp.tahun_anggaran ='$ta'
+            and t_spp.sifat_bayar ='$jb' group by t_spp.id_spp;");
+            return $q;
+        }
+    function isi_spm_usulan($id_unit,$ta,$jb){
+        $this->db->select('*');
+            $this->db->from("t_usulan");
+            $this->db->join("m_unit",'t_usulan.id_unit = m_unit.id_unit','inner');
+            $this->db->where('YEAR(tgl_usulan)',$ta);
+            $this->db->where('t_usulan.id_unit',$id_unit);
+            $this->db->where('t_usulan.sifat_bayar',$jb);
+            $result = $this->db->get();
+            if($result->num_rows() > 0)
+            {
+                return $result;
+            }
+    }
+    function cek_spp_spm($id_spp,$ta)
+        {
+            $this->db->select('*');
+            $this->db->from("t_spm");
+            $this->db->join("t_spp",'t_spm.id_spp=t_spp.id_spp','inner');
+            $this->db->where('t_spm.id_spp',$id_spp);
+            $this->db->where('YEAR(tgl_spp)='.$ta);
+            $result = $this->db->get();
+            if($result->num_rows() == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    function cek_usulan_spm($id_usulan,$ta)
+        {
+            $this->db->select('*');
+            $this->db->from("t_spm");
+            $this->db->join("t_usulan",'t_spm.id_spm = t_usulan.ref_id_spm','inner');
+            $this->db->where('t_spm.id_usulan',$id_usulan);
+            $this->db->where('YEAR(tgl_usulan)',$ta);
+            $result = $this->db->get();
+            if($result->num_rows() == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    function selek_kwitansi($id,$ta)
+        {
+           $this->db->select('*');
+           $this->db->from('t_spp');
+           $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');
+           $this->db->join("t_kwitansi",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');
+           $this->db->where('t_spp.id_spp',$id);
+           $this->db->where('t_spp.tahun_anggaran',$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+
+     function simpan_spm($ta,$id,$id_unit,$jb,$kwitansi,$status_set,$status_where)
+        {
+
+            $cb = $this->input->post('cb');
+            $kepada = $this->input->post('kepada');
+            $npwp = $this->input->post('npwp');
+            $no_rek = $this->input->post('no_rek');
+            $bank= $this->input->post('bank');
+            $uraian = $this->input->post('uraian');
+
+
+            $tgl_skrg = date("Y-m-d H:i:s");
+
+            $this->db->trans_strict(FALSE);
+		    $this->db->trans_start();
+
+            $idnew=$this->nomer->gen_no_spm($tgl_skrg, $id_unit, $jb);
+            $id_spm = $idnew['id_spm'];
+            $this->db->set('sifat_bayar',$jb);
+                if(!in_array($jb,array(Constant::JB_UP,Constant::JB_TUP))){
+                	 $this->db->set('id_spp',$id);
+				}
+            
+            $jum_nominal_spm=0;
+            
+            if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                //FIXME: ampe sini cuman masuk satu, cek
+                $urai=$this->m_spm->isi_spm_usulan($id_unit,$ta,$jb);
+                foreach($urai->result_array() as $u){
+                    $this->m_usulan->set_spm_usulan($u['id_usulan'],$id_spm,'6');
+                    $jum_nominal_spm+=$u['total_usulan'];
+                }
+
+            }else{
+                $this->m_spm->update_status_spp($id,$ta,43);
+                foreach($kwitansi->result_array() as $row){
+                  $id_sptb = $row['id_sptb'];
+                  $id_kwitansi = $row['id_kwitansi'];
+                  //$this->m_spm->update_status_sptb($id_sptb,$ta,4);
+                  $this->m_spm->update_kwitansi_spm($id_kwitansi,$ta,$id_spm);
+                  $jum_nominal_spm+=$row['nominal'];
+				  $id_spj = $row['id_spj'];
+                }
+            }
+                
+            $this->db->set('nominal_spm',$jum_nominal_spm);
+            $this->db->set('cara_bayar',$cb);
+			$this->db->set('id_spp',$id);
+			$this->db->set('id_spj',$id_spj);
+            $this->db->set('kepada',$kepada);
+            $this->db->set('npwp',$npwp);
+            $this->db->set('bank',$bank);
+            $this->db->set('nomor_rekening',$no_rek);
+            $this->db->set('uraian_spm',$uraian);
+            $this->db->where('id_spm', $id_spm);
+            $this->db->update('t_spm');
+
+            $this->db->trans_complete();
+		    return $this->db->trans_status();
+        }
+
+        function LAMA_update_spm_usulan($id_usulan,$id_subunit,$id_spm,$jb,$ta,$status_set,$status_where)
+        {
+			// id_status_usulan (6) = sudah dibuatkan SPM
+            $this->db->set('id_status_usulan',$status_set);
+            $this->db->set('ref_id_spm',$id_spm);
+            $this->db->where('sifat_bayar', $jb);
+            $this->db->where('id_status_usulan',$status_where);
+			$this->db->where('id_subunit',$id_subunit);
+            $this->db->where('ref_id_spm IS NULL');
+            $this->db->where('YEAR(tgl_usulan)',$ta);
+            $this->db->update('t_usulan');
+        }
+        /*function update_sptb_spm($id_sptb,$ta)
+        {
+            $this->db->set('id_status_sptb',4);
+            $this->db->where('id_sptb', $id_sptb);
+            $this->db->where('YEAR(tgl_sptb)='.$ta);
+            $this->db->update('t_sptb');
+        }
+       function update_status_spp($id_spp,$ta)
+        {
+            $this->db->set('id_status_spp',3);
+            $this->db->where('id_spp', $id_spp);
+            $this->db->where('YEAR(tgl_spp)='.$ta);
+            $this->db->update('t_spp');
+        } */
+       function update_kwitansi_spm($id_kwitansi,$ta,$id_spm)
+        {
+			//TODO : UPDATE STATUS KWITANSI
+			// STATUS YANG LAMA BERNILA 7
+            $this->db->set('id_status_kwitansi',22);
+            $this->db->set('id_spm',$id_spm);
+            $this->db->where('id_kwitansi', $id_kwitansi);
+            $this->db->where('t_kwitansi.tahun_anggaran',$ta);
+            $this->db->update('t_kwitansi');
+        }
+       function ambil_level_tertinggi($id_kwitansi,$ta)
+        {
+           $this->db->select_max('level');
+           $this->db->from('tb_waktu_kwitansi');
+           $this->db->where('id_kwitansi',$id_kwitansi);
+           $this->db->where('YEAR(tgl_kwitansi)='.$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+        function masuk_waktu_dibuatkan_spm($id_kwitansi,$level_terkini)
+        {
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into t_kwitansi_history(id_kwitansi,tanggal_waktu, status_waktu,level) values('$id_kwitansi','$tgl_skrg $jam_skrg','dibuatkan spm','$level_terkini')");
+            }
+        function get_spp_filter($ta,$bulan,$id_unit,$id_status){
+            if($id_unit==0){
+               $id_unit='';
+			   $id_unit2='';
+            }else{
+				$id_unit2="AND b.id_unit='".$id_unit."'";
+				$id_unit="AND c.id_unit='".$id_unit."'";				
+			}
+             $q=$this->db->query("
+                        SELECT a.id_spm, d.status_spm, concat(a.kdgiat,'.',a.kdoutput,'.',a.kdakun) as akun_kode, c.sifat_bayar, c.no_spm, c.tgl_spm, year(c.tgl_spm) as thn, sum(nominal) as jumlah, c.id_status_spm
+                        FROM `t_kwitansi` a
+                        INNER JOIN `t_spp` b ON a.`id_spp`=b.`id_spp`
+                        INNER JOIN `t_spm` c ON c.`id_spm`=a.`id_spm`
+                        INNER JOIN `m_status_spm` d ON c.`id_status_spm`=d.`id_status_spm`
+                        WHERE YEAR(tgl_spm) = '$ta' 
+						".$id_unit."
+						AND MONTH(tgl_spm) LIKE '%$bulan' 
+                        GROUP BY c.`id_spm`
+                        UNION
+                            SELECT a.ref_id_spm, c.status_spm, akun_kode, b.sifat_bayar, b.no_spm, b.tgl_spm, year(b.tgl_spm), sum(total_usulan), b.id_status_spm
+                            FROM t_usulan a
+                            INNER JOIN t_spm b ON a.ref_id_spm = b.id_spm
+                            INNER JOIN m_status_spm c ON c.id_status_spm = b.id_status_spm
+                            WHERE YEAR(b.tgl_spm) = '$ta'
+                            ".$id_unit2." 
+							AND MONTH(tgl_spm) LIKE '%$bulan'
+                            GROUP BY b.id_spm
+                       ");
+                    if($q->num_rows > 0) {
+    			         return $q;
+            		}
+          		    return FALSE;
+
+        }
+
+    function detail_spm_kwitansi($id_spm,$ta){
+            $q=$this->db->query("
+                SELECT SUBSTRING(akun_kode,7,2) AS jenis_belanja, t_spm.id_spm,t_spm.*,t_kwitansi.*,
+                       m_status_spm.*,m_unit.*,kode_digit, SUM(nominal) as jumlah
+                FROM t_spm,m_status_spm,t_spp,t_sptb,t_kwitansi,m_unit
+                WHERE m_status_spm.id_status_spm=t_spm.id_status_spm
+                    and t_spp.id_sptb=t_sptb.id_sptb
+                    and t_kwitansi.id_sptb=t_sptb.id_sptb
+					AND t_kwitansi.id_spm=t_spm.id_spm
+                    and t_spm.id_unit=m_unit.id_unit
+                    and t_spm.id_spm ='$id_spm' and YEAR(tgl_spm) =$ta
+                group by t_spm.id_spm;
+            ");
+            return $q;
+   }
+
+   function detail_spm_usulan($id_spm,$ta){
+            $sql = "
+                    SELECT t_spm.`no_spm`, t_spm.`id_spm`, SUM(total_usulan) AS jumlah,
+                           t_usulan.`akun_kode`, m_unit.*, t_spm.kepada, t_spm.nomor_rekening,
+                           t_spm.cara_bayar, t_spm.`sifat_bayar`, t_spm.id_status_spm, status_spm,
+                           t_spm.kepada, t_spm.`bank`, t_spm.`npwp`, t_spm.uraian_spm
+                    FROM t_spm
+                    JOIN t_usulan
+                    	ON t_usulan.`ref_id_spm` = t_spm.`id_spm`
+                    JOIN m_status_spm
+                    	ON t_spm.`id_status_spm` = m_status_spm.`id_status_spm`
+                    JOIN m_unit
+                    	ON t_spm.id_unit=m_unit.id_unit
+                    WHERE t_spm.id_spm = ?
+                    	AND YEAR(tgl_spm) = ?
+            ";
+        $query = $this->db->query($sql, array($id_spm,$ta));
+        return $query;
+   }
+
+    function update_print_spm($id_spm,$ta){
+             $this->db->set('jum_print',1);
+             $this->db->where('id_spm', $id_spm);
+             $this->db->where('YEAR(tgl_spm)='.$ta);
+             $this->db->update('t_spm');
+    }
+
+    function recheck_kelengkapan($id,$ta)
+         {
+            $this->db->select('*');
+            $this->db->from('t_spm');
+            $this->db->where('id_spm',$id);
+            $this->db->where('YEAR(tgl_spm)='.$ta);
+            $this->db->where('jum_print',0);
+            $result = $this->db->get();
+            return $result->num_rows();
+        }
+    function update_status_spm($id,$id_status)
+        {
+             $this->db->set('id_status_spm',$id_status);
+             $this->db->where('id_spm',$id);
+             $this->db->update('t_spm');
+        }
+     function update_status_spj($id,$id_status)
+        {
+             $this->db->set('status',$id_status);
+             $this->db->where('id_spj',$id);
+             $this->db->update('t_spj');
+        }
+    function selek_data_spm($id,$ta,$jb)
+        {
+           $this->db->select('*, YEAR(tgl_spm) as tahun');
+           $this->db->from('t_spm');
+           if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+                $this->db->join("t_usulan",'t_usulan.ref_id_spm = t_spm.id_spm','inner');
+           }else{
+                $this->db->join("t_kwitansi",'t_kwitansi.id_spm=t_spm.id_spm','inner');
+                $this->db->join("t_sptb",'t_sptb.id_sptb=t_kwitansi.id_sptb','inner');
+                $this->db->join("t_spp",'t_kwitansi.id_spp=t_spp.id_spp','inner');
+           }
+           $this->db->join("m_unit",'m_unit.id_unit=t_spm.id_unit','inner');
+           $this->db->where('t_spm.id_spm',$id);
+           $this->db->where('YEAR(tgl_spm)',$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+    function update_status_kwitansi($id_kwitansi,$ta,$status)
+        {
+			 //TO DO : UPDATE STATUS KWITANSI
+			 //STATUS LAMA = $status
+             $this->db->set('id_status_kwitansi','22');
+             $this->db->where('id_kwitansi',$id_kwitansi);
+             $this->db->where('t_kwitansi.tahun_anggaran',$ta);
+             $this->db->update('t_kwitansi');
+        }
+    function update_status_sptb($id_sptb,$ta,$status)
+        {
+             $this->db->set('id_status_sptb',$status);
+             $this->db->where('id_sptb',$id_sptb);
+             $this->db->where('t_sptb.tahun_anggaran',$ta);
+             $this->db->update('t_sptb');
+        }
+    function update_status_spp($id_spp,$ta,$status)
+        {
+             $this->db->set('id_status_spp',$status);
+             $this->db->where('id_spp',$id_spp);
+             $this->db->where('t_spp.tahun_anggaran',$ta);
+             $this->db->update('t_spp');
+        }
+
+    function get_spm_by_id($id_spm)
+    {
+    	$sql = "
+    		SELECT *
+    		FROM t_spm a
+    		WHERE a.id_spm = ?
+    		";
+
+    	$query = $this->db->query($sql, array($id_spm));
+    	if($query->num_rows() > 0) {
+	    	return $query->row();
+    	}
+
+    	return FALSE;
+    }
+
+    function get_spm_siap_verifikasi($ta, $status)
+    {
+    	//$idu='%' untuk semua unit
+    	return $this->get_list_spm($ta, '%', $status);
+    }
+
+    function get_spm_siap_otorisasi($ta, $idu)
+    {
+    	return $this->get_list_spm($ta, $idu, Constant::SPM_BARU);
+    }
+
+    function get_list_spm($ta, $idu, $status)
+    {
+	    $sql = "
+                SELECT a.id_spm, a.sifat_bayar, c.nama_unit, a.no_spm, a.tgl_spm,
+                	d.status_spm, a.id_spj, SUM(b.nominal) AS jumlah_spm
+                FROM t_spm a
+                INNER JOIN t_kwitansi b
+                        ON b.id_spm = a.id_spm
+                INNER JOIN m_unit c
+                        ON a.id_unit = c.id_unit
+                INNER JOIN m_status_spm d
+                        ON a.id_status_spm = d.id_status_spm
+                WHERE YEAR(a.tgl_spm)      = ?
+                	AND a.id_unit          LIKE ?
+                	AND a.id_status_spm    = ?
+                GROUP BY a.id_spm, a.sifat_bayar, c.nama_unit, a.no_spm, a.tgl_spm,
+                	d.status_spm, a.id_spj
+
+                UNION
+
+                SELECT a.id_spm, a.sifat_bayar, c.nama_unit, a.no_spm, a.tgl_spm,
+                	d.status_spm, a.id_spj, SUM(b.total_usulan) AS jumlah_spm
+                FROM t_spm a
+                INNER JOIN t_usulan b
+                        ON a.id_spm = b.ref_id_spm
+                INNER JOIN m_unit c
+                        ON a.id_unit = c.id_unit
+                INNER JOIN m_status_spm d
+                        ON a.id_status_spm = d.id_status_spm
+                WHERE YEAR(a.tgl_spm)      = ?
+                	AND a.id_unit          LIKE ?
+                	AND a.id_status_spm    = ?
+                GROUP BY a.id_spm, a.sifat_bayar, c.nama_unit, a.no_spm, a.tgl_spm,
+                	d.status_spm, a.id_spj
+           ";
+
+		$query = $this->db->query($sql, array($ta, $idu, $status, $ta, $idu, $status));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+    }
+
+    function siap_terotorisasi($id_unit,$ta,$status){
+        if($id_unit != 0){
+           $sql = "
+                SELECT `t_spm`.sifat_bayar, `nama_unit`,no_spm, t_spm.`id_spm`, tgl_spm,  SUM(nominal) AS jumlah_spm, status_spm, id_spj
+                FROM `t_spm`
+                INNER JOIN `t_kwitansi`
+                        ON `t_kwitansi`.`id_spm`=`t_spm`.`id_spm`
+                INNER JOIN `m_unit`
+                        ON `t_spm`.`id_unit`=`m_unit`.`id_unit`
+                INNER JOIN `m_status_spm`
+                        ON `m_status_spm`.`id_status_spm`=`t_spm`.`id_status_spm`
+                WHERE `t_spm`.`id_unit` = ?
+                	AND YEAR(tgl_spm)= ?
+                	AND `t_spm`.`id_status_spm` = ?
+                GROUP BY `t_spm`.`id_spm`
+                    UNION
+                        SELECT `t_spm`.sifat_bayar, `nama_unit`, no_spm, t_spm.`id_spm`, tgl_spm,  SUM(total_usulan) AS jumlah_spm, status_spm, id_spj
+                        FROM t_spm
+                        INNER JOIN `t_usulan`
+                                ON `t_usulan`.`ref_id_spm`=`t_spm`.`id_spm`
+                        INNER JOIN `m_unit`
+                                ON `t_spm`.`id_unit`=`m_unit`.`id_unit`
+                        INNER JOIN `m_status_spm`
+                                ON `m_status_spm`.`id_status_spm`=`t_spm`.`id_status_spm`
+                        WHERE `t_spm`.`id_unit` = ?
+                        	AND YEAR(tgl_spm)= ?
+                        	AND `t_spm`.`id_status_spm` = ?
+                        GROUP BY `t_spm`.`id_spm`
+           ";
+           $query = $this->db->query($sql, array($id_unit,$ta,$status,$id_unit,$ta,$status));
+           if($query->num_rows > 0) {
+		      return $query;
+    	   }
+  		   return FALSE;
+        }else{
+          $sql = "
+                SELECT `t_spm`.sifat_bayar, `nama_unit`,no_spm, t_spm.`id_spm`, tgl_spm,  SUM(nominal) AS jumlah_spm, status_spm, id_spj
+                FROM `t_spm`
+                INNER JOIN `t_kwitansi`
+                        ON `t_kwitansi`.`id_spm`=`t_spm`.`id_spm`
+                INNER JOIN `m_unit`
+                        ON `t_spm`.`id_unit`=`m_unit`.`id_unit`
+                INNER JOIN `m_status_spm`
+                        ON `m_status_spm`.`id_status_spm`=`t_spm`.`id_status_spm`
+                WHERE YEAR(tgl_spm)= ?
+                	AND `t_spm`.`id_status_spm` = ?
+                GROUP BY `t_spm`.`id_spm`
+                    UNION
+                        SELECT `t_spm`.sifat_bayar, `nama_unit`, no_spm, t_spm.`id_spm`, tgl_spm,  SUM(total_usulan) AS jumlah_spm, status_spm, id_spj
+                        FROM t_spm
+                        INNER JOIN `t_usulan`
+                                ON `t_usulan`.`ref_id_spm`=`t_spm`.`id_spm`
+                        INNER JOIN `m_unit`
+                                ON `t_spm`.`id_unit`=`m_unit`.`id_unit`
+                        INNER JOIN `m_status_spm`
+                                ON `m_status_spm`.`id_status_spm`=`t_spm`.`id_status_spm`
+                        WHERE YEAR(tgl_spm)= ?
+                        	AND `t_spm`.`id_status_spm` = ?
+                        GROUP BY `t_spm`.`id_spm`
+           ";
+           $query = $this->db->query($sql, array($ta,$status,$ta,$status));
+           if($query->num_rows > 0) {
+		      return $query;
+    	   }
+  		   return FALSE;
+        }
+    }
+    function update_spm($id_spm,$ta)
+        {
+            $uraian = $this->input->post('uraian');
+            $this->db->set('uraian_spm',$uraian);
+            $this->db->where('id_spm', $id_spm);
+            $this->db->where('YEAR(tgl_spm)='.$ta);
+            $this->db->update('t_spm');
+        }
+
+    function get_list_spm_by_id_spj($id_spj)
+    {
+	 	$sql = "
+	 		SELECT *
+	 		FROM t_spm a
+	 		WHERE a.id_spj = ?
+	 		";
+
+    	$query = $this->db->query($sql, array($id_spj));
+    	if($query->num_rows() > 0) {
+	    	return $query->result();
+    	}
+
+    	return FALSE;
+    }
+
+    function set_spm_diterima($id_spm)
+    {
+        $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		//update status spm
+		$this->update_status_spm($id_spm, Constant::SPM_LENGKAP);
+
+		//get spm
+		$cur_spm = $this->get_spm_by_id($id_spm);
+
+		//get list all spm dibawah spj yang sama
+		$list_spm = $this->get_list_spm_by_id_spj($cur_spm->id_spj);
+
+		if($list_spm !== FALSE) {
+			$spj_all_lengkap = TRUE;
+
+			foreach($list_spm as $spm){
+				if($spm->id_status_spm != Constant::SPM_LENGKAP) {
+					$spj_all_lengkap = FALSE;
+					break;
+				}
+			}
+
+			//jika semua spm lengkap (55), set status spj lengkap (3)
+			if($spj_all_lengkap == TRUE) {
+				$this->load->model('m_spj');
+				$this->m_spj->set_status_spj($cur_spm->id_spj, Constant::SPJU_LENGKAP);
+			}
+		}
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+    }
+
+    function update_spm_spj($ta,$id_spm,$id_spj,$id_status_spm,$id_status_spj){
+        $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+            $cek_spm = $this->cek_semua_stSPM($id_status_spm,$id_spj);
+            if($cek_spm){
+                $update_spj = $this->update_status_spj($id_spj,$id_status_spj);
+            }
+
+        $this->db->trans_complete();
+		return $this->db->trans_status();
+    }
+
+    function getSyaratUmum($jenis)
+        {
+           $result = array();
+           $this->db->select('*');
+           $this->db->from('m_verifikasi');
+           $this->db->where('id_jenis',$jenis);
+           $query = $this->db->get();
+           return $query;
+        }
+    function getKhususList()
+           {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_jenis_khusus');
+            $array_keys_values = $this->db->get();
+            $result['']= '~ Pilih Jenis ~';
+            $result[0]= '~ Tanpa Persyaratan Khusus ~';
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[$row->id_jenis_khusus]= ("$row->id_jenis_khusus - $row->nama_jenis");
+            }
+            
+            return $result;
+        }
+    function get_spm_pusat($id,$ta,$jb,$status_spm)
+        {
+            if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+               $this->db->select('*, sum(total_usulan) as jumlah_spm');
+               $this->db->from("t_spm");
+               $this->db->join("t_usulan",'t_usulan.ref_id_spm=t_spm.id_spm','inner');
+            }else{
+               $this->db->select('*, sum(nominal) as jumlah_spm');
+               $this->db->from("t_spm");
+               $this->db->join("t_kwitansi",'t_kwitansi.id_spm=t_spm.id_spm','inner');
+            }
+            $this->db->join("m_unit",'t_spm.id_unit=m_unit.id_unit','inner');
+            $this->db->join("m_status_spm",'m_status_spm.id_status_spm=t_spm.id_status_spm','inner');
+            $this->db->where('t_spm.id_spm',$id);
+            $this->db->where('t_spm.sifat_bayar',$jb);
+            $this->db->where('YEAR(tgl_spm)='.$ta);
+            $this->db->where('t_spm.id_status_spm',$status_spm);
+            $this->db->group_by('t_spm.id_spm');
+            $result = $this->db->get();
+            return $result;
+        }
+    function select_khusus()
+         {
+            $id_jenis_khusus = $this->input->post('id_jenis_khusus');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_verifikasi');
+            $this->db->where('id_jenis',$id_jenis_khusus);
+            $result = $this->db->get();
+            return $result;
+        }
+    function update_penyerah($id,$ta)
+        {
+            $nm = $this->input->post('nmpenyerah');
+            $nip = $this->input->post('nippenyerah');
+            $this->db->set('nama_penyerah',$nm);
+            $this->db->set('nip_penyerah',$nip);
+            $this->db->where('id_spm', $id);
+            $this->db->where('YEAR(tgl_spm)='.$ta);
+            $this->db->update('t_spm');
+
+        }
+    function insert_detail($id,$ta)
+        {
+
+            $cek = $this->input->post('cek');
+                for($i=0;$i<count($_POST['cek']);$i++){
+                    $q = $this->db->query("insert into t_detail_veri(id_spm,tahun,id_uraian) values ('$id','$ta',$cek[$i])");
+                }
+
+        }
+     function update_detail($id,$ta)
+        {
+        // cek di database, ada ga?
+        $tes = $this->input->post('tes');
+            for($i=0;$i<count($_POST['tes']);$i++){
+                 $this->db->set('flag_cek',1);
+                 $this->db->where('id_spm', $id);
+                 $this->db->where('tahun', $ta);
+                 $this->db->where('id_uraian', $tes[$i]);
+                 $this->db->update('t_detail_veri');
+
+            }
+        }
+      function ceklist_umum($id,$ta)
+         {
+            $this->db->select('*');
+            $this->db->from('t_spm');
+            $this->db->join("t_detail_veri",'t_detail_veri.id_spm=t_spm.id_spm','inner');
+            $this->db->join("m_verifikasi",'m_verifikasi.id_uraian=t_detail_veri.id_uraian','inner');
+            $this->db->where('id_persyaratan',1);
+            $this->db->where('t_detail_veri.id_spm', $id);
+            $this->db->where('t_detail_veri.tahun', $ta);
+            $result = $this->db->get();
+            return $result;
+        }
+     function ceklist_khusus($id,$ta)
+         {
+            $this->db->select('*');
+            $this->db->from('t_spm');
+            $this->db->join("t_detail_veri",'t_detail_veri.id_spm=t_spm.id_spm','inner');
+            $this->db->join("m_verifikasi",'m_verifikasi.id_uraian=t_detail_veri.id_uraian','inner');
+            $this->db->join("m_jenis_khusus",'m_jenis_khusus.id_jenis_khusus=m_verifikasi.id_jenis','inner');
+            $this->db->where('id_persyaratan',2);
+            $this->db->where('t_detail_veri.id_spm', $id);
+            $this->db->where('t_detail_veri.tahun', $ta);
+            $result = $this->db->get();
+            return $result;
+        }
+     function cek_ada_veri_komplit($id,$ta)
+        {
+            $this->db->select('*');
+            $this->db->from('t_detail_veri');
+            
+            $this->db->join('m_verifikasi','t_detail_veri.id_uraian=m_verifikasi.id_uraian');
+            $this->db->where('required','1');
+            
+            $this->db->where('id_spm',$id);
+            $this->db->where('tahun',$ta);
+            $this->db->where('flag_cek',0);
+            $result = $this->db->get();
+            if($result->num_rows() == 0)
+            {
+                return false; //sudah lengkap
+            }
+            else
+            {
+                return true; //belum lengkap
+            }
+        }
+
+         function cek_ada_veri($id,$ta)
+        {
+            $this->db->select('*');
+            $this->db->from('t_detail_veri');
+            $this->db->where('id_spm',$id);
+            $this->db->where('tahun',$ta);
+            $result = $this->db->get();
+            if($result->num_rows() == 0)
+            {
+                return false; //tidak ada data
+            }
+            else
+            {
+                return true; //ada data
+            }
+        }
+     function update_kelengkapan($id,$ta)
+        {
+        $tes = $this->input->post('tes');
+        for($i=0;$i<count($_POST['tes']);$i++){
+             $this->db->set('flag_cek',1);
+             $this->db->where('id_spm', $id);
+             $this->db->where('tahun', $ta);
+             $this->db->where('id_uraian', $tes[$i]);
+             $this->db->update('t_detail_veri');
+        }
+        }
+     function update_print_kelengkapan_spm($id_spm,$ta){
+             $this->db->set('jum_kelengkapan',1);
+             $this->db->where('id_spm', $id_spm);
+             $this->db->where('YEAR(tgl_spm)='.$ta);
+             $this->db->update('t_spm');
+    }
+    function cek_print_kel_spm($id,$ta)
+         {
+            $this->db->select('*');
+            $this->db->from('t_spm');
+            $this->db->where('id_spm',$id);
+            $this->db->where('YEAR(tgl_spm)='.$ta);
+            $this->db->where('jum_kelengkapan',0);
+            $result = $this->db->get();
+            return $result->num_rows();
+        }
+
+     function cek_semua_stSPM($id_status_spm, $id_spj){
+        //jumlah kwitansi yang berstatus sesuai id spj
+        $this->db->select('*');
+        $this->db->from('t_spm');
+        $this->db->where('t_spm.id_spj',$id_spj);
+        $query = $this->db->get();
+        $jum = $query->num_rows;
+
+        //jumlah kwitansi yang berstatus "x"v, id spj tertentu
+        $this->db->select('*');
+        $this->db->from('t_spm');
+        $this->db->where('t_spm.id_status_spm',$id_status_spm);
+        $this->db->where('t_spm.id_spj',$id_spj);
+        $query2 = $this->db->get();
+        $jum2 = $query2->num_rows;
+
+        // jika jumlah kwitansi spj = jumlah kwitansi spj yg berstatus "X" return true
+		//echo "jum: ".$jum;
+		//echo "jum2: ".$jum2;
+        if($jum==$jum2){
+            return TRUE;
+        }
+            return FALSE;
+
+    }
+	
+	//pencairan kwitansi dari SPM -> SPJ cair
+	function list_spm_cair($jb,$id_unit){
+		$query = $this->db->query("
+		SELECT t_spm.`id_spm`, t_spm.`no_spm`, t_spm.`id_spj`, t_spm.`sifat_bayar`, t_spj.`status`,
+			m_status_spj.status_spj, t_kwitansi.`kdoutput`,t_kwitansi.`kdakun`,t_kwitansi.`kdgiat`,t_kwitansi.`kdkomponen`,
+			t_spm.`tgl_spm`, YEAR(t_spm.tgl_spm) AS thn, SUM(nominal) AS jumlah 
+		FROM t_kwitansi 
+		INNER JOIN t_spm ON t_spm.id_spm = t_kwitansi.id_spm
+		INNER JOIN t_spj ON t_spj.`id_spj`= t_spm.`id_spj`
+		INNER JOIN m_status_spj ON m_status_spj.id_status_spj = t_spj.status
+		WHERE t_spm.`sifat_bayar` = '$jb'
+		AND t_spj.`status` = '8'
+		AND t_spm.`id_unit` = '$id_unit'
+		GROUP BY t_spm.`id_spm`
+		UNION
+		SELECT t_spm.`id_spm`, t_spm.`no_spm`, t_spm.`id_spj`, t_spm.`sifat_bayar`, t_spj.`status`,m_status_spj.status_spj,
+			'','','',t_usulan.`akun_kode` AS kdakun, t_spm.`tgl_spm`, 
+		YEAR(t_spm.`tgl_spm`) AS thn, SUM(total_usulan) AS jumlah 
+		FROM t_usulan 
+		INNER JOIN t_spm ON t_spm.`id_spm` = t_usulan.`ref_id_spm`
+		INNER JOIN t_spj ON t_spj.`id_spj`= t_spm.`id_spj`
+		INNER JOIN m_status_spj ON m_status_spj.id_status_spj = t_spj.status
+		WHERE t_spm.`sifat_bayar` = '$jb'
+		AND t_spj.`status` = '8'
+		GROUP BY t_spm.`id_spm`
+		");
+		return $query; 
+
+	}
+	
+	function view_list_kwitansi($id_spm) {
+            $qf=$this->db->query("
+				SELECT t_spm.id_spm, t_kwitansi.`id_kwitansi`, t_kwitansi.`tgl_kwitansi`, t_kwitansi.`ket_kwitansi`,
+					t_kwitansi.`no_kwitansi`,m_subunit.`nama_subunit`, t_kwitansi.jenis_kwitansi as ket,
+					t_kwitansi.id_spj_su, t_kwitansi.id_status_kwitansi, t_kwitansi.nominal AS jumlah
+				FROM t_spm
+				INNER JOIN t_kwitansi
+				ON t_kwitansi.id_spm = t_spm.id_spm
+				INNER JOIN m_subunit
+				ON t_kwitansi.id_subunit=m_subunit.id_subunit
+				INNER JOIN m_status_spm ON m_status_spm.id_status_spm= t_spm.`id_status_spm`
+				WHERE t_kwitansi.`id_spm` = '$id_spm'
+				-- AND t_kwitansi.id_status_kwitansi = '22'
+				-- GROUP BY t_kwitansi.id_spm
+				UNION
+				SELECT t_spm.id_spm, t_usulan.id_usulan, t_usulan.tgl_usulan, t_usulan.keterangan,
+					'', m_subunit.`nama_subunit`, t_usulan.sifat_bayar as ket,
+					'',t_usulan.id_status_usulan, SUM(t_usulan.total_usulan) AS jumlah
+				FROM t_spm
+				INNER JOIN t_usulan 
+				ON t_usulan.ref_id_spm =t_spm.id_spm
+				INNER JOIN m_subunit 
+				ON t_usulan.id_subunit=m_subunit.id_subunit
+				WHERE t_usulan.ref_id_spm = '$id_spm'
+				-- AND t_usulan.id_status_usulan = '6'
+				-- GROUP BY t_usulan.ref_id_spm
+				
+			");
+            return $qf;
+	}
+	
+	function cairkan_kwitansi($id_kwitansi,$id_spj_su)
+	{
+		//start traksaksi
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		//statement update. delete. insert, minimal 2
+		//set_status_sp2d( 73
+		$this->set_status_kwitansi($id_kwitansi,23);
+		//update status spj -> 7
+		//set_status_spj(
+		$cek_kwitansi = $this->cek_semua_stat_kwitansi($id_spj_su,23);
+            if($cek_kwitansi){
+                $update_spj_su = $this->m_spm->update_status_spj_su($id_spj_su,8);   
+            }
+		//complete traksaksi
+		$this->db->trans_complete();
+		//return status transaksi
+		return $this->db->trans_status();		
+	}
+
+    function cairkan_kwitansi_semua($id_spm)
+    {
+        //sama dengan cairkan kwitansi diatas, hanya bedanya proses ini berdasarkan id spm
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        
+        //update semua kwitansi dalam spm tsb
+        $this->db->set('id_status_kwitansi',23);
+        $this->db->where('id_spm',$id_spm);
+        $this->db->update('t_kwitansi');
+
+        //cek spj su untuk semua kwitansi dalam spm 
+        $this->db->select('id_spj_su');
+        $this->db->from('t_kwitansi');        
+        $this->db->where('id_spm',$id_spm);
+        $this->db->group_by('id_spj_su');
+        $query = $this->db->get();
+        
+        foreach ($query->result() as $row) {
+            $cek_kwitansi = $this->cek_semua_stat_kwitansi($row->id_spj_su,23);
+            if($cek_kwitansi){
+                $update_spj_su = $this->m_spm->update_status_spj_su($row->id_spj_su,8);   
+            }
+        }
+        
+        $this->db->trans_complete();        
+        return $this->db->trans_status();       
+    }
+	
+	function cek_semua_stat_kwitansi($id_spj_su,$status_kwitansi){
+        //jumlah kwitansi yang berstatus sesuai id spj
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+        $this->db->join("t_spj_su",'t_spj_su.id_spj_su = t_kwitansi.id_spj_su','inner'); 
+        $this->db->where('t_spj_su.id_spj_su',$id_spj_su);
+        $query = $this->db->get();
+        $jum = $query->num_rows;
+		//echo $this->db->last_query();
+        
+        //jumlah kwitansi yang berstatus "x"v, id spj tertentu
+        $this->db->select('*');
+        $this->db->from('t_kwitansi');
+		$this->db->join("t_spj_su",'t_spj_su.id_spj_su = t_kwitansi.id_spj_su','inner');
+        $this->db->where('t_kwitansi.id_spj_su',$id_spj_su);
+		$this->db->where('t_kwitansi.id_status_kwitansi',$status_kwitansi);
+        $query2 = $this->db->get();
+        $jum2 = $query2->num_rows;
+		//echo $this->db->last_query();
+        
+        // jika jumlah kwitansi spj = jumlah kwitansi spj yg berstatus "X" return true
+		//echo "jum=".$jum;
+		//echo "jum2=".$jum2;
+        if($jum==$jum2){
+            return TRUE;
+        }
+            return FALSE;
+        
+    }
+	
+	function set_status_kwitansi($id_kwitansi,$status){
+		$this->db->set('id_status_kwitansi',$status);
+		$this->db->where('id_kwitansi',$id_kwitansi);
+		$this->db->update('t_kwitansi');
+	}
+	
+	function update_status_spj_su($id_spj_su,$id_status){
+		$this->db->set('status_spj_su',$id_status);
+		$this->db->where('id_spj_su',$id_spj_su);
+		$this->db->update('t_spj_su');
+    }
+	
+	//pencairan usulan dari SPM -> SPJ cair
+	function list_spmcair_usulan($jb,$id_unit){
+		$query = $this->db->query("
+		SELECT t_spm.`id_spm`, t_spm.`no_spm`, t_spm.`sifat_bayar`, t_sp2d.`id_status_sp2d`, m_status_sp2d.id_status_sp2d,
+			m_status_sp2d.status_sp2d, t_usulan.`akun_kode` AS kdakun, t_spm.`tgl_spm`,
+			m_unit.`nama_unit`, t_usulan.`id_usulan`, YEAR(t_spm.`tgl_spm`) AS thn, SUM(total_usulan) AS jumlah 
+		FROM t_usulan 
+		INNER JOIN t_spm ON t_spm.`id_spm` = t_usulan.`ref_id_spm`
+		INNER JOIN m_unit ON t_usulan.`id_unit` = m_unit.`id_unit`
+		INNER JOIN t_sp2d ON t_sp2d.`id_spm`= t_spm.`id_spm`
+		INNER JOIN m_status_sp2d ON m_status_sp2d.id_status_sp2d = t_sp2d.id_status_sp2d
+		WHERE t_spm.`sifat_bayar` = '$jb'
+		AND t_sp2d.`id_status_sp2d` = '73'
+		AND t_spm.`id_unit` = '$id_unit'
+		GROUP BY t_spm.`id_spm`
+		");
+		return $query; 
+
+	}
+	
+	function view_list_usulan($id_spm) {
+            $qf=$this->db->query("
+			SELECT *,t_usulan.id_usulan, t_usulan.sifat_bayar AS ket, t_usulan.id_status_usulan,
+				SUM(t_usulan.total_usulan) AS jumlah
+			FROM t_usulan
+			INNER JOIN t_spm
+			ON t_usulan.ref_id_spm =t_spm.id_spm
+			INNER JOIN m_subunit 
+			ON t_usulan.id_subunit=m_subunit.id_subunit
+			WHERE t_usulan.ref_id_spm = '$id_spm'
+			GROUP BY t_usulan.`id_usulan`
+			");
+            return $qf->result();
+	}
+	
+	
+	function cairkan_usulan($id_usulan)
+	{
+		$qf=$this->db->query("
+		UPDATE t_usulan
+		SET id_status_usulan='7'
+		WHERE id_usulan='$id_usulan'
+		-- AND ref_id_spm='$id_spm'
+		");
+        return $qf->result();	
+	}
+
+
+	function get_max_up($id_unit, $tahun)
+    {
+        $query=$this->db->query("
+            SELECT 
+                SUM(nilai_max) AS nilai_max 
+            FROM 
+                t_max_up 
+            INNER JOIN m_subunit ON t_max_up.id_subunit=m_subunit.id_subunit 
+            WHERE 
+                id_unit='". $id_unit ."'
+                AND tahun='". $tahun ."'
+        ");
+        $result=$query->row();
+        if (!empty($result)) {
+            $result=$result->nilai_max;
+        }else{
+            $result=0;
+        }
+        return $result;
+    }
+	
+	// end pencairan kwitansi dari SPM -> SPJ cair
+
+}?>

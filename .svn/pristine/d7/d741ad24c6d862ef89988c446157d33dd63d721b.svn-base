@@ -1,0 +1,72 @@
+<?php
+
+class rbac_role_permission extends CI_Controller {
+    
+    function rbac_role_permission(){
+        parent::__construct();
+    }
+    
+    function index(){
+        $sql = "SELECT * FROM rbac_roles";
+        $sql_result = $this->db->query($sql);
+        $data['results']= $sql_result->result();
+        $data['flag']=0;
+		
+        $this->template->load('rbac/rbac_index', 'rbac/rbac_role_permission_home',$data);
+    }
+    
+    function edit(){
+        $role_id = $this->input->post('role_id',false);
+		
+		if(!$role_id){
+			return $this->index();
+		}
+		
+        $data['role_id']=$role_id;
+        
+        $sql = "SELECT * FROM rbac_roles";
+        $sql_result = $this->db->query($sql);
+        $data['roles'] = $sql_result->result();
+        
+        $sql = "SELECT a.perm_id, a.perm_name, a.perm_desc, a.group,
+				b.role_id
+				FROM rbac_permissions a LEFT JOIN
+					(
+						SELECT * FROM rbac_role_perm 
+						WHERE role_id=$role_id
+					) b
+				ON a.perm_id=b.perm_id
+				ORDER BY a.group";
+			   
+        $sql_result = $this->db->query($sql);
+        $data['permissions']=$sql_result->result();
+        
+        $sql = "SELECT DISTINCT `group` FROM rbac_permissions";
+        $sql_result = $this->db->query($sql);
+        $data['groups'] = $sql_result->result();
+        
+        $this->template->load('rbac/rbac_index', 'rbac/rbac_role_permission_edit',$data);
+    }
+    
+    function save(){
+        $data = $this->input->post('hasil');
+        $role_id = $this->input->post('role_id');
+        //delete dulu
+        $sql = "DELETE FROM rbac_role_perm WHERE role_id=$role_id";
+        $sql_result = $this->db->query($sql);
+        foreach($data as $a){
+            $sql = "INSERT INTO rbac_role_perm (role_id,perm_id) VALUE ($role_id,$a)";
+            $this->db->query($sql);
+        }
+        
+		$this->edit();
+    }
+    
+    
+    
+    
+    
+}
+
+
+?>

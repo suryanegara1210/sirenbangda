@@ -1,0 +1,6 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-05-09 09:09:57 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): A socket operation was attempted to an unreachable host.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-05-09 09:09:57 --> Unable to connect to the database
+ERROR - 2014-05-09 09:09:59 --> 404 Page Not Found --> -feb

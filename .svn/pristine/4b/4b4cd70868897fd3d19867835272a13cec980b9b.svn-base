@@ -1,0 +1,286 @@
+<script type="text/javascript">
+    $(function() {
+        $('#nilai_pok').autoNumeric(window.numOptions);
+        $('#total_uraian').autoNumeric(window.numOptions);
+        $('#sisa_pok').autoNumeric(window.numOptions);
+    });
+</script>
+
+<table  width="100%" cellspacing="0" style='margin: 5px 0;background-color: lightyellow;
+    padding: 3px'>
+    <tr>
+        <td width='120px'>Total POK</td><td>:</td>
+            <td><input type='text' name='nilai_pok' id='nilai_pok'
+                    value='<?php echo $nilai_pok?>' readonly='true' style='text-align: right'></td>
+        <td width='20px'></td>
+        <td width='120px'>Total Uraian</td><td>:</td>
+        <td><input type='text' name='total_uraian' id='total_uraian'
+                    value='<?php echo $total_uraian?>' readonly='true' style='text-align: right'>
+            <input type="hidden" name='old_total_uraian' id='old_total_uraian'
+                    value='<?php echo $total_uraian?>'>
+        </td>
+        <td width='20px'></td>
+        <td width='120px'>Sisa POK</td><td>:</td>
+        <td><input type='text' name='sisa_pok' id='sisa_pok'
+                   value='<?php echo ($nilai_pok - $total_uraian)?>'
+                   readonly='true' style='text-align: right'></td>
+    </tr>
+</table>
+
+<table id="tabel_uraian"></table>
+<div id="pager"></div>
+<br/>
+
+<table  id='bar_simpan' width="100%" cellspacing="0" style='background-color: yellow'>
+    <tr>
+        <td><div id="msg_simpan"></div></td>
+        <td style="text-align: right">
+            <input type ="button" value="Simpan" id="simpan_tender"
+                onclick ="save_tender()">
+    <input type="button" id='batal' value="Kembali" onclick="batal_uraian()">
+
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    function post_save_process() {
+        //perbaharui data total_usulan
+        $.post('<?php echo site_url('dpt/ajax_get_total_tender')?>',
+               {id_dpt: $('#id_dpt').val()},
+            function(data) {
+                $('#total_usulan').autoNumeric('set', data);
+            }
+        ).done( function() {
+            //perbaharui data old_total_uraian
+            $('#old_total_uraian').val($('#total_uraian').autoNumeric('get'));
+        });
+
+        //MUST: trigger header change
+        $('#kd_hdr').trigger('change');
+    }
+
+    /*function pre_check_before_save() {
+        //check total yang diusulkan dengan max usulan
+        var total_uraian= parseFloat($('#total_uraian').autoNumeric('get'));
+        var total_usulan= parseFloat($('#total_usulan').autoNumeric('get'));
+        var max_usulan  = parseFloat($('#max_usulan').autoNumeric('get'));
+        var old_total_uraian = parseFloat($('#old_total_uraian').val());
+
+        if (total_usulan-old_total_uraian+total_uraian > max_usulan) {
+            alert("Maaf, Uraian yang diajukan akan melebihi MAX Usulan yang diperbolehkan.");
+            return false;
+        }
+
+
+        return true;
+    }*/
+
+    function save_tender() {
+
+        /*if(pre_check_before_save() == false) {
+            return;
+        }*/
+
+        if (confirm('Apakah semua data sudah benar? Lanjutkan penyimpanan data Usulan?')) {
+            //block page
+            $.blockUI({
+                    message: 'Proses simpan uraian, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+                });
+
+            $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('dpt/save_tender')?>",
+                data: {id_dpt: $('#id_dpt').val()},
+                success: function(msg){
+                    var res = msg.split('|');
+                    msg = res[1];
+
+                    $.blockUI({
+                        message: msg,
+                        timeout: 2000,
+                        css: window._css,
+                        overlayCSS: window._ovcss
+                    });
+
+                    if(res[0] == 'OK') {
+	                    //sebenarnya tidak perlu
+	                    //post_save_process();
+
+	                	$("#pilih_sb").click();
+                    }
+                }
+            });
+        }
+    }
+    $( function() {
+
+        $('#tabel_uraian').jqGrid({
+            url: "<?php echo site_url('dpt/get_data_uraian')?>",
+            datatype: "json",
+            mtype: "POST",
+            colNames: ['','Uraian','Volume','Satuan','Harga Satuan','Jumlah'],
+            colModel: [
+                {width:10, sortable:false, align:'center'},
+                {name:'uraian', index:'uraian', sortable:false, editable:true,
+                    editoptions:{size:35}, editrules:{required:true}},
+                {name:'volume', index:'volume', width:30, align:"center", editable:true,
+                    editoptions:{ size:10,
+                                  defaultValue: '1',
+                                  dataEvents: [
+                                    {
+                                        type: 'change',
+                                        fn: fn_calc_jumlah
+                                    }
+                                  ]
+                    },
+                    editrules:{required:true, number:true}},
+                {name:'satuan', index:'satuan', width:30, align:"center", editable:true,
+                    edittype:'select', editoptions:{value:"<?php echo $satuan?>"}},
+                {name:'harga_satuan', index:'harga_satuan', width:40, align:"right", editable:true,
+                    editoptions:{ size:20,
+                                  defaultValue: '0',
+                                  dataEvents: [
+                                    {
+                                        type: 'change',
+                                        fn: fn_calc_jumlah
+                                    }
+                                  ]
+                    },
+                    editrules:{required:true, number:true},
+                    formatter:'currency',
+                    formatoptions:{thousandsSeparator:'.',decimalPlaces:','}},
+                {name:'jumlah', index:'jumlah', width:40, align:"right", editable:true,
+                    editoptions: { size:20,
+                                   readonly: 'readonly'
+                    },
+                    formatter:'currency',
+                    formatoptions:{thousandsSeparator:'.',decimalPlaces:','}},
+            ],
+            autowidth: true,        //atur lebar jqGrid otomatis
+            pager: '#pager',        //tampilkan pager
+            //hide page information
+            rowList: [],            //jangan tampilkan list jml baris
+            pgbuttons: false,       //jangan tampilkan tombol pages
+            pgtext: null,           //jangan tampilkan info halaman
+            viewrecords: false,     //jangan tampilkan info jum records
+            sortorder: "asc",
+            caption: 'Daftar Uraian',
+            editurl: "<?php echo site_url('dpt/cache_uraian')?>",
+            //mekanisme edit dengan double click baris
+            ondblClickRow: function (rowid, iRow, iCol, e) {
+                $('#tabel_uraian').jqGrid('editGridRow', rowid, {
+                        //edit
+                        closeAfterEdit: true,
+                        beforeSubmit: function(postdata, formid) {
+                            return check_pagu('edit');
+                        },
+                        onclickSubmit: function (params, postdata) {
+                            var edit_data = {
+                                "id_dpt": $('#id_dpt').val()
+                            };
+
+                            return edit_data;
+                        }
+                    });
+            },
+            //kalkulasi pok
+            gridComplete: function() {
+                try {
+                    var total = calc_total();
+                    var sisa   = parseFloat($('#nilai_pok').autoNumeric('get')) - total;
+
+                    $('#total_uraian').autoNumeric('set', total);
+
+                    if (sisa < 0) {
+                        alert('terjadi kesalahan perhitungan, mohon direfresh ulang');
+                        sisa = 0;
+                    }
+
+                    $('#sisa_pok').autoNumeric('set', sisa);
+
+                } catch(e) {
+                    alert(e);
+                }
+
+            }
+        });
+
+        $("#tabel_uraian").jqGrid('navGrid','#pager',
+            {edit:false,add:true,del:true,search:false},
+            {}, //edit use dblClick
+            {
+                //add
+                closeAfterAdd: true,
+                beforeSubmit: function(postdata, formid) {
+                    return check_pagu('add');
+                },
+                onclickSubmit: function(params, postdata) {
+                    var add_data = {
+                        "id_dpt": $('#id_dpt').val()
+                    };
+                    return add_data;
+                }
+            }
+        );
+
+        //Fungsi untuk menghitung jumlah di form input
+        function fn_calc_jumlah(e) {
+            var vol = parseFloat($('input#volume').val());
+            var hrgs= parseFloat($('input#harga_satuan').val());
+            $('input#jumlah').val(vol*hrgs);
+        }
+
+        //Fungsi untuk pengecekan uraian tidak melebihi pagu pok
+        function check_pagu(type) {
+            var jml_uraian_baru  = parseFloat($('#jumlah').val());
+            var nilai_pok   = parseFloat($('#nilai_pok').autoNumeric('get'));
+            var total_uraian= parseFloat($('#total_uraian').autoNumeric('get'));
+            var sisa_pok    = parseFloat($('#sisa_pok').autoNumeric('get'));
+            var total_usulan= parseFloat($('#total_usulan').autoNumeric('get'));
+            var max_usulan  = parseFloat($('#max_usulan').autoNumeric('get'));
+            var old_total_uraian = parseFloat($('#old_total_uraian').val());
+
+            switch (type) {
+                case 'edit':
+                    var selid  = $('#tabel_uraian').jqGrid('getGridParam', 'selrow');
+                    var jml_uraian_lama = $('#tabel_uraian').jqGrid('getCell', selid, 'jumlah');
+
+                    sisa_pok  = sisa_pok + parseFloat(jml_uraian_lama);
+
+                    if (jml_uraian_baru > sisa_pok) {
+                        return [false, 'Maaf, sisa POK untuk kegiatan ini tidak mencukupi.'];
+                    }
+
+                    /*if ((total_usulan-old_total_uraian+total_uraian-jml_uraian_lama+jml_uraian_baru) > max_usulan) {
+                        return [false, 'Maaf, total uraian akan melebihi Maksimal Usulan yang diperbolehkan.'];
+                    }*/
+                    break;
+                case 'add':
+                    //cek batasan pok per uraian baru
+                    if (jml_uraian_baru > sisa_pok) {
+                        return [false, 'Maaf, sisa POK untuk kegiatan ini tidak mencukupi.'];
+                    }
+
+                    //cek batasan max up
+                    /*if ((total_usulan + total_uraian + jml_uraian_baru) > max_usulan) {
+                        return [false, 'Maaf, total uraian akan melebihi maksimal Usulan yang diperbolehkan.'];
+                    }*/
+                    break;
+            }
+            return [true, ''];
+        }
+
+        //Fungsi untuk menghitung total nilai grid
+        function calc_total() {
+            var rows= $("#tabel_uraian").jqGrid('getRowData');
+            var tot_jum = 0;
+            for(var i=0;i<rows.length;i++){
+                 tot_jum += parseFloat(rows[i]['jumlah']);
+            }
+            return tot_jum;
+        }
+    });
+</script>

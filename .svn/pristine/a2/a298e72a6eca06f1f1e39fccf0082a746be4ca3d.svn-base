@@ -1,0 +1,470 @@
+<script type="text/javascript">
+<!--
+    $( function() {
+        //var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        //var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+
+        $("#nominal").autoNumeric(window.numOptions);
+		$("#max_belanja").autoNumeric(window.numOptions);
+        $("#nilai_pok").autoNumeric(window.numOptions);
+		$("#nilai_pok_terpakai").autoNumeric(window.numOptions);
+		$("#nilai_pok_sisa").autoNumeric(window.numOptions);
+		$("#limit_spjup").autoNumeric(window.numOptions);
+
+        $("#nilai_ppn").autoNumeric(window.numOptions);
+        $("#nilai_pph").autoNumeric(window.numOptions);
+
+        $("#persen_ppn").autoNumeric(window.numOptionsPersen);
+		$("#persen_pph").autoNumeric(window.numOptionsPersen);
+
+		//start combo relasi
+		//inisialisasi array combo
+		var arCombo = new Array (
+			$("#kd_giat"), $("#kd_output"), $("#kd_komponen"),
+			$("#kd_akun"), $("#kd_hdr"), $("#kd_bas")
+		);
+
+		init_combo([
+			{
+				combo: arCombo[1],
+				url: '<?php echo site_url('common/get_list_output')?>',
+				postData: {
+					jns_kwitansi: '<?php echo $row_edit->jenis_kwitansi?>',
+					kdgiat: '<?php echo $row_edit->kdgiat?>',
+					kdoutput: '<?php echo $row_edit->kdoutput?>'
+				}
+			},
+			{
+				combo: arCombo[2],
+				url: '<?php echo site_url('common/get_list_komponen')?>',
+				postData: {
+					jns_kwitansi: '<?php echo $row_edit->jenis_kwitansi?>',
+					kdgiat: '<?php echo $row_edit->kdgiat?>',
+					kdoutput: '<?php echo $row_edit->kdoutput?>',
+					kdkomponen: '<?php echo $row_edit->kdkomponen?>'
+				}
+			},
+			{
+				combo: arCombo[3],
+				url: '<?php echo site_url('common/get_list_akun')?>',
+				postData: {
+					jns_kwitansi: '<?php echo $row_edit->jenis_kwitansi?>',
+					kdgiat: '<?php echo $row_edit->kdgiat?>',
+					kdoutput: '<?php echo $row_edit->kdoutput?>',
+					kdkomponen: '<?php echo $row_edit->kdkomponen?>',
+					kdakun: '<?php echo $row_edit->kdakun?>'
+				}
+			},
+			{
+				combo: arCombo[4],
+				url: '<?php echo site_url('common/get_list_header')?>',
+				postData: {
+					jns_kwitansi: '<?php echo $row_edit->jenis_kwitansi?>',
+					kdgiat: '<?php echo $row_edit->kdgiat?>',
+					kdoutput: '<?php echo $row_edit->kdoutput?>',
+					kdkomponen: '<?php echo $row_edit->kdkomponen?>',
+					kdakun: '<?php echo $row_edit->kdakun?>',
+					kdhdr: '<?php echo $row_edit->hdr?>'
+				}
+			},
+			{
+				combo: arCombo[5],
+				url: '<?php echo site_url('common/get_list_bas')?>',
+				postData: {
+					jns_kwitansi: '<?php echo $row_edit->jenis_kwitansi?>',
+					kdgiat: '<?php echo $row_edit->kdgiat?>',
+					kdoutput: '<?php echo $row_edit->kdoutput?>',
+					kdkomponen: '<?php echo $row_edit->kdkomponen?>',
+					kdakun: '<?php echo $row_edit->kdakun?>',
+					kdhdr: '<?php echo $row_edit->hdr?>',
+					akun_kode: '<?php echo $row_edit->akun_kode?>'
+				}
+			}
+		]);
+
+
+		//set event change
+		$("#kd_giat").change( function() {
+			var postData = { jns_kwitansi: $("#jns_kwitansi").val(),
+							 kdgiat: $("#kd_giat").val()
+							};
+
+			populate_combo(arCombo, 0, "<?php echo site_url('common/get_list_output')?>", postData);
+			$("#nilai_pok").autoNumeric('set', 0);
+			$("#nilai_pok_terpakai").autoNumeric('set', 0);
+			$("#nilai_pok_sisa").autoNumeric('set', 0);
+		});
+
+		$("#kd_output").change( function() {
+
+			var postData = { jns_kwitansi: $("#jns_kwitansi").val(),
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val()
+							 };
+
+			populate_combo(arCombo, 1, "<?php echo site_url('common/get_list_komponen')?>", postData);
+			$("#nilai_pok").autoNumeric('set', 0);
+			$("#nilai_pok_terpakai").autoNumeric('set', 0);
+			$("#nilai_pok_sisa").autoNumeric('set', 0);
+		});
+
+		$("#kd_komponen").change( function() {
+			var postData = { jns_kwitansi: $("#jns_kwitansi").val(),
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val(),
+							 kdkomponen: $("#kd_komponen").val()
+							 };
+
+			populate_combo(arCombo, 2, "<?php echo site_url('common/get_list_akun')?>", postData);
+			$("#nilai_pok").autoNumeric('set', 0);
+			$("#nilai_pok_terpakai").autoNumeric('set', 0);
+			$("#nilai_pok_sisa").autoNumeric('set', 0);
+		});
+
+		$("#kd_akun").change( function() {
+			var postData = { jns_kwitansi: $("#jns_kwitansi").val(),
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val(),
+							 kdkomponen: $("#kd_komponen").val(),
+							 kdakun: $("#kd_akun").val()
+							 };
+
+			populate_combo(arCombo, 3, "<?php echo site_url('common/get_list_header')?>", postData);
+			$("#nilai_pok").autoNumeric('set', 0);
+			$("#nilai_pok_terpakai").autoNumeric('set', 0);
+			$("#nilai_pok_sisa").autoNumeric('set', 0);
+		});
+
+		$("#kd_hdr").change( function() {
+			var postData = { jns_kwitansi: $("#jns_kwitansi").val(),
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val(),
+							 kdkomponen: $("#kd_komponen").val(),
+							 kdakun: $("#kd_akun").val(),
+							 kdhdr: $("#kd_hdr").val()
+							 };
+
+			populate_combo(arCombo, 4, "<?php echo site_url('common/get_list_bas')?>", postData);
+
+			//ambil nilai POK yang berkaitan
+			$.ajax({
+					type: "POST",
+					url : "<?php echo site_url('common/get_nilai_pok')?>",
+					data: postData,
+					success: function(msg){
+						//split nilai pok dan pok_terpakai
+						var pok = msg.split('|');
+
+						//set textbox nilai POK
+						$("#nilai_pok").autoNumeric('set', parseFloat(pok[0]));
+
+						//set textbox nilai POK terpakai
+						$("#nilai_pok_terpakai").autoNumeric('set', parseFloat(pok[1]) - parseFloat($("#nominal").autoNumeric('get')) );
+
+						//hitung dan set sisa
+						var sisa = parseFloat(pok[0]) - parseFloat(pok[1]);
+						$("#nilai_pok_sisa").autoNumeric('set', sisa);
+					}
+			});
+		});
+
+		$("#jns_pajak").change( function() {
+		var data = $(this).val().split('|');
+		//data[0] = ppn
+		//data[1] = pph
+
+		$("#persen_ppn").autoNumeric('set', data[0]);
+		$("#persen_pph").autoNumeric('set', data[1]);
+
+		hitung_pajak();
+	});
+
+		//END combo relasi
+
+    });
+
+
+	//START perhitungan pajak
+
+	function hitung_pajak() {
+		//code
+		//ambil semua parameter
+		var nominal = $("#nominal").autoNumeric('get');
+		var ppn = $("#persen_ppn").autoNumeric('get');
+		var pph = $("#persen_pph").autoNumeric('get');
+
+		//hitung dpp dan ppn,pph
+		var dpp = (100/110) * nominal;
+		var nilai_ppn = ( ppn/100 ) * dpp;
+		var nilai_pph = ( pph/100 ) * dpp;
+
+		//set nilai textbox
+		$("#nilai_ppn").autoNumeric('set', nilai_ppn);
+		$("#nilai_pph").autoNumeric('set', nilai_pph);
+	}
+
+	//set event pajak
+
+	$("#nominal").change( function() {
+		hitung_pajak();
+	});
+
+	//END perhitungan pajak
+
+    $().ready( function() {
+        $.validator.addMethod('maxBelanja',
+						function(value, element, params) {
+							try {
+								value 		= parseFloat($(element).autoNumeric('get'));
+								var nil1	= parseFloat($(params[0]).autoNumeric('get'));
+								var nil2	= parseFloat($(params[1]).autoNumeric('get'));
+								var nil3	= parseFloat($(params[2]).autoNumeric('get'));
+
+							} catch(e) {
+								alert(e);
+								alert(nil1+"----"+nil2+"----"+nil3);
+							}
+							return (value <= nil1 &&
+									value <= nil2 &&
+									value <= nil3
+									);
+						},
+						$.validator.format("Nilai max. belanja barang Rp. {0} \
+										   dan belanja harus kurang dari [Sisa \
+										   POK] serta [Sisa Limit]",
+										   $("#max_belanja").val())
+					);
+
+        $("#form_barang").validate({
+            rules: {
+                tempat_kwitansi: "required",
+                kd_output: "required",
+                kd_komponen: "required",
+				kd_akun: "required",
+                kd_hdr: "required",
+                kd_bas: "required",
+                ket_kwitansi: "required",
+                nominal: {
+					required:	true,
+					maxBelanja: ["#max_belanja", "#nilai_pok_sisa", "#limit_spjup"],
+				},
+                jns_pajak: "required",
+                pengambil: "required",
+                nip_pengambil: "required",
+                penerima: "required"
+            },
+            messages: {
+                tempat_kwitansi: "Mohon diisi tempat dibuatnya kwitansi",
+                kd_output: "Mohon diisi kode output kwitansi",
+                kd_komponen: "Mohon diisi kode komponen kwitansi",
+				kd_akun: "Mohon diisi kode akun kwitansi",
+                kd_hdr: "Mohon diisi header kwitansi",
+                kd_bas: "Mohon diisi kode bas kwitansi",
+                ket_kwitansi: "Mohon diisi keterangan kwitansi",
+                nominal: {
+					required: "Mohon diisi nominal kwitansi"
+				},
+                jns_pajak: "Mohon diisi jenis pajak kwitansi",
+                pengambil: "Mohon diisi nama pembuat kwitansi",
+                nip_pengambil: "Mohon diisi nip pembuat kwitansi",
+                penerima: "Mohon diisi nama peneriima kwitansi"
+            },
+			submitHandler: function(form){
+				$("#nominal").val($("#nominal").autoNumeric('get'));
+				$("#nilai_ppn").val($("#nilai_ppn").autoNumeric('get'));
+				$("#nilai_pph").val($("#nilai_pph").autoNumeric('get'));
+				var data = $("#jns_pajak").val().split('|');
+				$("#jenis_pajak").val(data[2]);
+
+				form.submit();
+			}
+        });
+    });
+-->
+</script>
+<article class="module width_full">
+<header>
+<link rel="stylesheet" type="text/css" href="<?php echo base_url();?>application/views/ls/facebox/facebox.css" />
+<script language="javascript" src="<?php echo base_url();?>application/views/ls/facebox/facebox.js"></script>
+<h3>Edit Kwitansi <?php echo $row_edit->jenis_kwitansi;?>
+<a class="link_history" href="<?php echo site_url();?>kwitansi_view/tampil_history/<?php echo $row_edit->id_kwitansi;?>"
+rel="facebox"> History </a>
+</h3>
+</header>
+ <div class="module_content">
+<form method="post" name='form_barang' id='form_barang'
+action="<?php echo site_url('kwitansi/update')?>" >
+<input name='jenis_pajak' type='hidden' id="jenis_pajak" value=""  />
+<input name='jns_kwitansi' type='hidden' id="jns_kwitansi" value="<?php echo $row_edit->jenis_kwitansi;?>"  />
+<input name='jns_belanja' type='hidden' id="jns_belanja" value="<?php echo $row_edit->sifat_bayar;?>"  />
+<input name='id_kwitansi' type='hidden' id="id_kwitansi" value="<?php echo $row_edit->id_kwitansi?>"  />
+<input name='max_belanja' type='hidden' id="max_belanja" value="20000000"  />
+<input name='id_status_kwitansi' type='hidden' id="id_status_kwitansi" value="<?php echo $row_edit->id_status_kwitansi?>"  />
+<div id="div_barang_gu" class="box">
+      <table border="0" width="100%">
+        <tr>
+          <td width="200px;">Tanggal Kwitansi</td>
+          <td >:</td>
+          <td><input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="18"
+          		value="<?php echo date("Y-m-d", strtotime($row_edit->tgl_kwitansi));  ?>" /></td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+          <td >:</td>
+          <td><input name='tempat_kwitansi' type='text' value="<?php echo $row_edit->tpt_kwitansi;?>"
+            id="tempat_kwitansi" size="30" />
+          </td>
+        </tr>
+    <tr>
+    	<td>Kegiatan</td><td>:</td>
+        <td>
+          <label for="select"></label>
+          <select name="kd_giat" id="kd_giat">
+			<?php
+
+				foreach($kegiatans as $row){
+					if($row->kdgiat === $row_edit->kdgiat)
+						$selected = 'selected';
+					echo "<option value='{$row->kdgiat}' {$selected}>{$row->nmgiat}</option>";
+				}
+			?>
+        </select></td>
+   </tr>
+    <tr>
+    	<div id="propinsi">
+            <td>Output</td>
+            <td>:</td>
+            <td>
+			<select name="kd_output" id="kd_output">
+			</select>
+			</td>
+        </div>
+    </tr>
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+		<td>
+		<select name="kd_komponen" id="kd_komponen">
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+   <tr>
+        <td>Akun</td>
+        <td>:</td>
+		<td>
+		<select name="kd_akun" id="kd_akun">
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+		<td>
+		<select name="kd_hdr" id="kd_hdr">
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+    <tr>
+        <td>Kode BAS</td>
+        <td>:</td>
+		<td>
+		<select name="kd_bas" id="kd_bas">
+			<option value=""></option>
+		</select>
+		</td>
+    </tr>
+    <tr>
+        <td>Nilai POK</td>
+        <td>:</td>
+        <td>
+        <input name='nilai_pok' type='text' id="nilai_pok"  size="15"
+				readonly="readonly" value="<?php echo $pok;?>"/>&nbsp;&nbsp;Terpakai : &nbsp;
+			<input name='nilai_pok_terpakai' type='text' id="nilai_pok_terpakai"
+				   size="15" readonly="readonly" value="<?php echo $pok_terpakai - $row_edit->nominal;?>"/> &nbsp;&nbsp; Sisa : &nbsp;
+			<input name='nilai_pok_sisa' type='text' id="nilai_pok_sisa"
+				   size="15" readonly="readonly" value="<?php echo ($pok-($pok_terpakai-$row_edit->nominal));?>"/>
+		</td>
+    </tr>
+        <tr>
+        <td>Limit SPJ</td>
+        <td>:</td>
+        <td><input name='limit_spjup' type='text' id="limit_spjup"  size="18" style="text-align: left;"
+             			value="<?php echo $limit_spjup; ?>" disabled="disabled" /></td>
+    </tr>
+
+        <tr>
+          <td>Keterangan Kwitansi</td>
+          <td >:</td><td colspan="5">
+            <textarea name="ket_kwitansi" id="ket_kwitansi" class="input1" style="width:450px;" >
+            <?php echo $row_edit->ket_kwitansi;?>
+            </textarea></td>
+        </tr>
+        <tr>
+          <td>Nominal</td>
+          <td>:</td><td><input name='nominal' type='text' id="nominal"
+          size="20" value="<?php echo $row_edit->nominal; ?>">
+            </td>
+
+        </tr>
+		<tr>
+			<td>Jenis Pajak</td>
+			<td>:</td>
+			<td>
+			<select name="jns_pajak" id="jns_pajak">
+				<option value="">Pilih Jenis Pajak ...</option>
+			<?php
+				foreach($jns_pajak as $key=>$val){
+					$arKeys 	= explode('|', $key);
+					$selected 	= '';
+					if($arKeys[2] === $row_edit->id_pajak)
+						{$selected = 'selected';
+						$ppn_sen 	= $arKeys[0];
+						$pph_sen	= $arKeys[1];
+						}
+					echo "<option value='$key' $selected>$val</option>";
+					//echo $pph_sen;
+				}
+				?>
+			</select>
+			</td>
+        </tr>
+        <tr>
+          <td>Besaran Pajak </td>
+          <td >:</td><td colspan="5">
+          PPN : <input type="text" size="2" id="persen_ppn"  readonly="readonly" value="<?php echo $ppn_sen ;?>"/>
+          <input name="nilai_ppn" type="text" id="nilai_ppn" size="15" readonly="readonly" value="<?php echo $row_edit->ppn;?>" />
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          PPH : <input type="text" size="2" id="persen_pph" readonly="readonly" value="<?php echo $pph_sen;?>" />
+          <input name="nilai_pph" type="text" id="nilai_pph" size="15" readonly="readonly" value="<?php echo $row_edit->pph;?>" />
+        </tr>
+        <tr>
+          <td>Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='pengambil' type='text' value="<?php echo $row_edit->pengambil;?>" size="50" id="pengambil"
+            placeholder="Isikan nama dari pelaksana kegiatan"/></td>
+
+        </tr>
+         <tr>
+          <td>NIP Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='nip_pengambil' type='text' value="<?php echo $row_edit->nip_pengambil;?>" size="50"
+          id="nip_pengambil" placeholder="Isikan NIP dari pelaksana kegiatan"/></td>
+
+        </tr>
+        <tr>
+          <td>Penerima</td>
+          <td >:</td><td><input name='penerima' type='text' value="<?php echo $row_edit->penerima;?>" size="50"
+          id="penerima" placeholder="Nama dari Penerima uang (Toko)" /></td>
+
+        </tr>
+        <tr><input type="hidden" name="darne" id="val" value=""/></tr>
+    </table>
+      <div class="submit_link" style="padding-top:18px">
+      <input name="simpan" type='submit' id="simpan" value='Update' >
+      <input type=button value=Batal onclick=self.history.back()>
+    </div>
+  </div>
+
+</form>
+</article>

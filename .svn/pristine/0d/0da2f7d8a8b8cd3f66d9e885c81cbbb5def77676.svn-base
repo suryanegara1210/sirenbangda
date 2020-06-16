@@ -1,0 +1,7 @@
+<select name="bulan" id="bulan">
+  <option>- Pilih Tri Wulan -</option>
+  <option value="03">Tri Wulan 1</option>
+  <option value="06">Tri Wulan 2</option>
+  <option value="09">Tri Wulan 3</option>
+  <option value="12">Tri Wulan 4</option>
+</select>

@@ -1,0 +1,374 @@
+<table border='0' width='100%'> 
+     <?php foreach($detail_spp->result_array() as $row){
+                   $id = $row['id_spp'];
+                   $th = $row['th_spp'];
+                   $status_spp = $row['status_spp'];
+                   $kdgiat = $row['kegiatan'];
+                   $kdoutput = $row['kdoutput'];
+                   $kdakun = $row['kdakun'];
+                   
+                   $no = $row['no_spp'];
+                   $nomor = sprintf("%04d", $no);
+                   $kode_digit=$row['kode_digit'];
+                   $singkat=$row['singkat']; 
+                   
+                   $jum_spp=$row['jumlah_spp']; 
+                   $huruf = $this->konversi->terbilang ($jum_spp) ;
+                   
+                          
+                   
+                   
+                   $sp = $row['sifatpembayaran'];
+                   $jp = $row['jenispembayaran'];
+                   $nama_fak = $row['nama_unit'];
+                   $nomor_dipa = $row['nomor_dipa'];
+                   $tgl_dipa = $row['tgl_dipa'];
+                   
+                   $no_rekening = $row['rekening'];
+                   $pd2 = $row['nama_pd2'];
+                   $nip_pd2 = $row['nip_pd2'];
+                   $nmakun = $row['nmakun'];
+                   $date = date_create($tgl_dipa); 
+                   $tgl_sekarang = date_create($tgl); 
+                   
+                } 
+                foreach($setting->result_array() as $row){
+                   $nm_veri_blu = $row['nm_veri_blu'];
+                   $nip_veri_blu = $row['nip_veri_blu'];
+                }
+                ?>
+ 
+    <tr ><td align="center"><b>SURAT PERMINTAAN PEMBAYARAN</b><br> Nomor : <?php echo "$no" ?></td></tr>
+</table>
+  <br>
+<table border='0' style="font-size: 12px;">
+  <tr>
+    <td align="left">Tanggal </td>    
+    <td>:</td>
+    <td> <?php echo date_format($tgl_sekarang, 'd / m / Y'); ?></td>
+  </tr>
+  <tr>
+    <td align="left">Sifat Pembayaran </td>
+    <td>:</td>
+    <td> <?php echo"$sp";?> </td>
+
+  </tr>
+  <tr>
+    <td align="left">Jenis Pembayaran </td>
+    <td>:</td>
+    <td> <?php echo"$jp";?></td>                                
+  </tr>                
+</table>
+
+            <table border="1" width="100%" style="font-size: 12px;">
+                <tr><td>
+                <table width="100%">  
+                <tr>
+                    <td width="1%">1.</td>
+                    <td width="17%">Kementerian/Lembaga</td>
+                    <td width="1%">:</td><td width="32%">023</td>
+                    
+                    <td width="1%">7.</td> 
+                    <td width="15%">Kegiatan</td>
+                    <td width="1%">:</td><td width="60%" style="margin-right : -500px;">Layanan Tridharma di Perguruan Tinggi</td>
+                </tr>
+                <tr>
+                    <td width="1%">2.</td>
+                    <td width="17%">Unit Organisasi</td>
+                    <td width="1%">:</td><td width="32%">04</td>
+
+                    <td width="1%">8.</td>
+                    <td width="15%">Kode Kegiatan</td>
+                    <td width="1%">:</td><td width="32%">4078</td>
+                </tr>
+                <tr>
+                    <td width="1%">3.</td>
+                    <td width="17%">Satuan Kerja/SKS</td> 
+                    <td width="1%">:</td><td width="32%">415253</td>
+                    
+                    <td width="1%">9.</td>
+                    <td width="15%" colspan="2">Kode Fungsi,</td>
+                    <td width="1%"></td><td width="32%"></td>
+                </tr>
+                <tr>
+                    <td width="1%">4.</td> 
+                    <td width="17%">Lokasi</td>
+                    <td width="1%">:</td><td width="32%">2200</td>
+                    <td width="1%"></td>
+                    <td width="15%"> SubFungsi,Prog</td>
+                    <td width="1%">:</td><td width="32%" >10 / 06 / 08</td>
+                </tr>   
+                <tr>
+                    <td width="1%">5.</td>
+                    <td width="17%">Tempat</td>
+                    <td width="1%">:</td><td width="32%">15</td>
+                   
+                    <td width="1%">10.</td>
+                    <td width="15%" colspan="2">Kewenangan</td> 
+                    <td width="1%"></td><td width="32%"></td>
+                </tr>
+                <tr>
+                    <td width="1%">6.</td>
+                    <td width="17%">Alamat  </td>
+                    <td width="1%">:</td><td width="32%">Denpasar</td>
+                    <td width="1%"></td>  
+                    <td width="15%">Pelaksana</td>
+                    <td width="1%">:</td><td width="32%">Kantor Daerah (KD)</td>
+                </tr>   
+            </table>
+            </td></tr>
+            </table>
+
+            <table width="100%" style="font-size: 12px;">
+            <tr><td>
+            <?php $spp_tot = number_format($jum_spp,0,",",".");?>
+            <p>Kepada <br \>
+            Yth. Pejabat Penerbit Surat Perintah Membayar<br \>
+            <?php echo"$nama_fak"; ?><br \>
+            Di Denpasar, <br \> <br \> 
+            Berdasarkan DIPA Nomor : <?php echo"$nomor_dipa";?> tanggal <?php echo date_format($date, 'd/m/Y');?>, bersama ini kami ajukan permintaan 
+            pembayaran sebagai berikut : <br \> 
+            Jumlah Pembayaran yang dimintakan    : Rp. <?php echo "$spp_tot"; ?>,- <br \>    
+            *<?php echo "$huruf";?>* </p>
+            </td></tr>
+            </table>
+
+            </br>
+            <table width="100%" style="font-size: 12px;">
+                <tr>
+                    <td width="1%">1.</td>
+                    <td width="12%">Untuk Keperluan</td>
+                    <td width="1%">:</td><td width="32%">Operasional Perkantoran</td>  
+                </tr>
+
+                <tr>
+                    <td width="1%">2.</td>
+                    <td width="12%">Jenis Belanja</td>
+                    <td width="1%">:</td><td width="32%">Belanja Barang</td>  
+                </tr>
+                <tr>
+                    <td width="1%">3.</td>
+
+                    <td width="12%">Atas Nama</td>
+                    <td width="1%">:</td><td width="32%"> <?php echo"$nama_fak"; ?> </td>  
+                </tr>
+                <tr>
+                    <td width="1%">4.</td>
+                    <td width="12%">Alamat</td>
+                    <td width="1%">:</td><td width="32%">Denpasar</td>  
+                </tr>
+
+                <tr>
+                    <td width="1%">5.</td>
+                    <td width="12%">Mempunyai Rekening</td>
+                    <td width="1%">:</td><td width="32%"><?php echo"$no_rekening"; ?></td>  
+                </tr>
+
+                
+            </table>
+            <br>
+            <table style="font-size: 12px;">
+                <tr>
+                    <td>
+                    <p>Dengan Penjelasan </p>
+
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <table border="1" width="100%" style="font-size: 12px;">
+                 <tr>
+                    <th>No</th>
+                    <th>I. Sub.Keg.MAK <br>
+
+                        II. Kegiatan Fak <br>
+                        III.Semua Kode Kegiatan dalam DIPA
+                    </th>
+                    <th>Pagu Dalam DIPA <br> <br>(Rp)</th>
+                    <th>SPP/SPM s/d yang lalu <br><br> (Rp)</th>
+                    <th>SPP <br><br> (Rp)</th>
+                    <th>Jumlah s/d SPP <br><br> (Rp)</th>
+
+                    <th>Sisa <br><br> (Rp) </th>  
+                </tr>
+                <tr style="background-color: #dedede;"> 
+                    <td align="center"> 1</td>  
+                    <td align="center"> <?php echo"2";?> </td>
+                    <td align="center"> <?php echo"3";?> </td>
+                    <td align="center"> <?php echo"4";?> </td>
+                    <td align="center"> <?php echo"5";?> </td> 
+                    <td align="center"> <?php echo"6";?> </td>    
+                    <td align="center"> <?php echo"7";?> </td>
+                </tr>
+                <tr>
+                    <td align="center"> <?php echo"I";?> </td>
+                    <td align="center"><?php echo" KODE KEGIATAN, SUB KEGIATAN <br> DAN MAK YANG DIAJUKAN "; ?></td>
+                     <td align="center"> </td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                      
+                </tr>
+                 <?php    
+                    foreach ($tabel_spp->result() as $spp){
+                        if ("$kdgiat.$kdoutput.$kdakun" === "{$spp->kegiatan}.{$spp->kdoutput}.{$spp->kdakun}") {
+                            //ambil nilainya
+                            $jml_pok = $spp->pok;
+                            $spp_lalu= $spp->spp_lalu;
+                            $spp_ini= $spp->spp_ini;
+                            $total_spp_ini_lalu = $spp_lalu+ $spp_ini;
+                            $sisa_pagu_ini = $jml_pok - $total_spp_ini_lalu; 
+                            
+                            break;
+                        }                 
+                    }
+                    
+                ?> 
+                <tr>
+                    <td align="center">&nbsp;  </td>
+                    <td align="center"> <?php echo "$kdoutput.$kdakun"; ?></td>
+                    <td align="right">  <?php echo number_format($jml_pok,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($spp_lalu,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($spp_ini,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($total_spp_ini_lalu,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($sisa_pagu_ini,0,",",".");?> </td>
+                </tr> 
+                <tr style="background-color: #dedede;"> 
+                    <td align="center" colspan="2"> Jumlah I</td>  
+                    <td align="right">  <?php echo number_format($jml_pok,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($spp_lalu,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($spp_ini,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($total_spp_ini_lalu,0,",",".");?> </td>
+                    <td align="right">  <?php echo number_format($sisa_pagu_ini,0,",",".");?> </td> 
+                </tr>
+                <tr> 
+                     <td colspan="7">  </td>
+                      
+                </tr>
+                <tr>
+                    <td align="center"> <?php echo"II";?> </td>
+                    <td align="center"><?php echo" SEMUA KEGIATAN"; ?></td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                     <td align="center">  </td>
+                      
+                </tr>  
+                            <?php if(isset($jum_spp_terbayar_perunit)){
+                      $jum_terbayar_perunit = $jum_spp_terbayar_perunit;
+                }else{
+                      $jum_terbayar_perunit = 0;
+                } 
+                
+                 $kdoutput_lama='';
+                 foreach ($tabel_spp->result() as $pagu2){
+                 $kdoutput = $pagu2->kdoutput;    
+                 $kdakun = $pagu2->kdakun;
+                 $jum_spp = ($pagu2->spp_lalu) + ($pagu2->spp_ini);
+                 $sisa = ($pagu2->pok) - ($jum_spp); 
+                      
+             ?> 
+             <?php if ($kdoutput_lama!=$kdoutput){
+                 echo "
+                    <tr>
+                        <td align=\"center\"> &nbsp; </td>
+                        <td align=\"center\">4078.".$kdoutput."</td>
+                        <td align=\"center\"  colspan=\"5\"></td>
+                    </tr>
+                 ";
+                 $kdoutput_lama=$kdoutput;
+             }  
+             ?> 
+                       <tr>
+                    <td align="center">  </td> 
+                    <td align="right"> <?php echo"$kdakun"; ?> </td>
+                    <td align="right"> <?php echo number_format($pagu2->pok,0,",",".");?> </td>
+                    <td align="right"> <?php echo number_format($pagu2->spp_lalu,0,",",".");?> </td>
+                    <td align="right"> <?php echo number_format($pagu2->spp_ini,0,",",".");?> </td>
+                    <td align="right"> <?php echo number_format($jum_spp,0,",",".");?> </td>
+                    <td align="right"> <?php echo number_format($sisa,0,",",".");?> </td>   
+                    
+                    <?php }
+                    
+                        $jumlah_spp_terbayar = ($spp_terbayar_lalu_unit->spp_lalu) + ($spp_ini_unit->spp_ini);
+                        $sisa_tot_pagu_unit = ($pagu_rkakl_unit->pok) - $jumlah_spp_terbayar;
+                    ?>
+                </tr> 
+                  <tr style="background-color: #dedede;"> 
+                    <td align="center" colspan="2"> Jumlah II </td>  
+                    <td align="right"> <?php echo number_format($pagu_rkakl_unit->pok,0,",",".");?> </td>
+                    <td align="right"> <?php echo number_format($spp_terbayar_lalu_unit->spp_lalu,0,",",".");?> </td>
+                    <td align="right"> <?php echo number_format($spp_ini_unit->spp_ini,0,",",".");?> </td> 
+                    <td align="right"> <?php echo number_format($jumlah_spp_terbayar,0,",",".");?> </td> 
+                    <td align="right"> <?php echo number_format($sisa_tot_pagu_unit,0,",",".");?> </td> 
+                </tr>
+                 
+          </table>
+          <table style="font-size: 13px;">
+                <tr>
+                    <td>
+                    <p>LAMPIRAN  </p>
+                    </td>
+                </tr>
+            </table>
+            <table width="100%" style="font-size: 12px;">
+                <tr>
+                    <td width="12%"></td>
+                    <table>
+                        <tr>
+                            <td width="250px"></td>             
+                            <td width="230px">Dokumen Pendukung : ...... berkas</td>
+                            <td width="250px"></td>
+
+                            <td width="250px"></td>  
+                            <td width="250px">Surat Bukti Pendukung : ...... lembar</td>
+                            <td width="250px"></td>
+                            
+                            <td width="250px"></td>
+                            <td width="200px">STS : ...... lembar</td>
+                            <td width="250px"></td>
+                        </tr>
+                    </table>
+                   </td>            
+                </tr>
+            </table> 
+            <br><br><br> 
+            <table width="100%" style="font-size: 12px;">
+
+                <tr>
+                    <td width="40%">Diterima Oleh Penguji SPP</td> 
+                    <td width="20%"></td>
+                    <td width="40%">Bukit,.....</td>   
+                </tr>
+                <tr>
+                    <td>Unit kerja <?php echo"$nama_fak";?> </td>
+                    <td></td>
+
+                    <td>a.n. Kuasa PA</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Ketua Penyelenggara Kegiatan</td>
+                </tr>
+                <tr>
+
+                    <td></td>
+                    <td></td>
+                    <td> <?php echo"$nama_fak";?> </td>
+                </tr>
+                <tr height="70px"><td><br><br><br><br></td> </tr>
+                <tr>
+                    <td> <?php echo"";?></td>
+                    <td></td>
+
+                    <td> <?php echo"$pd2";?></td>
+                </tr>
+                <tr>
+                    <td>NIP. <?php echo"";?> </td>
+                    <td></td>
+                    <td>NIP. <?php echo"$nip_pd2";?> </td>
+                </tr> 
+            </table>

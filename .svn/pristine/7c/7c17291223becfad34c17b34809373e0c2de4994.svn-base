@@ -1,0 +1,72 @@
+
+<article class="module width_full">
+    <header><h3>Form Pengisian Nomor BG</h3></header>
+                    
+    <div class="module_content">  
+    <form method="post" name='form-spp' action="" onSubmit='return validasi(this)'> 
+        <?php foreach($daftar_sp2d->result_array() as $u){
+        $id_sp2d = $u['id_sp2d'];   
+        $id_spm = $u['id_spm'];   
+        $tgl_buat = $u['tgl_buat'];
+        $jum_angka = $u['jumlah'];
+        $jumlah = number_format($jum_angka,0,",",".");
+        $huruf = $this->konversi->terbilang ($jum_angka) ;
+        $nama_bank=$u['bank'];
+        $nomor_bg=$u['nomor_bg'];
+        $nomor_rekening = $u['nomor_rekening'];
+        $nama_unit = $u['nama_unit'];
+        $tgl_sp2d = date_create($tgl_buat);   
+    }  ?>  
+        <input type="hidden" name="id_sp2d" value="<?php echo"$id_sp2d";?>">          
+        <input type="hidden" name="id_spm" value="<?php echo"$id_spm";?>">
+        <table align="right">
+        <tr>
+            <td width="200px">Bilyet Giro No. <?php echo"$nomor_bg";?> </td> 
+        
+        </tr>
+        </table> 
+        <table style="padding-top: 20px;">
+        <tr>
+            <td width="250px"><h1><strong>MANDIRI<strong></strong></h1></td>
+            <td>Cabang :<td width="100px">.......................</td></td>
+        
+        </tr> 
+        </table>
+        <table>
+        <tr>
+            <td>Diminta Kepada Saudara supaya pada tanggal <?php echo date_format($tgl_sp2d, 'd/ m/ Y'); ?>, memindahkan data atas beban</td>
+            
+        </tr>
+        </table>
+        <table>
+        <tr>
+            <td width=""> rekening kami sejumlah Rp. </td><td><table border="1" width="150px" align="right"><tr><td align="right"><?php echo"$jumlah";?>,- </td></tr> </table><td>&nbsp;</td> </td><td> (<?php echo"$huruf";?> rupiah) </td>  
+        
+        </tr> 
+        </table>
+        <table>         
+            <tr><td>untuk keuntungan rekening nomor <?php echo"$nomor_rekening";?> atas nama <?php echo"$nama_unit";?> pada bank <?php echo"$nama_bank";?></td></tr>
+        </table> 
+        <table  style="padding-top: 80px; padding-left: 600px;">         
+            <tr><td><hr \></td></tr>
+            <tr><td>Tanda tangan, nama (dan cap Perusahaan)</td></tr>
+        </table> 
+    </div>
+    <footer>                           
+                
+    <div class="submit_link">        
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+    </form>
+
+
+</article>
+         
+
+
+
+
+
+
+

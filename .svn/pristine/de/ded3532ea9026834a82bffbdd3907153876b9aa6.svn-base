@@ -1,0 +1,19 @@
+<?php echo form_dropdown("kode_2", $kode2,'',"id='kode_2', class='drop_down'"); ?>
+
+<script type="text/javascript">
+
+          $("#kode_2").change(function(){
+							 /* alert(kode1); */ 
+							$.ajax({
+									type: "POST",									
+									url : "<?php echo site_url('c_gu/select_kode3')?>",	
+									data: {
+												kode2: $("#kode_2").val()
+											},
+									success: function(msg){
+										$('#kode3').html(msg);
+									}
+							  });	
+				});
+       </script>
+       

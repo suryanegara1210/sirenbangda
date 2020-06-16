@@ -1,0 +1,108 @@
+<article class="module width_full">
+<?php foreach($daftar_up->result_array() as $row){ $nama_unit = $row['nama_subunit'];}?>
+<header><h3>Detail Rincian UP (Uang Persediaan) <?php echo "$nama_unit"; ?> </h3></header>
+                     
+            <div class="module_content">
+            <form method="post" name='formName4' action="<?php echo base_url();?>unit/verifikasi" onSubmit='return validasi(this)'> 
+            <?php       
+            foreach($daftar_up->result_array() as $row)
+            {  
+            $kode_subunit=$row['kode_subunit'];
+            $id_subunit=$row['id_subunit'];
+            $id_rekap=$row['id_rekap'];  
+            $id=$row['id_transaksi']; 
+            $th=$row['th_transaksi']; 
+            $kd_output= $row['kdoutput'];
+            $kd_komponen= $row['kdkomponen'];
+            $nama_output= $row['nmoutput'];
+            $nama_komponen= $row['nmkomponen'];
+            $kd_akun= $row['kdakun'];
+            $nmakun= $row['nmakun'];   
+            $header= $row['nmheader'];    
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",",".");    
+            $renja = number_format($rkakl,0,",",".");    
+            $sisa = number_format($sisa_pagu,0,",",".");    
+            ?>
+              
+            <table  class="table-common" style="margin-left: 20px; width: 750px;" >  
+             <thead> 
+                <tr >
+                <th>Kode Output / Kode Komponen <br> / Kode Akun </th>
+                <th>Output / Komponen / Nama Akun / Header</th>
+                <th>Jumlah Renja</th> 
+                <th>Jumlah Diajukan</th> 
+                <th>Sisa Pagu</th> 
+                </tr>
+             </thead>
+             
+
+              <input type="hidden" name="id_rekap" value="<?php echo "$id_rekap"; ?>"> 
+              <input type="hidden" name="id_transaksi" value="<?php echo "$id"; ?>"> 
+              <input type="hidden" name="th_transaksi" value="<?php echo "$th"; ?>"> 
+              <input type="hidden" name="id_subunit" value="<?php echo "$id_subunit"; ?>"> 
+              <tr>
+                <td align='left'><?php echo "$kd_output";?></td>
+                <td><?php echo "$nama_output";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kd_komponen";?></td>
+                <td><?php echo "$nama_komponen";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kd_komponen.$kd_akun";?></td>
+                <td><?php echo "$nmakun";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'>Header</td>
+                <td><?php echo "$header";?></td>
+                <td align="right"><?php echo "$renja";?></td>
+                <td align="right"><?php echo "$jumlah";?></td>
+                <td align="right"><?php echo "$sisa";?></td>
+              </tr>
+           
+              <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+             <?php /*
+                <table style="padding-left: 20px;" >
+                    <tr><td style="font-size: 16px; background-color: gray;" width="10px" ><a href="javascript:Start('<?php echo base_url();?>index.php/unit/tampil_pagu/<?php echo"$kode_subunit" ?>')" title='Daftar Pagu'>Pagu</a></td></tr>
+             </table> */
+             ?>
+             <table style="padding-left: 780px; margin-top: -65px;" width="900px"> 
+                     <?php if( $sisa_pagu >= 0) { ?>
+                    <tr><td align="left"><a title=''> <img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td><td style="font-size: 10px; color: green;" > dana yang diajukan benar</td> 
+                    <?php }else{ ?>
+                    <tr><td align="left"><a title=''> <img src='<?php echo base_url();?>asset/images/icn_alert_error.png'></a></td><td style="font-size: 10px; color: red;" > dana yang diajukan melebihi pagu</td> 
+                    <?php }?>
+             </table> 
+             
+             <table style="margin-top: 50px;">
+                    <tr><td style="padding-left: 20px">Keterangan:</td><td style="margin-left: -230px; padding-left: -130px;"><textarea name="keterangan" rows="5" cols="35"></textarea></td></td></tr>
+                    <br><tr><td style="padding-left: 20px; padding-top: 20px"><input type="checkbox" name="kelengkapan" style="padding-left: 10px;"> Lengkap dan Benar </td></tr> 
+             </table>
+
+ </table>   
+ </div>
+ <footer> 
+                    <div class="submit_link">
+                        <input type='submit' value='Setuju' name='simpan' onclick="return confirm('Apakah anda yakin menyetujui UP ini ?')">
+                    <input type='submit' value='Revisi Ke Subunit' name='simpan' onclick="return confirm('Apakah anda yakin ingin merevisi Up ini ke Subunit ?')">
+                    <input type=button value=Kembali onclick=self.history.back()>
+                    </div>  
+            </footer>
+            <?php }?>
+ </article>

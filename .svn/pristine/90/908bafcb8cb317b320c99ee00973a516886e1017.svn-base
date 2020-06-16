@@ -1,0 +1,170 @@
+<?php foreach($hasil->result() as $row):?>
+<article class="module width_full">
+<header>
+
+<!--==============================-->
+<link rel="stylesheet" type="text/css" href="<?php echo base_url();?>application/views/ls/facebox/facebox.css" />
+<script language="javascript" src="<?php echo base_url();?>application/views/ls/facebox/facebox.js"></script>
+	 
+<script language="javascript">
+ 
+$(document).ready(function() {
+	    $('a[rel*=facebox]').facebox();
+})
+	                                                   
+</script>
+<!--==============================-->
+<style>
+.link_history {text-decoration:none;}
+.link_history :hover {text-decoration:none;}
+.link_history :visited  {text-decoration:none;}
+.link_history :active   {text-decoration:none;}
+#facebox .body {width: 600px; max-height:400px;}
+</style>
+
+<!--==============================-->
+
+
+<style>
+.input
+{
+	width:250px;
+}
+</style>
+ <script language="javascript">
+  function validasi(form){
+  
+  if (form.tgl_kwitansi.value == ""){
+    alert("Tanggal Kwitansi masih kosong.");
+    form.tgl_kwitansi.focus();
+    return (false);
+  }
+  if (form.nominal.value == ""){
+    alert("Nominal masih kosong.");
+    form.nominal.focus();
+    return (false);
+  }
+  if (form.ket_kwitansi.value == ""){
+    alert("Keterangan masih kosong.");
+    form.ket_kwitansi.focus();
+    return (false);
+  }
+  if (form.tempat_kwitansi.value == ""){
+    alert("Tempat Kwitansi.");
+    form.tempat_kwitansi.focus();
+    return (false);
+  }
+  if (form.penerima.value == ""){
+    alert("Penerima masih kosong.");
+    form.penerima.focus();
+    return (false);
+  }
+  if (form.pengambil.value == ""){
+    alert("Pengambil masih kosong.");
+    form.pengambil.focus();
+    return (false);
+  }
+    
+  return (true);
+}
+
+//==============================================================
+//==============================================================
+
+			
+</script>
+<h3>Edit Data Kwitansi</h3>
+</header>
+
+<form method="post" name='form' action="<?php echo base_url();?>ls/edit_kwitansi_pengadaan" onSubmit='return validasi(this)'> 
+
+  <table width="100%" border="0" style="margin-left:20px; margin-top:20px">
+    <tr>
+      <td>      
+        <a class="link_history" href="<?php echo site_url();?>ls/verifikasi_history/<?php echo $row->th_kwitansi_kontrak;?>/<?php echo $row->id_kwitansi_kontrak;?>" rel="facebox">Tampilkan History </a>
+</td>
+      <td>&nbsp;</td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td width="15%">Tanggal Kwitansi</td>
+      <td width="1%">:</td>
+      <td width="84%"><label for="tgl_kwitansi"></label>
+      <input name="tgl_kwitansi" type="text" class="input" id="tgl_kwitansi" value="<?php echo $row->tgl_kwitansi;?>" readonly="readonly" /></td>
+    </tr>
+    <tr>
+      <td>Nominal</td>
+      <td>:</td>
+      <td>
+      <?php $id_pajak=$row->id_pajak;
+	  if ($id_pajak=='0' or $id_pajak=='')
+	  {
+	  ?>
+      		<input type="text" name="nominal" disabled="disabled" id="nominal" class="input" value="<?php echo $row->nominal ?>"/> 
+	  <?php }
+	  else
+	  {
+	  echo '<input type="text" name="nominal" id="nominal" class="input" value="'.$row->nominal.'" />'; 
+	  }
+	  ?>
+      </td>
+    </tr>
+    <tr>
+      <td>Keterangan Kwitansi</td>
+      <td>:</td>
+      <td><textarea name="ket_kwitansi" class="input" id="ket_kwitansi" ><?php echo $row->ket_kwitansi;?></textarea></td>
+    </tr>
+    <tr>
+      <td><e>
+        Tempat Kwitansi</td>
+      <td>:</td>
+      <td><input type="text" name="tempat_kwitansi" id="tempat_kwitansi" class="input" value="<?php echo $row->tpt_kwitansi;?>" /></td>
+    </tr>
+    <tr>
+      <td>Penerima</td>
+      <td>:</td>
+      <td><input type="text" name="penerima" id="penerima" class="input" value="<?php echo $row->penerima;?>" /></td>
+    </tr>
+    <tr>
+      <td>Pengambil</td>
+      <td>:</td>
+      <td><input type="text" name="pengambil" id="pengambil" class="input" value="<?php echo $row->pengambil;?>"  /></td>
+    </tr>
+    <tr>
+      <td>Jenis Pajak</td>
+      <td>: </td>
+      <td>
+	  <?php $id_pajak=$row->id_pajak;
+	  if ($id_pajak=='' or $id_pajak=='0')
+	  {
+		  echo form_dropdown("jns_pajak",$jns_pajak,$row->id_pajak,"id='jns_pajak' style='width : 450px' disabled='disabled' ");
+	  }
+	  else
+	  {
+	  echo form_dropdown("jns_pajak",$jns_pajak,$row->id_pajak,"id='jns_pajak' style='width : 450px'"); 
+	  }
+	  ?>
+      </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td><input name="id_kwitansi" id="id_kwitansi" class="input" value="<?php echo $row->id_kwitansi_kontrak;?>" type="hidden"  />
+      <input name="id_status_kwitansi" id="id_kwitansi" class="input" value="<?php echo $row->id_status_kwitansi;?>" type="hidden"  />
+      <input name="th_kwitansi" id="id_kwitansi" class="input" value="<?php echo $row->th_kwitansi_kontrak;?>" type="hidden"  />
+
+      </td>
+    </tr>
+  </table>
+  </div>
+<footer>
+            <div class="submit_link">
+            <input value="Kembalikan Kwitansi ke Unit" type="submit"/>  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+</footer>   
+</form>
+<?php endforeach;?>
+
+

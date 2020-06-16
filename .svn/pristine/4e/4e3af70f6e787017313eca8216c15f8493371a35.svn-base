@@ -1,0 +1,1312 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class berkaitan pembuatan Bukti Akuntansi
+ * 
+ * Controller Class berkaitan pembuatan Bukti Akuntansi untuk masing masing jenis
+ * penerimaan (Layanan Pendidikan Lain, Layanan Masyarakat, Hibah, Penyewaan Aset)
+ * 
+ * @author Putu Praba Santika
+ */
+
+class Bukti_akuntansi extends CI_Controller {
+    
+    public function __construct(){
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->model(array('m_rekap','m_umum','m_bukti_akuntansi','m_lov','m_pen_lain','m_ladik','m_settings'));
+    }
+    
+    function index(){
+        redirect(base_url());
+    }
+    
+    public $bulan=array(
+        '1'=>'Januari',
+        '2'=>'Februari',
+        '3'=>'Maret',
+        '4'=>'April',
+        '5'=>'Mei',
+        '6'=>'Juni',
+        '7'=>'Juli',
+        '8'=>'Agustus',
+        '9'=>'September',
+        '10'=>'Oktober',
+        '11'=>'November',
+        '12'=>'Desember'
+    );
+    
+    function saldonormal(){
+        $akun=$this->input->post('akun');
+        $akunDet=$this->m_umum->basDetail($akun);
+        echo $akunDet->saldo_normal;
+    }
+    
+    /**
+    * Auto complete kode akun
+    */
+    function cariAkun(){
+		// process posted form data
+        $keyword = $this->input->post('term');
+        $batas=$this->input->post('batas');
+        if (!isset($batas)&&$batas==''){
+            $batas='';
+        }
+        
+        $kasbank=$this->input->post('kasbank');
+        $jb=$this->input->post('jb');
+        if (isset($kasbank)&&$kasbank!==''){
+            $akunDet=$this->m_umum->basDetail($kasbank);
+            if(isset($akunDet)){
+                $sn = $akunDet->saldo_normal;
+            }
+            if($jb==constant::BUK_BKK){
+                 $snlawan=$sn;
+            }else{
+                if($sn==='D'){
+                    $snlawan='K';
+                }else{
+                    $snlawan='D';
+                }
+            }
+            
+        }else{
+            $snlawan='';
+        }
+        
+        $data['response'] = 'false'; //Set default response
+        $akun = $this->m_umum->cariAkun($keyword,$batas,$snlawan); //Search DB
+		//echo $this->db->last_query();
+        if( ! empty($akun) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $akun as $row )
+            {
+                $data['message'][] = array( 
+                                        'id'=>$row->akun_kode,
+					'label'=>$row->akun_kode.". ".$row->akun_nama,
+					'value'=>$row->akun_kode,
+					'desc'=>$row->akun_kode.". ".$row->akun_nama,
+                                        'saldoNormal'=>$row->saldo_normal
+                                     );  //Add a row to array
+            }
+        }
+        
+        echo json_encode($data); //echo json string
+	}
+    
+    function bas_perjenis_tran(){
+        $jt=$this->input->post('jt');
+        $idsubunit=$this->input->post('idsubunit');
+        $pilih=$this->input->post('pilih');
+        $batas='';
+        //TODO: sesuaiin batas bas
+        switch($jt){
+            case constant::BK_KAS_MASUK:
+                $batas='1119111114';
+                break;
+            case constant::BK_KAS_KELUAR:
+                $batas='1119111114';
+                break;
+            case constant::BK_BANK_MASUK:
+                $batas='1119111115,1119111116';
+                break;
+            case constant::BK_BANK_KELUAR:
+                $batas='1119111115,1119111116';
+                break;
+            case constant::BK_MEMORIAL:
+                $batas='';
+                break;
+        }
+        
+        $akun = $this->m_bukti_akuntansi->cariAkun($batas,$idsubunit);
+        $select="<option value=\"\"> --> Pilih Akun <-- </option>";
+        foreach ($akun as $ak){
+            if ($ak->akun_kode==$pilih){
+                $select.="<option selected=\"selected\" value=\"$ak->akun_kode\">$ak->akun_kode. $ak->akun_nama</option>"; //set value
+            }else{
+                $select.="<option value=\"$ak->akun_kode\">$ak->akun_kode. $ak->akun_nama</option>"; //set value
+            }
+            
+        }
+        echo $select;
+    }
+    
+    /**
+     * tampilin daftar input yang tersedia
+     */
+    function inputbukti(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $jen_buk=$this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        $jbkt= Array();
+        $jbkt['']= '~~~ Jenis Bukti ~~~';
+        foreach ($jen_buk as $jb){
+            $jbkt[$jb->kode_value]= $jb->nama_value;
+        }
+        $data['jen_bkt']=$jbkt;
+        
+        $jen_pen=$this->m_lov->get_list_lov(Constant::KAP_JENIS_PENERIMAAN);
+        $jpen= Array();
+        $jpen['']= '~~~ Referensi Jenis Penerimaan ~~~';
+        foreach ($jen_pen as $jp){
+            $jpen[$jp->kode_value]= $jp->nama_value;
+        }
+        $jpen['NOREF']= 'Tanpa Referensi';
+        $data['jen_pen']=$jpen;
+        
+        $data['title']='Input Bukti Kas Masuk';
+        $data['judul']='Input Bukti Kas Masuk';
+        $data['link']=site_url('bukti_akuntansi/inputbukti_per_mou');
+        $data['link_rm']=site_url('bukti_akuntansi/input_rm');
+
+        $this->template->load('template','bukti_akuntansi/kepala_bukti',$data);
+    }
+    /*
+     * nampilin daftar yang boleh dibuatkan bukti sesuai dengan yg diminta
+     */
+    function inputbukti_per_mou(){
+        //TODO: ini ajax request, kalau session user habis, ga nampil apa2
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $jen_pen=$this->input->post('jen_pen');
+        $jen_bkt=$this->input->post('jen_bkt');
+        
+        if ($jen_pen==constant::MOU_LADIK){
+            switch($jen_bkt){
+                case constant::BUK_BKM:
+                    $data['penerima']=$this->m_ladik->ambilUnitBKM();
+                    $data['isBKM']=true;
+                    $data['title']="Input Bukti Kas Masuk";
+                    $this->load->view('ladik/daftar',$data);
+                    break;
+                case constant::BUK_BM:
+                    $data['penerima']=$this->m_ladik->ambilUnitBM();
+                    $data['isBM']=true;
+                    $data['title']="Input Bukti Memorial";
+                    $this->load->view('ladik/daftar',$data);
+                    break;
+                default :
+                    return false;
+                    break;
+            }
+        }else{
+            
+            switch($jen_bkt){
+                case constant::BUK_BKM:
+                    $data['judul']='Daftar MOU yang Belum dibuatkan Bukti Kas Masuk';
+                    $data['link']['inputbkm']['judul']="Input Bukti Kas Masuk";
+                    $data['link']['inputbkm']['alamat']="bukti_akuntansi/input/".$jen_bkt."/";
+                    $data['link']['inputbkm']['img']="add";
+                    
+                    $data['link']['detail']['judul']="Detail";
+                    $data['link']['detail']['alamat']="pen_lain/detail/";
+                    $data['link']['detail']['img']="detail";
+                    
+                    $data['resume_mou']=$this->m_pen_lain->ambil_non_bukti($jen_bkt,$jen_pen);
+                    break;
+                case constant::BUK_BM:
+                    $data['judul']='Daftar MOU yang Belum dibuatkan Bukti Memorial';
+                    $data['link']['inputbm']['judul']="Input Bukti Memorial";
+                    $data['link']['inputbm']['alamat']="bukti_akuntansi/input/".constant::BUK_BM."/";
+                    $data['link']['inputbm']['img']="add";
+                    
+                    $data['link']['detail']['judul']="Detail";
+                    $data['link']['detail']['alamat']="pen_lain/detail/";
+                    $data['link']['detail']['img']="detail";
+                    
+                    $data['resume_mou']=$this->m_pen_lain->ambil_non_bukti($jen_bkt,$jen_pen);
+                    break;
+                case constant::BUK_BKK:
+                    $data['judul']='Input Bukti Kas Keluar';
+                    break;
+                default :
+                    return false;
+                    break;
+            }
+            
+            
+            $data['jen_bkt']=$jen_bkt;
+            
+            $namafile=$this->m_umum->nama_file($jen_pen);
+            if($namafile){
+                $file_daftar='daftar'.$namafile;
+                $this->load->view('pen_lain/'.$file_daftar,$data);
+            }else return false;    
+        }
+        
+        
+        
+    }
+    
+    /**
+     * Menampilkan form input Bukti Akuntansi
+     * siaku/bukti_akuntansi/input/bkm/2/13/1
+     */
+    function input(){
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $data['jenis_bukti']     = $this->uri->segment(3);
+        $jenis_mou               = $this->uri->segment(4);
+        
+        switch($data['jenis_bukti']){
+            case constant::BUK_BKK :
+                $isi[]=constant::BK_KAS_KELUAR;
+                $isi[]=constant::BK_BANK_KELUAR;
+                break;
+            case constant::BUK_BKM :
+                $isi[]=constant::BK_BANK_MASUK;
+                $isi[]=constant::BK_KAS_MASUK;
+                break;
+            case constant::BUK_BM :
+                $isi[]=constant::BK_MEMORIAL;
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        
+        $jenis_bank_kas= $this->m_lov->get_list_lov(Constant::JENIS_BANK_KAS);
+        $jt['']='~~~ Jenis Transaksi ~~~';
+        
+        foreach ($jenis_bank_kas as $row){
+            if(in_array($row->kode_value, $isi)){
+                $jt[$row->kode_value]= $row->nama_value;
+            }
+        }
+        
+        $data['jenis_transaksi'] = $jt;
+		$data['nm_unit']         = $this->m_umum->unit_semua("","");
+        $data['sub_unit']        = $this->m_umum->subunit_semua("", constant::WITHOUT_ALL);
+        
+        switch ($jenis_mou){
+            case constant::MOU_LADIK:
+                $data['idsub']=$this->uri->segment(5);
+                $data['isLadik']=true;
+                $data['namasub']=$this->m_umum->get_nama_sunit_by_id ($data['idsub']);
+                
+                switch($data['jenis_bukti']){
+                    case constant::BUK_BKK :
+                        break;
+                    case constant::BUK_BKM :
+                        $datapen['penerimaan']=$this->m_ladik->ambilBKMperSubunit($data['idsub']);
+                        $data['pen_isi']=$this->load->view('pen_lain/isi_ladik',$datapen,true);
+                        break;
+                    case constant::BUK_BM :
+                        $closeNonVeri=$this->m_ladik->ambilCloseNonVeri($data['idsub']);
+                        if ($closeNonVeri > 0){
+                            $this->session->set_userdata('msg_typ','err');
+                            $this->session->set_userdata('msg', 'Ada transaksi '.$data['namasub'].' yang belum di verifikasi');
+                            redirect('ladik/inputBM');
+                            return;
+                        }
+                        $datapen['penerimaan']=$this->m_ladik->ambilBMperSubunit($data['idsub']);
+                        $data['pen_isi']=$this->load->view('pen_lain/isi_ladik',$datapen,true);
+                        break;
+                }
+                
+                break;
+            case constant::MOU_LADIK_LAIN:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $data['nama_mou']=$this->m_pen_lain->ambil_detail_det($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $datapen['nama_mou']=$data['nama_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_ladik_lain',$datapen,true);
+                break;
+            case constant::MOU_HIBAH_TERENCANA:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_hibah',$datapen,true);
+                break;
+            case constant::MOU_PPPMAS:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $data['nama_mou']=$this->m_pen_lain->ambil_detail_det($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $datapen['nama_mou']=$data['nama_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_pppmas',$datapen,true);
+                break;
+            case constant::MOU_HIBAH_TAKTER:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_hibah_takter',$datapen,true);
+                break;
+            case constant::MOU_UNIT_USAHA:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_unit_usaha',$datapen,true);
+                break;
+            case constant::MOU_ASET:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_aset_inseden',$datapen,true);
+                break;
+            case  constant::MOU_ASET_RUTIN:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_aset_rutin',$datapen,true);
+                break;
+            case constant::MOU_INVESTASI:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_investasi',$datapen,true);
+                break;
+            case constant::MOU_JASA_GIRO:
+                $id=$this->uri->segment(5);
+                $data['id_ref']=$id;
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                $datapen['isi_mou']=$data['isi_mou'];
+                $data['pen_isi']=$this->load->view('pen_lain/isi_jasa_giro',$datapen,true);
+                break;
+            case 'NOREF':
+                $data['isNoRef']=true;
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        $data['jenis_mou']=$jenis_mou;
+        $data['isInput']=true;
+        $data['title']="Input Bukti Akuntansi";
+        $this->template->load('template','bukti_akuntansi/input',$data);
+    }
+
+    function input_rm($id_sp2d=null, $kw_gup=null){
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $jen_buk=$this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        $jbkt= Array();
+        $jbkt['']= '~~~ Jenis Bukti ~~~';
+        foreach ($jen_buk as $jb){
+            $jbkt[$jb->kode_value]= $jb->nama_value;
+        }
+        $data['jen_bkt']=$jbkt;
+
+        if(!empty($id_sp2d))
+        {
+            $jen_buk=$this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);            
+            $jbkt= Array();
+            foreach ($jen_buk as $jb){
+                if ($jb->kode_value==constant::BUK_BKK) {
+                    $jbkt[$jb->kode_value]= $jb->nama_value;
+                }                
+            }
+            $data['jen_bkt']=$jbkt;
+            
+            $isi[]=constant::BK_BANK_KELUAR;
+            $jenis_bank_kas= $this->m_lov->get_list_lov(Constant::JENIS_BANK_KAS);                        
+            //echo $this->db->last_query();
+            foreach ($jenis_bank_kas as $row){
+                if(in_array($row->kode_value, $isi)){
+                    $jt[$row->kode_value]= $row->nama_value;                    
+                }
+            }
+            $data['jenis_transaksi'] = $jt;
+
+            //$sub_unit_det=$this->m_umum->subunit_detail($data['isi_bkm']->id_subunit);
+
+            $data['isSp2d']=TRUE;
+            $sp2d = $this->m_rekap->select_sp2dcair($id_sp2d);
+            //echo $this->db->last_query();
+
+            $nm_unit=$this->m_umum->unit_detail($sp2d->id_unit,Constant::JR_ID);
+                        
+            $unit_cb[$nm_unit->id_unit]=$nm_unit->nama_unit;
+            $data['nm_unit']= $unit_cb;
+            $data['sub_unit']=NULL;
+
+            $data['sp2d'] = $sp2d;
+            if (empty($kw_gup)) {
+                $data['kw_gup']=1;
+            }else{
+                $data['kw_gup']=$kw_gup;
+            }            
+        }
+        else
+        {            
+            $jen_buk=$this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+            $jbkt= Array();
+            $jbkt['']= '~~~ Jenis Bukti ~~~';
+            foreach ($jen_buk as $jb){
+                $jbkt[$jb->kode_value]= $jb->nama_value;
+            }
+            $data['jen_bkt']=$jbkt;
+            $data['nm_unit']= $this->m_umum->unit_semua(constant::WITHOUT_ALL);        
+            $data['sub_unit']= $this->m_umum->subunit_semua("", constant::WITHOUT_ALL);
+        }
+        
+        $data['isNoRef']=true;
+        $data['isInput']=true;
+        $data['title']="Input Bukti Akuntansi";
+        $this->template->load('template','bukti_akuntansi/input_rm',$data);
+    }
+
+    function cari_bas_sp2d(){
+        $id_unit = $this->input->post('id_unit');
+        $query = $this->m_bukti_akuntansi->cari_bas_sp2d($id_unit);
+        echo '{"akun_kode":"'. $query->akun_kode .'", "akun_nama":"'. $query->akun_nama .'"}';          
+    }
+	
+    //Menampilkan jenis transaksi yang dipilih pada input rm
+    function jenis_transaksi_input_rm(){
+        $bukti_transaksi=$this->input->post('bukti_transaksi');
+
+        switch($bukti_transaksi){
+            case constant::BUK_BKK :
+                $isi[]=constant::BK_KAS_KELUAR;
+                $isi[]=constant::BK_BANK_KELUAR;
+                break;
+            case constant::BUK_BKM :
+                $isi[]=constant::BK_BANK_MASUK;
+                $isi[]=constant::BK_KAS_MASUK;
+                break;
+            case constant::BUK_BM :
+                $isi[]=constant::BK_MEMORIAL;
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+
+        $jenis_bank_kas= $this->m_lov->get_list_lov(Constant::JENIS_BANK_KAS);
+        $jt['']='~~~ Jenis Transaksi ~~~';
+        
+        foreach ($jenis_bank_kas as $row){            
+            if(in_array($row->kode_value, $isi)){
+                $jt[$row->kode_value]= $row->nama_value;
+            }
+        }
+        
+        $jenis_transaksi=$jt;
+        echo form_dropdown("jenis_transaksi",$jenis_transaksi,"","id='jenis_transaksi' style='width:94%;'");
+
+    }
+
+    function sub_unit_input_rm(){
+        $unit=$this->input->post('unit');
+
+        $sub_unit = $this->m_umum->subunit_semua($unit, constant::WITHOUT_ALL);        
+        echo form_dropdown("sub_unit",$sub_unit,""," class='kombocari' id='sub_unit' style='width:94%;'");
+    }
+
+    /**
+     * Menyimpan Bukti
+     * 
+     */
+    function simpan(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $objek = new stdClass();
+        $komentar='';
+        
+        $objek->tgl_bukti       = $this->input->post('tgl_bukti');
+        $objek->jenis_transaksi = $this->input->post('jenis_transaksi');
+        $objek->ref            = $this->input->post('ref');
+        $objek->dari            = $this->input->post('dari');
+        $objek->keterangan      = $this->input->post('keterangan');
+		$objek->id_unit      	= $this->input->post('nm_unit');
+        $objek->id_subunit      = $this->input->post('sub_unit');
+        
+        $kas_bank   = $this->input->post('kas_bank');
+        
+        $jenpen = $_POST['jenpen'];
+        $akun   = $_POST['akun'];
+        $debet  = $_POST['debet'];
+        $kredit = $_POST['kredit'];
+        $uraian = $_POST['uraian'];
+        
+        $objek->ttd1_nama   =   $this->m_settings->getSettingVal('PPK_NAMA');
+        $objek->ttd1_nip    =   $this->m_settings->getSettingVal('PPK_NIP');
+        $objek->ttd2_nama   =   $this->m_settings->getSettingVal('KASUB_MONEV_NAMA');
+        $objek->ttd2_nip    =   $this->m_settings->getSettingVal('KASUB_MONEV_NIP');
+        $objek->ttd3_nama   =   $this->m_settings->getSettingVal('BEN_PENERIMA_NAMA');
+        $objek->ttd3_nip    =   $this->m_settings->getSettingVal('BEN_PENERIMA_NIP');
+        
+        
+        date_default_timezone_set('Etc/GMT-8');
+        $id_bukti= $this->input->post('id_bukti');
+        if (isset($id_bukti) && $id_bukti!='' && $id_bukti!='0'){
+            //edit
+            $objek->id_bukti    = $id_bukti;
+            $objek->changed_date = date('Y-m-d H:i:s');
+            $objek->changed_by   = $this->session->userdata('username');
+            $status='Edit';
+            if ($this->input->post('status')==='REVISI'){
+                $objek->status='SUDAH_REVISI';
+                $status=$objek->status;
+            }
+        }else{
+            //input
+            $objek->jenis_bukti     = $this->input->post('jenis_bukti');
+            $objek->id_ref       = $this->input->post('id_ref');
+            $objek->jenis_ref       = $this->input->post('jenis_ref');
+            $objek->created_date = date('Y-m-d H:i:s');
+            $objek->created_by   = $this->session->userdata('username');
+            $status='Input';
+        }
+        $hasil=$this->m_bukti_akuntansi->simpan($objek,$akun,$debet,$kredit,
+                            $uraian,$kas_bank,$jenpen);
+        if($hasil!==false){
+            
+            $this->alat->history_tambah('t_bukti_akuntansi','bukti',$hasil,$status,$komentar);
+                        
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil menyimpan Bukti Akuntansi.');
+            redirect('bukti_akuntansi/detail/'.$hasil);
+        } else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL menyimpan Bukti Akuntansi.');
+            redirect('bukti_akuntansi/semua');
+        }
+    }
+
+    function simpan_rm(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $objek = new stdClass();
+        $komentar='';
+        
+        $objek->tgl_bukti       = $this->input->post('tgl_bukti');
+        $objek->jenis_transaksi = $this->input->post('jenis_transaksi');
+        $objek->ref            = $this->input->post('ref');
+        $objek->dari            = $this->input->post('dari');
+        $objek->keterangan      = $this->input->post('keterangan');
+        $objek->id_unit         = $this->input->post('nm_unit');
+        $objek->id_subunit      = $this->input->post('sub_unit');
+
+        echo "Unit : ".$this->input->post('nm_unit');
+        echo "Sub Unit : ".$this->input->post('sub_unit');
+
+        $kas_bank   = $this->input->post('kas_bank');
+        
+        $jenpen = $_POST['jenpen'];
+        $akun   = $_POST['akun'];
+        $debet  = $_POST['debet'];
+        $kredit = $_POST['kredit'];
+        $uraian = $_POST['uraian'];
+        
+        $objek->ttd1_nama   =   $this->m_settings->getSettingVal('PPK_NAMA');
+        $objek->ttd1_nip    =   $this->m_settings->getSettingVal('PPK_NIP');
+        $objek->ttd2_nama   =   $this->m_settings->getSettingVal('KASUB_MONEV_NAMA');
+        $objek->ttd2_nip    =   $this->m_settings->getSettingVal('KASUB_MONEV_NIP');
+        $objek->ttd3_nama   =   $this->m_settings->getSettingVal('BEN_PENERIMA_NAMA');
+        $objek->ttd3_nip    =   $this->m_settings->getSettingVal('BEN_PENERIMA_NIP');
+        
+        
+        date_default_timezone_set('Etc/GMT-8');
+        $id_bukti= $this->input->post('id_bukti');
+        $id_sp2d= $this->input->post('id_sp2d');
+        $kw_gup= $this->input->post('kw_gup');
+        echo $id_bukti." - ".$id_sp2d ."<BR>";
+        if (isset($id_bukti) && $id_bukti!='' && $id_bukti!='0' && empty($id_sp2d)){
+            //edit
+            echo "edit";
+            $objek->id_bukti    = $id_bukti;
+            $objek->changed_date = date('Y-m-d H:i:s');
+            $objek->changed_by   = $this->session->userdata('username');
+            $status='Edit';
+            if ($this->input->post('status')==='REVISI'){
+                $objek->status='SUDAH_REVISI';
+                $status=$objek->status;
+            }
+        }else{
+            //input
+            echo "input";
+            $objek->jenis_bukti     = $this->input->post('jenis_bukti');
+            $objek->id_ref       = $this->input->post('id_ref');
+            $objek->jenis_ref       = $this->input->post('jenis_ref');
+            $objek->created_date = date('Y-m-d H:i:s');
+            $objek->created_by   = $this->session->userdata('username');
+            $status='Input';
+        }
+
+        $objek->tahun_anggaran  = $this->m_settings->get_tahun_anggaran();
+
+        $hasil=$this->m_bukti_akuntansi->simpan($objek,$akun,$debet,$kredit,
+                            $uraian,$kas_bank,$jenpen);
+
+        if (isset($id_sp2d) && $id_sp2d!='' && $id_sp2d!='0') {
+            $sp2d->id_sp2d = $id_sp2d;
+            if ($kw_gup==2) {
+                $sp2d->id_buktitrans2 = $hasil;
+            }else{
+                $sp2d->id_buktitrans = $hasil;
+            }            
+            $id_buktitrans=$this->m_rekap->update_buktitrans($sp2d);            
+        }
+        
+        if($hasil!==false){
+            
+            $this->alat->history_tambah('t_bukti_akuntansi','bukti',$hasil,$status,$komentar);
+                        
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil menyimpan Bukti Akuntansi.');
+            redirect('bukti_akuntansi/detail_rm/'.$hasil);
+        } else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL menyimpan Bukti Akuntansi.');
+            redirect('bukti_akuntansi/semua');
+        }        
+    }
+    
+    /**
+     * Menampilkan form edit BKM
+     */
+    function edit(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $data['nm_unit']         = $this->m_umum->unit_semua("",constant::WITHOUT_ALL);        
+        $data['sub_unit']        = $this->m_umum->subunit_semua("", constant::WITHOUT_ALL);
+        
+        $id = $this->uri->segment(3);
+        $isi_bukti=$this->m_bukti_akuntansi->detail($id);
+        $data['isi_bkm']=$isi_bukti;
+        $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+        
+        $data['jenis_bukti']=$data['isi_bkm']->jenis_bukti;
+        
+        switch($data['jenis_bukti']){
+            case constant::BUK_BKK :
+                $isi[]=constant::BK_KAS_KELUAR;
+                $isi[]=constant::BK_BANK_KELUAR;
+                break;
+            case constant::BUK_BKM :
+                $isi[]=constant::BK_BANK_MASUK;
+                $isi[]=constant::BK_KAS_MASUK;
+                break;
+            case constant::BUK_BM :
+                $isi[]=constant::BK_MEMORIAL;
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        
+        $jenis_bank_kas= $this->m_lov->get_list_lov(Constant::JENIS_BANK_KAS);
+        $jt['']='~~~ Jenis Transaksi ~~~';
+        
+        foreach ($jenis_bank_kas as $row){
+            if(in_array($row->kode_value, $isi)){
+                $jt[$row->kode_value]= $row->nama_value;
+            }
+        }
+        
+        $data['jenis_transaksi'] = $jt;
+        
+        
+        //hilangin yang lawannya dari det_bkm, pindah ke atas
+        switch($data['isi_bkm']->jenis_bukti){
+            case constant::BUK_BKM :
+                $dk='D';
+                foreach($data['det_bkm'] as $key=>$val){
+                    if($val['saldo_normal']===$dk){
+                        $data['atas']=$data['det_bkm'][$key];
+                        unset($data['det_bkm'][$key]);
+                    }
+                }
+                break;
+            case constant::BUK_BKK:
+                $dk='K';
+                foreach($data['det_bkm'] as $key=>$val){
+                    if($val['saldo_normal']===$dk){
+                        $data['atas']=$data['det_bkm'][$key];
+                        unset($data['det_bkm'][$key]);
+                    }
+                }
+                break;
+        }
+        $sub_unit_det=$this->m_umum->subunit_detail($data['isi_bkm']->id_subunit);
+        
+        //case per jenis mou, panggil detail masing2
+        switch ($isi_bukti->jenis_ref){
+            case constant::MOU_LADIK:
+                $data['idsub']=$this->uri->segment(3);
+                $data['isLadik']=true;
+                $data['penerimaan']=$this->m_ladik->ambilBKMperSubunit($isi_bukti->id_bukti,'2');
+                break;
+            case constant::MOU_LADIK_LAIN:
+            case constant::MOU_HIBAH_TERENCANA:
+            case constant::MOU_PPPMAS:
+            case constant::MOU_HIBAH_TAKTER:
+            case constant::MOU_UNIT_USAHA:
+            case constant::MOU_ASET:
+            case constant::MOU_ASET_RUTIN:
+            case constant::MOU_INVESTASI:
+            case constant::MOU_JASA_GIRO:
+                $id=$this->uri->segment(3);
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($isi_bukti->jenis_ref,$isi_bukti->id_ref);
+                break;
+            case 'NOREF':
+                $data['isNoRef']=true;
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        $data['isEdit']=TRUE;
+        $data['title']="Edit Bukti Akuntansi";
+        $this->template->load('template','bukti_akuntansi/input',$data);
+    }
+
+    function edit_rm(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $data['nm_unit']         = $this->m_umum->unit_semua("",constant::WITHOUT_ALL);        
+        $data['sub_unit']        = $this->m_umum->subunit_semua("", constant::WITHOUT_ALL);
+        
+        $id = $this->uri->segment(3);
+        $isi_bukti=$this->m_bukti_akuntansi->detail($id);
+        //echo $this->db->last_query();
+        $data['isi_bkm']=$isi_bukti;
+        $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+
+        $jen_buk=$this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        $jbkt= Array();
+        $jbkt['']= '~~~ Jenis Bukti ~~~';
+        foreach ($jen_buk as $jb){
+            $jbkt[$jb->kode_value]= $jb->nama_value;
+        }
+        $data['jen_bkt']=$jbkt;
+        
+        $data['jenis_bukti']=$data['isi_bkm']->jenis_bukti;
+        
+        switch($data['jenis_bukti']){
+            case constant::BUK_BKK :
+                $isi[]=constant::BK_KAS_KELUAR;
+                $isi[]=constant::BK_BANK_KELUAR;
+                break;
+            case constant::BUK_BKM :
+                $isi[]=constant::BK_BANK_MASUK;
+                $isi[]=constant::BK_KAS_MASUK;
+                break;
+            case constant::BUK_BM :
+                $isi[]=constant::BK_MEMORIAL;
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        
+        $jenis_bank_kas= $this->m_lov->get_list_lov(Constant::JENIS_BANK_KAS);
+        $jt['']='~~~ Jenis Transaksi ~~~';
+        
+        foreach ($jenis_bank_kas as $row){
+            if(in_array($row->kode_value, $isi)){
+                $jt[$row->kode_value]= $row->nama_value;
+            }
+        }
+        
+        $data['jenis_transaksi'] = $jt;
+        
+        $sub_unit_det=$this->m_umum->subunit_detail($data['isi_bkm']->id_subunit);
+        
+        $data['isNoRef']=true;
+        $data['isEdit']=TRUE;
+        $data['title']="Edit Bukti Akuntansi";
+        $this->template->load('template','bukti_akuntansi/input_rm',$data);
+    }
+    
+    
+    /**
+     * Menampilkan semua bukti kas masuk
+     */
+     //TODO: tambahin filter, HARUS
+    function semua(){
+        
+        $this->auth->has_privileges('read_bukti_akuntansi');
+        
+        $jenisbukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        $jen_bkt= Array();
+        $jen_bkt['SEMUA']='Semua';
+        foreach ($jenisbukti as $jb){
+            $jen_bkt[$jb->kode_value]= $jb->nama_value;
+        }
+
+        $status= $this->m_lov->get_list_lov(Constant::KAP_STATUS_BUKTI_AKUNTANSI);
+        
+        $st_bukti= Array();
+        $st_bukti['SEMUA']= 'Semua';
+        $st_bukti['BARU']= 'Baru';
+        foreach ($status as $st){
+            $st_bukti[$st->kode_value]= $st->nama_value;
+        }
+
+        $role= Array();
+        $role['SEMUA']= 'Semua';
+        $role['BPM']= 'Bendahara Penerimaan';
+        $role['BPL']= 'Bendahara Pengeluaran';
+
+        $sort= Array();        
+        $sort['tgl_bukti']= 'Tanggal Bukti';
+        $sort['no_bukti']= 'Nomor Bukti';
+        $sort['role']= 'Role Pembuat Bukti';
+        $sort['jenis_bukti']= 'Jenis Bukti';
+        $sort['jenis_transaksi']= 'Jenis Transaksi';
+        $sort['status']= 'Status Bukti';
+
+        $jsort= Array();
+        $jsort['ASC']= 'Ascending';
+        $jsort['DESC']= 'Descending';        
+
+        $data['jen_bkt']=$jen_bkt;
+        $data['status']=$st_bukti;
+        $data['role']=$role;
+        $data['sort']=$sort;
+        $data['jsort']=$jsort;
+        $data['bulan']=$this->bulan;        
+        $this->template->load('template','bukti_akuntansi/kepala',$data);
+    }
+    
+    function semua_daftar(){
+        
+        $this->auth->has_privileges('read_bukti_akuntansi');
+        
+        $jen_bkt    =$this->input->post('jen_bkt');
+        $bulan      =$this->input->post('bulan');
+        $bulan2     =$this->input->post('bulan2');
+        $status     =$this->input->post('status');
+        $role       =$this->input->post('role');
+        $sort       =$this->input->post('sort');
+        $jsort     =$this->input->post('jsort');
+        $search     =$this->input->post('search');
+
+        /*
+        $data['jen_bkt']=$jen_bkt;
+        $data['bulan']=$bulan;
+        $data['bulan2']=$bulan2;
+        $data['status']=$status;
+        */
+
+        $th=$this->m_settings->get_tahun_anggaran();
+        $data['bkm']=$this->m_bukti_akuntansi->semua($jen_bkt,$th,$bulan,$bulan2,$status,$role,$sort,$jsort,$search);
+        
+        $data['title']="Daftar Bukti Akuntansi";
+        $this->load->view('bukti_akuntansi/daftar',$data);
+    }
+    /**
+     * Menampilkan detail bukti kas masuk
+     */
+    function detail($id,$cetak=''){
+        
+        $this->auth->has_privileges('read_bukti_akuntansi');
+                
+        if($cetak==='cetak'){
+            //TODO: batasin dokumen yang boleh dicetak hanya yg uda beres
+            //TODO: ini db update, harusnya ada transaksi coy
+            $this->alat->history_tambah('t_bukti_akuntansi','bukti', $id,'Cetak','');
+            $this->alat->update_print('t_bukti_akuntansi','bukti', $id);
+            
+            $data['isi_bkm']=$this->m_bukti_akuntansi->detail($id);
+
+            $jenis_bukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+
+            foreach ($jenis_bukti as $row){
+                if($row->kode_value == $data['isi_bkm']->jenis_bukti){
+                    $data['bukti_transaksi']=$row->nama_value;
+                }
+            }
+
+            $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+            
+            $data['link_edit']=base_url('bukti_akuntansi/edit/'.$data['isi_bkm']->id_bukti);
+            $data['link_buat_baru']=site_url("/bukti_akuntansi/inputbukti");
+            $sekarang=date("Ymd_Hi");
+            $jenis= $data['isi_bkm']->jenis_bukti;
+            $filename=$jenis.'_'.$id.'_'.$sekarang.'.pdf';
+            $output = $this->load->view('bukti_akuntansi/isi', $data,  true); 
+            generate_pdf_A4($output,$filename);
+        }else{
+            $data['isi_bkm']=$this->m_bukti_akuntansi->detail($id);
+
+            $jenis_bukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+
+            foreach ($jenis_bukti as $row){
+                if($row->kode_value == $data['isi_bkm']->jenis_bukti){
+                    $data['bukti_transaksi']=$row->nama_value;
+                }
+            }
+
+            $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+            
+            $data['link_edit']=base_url('bukti_akuntansi/edit/'.$data['isi_bkm']->id_bukti);
+            $data['link_buat_baru']=site_url("/bukti_akuntansi/inputbukti");
+            $data['title']="Detail Bukti Akuntansi";
+            $this->template->load('template','bukti_akuntansi/detail',$data);
+        }
+    }
+
+    function detail_rm($id,$cetak=''){
+        
+        $this->auth->has_privileges('read_bukti_akuntansi');        
+        
+        $data['bukti_transaksi']=null;
+        if($cetak==='cetak'){
+            //TODO: batasin dokumen yang boleh dicetak hanya yg uda beres
+            //TODO: ini db update, harusnya ada transaksi coy
+            $this->alat->history_tambah('t_bukti_akuntansi','bukti', $id,'Cetak','');
+            $this->alat->update_print('t_bukti_akuntansi','bukti', $id);
+            
+            $data['isi_bkm']=$this->m_bukti_akuntansi->detail($id);
+
+            $jenis_bukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+
+            foreach ($jenis_bukti as $row){
+                if($row->kode_value == $data['isi_bkm']->jenis_bukti){
+                    $data['bukti_transaksi']=$row->nama_value;
+                }
+            }
+            
+            $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+            
+            $data['link_edit']=base_url('bukti_akuntansi/edit_rm/'.$data['isi_bkm']->id_bukti);
+            $data['link_buat_baru']=site_url("/bukti_akuntansi/input_rm");
+            $sekarang=date("Ymd_Hi");
+            $jenis= $data['isi_bkm']->jenis_bukti;
+            $filename=$jenis.'_'.$id.'_'.$sekarang.'.pdf';
+            $output = $this->load->view('bukti_akuntansi/isi', $data,  true); 
+            generate_pdf_A4($output,$filename);
+        }else{
+            $data['isi_bkm']=$this->m_bukti_akuntansi->detail($id);
+
+            $jenis_bukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);            
+
+            foreach ($jenis_bukti as $row){
+                if($row->kode_value == $data['isi_bkm']->jenis_bukti){                    
+                    $data['bukti_transaksi']=$row->nama_value;
+                }
+            }
+
+            $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);            
+            
+            $data['link_edit']=base_url('bukti_akuntansi/edit_rm/'.$data['isi_bkm']->id_bukti);
+            $data['link_buat_baru']=site_url("/bukti_akuntansi/input_rm");
+            $data['title']="Detail Bukti Akuntansi";
+            $this->template->load('template','bukti_akuntansi/detail',$data);
+        }
+    }
+
+    function hapus(){
+    	$id = $this->input->post('id');
+    	if (!empty($id)) {
+    		$result = $this->m_bukti_akuntansi->hapus_bukti_akuntansi($id);
+    		if ($result) {
+    			echo "1";
+    		}else{
+    			echo "0";
+    		}
+    	}
+    }
+
+    /**
+     * Kirim BKM ke verifikator
+     */
+    function kirim(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $id=$this->input->post('id');
+        $objek = new stdClass();
+        $objek->id_bukti    = $id;
+        $objek->status      = 'BELUM';
+        
+        $hasil=$this->m_bukti_akuntansi->update_status($objek);
+        if($hasil){
+            $response['errno'] 	= 0;
+            $response['message']= 'Bukti Akuntansi Berhasil Dikirim';
+        }else{
+            $response['errno'] 	= 1;
+            $response['message']= 'Bukti Akuntansi GAGAL Dikirim';
+        }
+        echo json_encode($response);
+    }
+
+    function verifikasi(){
+        
+        $this->auth->has_privileges('verify_bukti_akuntansi');
+        
+        $jenisbukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        $jen_bkt= Array();
+        $jen_bkt['SEMUA']='Semua';
+        foreach ($jenisbukti as $jb){
+            $jen_bkt[$jb->kode_value]= $jb->nama_value;
+        }
+
+        $status= $this->m_lov->get_list_lov(Constant::KAP_STATUS_BUKTI_AKUNTANSI);
+        
+        $st_bukti= Array();
+        $st_bukti['SEMUA']= 'Semua';
+        $st_bukti['BARU']= 'Baru';
+        foreach ($status as $st){
+            $st_bukti[$st->kode_value]= $st->nama_value;
+        }
+
+        $role= Array();
+        $role['SEMUA']= 'Semua';
+        $role['BPM']= 'Bendahara Penerimaan';
+        $role['BPL']= 'Bendahara Pengeluaran';
+
+        $sort= Array();        
+        $sort['tgl_bukti']= 'Tanggal Bukti';
+        $sort['no_bukti']= 'Nomor Bukti';
+        $sort['role']= 'Role Pembuat Bukti';
+        $sort['jenis_bukti']= 'Jenis Bukti';
+        $sort['jenis_transaksi']= 'Jenis Transaksi';
+        $sort['status']= 'Status Bukti';
+
+        $jsort= Array();
+        $jsort['ASC']= 'Ascending';
+        $jsort['DESC']= 'Descending';        
+
+        $data['jen_bkt']=$jen_bkt;
+        $data['status']=$st_bukti;
+        $data['role']=$role;
+        $data['sort']=$sort;
+        $data['jsort']=$jsort;
+        $data['bulan']=$this->bulan;        
+        $this->template->load('template','bukti_akuntansi/kepala_veri',$data);
+
+        /*
+        //TODO: tambahin filter
+        $data['bkm']=$this->m_bukti_akuntansi->ambilVeri();
+        echo $this->db->last_query();
+        $data['isVeri']=true;
+        $data['title']="Verifikasi Bukti Akuntansi";
+        $this->template->load('template','bukti_akuntansi/daftar',$data);
+        */
+    }
+
+    function semua_daftar_veri(){
+        $this->auth->has_privileges('read_bukti_akuntansi');
+        
+        $jen_bkt    =$this->input->post('jen_bkt');
+        $bulan      =$this->input->post('bulan');
+        $bulan2     =$this->input->post('bulan2');
+        $status     =$this->input->post('status');
+        $role       =$this->input->post('role');
+        $sort       =$this->input->post('sort');
+        $jsort     =$this->input->post('jsort');
+        $search     =$this->input->post('search');        
+
+        $th=$this->m_settings->get_tahun_anggaran();
+        $data['bkm']=$this->m_bukti_akuntansi->ambilVeri($jen_bkt,$th,$bulan,$bulan2,$status,$role,$sort,$jsort,$search);
+
+        $data['isVeri']=true;
+        $data['title']="Daftar Verifikasi Bukti Akuntansi";
+        $this->load->view('bukti_akuntansi/daftar',$data);
+    }
+    /**
+     * Menampilkan detail bukti kas masuk untuk verifikasi
+     */
+    function detveri($id){
+        
+        $this->auth->has_privileges('verify_bukti_akuntansi');
+        
+        $data['isi_bkm']=$this->m_bukti_akuntansi->detail($id);
+        $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+        $data['isVeri']=true;
+		$jenis_bukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+		foreach ($jenis_bukti as $row){
+			if($row->kode_value == $data['isi_bkm']->jenis_bukti){
+				$data['bukti_transaksi']=$row->nama_value;
+			}
+		}
+        $data['title']="Verifikasi Bukti Akuntansi";
+        $this->template->load('template','bukti_akuntansi/detail',$data);
+    }
+    /**
+     * Simpan hasil verifikasi Bukti Kas Masuk
+     */
+    function saveVeri(){
+        
+        $this->auth->has_privileges('verify_bukti_akuntansi');
+        
+        $objek = new stdClass();
+        $objek->id_bukti=$this->input->post('id_bukti');
+        $status=$this->input->post('status');
+        if ($status=='benar'){
+            $objek->status='DITERIMA';
+            $objek->komentar='';
+        }else{
+            $objek->status='REVISI';
+            $objek->komentar=$this->input->post('komentar');
+        }
+        
+        $hasil=$this->m_bukti_akuntansi->update_status($objek);
+        
+        
+        if($hasil['berhasil']==true){
+            $this->alat->history_tambah('t_bukti_akuntansi','bukti',$objek->id_bukti,$objek->status,$objek->komentar);
+            
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil memverifikasi Bukti Akuntansi.');
+            redirect('bukti_akuntansi/verifikasi/');
+        } else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL memverifikasi Bukti Akuntansi.');
+            redirect('bukti_akuntansi/detail/'.$objek->id_bukti);
+        }
+        
+    }
+    //FIXME: belum kelar
+    function status($id){
+        //TODO: ijinkan hanya ajax request
+        $data['id']=$id;
+        $data['bukti'] = $this->m_bukti_akuntansi->detail($id);
+        $this->load->view('bukti_akuntansi/status', $data);
+    }
+    
+    /**
+     * Uji status dan history dokumen
+     */
+    function history(){
+        $id=$this->uri->segment(3);
+        $bkm=$this->m_bukti_akuntansi->detail($id);
+        $xml = new SimpleXMLElement($bkm->riwayat_bukti);
+        echo "<table border =1>";
+            echo "<tr>";
+            echo "<th>REV</th>";
+            echo "<th>Tanggal</th>";
+            echo "<th>Status</th>";
+            echo "<th>Komentar</th>";
+            echo "<th>By</th>";
+            echo "<tr>";
+        foreach($xml as $xmlrow){
+            echo "<tr>";
+            echo "<td>".$xmlrow['rev']."</td>";
+            echo "<td>".$xmlrow->date."</td>";
+            echo "<td>".$xmlrow->status."</td>";
+            echo "<td>".$xmlrow->coment."</td>";
+            echo "<td>".$xmlrow->by."</td>";
+            echo "<tr>";
+        }
+        echo "</table>";
+        echo htmlentities($xml->asXML()) ;
+    }
+    
+    function gen_bkk_sp2d($id_sp2d){
+        
+        //select * from t_kwitansi where id_sp2d= id
+        
+        $this->db->where('id_sp2d',$id_sp2d);
+        $this->db->from('t_kwitansi');
+        $query=$this->db->get();
+        $hasil=$query->result();
+        
+        foreach ($hasil as $has){
+            
+            $akunDet=$this->m_umum->basDetail($has->akun_kode);
+            $sn=$akunDet->saldo_normal;
+            if ($sn='D'){
+                $debet  =   $has->nominal;
+                $kredit =   0;
+            }else{
+                $debet  =   0;
+                $kredit =   $has->nominal;
+            }
+            
+            echo 'jenis transaksi :'.'<br/>';
+            echo 'sub unit	: '.$has->id_subunit.'<br/>';
+            echo 'kas bank	: '.'<br/>';
+            echo 'tanggal		: '.'<br/>';
+            echo 'penerima dana	: '.'<br/>';
+            echo 'keterangan	: '.$has->ket_kwitansi.'<br/>';
+            
+            
+            
+            echo 'akun	: '.$has->akun_kode.'<br/>';
+            echo 'debet	: '.$debet.'<br/>';
+            echo 'kredit	: '.$kredit.'<br/>';
+            echo 'uraian	: '.$has->ket_kwitansi.'<br/>';
+            
+            
+            /*
+            date_default_timezone_set('Etc/GMT-8');
+            
+            $objek = new stdClass();
+            $komentar='';
+            
+            $objek->tgl_bukti       = date('Y-m-d H:i:s');  //tanggal
+            $objek->jenis_transaksi = 'BM'; //BM KM
+            $objek->dari            = 'Dari siapa saja';
+            $objek->keterangan      = $has->ket_kwitansi;
+            $objek->id_subunit      = $has->id_subunit;
+            
+            $kas_bank   = '111911111602'; //yg atas
+            
+            //$jenpen = $_POST['jenpen'];
+            $akun   = array($has->akun_kode); //array  kode akun  
+            $debet  = array($debet); //array  debet
+            $kredit = array($kredit); //array kredit
+            $uraian = array($has->ket_kwitansi); //array uraian
+            
+            $objek->ttd1_nama   =   $this->m_settings->getSettingVal('PPK_NAMA');
+            $objek->ttd1_nip    =   $this->m_settings->getSettingVal('PPK_NIP');
+            $objek->ttd2_nama   =   $this->m_settings->getSettingVal('KASUB_MONEV_NAMA');
+            $objek->ttd2_nip    =   $this->m_settings->getSettingVal('KASUB_MONEV_NIP');
+            $objek->ttd3_nama   =   $this->m_settings->getSettingVal('BEN_PENERIMA_NAMA');
+            $objek->ttd3_nip    =   $this->m_settings->getSettingVal('BEN_PENERIMA_NIP');
+            
+            //input
+            $objek->jenis_bukti     = 'BKK';
+            $objek->id_ref          = '5'; 
+            $objek->jenis_ref       = 'TUP'; //apa yg dijadiin bkk
+            $objek->created_date    = date('Y-m-d H:i:s');
+            $objek->created_by      = $this->session->userdata('username');
+            $status='Input';
+            
+            $hasil=$this->m_bukti_akuntansi->simpan($objek,$akun,$debet,$kredit,
+                                $uraian,$kas_bank,null);
+            var_dump($hasil);
+            */
+            /*
+            if($hasil!==false){
+                
+                $this->alat->history_tambah('t_bukti_akuntansi','bukti',$hasil,$status,$komentar);
+                            
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'Berhasil menyimpan Bukti Akuntansi.');
+                redirect('bukti_akuntansi/detail/'.$hasil);
+            } else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'GAGAL menyimpan Bukti Akuntansi.');
+                redirect('bukti_akuntansi/semua');
+            }
+            */
+            
+        }
+            
+    }
+
+}

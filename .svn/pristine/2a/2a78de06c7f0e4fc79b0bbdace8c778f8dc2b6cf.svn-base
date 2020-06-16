@@ -1,0 +1,136 @@
+<script>
+function checkAll(formname, checktoggle){
+	var checkboxes = new Array(); 
+	checkboxes = document[formname].getElementsByTagName('input');
+	
+	var total=0;
+	var tot_spj	= parseFloat($("#nominal").val());
+	
+	for (var i=0; i<checkboxes.length; i++){
+		if (checkboxes[i].type == 'checkbox'){
+		checkboxes[i].checked = checktoggle;
+		var nama  = "#s"+checkboxes[i].value;
+		if (checktoggle==true){
+				total += parseFloat($(nama).val());
+			}else{
+				$("#nominal").val(0);
+			}
+		}
+	}
+	$("#nominal").val(total);
+}
+
+$( function () {
+	
+		$('#form_simpan :checkbox').change(function() {
+			var total=0;
+			var tot_spj	= parseFloat($("#nominal").val());
+			var nama  = "#s"+this.value;
+			//alert(nilai_kwi);
+			if (this.checked)
+				{
+					total = tot_spj + parseFloat($(nama).val());
+					$('#simpan').removeAttr('disabled');
+				}
+			else
+				{
+					total = tot_spj - parseFloat($(nama).val());
+				}
+			$("#nominal").val(total);
+			if(	$("#nominal").val()==0)
+			{
+					$('#simpan').attr("disabled", "disabled");
+			}
+		});	
+		
+});
+
+function simpanlah(){
+        if (confirm('Apakah Anda Yakin untuk Mengajukan SPJ ini ... ?')){
+			var nodeArray = Array();
+			
+			$('#form_simpan :checkbox').each(function() {
+				if(this.checked)
+					nodeArray.push($(this).attr('value'));					
+			});	
+			//alert(nodeArray);
+			var bulan= $("#bulan").val();
+			var tahun= $("#tahun").val();
+			var jenis_belanja = $("#jenis_belanja").val();						
+			var idVar = {id:nodeArray, bulan :bulan, tahun: tahun, jenis_belanja: jenis_belanja };
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('spj/buat_spj')?>",
+                    data: idVar,
+		  });
+		alert('Data Berhasil dikirim');
+		showAll();
+		}
+    }
+</script>
+
+
+
+
+
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="<?php echo base_url();?>report/simpan_spj" onSubmit='return validasi(this)'>
+
+<table  class="table-common" style="width: 99.5%;" >  
+       <tbody> 
+                <tr>
+                	<td align="right">TOTAL SPJ : <input type="text" name="nominal" id="nominal" readonly="readonly" value="0"/></td>
+            </tr>
+      </tbody>
+</table>
+
+
+<table  class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Tanggal SPM</th>
+                <th>Nomor SPM</th>
+                <th>Sub Unit</th>
+                <th>Sifat Bayar</th>
+                <th>Keterangan</th>
+                <th>Nominal</th>
+                <th>Aksi</th>
+            </tr>
+      </thead>
+           <tbody>
+          
+           <?php if ( COUNT ($data_spm)<=0){
+                        echo "<tr><td colspan=\"8\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=0;
+						foreach($data_spm as $row) : $i++;
+						?>
+                        <tr>
+                            <td align="center"><?php echo $i;?></td>
+                            <td align="left"><?php echo $row->tgl_spm; ?> </td>
+                            <td align="left"><a href="<?php echo base_url();?>spm/preview_spm2/<?php echo $row->id_spm;?>" target="_blank" title="view SPM"><?php echo $row->no_spm; ?></a> </td>
+                            <td align="left"><?php echo $row->nama_subunit; ?> </td>
+                            <td align="left"><?php echo $row->sifat_bayar; ?> </td>
+                            <td align="left"><?php echo $row->uraian_spm; ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->jumlah,0,false); ?></td>
+                            <td align="center">
+                            	<input type="checkbox" name="cek[]" value="<?php echo $row->id_spm; ?>"/>
+                    			<input id="s<?php echo $row->id_spm; ?>" name="" type="hidden" value="<?php echo $row->jumlah; ?>" />
+                            </td>
+                        </tr>
+                        <?php endforeach; } ?>
+                        <tr>
+                        	<td colspan="8" align="right">
+                            <input type="button" onclick="javascript:checkAll('form_simpan', true);" value="Pilih Semua">
+                            
+                            	<input type="button" onclick="javascript:checkAll('form_simpan', false);" value="Batal">
+                            	<input type="button" id="simpan" value="Simpan" name="simpan" disabled="disabled" 
+                            	onclick="simpanlah()" />
+                         	</td>
+                        </tr>
+        </tbody>
+</table>
+</form>
+</div>
+

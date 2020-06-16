@@ -1,0 +1,105 @@
+<table border='0' width='100%'>   
+ <tr ><td><img src='<?php echo base_url();?>asset/images/logo_baru.png'></td></tr>
+</table>
+<table border='0' width='100%' style="padding-top: -80px;">   
+ <tr ><td align="center"><strong>KEMENTERIAN PENDIDIKAN DAN KEBUDAYAAN <br>
+UNIVERSITAS UDAYANA <br> <?php foreach ($unit->result_array() as $row){ $fakultas=$row['nama_unit']; echo Strtoupper ($fakultas);}?></strong></td></tr></table>
+<table border='0' width='100%' style="padding-top: -15px;"> 
+<tr ><td align="center" style="font-size: 10px;">Telepon:.(0361) 701954, 701812, 701797 Fax (0361) 701907</td></tr>
+</table>
+<table border='0' width='100%'>   
+ <tr ><td><img src='<?php echo base_url();?>asset/images/garis.png'></td></tr>  
+</table>
+<table style="font-size: 12px; padding-top: 20px;"> 
+  <tr>
+    <td align="left">No.</td>
+    <td>:</td>
+    <td>  </td>
+  </tr>
+  <tr>
+    <td align="left">Lamp.</td>
+    <td>:</td>
+    <td>1 gabung  </td>
+  </tr>  
+  <tr>
+    <td align="left">Hal</td>
+    <td>:</td>
+    <td>Proposal Uang Persediaan (UP)</td><br>
+  </tr>
+</table>
+<table border='0' width='100%' style="padding-top: -91px; padding-right: -20px;"> 
+<tr><td align="right" style="font-size: 12px;">Denpasar, <?php echo date('d/m/Y'); ?></td></tr>
+</table>
+<table style="font-size: 12px;"> 
+  <tr>
+    <td align="left">Yth.</td> 
+  </tr>
+  <tr>
+    <td align="left">Dekan Unit Kerja <?php echo"$fakultas";?></td> 
+  </tr>  
+
+</table>
+<?php foreach($unit->result_array() as $unit){
+     $nama_subunit = $unit['nama_unit'];
+     $nama_kajur = $unit['kajur_nama'];
+     $nip_kajur = $unit['kajur_nip'];
+}
+
+$tahun = date("Y");?>
+<br>
+<table style="font-size: 12px;"> 
+  <tr>
+    <td align="left">Bersama ini disampaikan Proposal Uang Persediaan (UP) tahun <?php echo"$tahun"; ?> dari Sub Unit <?php echo"$nama_subunit";?> Universitas Udayana (terlampir).</td> 
+  </tr>
+</table>
+<br>
+<table style="font-size: 12px;"> 
+  <tr>
+    <td align="left">Demikian disampaikan, atas perhatiannya diucapkan terima kasih.</td> 
+  </tr>
+</table>   
+<br><br><br> 
+            <table width="100%" style="font-size: 12px;">
+                <tr>
+                    <td width="40%"></td> 
+                    <td width="20%"></td>
+                    <td width="40%">Bukit </td>   
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Ketua Sub Unit, </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td> <?php echo"$nama_subunit";?></td>
+                </tr>
+                
+
+                <tr height="40px"><td><br><br><br></td> </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td> <?php echo"$nama_kajur";?> </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>NIP. <?php echo"$nip_kajur";?> </td>
+                </tr>
+            </table>                                                             
+
+<table> 
+
+
+<table  style="font-size: 12px;">
+                <tr><td><br><br></td></tr>    
+                <tr>
+                    <td align="left">Tembusan : </td>   
+                </tr>
+                <tr>
+                    <td align="left">arsip </td>   
+                </tr>
+                
+</table>   

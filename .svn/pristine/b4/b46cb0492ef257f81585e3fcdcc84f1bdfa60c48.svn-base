@@ -1,0 +1,54 @@
+<center>
+<form action="<?php echo site_url('ladik/simpan_proporsi');?>" method="POST" name="prop" accept-charset="UTF-8">
+<table  class="table-common" style="margin-left: 20px; width: 90%;" >  
+             <thead>
+             <?php //echo $banyak_pro;?> 
+             <input type="hidden" name="id_unit" value="<?php echo "$id_unit_bro"; ?>">
+            <tr >
+                <th>No</th>
+                <th>Subunit Asal</th>
+                <th>Subunit Tujuan</th>
+                <th>Jumlah Total (Rp)</th>
+                <th>Proporsi (%)</th>
+                <th>Jumlah Proporsi (Rp)</th>
+                <th>Jenis Penerimaan</th> 
+            </tr>
+            
+            </thead>
+            <?php
+           
+            $no = 1; 
+            foreach($data_proporsi as $row)
+            {  
+            $unit_asal=$row['u_asal']; 
+			$unit_tujuan=$row['u_tujuan']; 
+			$jum_tot_pen=$row['jum_kredit']; 
+            $proporsi=$row['proporsi'];
+			$jen_pen=$row['title_singkat'];
+			$jum_pro = $proporsi*$jum_tot_pen/100;
+			
+			     
+            ?>
+              
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="left"><?php echo "$unit_asal";?></td>
+                <td align="left"><?php echo "$unit_tujuan";?></td>
+                <td align="right"><?php echo number_format($jum_tot_pen,0,",",".");?></td>
+                <td align="right"><?php echo"$proporsi";?></td>
+                <td align="right"><?php echo number_format($jum_pro,0,",",".");?></td>
+                <td align="right"><?php echo"$jen_pen";?></td>
+              </tr>
+              
+            <?php $no++ ?>
+            <?php }?>
+ 
+ <?php 
+    if(count($data_proporsi) > 0){?> 
+ <tr> 
+ <td align="right" colspan="7"><input type="submit" value="Distribusikan Proporsi"></td>  
+ </tr>
+ <?php } ?>
+</table>
+</form>
+</center>

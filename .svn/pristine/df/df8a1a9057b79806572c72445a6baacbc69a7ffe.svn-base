@@ -1,0 +1,951 @@
+<?php /**
+	* @brief Controller Class yang terkait dengan tampilan data
+	* menampilkan tabel dan proses CRUD (create read update delete)
+	*
+	* Class Controller ini untuk mengelola tampilan data
+	* menampilkan tabel dengan proses menambah data, membaca data, mengganti data dan menghapus data
+	*
+	* @author Praba Santika
+	*
+	*/
+	class Jqgrid extends CI_Controller {
+
+	function __construct()
+	{
+		parent::__construct();
+		$this->load->helper(array('url'));
+		$this->load->model('madmin');
+		$this->load->database();
+	}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA DARI INDEX URAIAN
+*/
+	function index()
+	{
+    		$this->load->view('user_grid');
+	}
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA USER
+*/
+	 function tampil_datauser(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_user'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+        }                                    
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_semua(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilDatauser($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_user;
+            $responce->rows[$i]['cell']=array($row->id_user,$row->username,$row->password,$row->user_nama,$row->user_active); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA USER
+*/
+     function crud(){ 
+        $this->load->model('madmin');
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];  
+        $username=$_POST['username']; 
+        $nama_lengkap=$_POST['nama_lengkap'];
+        $nip=$_POST['nip'];
+        $id_group=$_POST['nama_group'];
+        $id_unit=$_POST['nama_unit'];
+        
+        $is_same_password=$this->madmin->cek_password($_POST['id'],$_POST['password']);
+        // print_r($is_same_password); 
+        if($is_same_password){
+            $new_password=$_POST['password'];
+            //$new_password='password sama ama yang dulu';
+        } else{
+            $new_password=md5($_POST['password']);
+            //$new_password='beda password ama yang dulu';
+        } 
+        
+        switch ($oper) {
+            case 'add':
+                $user->username=$username;
+                $user->password=$new_password;
+                $user->id_group=$id_group;
+                $user->id_unit=$id_unit; 
+                $user->nama_lengkap=$nama_lengkap; 
+                $user->nip=$nip; 
+                $this->madmin->add_artis($user);
+                break;
+            case 'edit':
+                $user->username=$username;
+                $user->password=$new_password;  
+                $user->id_group=$id_group;
+                $user->id_unit=$id_unit;
+                $user->nama_lengkap=$nama_lengkap; 
+                $user->nip=$nip; 
+                $this->madmin->update_artis($user, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_artis($id);
+            break;
+        }
+    }
+	
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA UNIT
+*/
+    function tampil_dataunit(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_unit'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        }
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_semuaunit(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilDataunit($start,$limit,$sidx,$sord,$where); //add parameter to model
+ 
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {  
+            $responce->rows[$i]['id']=$row->id_unit;
+            $responce->rows[$i]['cell']=array($row->id_unit,$row->kode_digit,$row->nama_unit);
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA UNIT
+*/
+    function crudunit(){
+        $oper=$_POST['oper'];
+        $id=$_POST['id'];
+        $kode_unit=$_POST['kode_unit']; 
+        $nama_unit=$_POST['nama_unit']; 
+        
+        switch ($oper) {
+            case 'add':
+                $unit->kode_unit=$kode_unit;  
+                $unit->nama_unit=$nama_unit; 
+                $this->madmin->add_unit($unit);
+                break;
+            case 'edit':
+                $unit->kode_unit=$kode_unit;  
+                $unit->nama_unit=$nama_unit;
+                $this->madmin->update_unit($unit, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_unit($id);
+            break;
+        }
+    }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN CARA BAYAR YANG ADA
+*/
+     function tampil_carabayar(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_carabayar'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        }
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_carabayar(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilcarabayar($start,$limit,$sidx,$sord,$where); //add parameter to model
+ 
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {  
+            $responce->rows[$i]['id']=$row->id_carabayar;
+            $responce->rows[$i]['cell']=array($row->id_carabayar,$row->kode_carabayar,$row->carabayar);
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL CARA MEMBAYAR
+*/
+    function crudcarabayar(){
+        $oper=$_POST['oper'];
+        $id=$_POST['id'];
+        $kode_carabayar=$_POST['kode_carabayar']; 
+        $carabayar=$_POST['carabayar']; 
+        
+        switch ($oper) {
+            case 'add':
+                $cb->kode_carabayar=$kode_carabayar; 
+                $cb->carabayar=$carabayar; 
+                $this->madmin->add_carabayar($cb);
+                break;
+            case 'edit':
+                $cb->kode_carabayar=$kode_carabayar; 
+                $cb->carabayar=$carabayar;
+                $this->madmin->update_carabayar($cb, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_carabayar($id);
+            break;
+        }
+    }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN SIFAT PEMBAYARAN YANG ADA
+*/
+    function tampil_sifatpembayaran(){
+           
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_sifatpembayaran'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+        }                                       
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_sifatpembayaran(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilsifatpembayaran($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_sifatpembayaran;
+            $responce->rows[$i]['cell']=array($row->id_sifatpembayaran,$row->sifatpembayaran,$row->singkat); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL SIFAT BAYAR
+*/    
+    function crud_sifatpembayaran(){ 
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];
+        $sifatpembayaran=$_POST['sifatpembayaran'];  
+        $singkat=$_POST['singkat'];  
+          
+        switch ($oper) {
+            case 'add':
+                $sp->sifatpembayaran=$sifatpembayaran;
+                $sp->singkat=$singkat;
+                $this->madmin->add_sifatpembayaran($sp);
+                break;
+            case 'edit':  
+                $sp->sifatpembayaran=$sifatpembayaran;
+                $sp->singkat=$singkat; 
+                $this->madmin->update_sifatpembayaran($sp, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_sifatpembayaran($id);
+            break;
+        }
+    }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA SUBUNIT
+*/
+    function tampil_subunit(){
+         
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_subunit'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+        }                                       
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_subunit(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilsubunit($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_subunit;
+            $responce->rows[$i]['cell']=array($row->id_subunit,$row->kode_subunit,$row->nama_subunit,$row->nama_unit); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA SUBUNIT
+*/
+    function crud_subunit(){ 
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];  
+        $kode_subunit=$_POST['kode_subunit'];  
+        $nama_subunit=$_POST['nama_subunit'];  
+        $nama_unit=$_POST['nama_unit'];  
+        
+        
+        switch ($oper) {
+            case 'add':
+                $sub->kode_subunit=$kode_subunit;
+                $sub->nama_subunit=$nama_subunit;
+                $sub->id_unit=$nama_unit;
+                $this->madmin->add_subunit($sub);   
+                break;
+            case 'edit':  
+                $sub->kode_subunit=$kode_subunit;
+                $sub->nama_subunit=$nama_subunit;
+                $sub->id_unit=$nama_unit; 
+                $this->madmin->update_subunit($sub, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_subunit($id);
+            break;
+        }
+    } 
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA USER SUBUNIT
+*/
+     function tampil_datauser_subunit(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_user'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+            
+        }                                   
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_semua_user_subunit(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilDatauser_subunit($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_user;
+            $responce->rows[$i]['cell']=array($row->id_user,$row->username,$row->password,$row->user_nama,$row->nama_subunit,$row->user_active); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA USER SUBUNIT
+*/
+     function crud_user_subunit(){ 
+        $this->load->model('madmin');
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];  
+        $username=$_POST['username']; 
+        $pass=md5($_POST['password']);
+        $user_nama=$_POST['user_nama'];
+        $nama_subunit=$_POST['nama_subunit'];
+        $user_active=$_POST['user_active'];
+        $id_kategori=2;
+        $id_group=2;
+        
+        $is_same_password=$this->madmin->cek_password($_POST['id'],$_POST['password']);
+        // print_r($is_same_password); 
+        if($is_same_password){
+            $new_password=$_POST['password'];
+            //$new_password='password sama ama yang dulu';
+        } else{
+            $new_password=md5($_POST['password']);
+            //$new_password='beda password ama yang dulu';
+        } 
+        
+        switch ($oper) {
+            case 'add':
+                $user->username=$username;
+                $user->password=$pass;
+                $user->user_nama=$user_nama;
+                $user->id_group=$id_group;
+                $user->id_subunit=$nama_subunit; 
+                $user->id_kategori=$id_kategori; 
+                $user->user_active=$user_active; 
+                $this->madmin->add_user_subunit($user);
+                break;
+            case 'edit':
+                $user->username=$username;
+                $user->password=$new_password;
+                $user->user_nama=$user_nama;
+                $user->id_group=$id_group;
+                $user->id_subunit=$nama_subunit; 
+                $user->id_kategori=$id_kategori; 
+                $user->user_active=$user_active; 
+                $this->madmin->update_user_subunit($user, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_user_subunit($id);
+            break;
+        }
+    }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA USER UNIT
+*/
+    function tampil_datauser_unit(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_user'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+        }                                   
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_semua_user_unit(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilDatauser_unit($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_user;
+            $responce->rows[$i]['cell']=array($row->id_user,$row->username,$row->password,$row->user_nama,$row->nama_unit,$row->nama_group,$row->user_active); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA USER UNIT
+*/
+     function crud_user_unit(){ 
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];  
+        $username=$_POST['username']; 
+        $pass=md5($_POST['password']);
+        $user_nama=$_POST['user_nama'];
+        $nama_unit=$_POST['nama_unit'];
+        $nama_group=$_POST['nama_group'];
+        $user_active=$_POST['user_active'];
+        $id_kategori=3;
+        
+        $is_same_password=$this->madmin->cek_password($_POST['id'],$_POST['password']);
+        // print_r($is_same_password); 
+        if($is_same_password){
+            $new_password=$_POST['password'];
+            //$new_password='password sama ama yang dulu';
+        } else{
+            $new_password=md5($_POST['password']);
+            //$new_password='beda password ama yang dulu';
+        } 
+        
+        switch ($oper) {
+            case 'add':
+                $user->username=$username;
+                $user->password=$pass;
+                $user->id_kategori=$id_kategori;
+                $user->id_group=$nama_group;
+                $user->id_unit=$nama_unit; 
+                $user->user_nama=$user_nama;
+                $user->user_active=$user_active;
+                $this->madmin->add_user_unit($user);
+                break;
+            case 'edit':
+                $user->username=$username;
+                $user->password=$new_password;
+                $user->id_kategori=$id_kategori;
+                $user->id_group=$nama_group;
+                $user->id_unit=$nama_unit; 
+                $user->user_nama=$user_nama;
+                $user->user_active=$user_active;
+                $this->madmin->update_user_unit($user, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_user_unit($id);
+            break;
+        }
+    }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN TABEL DATA USER PUSAT
+*/
+    function tampil_datauser_pusat(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_user'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        
+        }                                   
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->madmin->banyak_semua_user_pusat(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->madmin->ambilDatauser_pusat($start,$limit,$sidx,$sord,$where); //add parameter to model
+        //echo $this->db->last_query();  
+        
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_user;
+            $responce->rows[$i]['cell']=array($row->id_user,$row->username,$row->password,$row->user_nama,$row->nama_group,$row->user_active); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL DATA USER PUSAT
+*/
+     function crud_user_pusat(){ 
+        $oper=$_POST['oper'];  
+        $id=$_POST['id'];  
+        $username=$_POST['username']; 
+        $pass=md5($_POST['password']);
+        $user_nama=$_POST['user_nama'];
+        $nama_group=$_POST['nama_group'];
+        $user_active=$_POST['user_active'];
+        $id_kategori=4;
+        
+        $is_same_password=$this->madmin->cek_password($_POST['id'],$_POST['password']);
+        // print_r($is_same_password); 
+        if($is_same_password){
+            $new_password=$_POST['password'];
+            //$new_password='password sama ama yang dulu';
+        } else{
+            $new_password=md5($_POST['password']);
+            //$new_password='beda password ama yang dulu';
+        } 
+        
+        switch ($oper) {
+            case 'add':
+                $user->username=$username;
+                $user->password=$pass;
+                $user->id_group=$nama_group;
+                $user->user_nama=$user_nama; 
+                $user->id_kategori=$id_kategori; 
+                $user->user_active=$user_active;
+                $this->madmin->add_user_pusat($user);
+                break;
+            case 'edit':
+                $user->username=$username;
+                $user->password=$new_password;
+                $user->id_group=$nama_group;
+                $user->user_nama=$user_nama; 
+                $user->id_kategori=$id_kategori; 
+                $user->user_active=$user_active; 
+                $this->madmin->update_user_pusat($user, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_user_pusat($id);
+            break;
+        }
+    }      
+}
+
+?>

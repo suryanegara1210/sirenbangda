@@ -1,0 +1,80 @@
+<h2>Daftar Penerimaan:</h2>
+                    <table style="width: 95%;" class="table-common" id="tbl_ladik" >
+                        <tr>
+                            <th>Th. Ajaran</th>
+                            <th>Jenis Penerimaan</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
+                        </tr>
+                        <script>var pen = new Array();</script>
+                        <?php
+                            //tampil penerimaan untuk ladik
+                            $ke=1;
+                            foreach($penerimaan as $pen){
+                                echo "<script>pen[".$ke."] =".json_encode($pen)."</script>";
+                                echo "<tr id=".$ke.">
+                                        <td>$pen->th_ajar $pen->semester</td>
+                                        <td>$pen->jenis_pen</td>
+                                        <td>$pen->nilai</td>
+                                        <td><input type='button'id='add".$ke."' disabled class='add' value='Tambah' onclick=\"tambah_baris('tbl_ladik',this,".$ke.")\" /> <div id='tunjukbawah".$ke."' style='display:none'>&#11019 &#11019 &#11019</div></td>
+                                       </tr>";
+                                $ke++;
+                            }
+                        ?>
+                    </table>
+    <script>
+    function tambah_baris(tableID,src,id){
+        
+        //document.getElementById('add'+id).style.display = 'none';
+        $('.add').hide();
+        $('#tunjukbawah'+id).show();
+        
+        var tabel = document.getElementById(tableID);
+        var oRow = src.parentElement.parentElement;
+        //oRow.style.background = '#DEDEDE';
+		var row = tabel.insertRow(oRow.rowIndex+1);
+        row.style.background = '#DEDEDE';
+        
+        var akun = row.insertCell(0);
+        
+        var hd_sn = document.createElement("input");
+            hd_sn.type="hidden";
+            hd_sn.name= "akun_sn";
+            hd_sn.id= "akun_sn";
+            akun.appendChild(hd_sn);
+        var inp_akun = document.createElement("input");
+            inp_akun.type="text";
+            inp_akun.id="akun_cari";
+            inp_akun.autocomplete="on";
+            inp_akun.placeholder="Masukan kode BAS"
+            inp_akun.name= "akun_cari";
+        akun.appendChild(inp_akun);
+        akun.setAttribute("colSpan",2);
+        
+        var simpan = row.insertCell(1);
+        var inp_simpan = document.createElement("input");
+		inp_simpan.type = "button";
+		inp_simpan.value = "Simpan";
+		inp_simpan.onclick= function() {masuk_tabel(pen[id],this,id);}
+		simpan.appendChild(inp_simpan);
+        
+        var reset = row.insertCell(2);
+        var inp_reset = document.createElement("input");
+		inp_reset.type = "button";
+		inp_reset.value = "Reset";
+		inp_reset.onclick= function() {hilangin_baris(tableID,this,id);}
+		reset.appendChild(inp_reset);
+        
+        inp_akun.focus();
+    }
+    
+    function hilangin_baris(tabeID,src,id){
+        var oRow = src.parentElement.parentElement;
+	    document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+        //var prevRow=oRow.previousElementSibling;
+        //prevRow.style.background = '#fffff';
+        //document.getElementById('add'+id).style.display = '';
+        $('.add').show();
+        $('#tunjukbawah'+id).hide();
+    }
+    </script>

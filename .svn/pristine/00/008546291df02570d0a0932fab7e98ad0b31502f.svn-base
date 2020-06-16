@@ -1,0 +1,179 @@
+<article class="module width_full">
+            <header><h3>Buat Pengajuan Tambahan Uang Persediaan (TUP)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/tup/simpan_up" onSubmit='return validasi(this)'> 
+
+    <table><br><h3>Daftar RINCIAN RENCANA PENGGUNAAN  Tambahan Uang Persediaan (TUP) yang telah dibuat</h3></table>
+    <?php  
+    $pagu = number_format($jumlah,0,",",".");
+    foreach($edit_rincian_up->result_array() as $row){
+         $id_transaksi = $row['id_transaksi'];
+         $nmoutput = $row['nmoutput'];
+         $nmkomponen = $row['nmkomponen'];
+         $nmakun = $row['nmakun'];
+         $nmheader = $row['nmheader'];
+         $kdoutput = $row['kdoutput'];
+         $kdkomponen = $row['kdkomponen'];
+         $kdskomponen = $row['kdskomponen'];
+         $kdakun = $row['kdakun'];
+         $id_header = $row['hdr'];
+         $id_subunit = $row['id_subunit'];
+         $id_jenisbelanja = 2;                 
+     
+    ?>
+    <br \> <br \>      
+    <table cellspacing="0" > 
+        <tr><td>Kegiatan</td><td>: Layanan Tridharma di Perguruan Tinggi </td></div></tr>  
+        <tr><td>Output</td><td>: <?php echo"$nmoutput";?> </td></tr>  
+        <tr><td>Komponen</td><td>: <?php echo"$nmkomponen";?> </td></tr>  
+        <tr><td>Akun</td><td>: <?php echo"$nmakun";?> </td></tr>  
+        <tr><td>Header</td><td>: <?php echo"$nmheader";?> </td></tr>
+        <tr><td><br> </td></tr>
+        
+        <input type="hidden" name="id_transaksi" value="<?php echo"$id_transaksi"; ?>">
+    </table>
+    <table class="table-list" >
+      <tr >
+        <th width='200'>TOTAL PAGU UNTUK KEGIATAN INI</th>
+        <td>Rp.</td>
+        <td align="right"><?php echo "$pagu";?></td>
+        <input type="hidden" name="total_pagu" value="<?php echo"$jumlah";?>" />
+      </tr>
+      <tr >
+        <th width='200'>TOTAL TUP YANG DIAJUKAN</th>
+        <td>Rp.</td>
+        <td align="right"><span id="usulan"></span></td>
+      </tr>
+       <tr >
+        <th width='200px'>SISA PAGU KEGIATAN</th>
+        <td>Rp.</td>
+        <td align="right"><span id="sisa_pagu"></span></td>
+      </tr>
+      <tr >
+        <th>SISA PAGU REALISASI</th>
+        <td>Rp</td>
+        <td align="right"><?php echo number_format($sisa_pagu_realisasi,0,",",".") ;?></td>
+      </tr>
+    </table>
+<p>&nbsp;</p>
+<table id="daftar_uraian" ></table>  
+    <div id="pager"></div>
+    
+    
+    </div>
+    <br \> <br \> 
+    <footer>
+            
+                
+                <div class="submit_link">
+                    <?php if($id_url==1){?>                   
+                    <input type="button" onClick="parent.location='<?php echo site_url('tup/buat');?>'" value="Back" class="alt_btn" > 
+                    <?php } elseif ($id_url==2){?>
+                    <input type="button" onClick="parent.location='<?php echo site_url('tup/revisi_up');?>'" value="Back" class="alt_btn" > 
+                    <?php } else {?> 
+                    <input type="button" onClick="parent.location='<?php echo site_url('tup/list_up');?>'" value="Back" class="alt_btn" >
+                    <?php }?>
+                </div>
+
+    </footer>  
+
+          
+     <script type="text/javascript">
+
+            jQuery().ready(function (){
+                jQuery("#daftar_uraian").jqGrid({
+                    gridComplete: function(){
+                        var tot_jumlah=accounting.formatMoney(calc_total());
+                        $("#usulan").text(tot_jumlah);
+                        $("#sisa_pagu").text(sisa());
+                    },
+                    url:'<?php echo base_url().'jq_uraian_tup/tampil_uraian/'.$id_subunit."/".$kdoutput."/".$kdkomponen."/".$kdskomponen."/".$kdakun."/".$id_header; ?>',
+                    mtype : "POST",
+                    datatype: "json",
+                    colNames:['Uraian','Volume','Satuan','Harga Satuan','Jumlah','Aksi'],
+                    colModel:[
+                         {name:'uraian',index:'uraian', width:29, align:"left",editable:true,editrules:{required:true}},
+                        {name:'volume',index:'volume', width:4, align:"center",editable:true,editrules:{required:true,number:true}},
+                        {name:'satuan',index:'satuan',  width:20, align:"center",editable:true,editrules:{required:true}, edittype:'select', editoptions:{value:{<?php echo "$satuan";?>}}},
+                        {name:'harga_satuan',index:'harga_satuan', width:16, align:"right",editable:true,editrules:{required:true,number:true, custom:true, custom_func:checkpagu},formatter:'currency',
+                     formatoptions:{prefix:'Rp',suffix:'',thousandsSeparator:',',decimalPlaces:''}},
+                        {name:'jumlah',index:'jumlah', width:16, align:"right",editable:false, formatter:'currency',
+                     formatoptions:{prefix:'Rp',suffix:'',thousandsSeparator:',',decimalPlaces:''} },
+                        {name: 'myac', width:60, fixed:true, sortable:false, search:false, align:'center', resizable: false, resize:false, formatter:'actions',
+                        formatoptions:{
+                        keys:true,editbutton: true, delbutton: true, //Key True disini adalah untuk Shorcut Tombol Enter dan Esc, Enter untuk Save, dan Escape Untuk Batal, anda juga Membuatnya jadi False jika anda tidak ingin seperti itu
+                        //Saya menghapus baris di bawah ini
+                                                        /*onSuccess:function(jqXHR) {
+                                                            alert(jqXHR.responseText);
+                                                            return true;
+                                                        }*/
+                        }}
+                    ],
+                    rowNum:20,
+                    width: 900,
+                    height: 150,
+                    rowList:[10,20,30,40,50,60,70],
+                    pager: '#pager',
+                    sortname: 'id_uraian',
+                    viewrecords: true,
+                    sortorder: "asc",
+                    editurl: "<?php echo base_url().'jq_uraian_tup/crud_uraian'?>",
+                    multiselect: false,
+                    caption:"Daftar Uraian"
+                }).navGrid('#pager',{edit:true,add:true,del:true},
+                    {
+                            onclickSubmit: function(re, postdata){
+                                return {"id_subunit": "<?php echo $id_subunit?>","kdoutput": "<?php echo $kdoutput?>","kdkomponen": "<?php echo $kdkomponen?>","kdakun": <?php echo $kdakun?>, "hdr": <?php echo $id_header?> }; 
+                            } 
+                    },
+                    {
+                            onclickSubmit: function(re, postdata){ 
+                                return {"id_subunit": "<?php echo $id_subunit?>","kdoutput": "<?php echo $kdoutput?>","kdkomponen": "<?php echo $kdkomponen?>","kdakun": <?php echo $kdakun?>, "hdr": <?php echo $id_header?>, "nmoutput": "<?php echo $nmoutput?>", "nmkomponen": "<?php echo $nmkomponen?>", "nmakun": "<?php echo $nmakun?>", "header": "<?php echo $nmheader?>", "id_jenisbelanja": "<?php echo $id_jenisbelanja?>", "id_transaksi": "<?php echo $id_transaksi?>" }; 
+                           }
+                    }
+                );
+            }); 
+            function checkpagu(value, colname)
+            {   
+                var vol = $("#volume").val();
+                var hrg = $("#harga_satuan").val();
+                var pagu = <?php echo $jumlah;?>;
+                var jum_db =calc_total();
+                var jum = vol*hrg;
+                var sisa_pagu_realisasi=<?php echo $sisa_pagu_realisasi?>;
+                //var jum_db = parseFloat($("#usulan").text());
+                var total_rencana_usulan = jum + jum_db;
+                    if (total_rencana_usulan > pagu ){
+                       return [false,"Maaf Jumlah total rincian melebihi sisa pagu yang dimiliki"];
+                       }
+                    else{
+                        if (total_rencana_usulan > sisa_pagu_realisasi){
+                            return [false,"Maaf Jumlah total rincian melebihi sisa pagu realisasi"];
+                            }
+                            else{
+                            return [true,""];
+                            }
+                        }
+            }  
+            
+            function calc_total() {
+                var rows= jQuery("#daftar_uraian").jqGrid('getRowData');
+                var tot_jum = 0;
+                for(var i=0;i<rows.length;i++){
+                     var row=rows[i];
+                     tot_jum += parseFloat(row['jumlah']);                     
+                }
+                //var tot_jumlah=accounting.formatMoney(tot_jum);
+                return tot_jum;
+            }
+
+            function sisa() {
+                var pagu = <?php echo $jumlah;?>;
+                var total = calc_total();
+                var sisa_pagu = accounting.formatMoney(parseFloat(pagu) - parseFloat(total));
+                return sisa_pagu
+            }
+            </script>      
+<?php } ?>

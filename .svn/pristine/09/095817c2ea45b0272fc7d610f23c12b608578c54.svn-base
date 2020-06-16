@@ -1,0 +1,183 @@
+<?php
+	$tahun_sekarang=$this->session->userdata('t_anggaran_aktif');
+	$max_col_keg=1;
+?>
+			<thead>
+				<tr>
+					<th rowspan="3" colspan="4">Kode</th>
+					<th rowspan="3" >Program dan Kegiatan</th>
+					<th rowspan="3" >Kriteria Keberhasilan</th>
+					<th rowspan="3" >Ukuran Keberhasilan</th>
+					<th colspan="4" >Kinerja Triwulan</th>
+				</tr>
+				<tr>
+					<th>Triwulan I</th>
+                    <th>Triwulan II</th>
+                    <th>Triwulan III</th>
+                    <th>Triwulan IV</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+					foreach ($program as $row) {
+						$result = $this->m_kendali_perubahan->get_kegiatan_dpa_4_cetak($row->id,$tahun_sekarang);
+						$kegiatan = $result->result();
+						$indikator_program = $this->m_kendali_perubahan->get_indikator_prog_keg_dpa($row->id, FALSE, TRUE);
+						$temp = $indikator_program->result();
+						$total_temp = $indikator_program->num_rows();
+						
+						$col_indikator=1;
+						$go_2_keg = FALSE;
+						$total_for_iteration = $total_temp;
+						if($total_temp > $max_col_keg){
+							$total_temp = $max_col_keg;
+							$go_2_keg = TRUE;
+						}
+				?>
+				<tr>
+					<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_urusan; ?></td>
+					<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_bidang; ?></td>
+					<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_program; ?></td>
+					<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_kegiatan; ?></td>
+					<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->nama_prog_or_keg; ?></td>
+					<td>
+						
+					</td>
+					<td>
+						
+					</td>
+					<td align="center" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+						
+                    </td>
+					<td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                    	
+                    </td>
+					<td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                    	
+                    </td>
+					<td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                    	
+                    </td>
+				</tr>
+				<?php
+					if ($total_for_iteration > 1) {			
+						for ($i=1; $i < $total_for_iteration; $i++) { 
+							$col_indikator++;
+				?>
+					<tr>
+						<?php
+								if ($go_2_keg && $col_indikator > $max_col_keg) { 
+							?>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+							<?php
+								}
+							?>
+							<td>
+								<?php
+									echo $temp[$i]->indikator;
+								?>
+							</td>
+							<td>
+								<?php
+									echo $temp[$i]->indikator." ".$temp[0]->target." ".$temp[0]->satuan_target;
+								?>
+							</td>
+							<?php
+								if ($go_2_keg && $col_indikator > $max_col_keg) {
+							?>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+					<?php
+							}
+					?>
+						</tr>
+					<?php
+						}
+					}
+					foreach ($kegiatan as $row) {						
+							$indikator_kegiatan = $this->m_kendali_perubahan->get_indikator_prog_keg_dpa($row->id, FALSE, TRUE);
+							$temp = $indikator_kegiatan->result();			
+							$total_temp = $indikator_kegiatan->num_rows();
+
+							$go_2_keg = FALSE;
+							$col_indikator_keg=1;
+							$total_for_iteration = $total_temp;
+							if ($total_temp > $max_col_keg) {
+								$total_temp = $max_col_keg;
+								$go_2_keg = TRUE;
+							}
+					?>
+					<tr>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_urusan; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_bidang; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_program; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_kegiatan; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->nama_prog_or_keg; ?></td>
+						<td>
+							<?php
+								echo $temp[0]->indikator;
+							?>
+						</td>
+						<td>
+							<?php
+								echo $temp[0]->indikator." ".$temp[0]->target." ".$temp[0]->satuan_target;
+							?>
+						</td>
+						<td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                    	<?php echo Formatting::currency($row->nominal_1); ?>
+                        </td>
+                        <td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                        <?php echo Formatting::currency($row->nominal_2); ?>
+                        </td>
+                        <td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                        <?php echo Formatting::currency($row->nominal_3); ?>
+                        </td>
+                        <td align="right" style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">
+                        <?php echo Formatting::currency($row->nominal_4); ?>
+                    	</td>
+					</tr>
+					<?php
+						if ($total_for_iteration > 1) {
+						for ($i=1; $i < $total_for_iteration; $i++) { 					
+							$col_indikator_keg++;
+					?>
+						<tr>
+						<?php
+							if ($go_2_keg && $col_indikator_keg > $max_col_keg) {
+						?>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+						<?php
+							}
+						?>
+							<td>
+								<?php
+									echo $temp[$i]->indikator;
+								?>
+							</td>
+							<td>
+								<?php
+									echo $temp[$i]->indikator." ".$temp[0]->target." ".$temp[0]->satuan_target;
+								?>
+							</td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+					</tr>
+					<?php
+						}
+					}
+				}
+			}
+					?>
+			</tbody>

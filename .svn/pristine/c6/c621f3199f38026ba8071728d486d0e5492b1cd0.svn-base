@@ -1,0 +1,50 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-16 08:23:43 --> Query error: Unknown column 'a.jumlah_old' in 'field list'
+ERROR - 2013-07-16 17:51:24 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 17:51:24 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 12:01:28 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 12:01:28 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 18:17:23 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-07-16 12:17:40 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 12:17:40 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 14:02:25 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 14:02:25 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 14:04:51 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 14:04:51 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 20:05:39 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:05:39 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:05:57 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:05:57 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 14:08:04 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 14:08:04 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 14:11:11 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 14:11:11 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 14:11:25 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-16 14:11:25 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-16 20:12:51 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:12:51 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:17:49 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:17:49 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:18:00 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:18:01 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 20:55:56 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-16 20:55:56 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 155
+ERROR - 2013-07-16 20:55:56 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 156
+ERROR - 2013-07-16 20:55:56 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 160
+ERROR - 2013-07-16 20:55:56 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 161
+ERROR - 2013-07-16 20:56:15 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-16 20:56:15 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 155
+ERROR - 2013-07-16 20:56:15 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 156
+ERROR - 2013-07-16 20:56:15 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 160
+ERROR - 2013-07-16 20:56:15 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 161
+ERROR - 2013-07-16 20:56:40 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-16 20:56:40 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 155
+ERROR - 2013-07-16 20:56:40 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 156
+ERROR - 2013-07-16 20:56:40 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 160
+ERROR - 2013-07-16 20:56:40 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_1.php 161
+ERROR - 2013-07-16 21:01:24 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 21:01:24 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 21:01:26 --> Severity: Notice  --> Undefined variable: id_subunit C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 572
+ERROR - 2013-07-16 21:02:54 --> 404 Page Not Found --> kwitansi_view/asset
+ERROR - 2013-07-16 21:02:54 --> 404 Page Not Found --> kwitansi_view/asset

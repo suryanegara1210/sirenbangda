@@ -1,0 +1,88 @@
+<article class="module width_full">
+            <header><h3>Daftar SPM TUP (Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='form-spp' action="<?php echo base_url();?>tup_spj/update_status_spj" onSubmit='return validasi(this)'> 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="3">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            if($jum_daftar_spm > 0){
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th_spm=$row['th_spm'];   
+            $nama_unit=$row['nama_unit']; 
+            $status_spm=$row['status_spm'];
+            $id_status_spm=$row['id_status_spm'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");
+            
+            $nmr=$row['no_spm']; 
+            $tahun=$row['th_spm']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat'];    
+            $thn = '20'.$tahun;   
+            $nomor= sprintf("%04d", $nmr);    
+            ?>
+              <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>">   
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$thn";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>   
+                
+                <?php if($id_status_spm ==1 or $id_status_spm ==2 or $id_status_spm ==3 or $id_status_spm ==4 or $id_status_spm =="5"){?>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <td align="center"><a href='#' title='Buatkan SP2D' onclick="return alert('Maaf SPM ini belum siap dibuatkan SP2D')"><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                <td align="center"><a href='#' title='Preview SP2D' onclick="return alert('Maaf SPM ini belum dibuatkan SP2D')"><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='#' title='Klik Jika Sudah diotorisasi PR2' onclick="return alert('Maaf SPM ini belum dibuatkan SP2D')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                
+                <?php }elseif($id_status_spm =="6"){?>
+                <td align="center" ><?php echo"$status_spm";?></td> 
+                <td align="center"><a href='<?php echo base_url()."tup_spj/buat_sp2d/".$th_spm."/".$id;?>' title='Buatkan SP2D' onclick="return confirm('Apakah Anda yakin ingin membuatkan SP2D untuk SPM ini?')"><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                <td align="center"><a href='#' title='Preview SP2D' onclick="return alert('Maaf SPM ini belum dibuatkan SP2D')"><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='#' title='Klik Jika Sudah diotorisasi PR2' onclick="return alert('Maaf SPM ini belum dibuatkan SP2D')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+               
+                 <?php }elseif($id_status_spm =="7"){?>
+                 <td align="center" style="background-color: #99ff33"><?php echo"$status_spm";?></td>
+                <td align="center"><a href='#' title='Buatkan SP2D' onclick="return alert('Maaf SPM ini sudah dibuatkan SP2D sebelumnya')"><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/preview_sp2d/".$th_spm."/".$id;?>' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                 <td align="center"><a href='<?php echo base_url()."tup_spj/setuju_spm_sp2d/".$th_spm."/".$id;?>' title='Klik Jika Sudah diotorisasi PR2' onclick="return confirm('Apakah anda yakin SP2D ini sudah divalidasi oleh PR2?')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                
+                <?php }else{?>
+                 <td align="center" style="background-color: #00ffcc"><?php echo"$status_spm";?></td>
+                <td align="center"><a href='#' title='Buatkan SP2D' onclick="return alert('Maaf SPM ini sudah dibuatkan SP2D sebelumnya')"><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/preview_sp2d_tanpa_unduh/".$th_spm."/".$id;?>' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='#' title='Klik Jika Sudah diotorisasi PR2' onclick="return alert('Maaf SP2D ini sudah diotorisasi PR2')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                
+                <?php }$no++?>
+              </tr>
+              
+            <?php } ?> 
+            <?php }else{?>
+                  <tr>
+                  <td align='center' colspan="9" style="padding-top: 20px; padding-bottom: 20px;">Data Kosong</td></tr>
+            <? } ?>        
+            
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">
+                    <input type='submit' value='Update Status SPJ' onclick="return confirm('Apakah anda yakin ingin menyimpan SPM ini?')">       
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer>
+     </form>  
+</article> 

@@ -1,0 +1,212 @@
+<script type="text/javascript">
+	prepare_chosen();
+	$(document).on("change", "#kd_urusan", function () {		
+		$.ajax({
+			type: "POST",
+			url: '<?php echo site_url("common/cmb_bidang"); ?>',
+			data: {kd_urusan: $(this).val()},
+			success: function(msg){
+				$("#cmb-bidang").html(msg);				
+				$("#kd_program").val("");
+				$("#nama_program").html("");
+				$("#nama_prog_or_keg").val("");		
+        		$("#kd_program").trigger("chosen:updated");
+				prepare_chosen();
+			}
+		});
+	});
+
+	$(document).on("change", "#kd_bidang", function () {		
+		$.ajax({
+			type: "POST",
+			url: '<?php echo site_url("common/cmb_program"); ?>',
+			data: {kd_urusan:$("#kd_urusan").val(), kd_bidang: $(this).val()},
+			success: function(msg){
+				$("#cmb-program").html(msg);
+				prepare_chosen();
+			}
+		});
+	});
+
+	$(document).on("change", "#kd_program", function () {		
+		var str = $(this).find('option:selected').text();		
+		var nama_program = str.substring(str.indexOf(".")+1);
+		$("#nama_program").html(nama_program);
+		$("#nama_prog_or_keg").val(nama_program);		
+	});
+
+	//agar validation tetap aktif untuk chosen dropdown	
+	$('form#program').validate({
+		rules: {
+			kd_urusan : "required",
+			kd_bidang : "required",
+			kd_program : "required",
+			indikator_kinerja : "required",
+			satuan_target : "required",
+			target_1 : {
+						required:true,
+						digits:true
+			},
+			target_2 : {
+						required:true,
+						digits:true
+			},
+			target_3 : {
+						required:true,
+						digits:true
+			},
+			target_4 : {
+						required:true,
+						digits:true
+			},
+			target_5 : {
+						required:true,
+						digits:true
+			},
+			kondisi_awal : {
+						required:true,
+						digits:true
+			},
+			target_kondisi_akhir : {
+						required:true,
+						digits:true
+			}				
+		},
+		ignore: ":hidden:not(select)"			
+	});
+
+	$("#simpan").click(function(){
+	    var valid = $("form#program").valid();
+	    if (valid) {		    	
+	    	$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+	    	
+	    	$.ajax({
+				type: "POST",
+				url: $("form#program").attr("action"),
+				data: $("form#program").serialize(),
+				dataType: "json",
+				success: function(msg){
+					if (msg.success==1) {														
+						$.blockUI({
+							message: msg.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});							
+						$.facebox.close();							
+						element.trigger( "click" );
+					};						
+				}
+			});
+	    };
+	});
+</script>
+
+<div style="width: 900px">
+	<header>
+		<h3>
+	<?php
+		if (!empty($program)){
+		    echo "Edit Data Program";
+		} else{
+		    echo "Input Data Program";
+		}
+	?>
+	</h3>
+	</header>
+	<div class="module_content">
+		<form action="<?php echo site_url('renstra/save_program');?>" method="POST" name="program" id="program" accept-charset="UTF-8" enctype="multipart/form-data" >
+			<input type="hidden" name="id_program" value="<?php if(!empty($program->id)){echo $program->id;} ?>" />
+			<input type="hidden" name="id_renstra" value="<?php echo $id_renstra; ?>" />
+			<input type="hidden" name="id_sasaran" value="<?php echo $id_sasaran; ?>" />
+			<input type="hidden" id="nama_prog_or_keg" name="nama_prog_or_keg" value="<?php echo (!empty($program->nama_prog_or_keg))?$program->nama_prog_or_keg:''; ?>" />
+			
+			<table class="fcari" width="100%">
+				<tbody>
+					<tr>
+						<td width="20%">SKPD</td>
+						<td width="80%"><?php echo $skpd->nama_skpd; ?></td>
+					</tr>
+					<tr>
+						<td>Tujuan</td>
+						<td><?php echo $tujuan_n_sasaran->tujuan; ?></td>
+					</tr>
+					<tr>
+						<td>Sasaran</td>
+						<td><?php echo $tujuan_n_sasaran->sasaran; ?></td>
+					</tr>
+					<tr>
+						<td>Urusan</td>
+						<td>
+							<?php echo $kd_urusan; ?>
+		    			</td>
+					</tr>
+					<tr>
+						<td>Bidang Urusan</td>
+						<td id="cmb-bidang">
+							<?php echo $kd_bidang; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Program</td>
+						<td id="cmb-program">
+							<?php echo $kd_program; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Nama Program</td>
+						<td id="nama_program">
+							<?php echo (!empty($program->nama_prog_or_keg))?$program->nama_prog_or_keg:''; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Indikator Kerja</td>
+						<td>
+							<textarea class="common" name="indikator_kinerja"><?php echo (!empty($program->indikator_kinerja))?$program->indikator_kinerja:''; ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>Satuan Target</td>
+						<td><?php echo $satuan; ?></td>
+					</tr>
+					<tr>
+						<td>Kondisi Awal</td>
+						<td><input class="common" name="kondisi_awal" value="<?php echo (!empty($program->kondisi_awal))?$program->kondisi_awal:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Target Tahun 1</td>
+						<td><input class="common" name="target_1" value="<?php echo (!empty($program->target_1))?$program->target_1:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Target Tahun 2</td>
+						<td><input class="common" name="target_2" value="<?php echo (!empty($program->target_2))?$program->target_2:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Target Tahun 3</td>
+						<td><input class="common" name="target_3" value="<?php echo (!empty($program->target_3))?$program->target_3:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Target Tahun 4</td>
+						<td><input class="common" name="target_4" value="<?php echo (!empty($program->target_4))?$program->target_4:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Target Tahun 5</td>
+						<td><input class="common" name="target_5" value="<?php echo (!empty($program->target_5))?$program->target_5:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Target Kondisi Akhir</td>
+						<td><input class="common" name="target_kondisi_akhir" value="<?php echo (!empty($program->target_kondisi_akhir))?$program->target_kondisi_akhir:''; ?>"></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<footer>
+		<div class="submit_link">    			
+  			<input id="simpan" type="button" value="Simpan">
+		</div> 
+	</footer>
+</div>

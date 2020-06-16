@@ -1,0 +1,48 @@
+<article class="module width_full">
+<header>
+  <h3>Daftar SPTB TUP SPJ (Tambahan Uang Persediaan)</h3></header>
+   
+  <table></table>
+  <div id="sub-content"> 
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width: 780px;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+                <th>Kode MAK</th>
+                <th>No. SPTB</th>
+                <th>Tanggal</th>
+                <th>Status SPTB</th>
+                <th colspan="2">Action</th> 
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php if($hasil ==""){
+				 echo "<tr><td colspan='6' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+			 	$i=0;
+			 	foreach($hasil->result() as $row) : $i++;?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                    <td align="center"><?php echo $row->kegiatan;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td align="center"><?php echo $row->no_sptb.'/UN.14.1.26/SPTB/'.$nama_unit.'/'.$row->thn ?> </td>
+                    <td align="center"><?php echo $row->tgl_sptb; ?> </td>
+                    <td align="center"><?php echo $row->status_sptb; ?> </td>    
+                    <?php if( $row->id_status_sptb==1){?>  
+                    <td align="center"><a href="<?php echo base_url();?>tup_spj/preview_sptb_gu/<?php echo $row->th_sptb;?>/<?php echo $row->id_sptb;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                    <td align="center"><a href="<?php echo base_url();?>tup_spj/simpan_spp/<?php echo $row->th_sptb;?>/<?php echo $row->id_sptb;?>" title="Buat SPP" onclick="return confirm('Apakah Anda Yakin untuk Membuat SPP ... ?')" ><img src="<?php echo base_url(); ?>asset/images/add.png"/></a></td>
+                    <?php }else {?>
+                    <td align="center"><a href="<?php echo base_url();?>tup_spj/preview_sptb_gu/<?php echo $row->th_sptb;?>/<?php echo $row->id_sptb;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                    <td align="center"><a href='#' title='Buatkan SPP' onclick="return alert('SPTB ini sudah dibuatkan SPP')"><img src='<?php echo base_url();?>asset/images/like.png'></a></td>
+                    <?php } ?>
+                </tr>
+			 <?php endforeach; }?>
+        </tbody>
+</table>
+</div>
+<footer>         
+                <div class="submit_link">  
+                    <!--<input type="button" value="Kembali" onclick=self.history.back() >--> 
+                </div>
+
+            </footer>
+</article>

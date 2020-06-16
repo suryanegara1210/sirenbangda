@@ -1,0 +1,104 @@
+<html>
+<head>    
+</head>
+<body style="margin: 30px">
+    <div style="font-size: 10;">
+        <table width="100%" style="border-collapse:collapse; padding:5px;" align="center">        
+            <tr>    
+                <td width="50%">UNIVERSITAS UDAYANA</td>
+                <td width="15%"></td>
+                <td width="11%">Periode</td>
+                <td width="3%">:</td>
+                <td width="21%"><?php echo $n_bulan1; ?> - <?php echo $n_bulan2; ?> <?php echo $tahun; ?></td>
+            </tr>
+            <tr>
+                <td width="50%">Jalan Kampus Bukit Jimbaran </td>                
+                <td width="15%"></td>
+                <td width="11%">Tanggal</td>
+                <td width="3%">:</td>
+                <td width="21%"><?php echo $tanggal; ?></td>
+            </tr>
+            
+            <tr>
+                <td colspan="7" align="center">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="7" align="center">JURNAL</td>
+            </tr>
+            <tr>
+                <td colspan="7" align="center">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="7" align="center">&nbsp;</td>
+            </tr>        
+        </table>
+        <table width="100%" style="font-size: 6; border-collapse:collapse; padding:5px;" border="1" align="center">
+           <thead> 
+                <tr>
+                    <th>No</th>
+                    <th>Nomor Bukti</th>
+                    <th width="50px">Tanggal Transaksi</th>
+                    <th colspan="2">Akun</th>
+                    <th>Nama Akun</th>
+                    <th width="50px">Keterangan</th>
+                    <th>Debet</th>
+                    <th>Kredit</th> 
+                </tr>
+          </thead>
+               <tbody> 
+               <?php 
+                if ( COUNT ($isi_jurnal)<=0){
+                    echo "<tr><td colspan=\"8\"><center>Tidak Ada Data...</center></td></tr>";
+                }else{
+                    $i=1;
+                    $sum_debet=0;
+                    $sum_kredit=0;
+                    $id_bukti_lama ='';
+                    foreach($isi_jurnal as $row){;
+                    $sum_debet+= $row->debet;
+                    $sum_kredit+= $row->kredit;
+                    $id_bukti   = $row->id_bukti;
+                    ?>
+                    <tr>
+                   <?php             
+                    if ($id_bukti_lama!=$id_bukti){
+                        $tanggal    = DATE("d-m-Y",strtotime($row->tgl_bukti));
+                         echo "
+                                <td align=\"center\"> $i </td>
+                                <td align=\"left\"> $row->no_bukti </td>
+                                <td align=\"left\"> $tanggal </td>
+                         ";
+                         $i++;
+                         $id_bukti_lama=$id_bukti;
+                     }  
+                    else
+                    {
+                        echo " <td align='center'></td>
+                               <td align='center'></td>
+                               <td align='center'></td>
+                        ";
+                    }
+                    ?>
+                        <?php if ($row->kredit==""){
+                            echo "<td colspan=\"2\" align=\"left\"> $row->akun_bas </td> ";
+                            echo "<td align=\"left\"> $row->akun_nama </td> ";
+                        }else{
+                            echo "<td width=\"1px\" style=\"border-right: 0px;\"></td><td style=\"border-left: 0px;\" align=\"left\"> $row->akun_bas </td> ";
+                            echo "<td align=\"left\"> $row->akun_nama </td> ";
+                        } ?>
+                        <td align="left" width="250px"><?php echo $row->uraian; ?> </td>
+                        <td align="right"><?php echo Formatting::currency($row->debet,0,false);?> </td>
+                        <td align="right"><?php echo Formatting::currency($row->kredit,0,false); ?> </td>
+                    </tr>
+                    <?php }; ?>
+                    <tr>
+                        <td colspan="7" align="center"><b>Jumlah</b></td>
+                        <td align="right"><b><?php echo Formatting::currency($sum_debet,0,false); ?> </b></td>
+                        <td align="right"><b><?php echo Formatting::currency($sum_kredit,0,false); ?> </b></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

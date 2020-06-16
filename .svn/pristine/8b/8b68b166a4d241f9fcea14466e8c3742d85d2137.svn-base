@@ -1,0 +1,6 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-08 18:25:47 --> Severity: Notice  --> Undefined variable: nm_pr2 C:\xampp\htdocs\siaku\application\views\sp2d\preview_sp2d.php 151
+ERROR - 2013-07-08 18:25:47 --> Severity: Notice  --> Undefined variable: nip_pr2 C:\xampp\htdocs\siaku\application\views\sp2d\preview_sp2d.php 152
+ERROR - 2013-07-08 18:25:47 --> Severity: Notice  --> Undefined variable: nm_ben C:\xampp\htdocs\siaku\application\views\sp2d\preview_sp2d.php 154
+ERROR - 2013-07-08 18:25:47 --> Severity: Notice  --> Undefined variable: nip_ben C:\xampp\htdocs\siaku\application\views\sp2d\preview_sp2d.php 155

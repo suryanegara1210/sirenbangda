@@ -1,0 +1,46 @@
+	    <article class="module width_full">
+    		<header><h3>Cetak Bukti Kas Masuk Penerimaan dari Mahasiswa</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table id="tbl_display">
+                    <tr>
+                        <th>No.</th>
+                        <th>Nama Unit</th>
+                        <th>Besaran</th>
+                    </tr>
+                
+                        
+                <?php if(count($penerimaan)>0){
+                    $no=1;
+                    foreach($penerimaan as $pen){
+                       echo "
+                           <tr>
+                                <td>$no</td>
+                                <td>".$pen['nama']."</td>
+                                <td>".$this->uang->angka($pen['total'])."</td>
+                            </tr>
+                        "; 
+                        $no++;
+                    }
+                }else{
+                     echo "<tr><td colspan=\"3\"><center>Tidak Ada Data...</center></td></tr>";
+                }
+                    
+                    
+                ?>
+                </table>
+                </center>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                <?php if(count($penerimaan)>0){
+                    echo "<input type=\"button\" value=\"Cetak\" onClick=\"location.href='".site_url('ladik/buktiKasMasukCetak')."'\">";
+                    }
+                ?>
+				</div>
+			</footer>
+        </article>
+        <!-- end of styles article --> 
+	

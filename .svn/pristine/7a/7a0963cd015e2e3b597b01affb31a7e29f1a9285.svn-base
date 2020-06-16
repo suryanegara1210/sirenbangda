@@ -1,0 +1,589 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Evaluasi_renja extends CI_controller
+{
+	var $CI = NULL;
+	public $triwulan = array(
+								"1" => array(
+												"nama" => "Triwulan 1",
+												"awal" => 1,
+												"akhir" => 3,
+												"romawi" => "I"
+											),
+								"2" => array(
+												"nama" => "Triwulan 2",
+												"awal" => 4,
+												"akhir" => 6,
+												"romawi" => "II"
+											),
+								"3" => array(
+												"nama" => "Triwulan 3",
+												"awal" => 7,
+												"akhir" => 9,
+												"romawi" => "III"
+											),
+								"4" => array(
+												"nama" => "Triwulan 4",
+												"awal" => 10,
+												"akhir" => 12,
+												"romawi" => "IV"
+											),
+							);
+
+	public function __construct()
+	{
+		$this->CI =& get_instance();
+        parent::__construct();
+        $this->load->database();
+        $this->load->model(array('m_urusan', 'm_bidang', 'm_program', 'm_kegiatan','m_evaluasi_renja','m_skpd'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+
+		$this->template->load('template','evaluasi/renja/evaluasi_renja_view', $data);
+	}
+
+	function cru_evaluasi_renja(){
+		$this->auth->restrict_ajax_login();
+
+    $data['source'] = 'Renja';
+    $data['source_id'] = 'id_indikator_prog_keg';
+    $data['source_id_prog_keg'] = 'id_renja';
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$det_tahun = $this->m_evaluasi_renja->get_tahun_now($tahun);
+
+		$data['kolom_now'] = array(
+									"nominal" => "nominal_".$det_tahun->id,
+									"target" => "target_".$det_tahun->id,
+								);
+
+		$id_renja = $this->input->post("idr");
+		$id_indikator = $this->input->post("idi");
+		$tw = $this->input->post("tw");
+
+    ### GET DATA FOR EDIT ###
+		$evaluasi_detail = $this->m_evaluasi_renja->get_one_evaluasi_renja($id_indikator, $tahun, $tw);
+    $data['evaluasi_detail'] = $evaluasi_detail;
+		if (!empty($evaluasi_detail)) {
+			$data['ket_revisi'] = $this->m_evaluasi_renja->get_revisi_evaluasi_renja($evaluasi_detail->id_evaluasi_renja);
+		}
+
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['indikator_renstra'] = $this->m_evaluasi_renja->get_indikator_renstra($id_indikator);
+		$data['renstra'] = $this->m_evaluasi_renja->get_renstra($id_renja);
+
+		$indikator_cik = $this->m_evaluasi_renja->get_indikator_cik($id_indikator);
+		$cik = $this->m_evaluasi_renja->get_cik($id_renja);
+		$nominal_pengurang = 0;
+		$real_pengurang = 0;
+		for ($i=1; $i <= 4; $i++) {
+			if ($i > $tw) {
+				$tw_cik[$i] = array(
+								"nominal" => 0,
+								"target" => 0,
+							);
+				continue;
+			}
+			$realisasi = "realisasi_".$this->triwulan[$i]["akhir"];
+			$real = "real_".$this->triwulan[$i]["akhir"];
+
+			$nominal = $cik->$realisasi - $nominal_pengurang;
+			$real_persen = @$indikator_cik->$real - $real_pengurang;
+			$nominal_pengurang = $cik->$realisasi;
+			$real_pengurang = @$indikator_cik->$real;
+			$tw_cik[$i] = array(
+								"nominal" => $nominal,
+								"target" => $real_persen,
+							);
+		}
+		$realisasi = "realisasi_".$this->triwulan[$tw]["akhir"];
+		$real = "real_".$this->triwulan[$tw]["akhir"];
+
+		$nominal = $cik->$realisasi;
+		$real_persen = (float)@$indikator_cik->$real;
+		$tw_cik["ak"] = array(
+							"nominal" => $nominal,
+							"target" => $real_persen,
+						);
+
+		$data['cik'] = $tw_cik;
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+		$data['tahun'] = $tahun;
+		$data['id_indikator'] = $id_indikator;
+		$data['tw'] = $tw;
+		$data['data'] = $this->m_evaluasi_renja->get_one_renja($id_renja);
+		$data['periode'] = $this->triwulan[$tw]['nama'];
+		$last_year = $this->m_evaluasi_renja->get_last_evaluasi_renja($id_indikator, $tahun);
+		$data['realisasi_capaian_tahun_lalu'] = array(
+														"target" => (!empty($last_year))?$last_year->realisasi_kinerja_k:0,
+														"nominal" => (!empty($last_year))?$last_year->realisasi_kinerja_rp:0
+													);
+
+		$html = $this->load->view("evaluasi/renja/cru_evaluasi_renja", $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+  function cru_evaluasi_cik(){
+    $this->auth->restrict_ajax_login();
+
+    $data['source'] = 'CIK';
+    $data['source_id'] = 'id_indikator_prog_keg_cik';
+    $data['source_id_prog_keg'] = 'id_cik';
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$det_tahun = $this->m_evaluasi_renja->get_tahun_now($tahun);
+
+		$data['kolom_now'] = array(
+									"nominal" => "nominal_".$det_tahun->id,
+									"target" => "target_".$det_tahun->id,
+								);
+
+		$id_cik = $this->input->post("idr");
+		$id_indikator = $this->input->post("idi");
+		$tw = $this->input->post("tw");
+
+    ### GET DATA FOR EDIT ###
+		$evaluasi_detail = $this->m_evaluasi_renja->get_one_evaluasi_renja_cik($id_indikator, $tahun, $tw);
+		$data['evaluasi_detail'] = $evaluasi_detail;
+		if (!empty($evaluasi_detail)) {
+			$data['ket_revisi'] = $this->m_evaluasi_renja->get_revisi_evaluasi_renja($evaluasi_detail->id_evaluasi_renja);
+		}
+
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['indikator_renstra'] = $this->m_evaluasi_renja->get_indikator_renstra_cik($id_indikator);
+		$data['renstra'] = $this->m_evaluasi_renja->get_renstra_cik($id_cik);
+
+		$indikator_cik = $this->m_evaluasi_renja->get_indikator_cik_itself($id_indikator);
+		$cik = $this->m_evaluasi_renja->get_cik_itself($id_cik);
+		$nominal_pengurang = 0;
+		$real_pengurang = 0;
+		for ($i=1; $i <= $tw; $i++) {
+			if ($i > $tw) {
+				$tw_cik[$i] = array(
+								"nominal" => 0,
+								"target" => 0,
+							);
+				continue;
+			}
+			$realisasi = "realisasi_".$this->triwulan[$i]["akhir"];
+			$real = "real_".$this->triwulan[$i]["akhir"];
+
+			$nominal = $cik->$realisasi - $nominal_pengurang;
+			$real_persen = @$indikator_cik->$real - $real_pengurang;
+			$nominal_pengurang = $cik->$realisasi;
+			$real_pengurang = @$indikator_cik->$real;
+			$tw_cik[$i] = array(
+								"nominal" => $nominal,
+								"target" => $real_persen,
+							);
+		}
+		$realisasi = "realisasi_".$this->triwulan[$tw]["akhir"];
+		$real = "real_".$this->triwulan[$tw]["akhir"];
+
+		$nominal = $cik->$realisasi;
+		$real_persen = (float)@$indikator_cik->$real;
+		$tw_cik["ak"] = array(
+							"nominal" => $nominal,
+							"target" => $real_persen,
+						);
+
+		$data['cik'] = $tw_cik;
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+		$data['tahun'] = $tahun;
+		$data['id_indikator'] = $id_indikator;
+		$data['tw'] = $tw;
+		$data['data'] = $this->m_evaluasi_renja->get_one_cik($id_cik);
+		$data['periode'] = $this->triwulan[$tw]['nama'];
+		$last_year = $this->m_evaluasi_renja->get_last_evaluasi_renja_cik($id_indikator, $tahun);
+		$data['realisasi_capaian_tahun_lalu'] = array(
+														"target" => (!empty($last_year))?$last_year->realisasi_kinerja_k:0,
+														"nominal" => (!empty($last_year))?$last_year->realisasi_kinerja_rp:0
+													);
+
+		$html = $this->load->view("evaluasi/renja/cru_evaluasi_renja", $data, TRUE);
+		echo json_encode(array("html" => $html));
+  }
+
+	function get_evaluasi_renja($pusat=NULL){
+		$this->auth->restrict_ajax_login();
+
+		$data['pusat'] = FALSE;
+		if ($pusat==='PUSAT') {
+			$data['pusat'] = TRUE;
+		}
+
+		$id_evaluasi_renja = $this->input->post("idev");
+		$data['data'] = $this->m_evaluasi_renja->get_one_evaluasi_detail($id_evaluasi_renja);
+    // echo $this->db->last_query();
+
+		$id_skpd = $data['data']['evaluasirenja']->id_skpd;
+		$tahun = $data['data']['evaluasirenja']->tahun;
+		$tw = $this->input->post("tw");
+		$det_tahun = $this->m_evaluasi_renja->get_tahun_now($tahun);
+
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		// $data['kolom_now'] = array(
+		// 							"nominal" => "nominal_".$det_tahun->id,
+		// 							"target" => "target_".$det_tahun->id,
+		// 						);
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+		$data['tahun'] = $tahun;
+		$data['periode'] = $this->triwulan[$tw]['nama'];
+		$data['periode_er'] = $this->m_evaluasi_renja->get_periode();
+		$data['triwulan'] = $tw;
+		// $detail_berjalan = $this->m_evaluasi_renja->get_one_evaluasi_detail_berjalan_by_id($id_evaluasi_renja, $tw);
+		// $data['detail_berjalan'] = $detail_berjalan;
+		// $data['ket_revisi'] = $this->m_evaluasi_renja->get_revisi_evaluasi_renja($detail_berjalan->id);
+    $data['ket_revisi'] = NULL;
+
+		$html = $this->load->view("evaluasi/renja/view_det_evaluasi_renja", $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function get_table_data(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data['renja'] = $this->m_evaluasi_renja->get_renja_all($tahun, $id_skpd);
+    $data['cik'] = $this->m_evaluasi_renja->get_cik_all($tahun, $id_skpd);
+
+		$data['periode'] = $this->m_evaluasi_renja->get_periode();
+
+		$html = $this->load->view('evaluasi/renja/table_renja', $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function save(){
+		$input = $this->input->post();
+		$realisasi['k'] = $this->input->post("realisasi_k");
+		$realisasi['rp'] = $this->input->post("realisasi_rp");
+
+    $id_evaluasi_renja = $this->input->post("id_evaluasi_renja");
+    $id_evaluasi_renja_prog_keg = $this->input->post("id_evaluasi_renja_prog_keg");
+
+    $data_evaluasi_prog_keg = array(
+                                    "tahun" => $input["tahun"],
+                                    "triwulan" => $input["triwulan_berjalan"],
+                                    "is_prog_or_keg" => $input["is_prog_or_keg"],
+                                    "kd_urusan" => $input["kd_urusan"],
+                                    "kd_bidang" => $input["kd_bidang"],
+                                    "kd_program" => $input["kd_program"],
+                                    "nama_prog_or_keg" => $input["nama_prog_or_keg"],
+                                    "id_skpd" => $input["id_skpd"],
+                                    "penanggung_jawab" => @$input["penanggung_jawab"],
+                    								"target_akhir_renstra_rp" => $input["target_akhir_renstra_rp"],
+                    								"realisasi_kinerja_sebelum_rp" => $input["realisasi_kinerja_sebelum_rp"],
+                    								"target_anggaran_berjalan_rp" => $input["target_anggaran_berjalan_rp"],
+                    								"realisasi_kinerja_berjalan_rp" => $input["realisasi_kinerja_berjalan_rp"],
+                                    "tingkat_capaian_rp" => $input["tingkat_capaian_rp"],
+                                    "realisasi_kinerja_rp" => $input["realisasi_kinerja_rp"],
+                                    "tingkat_capaian_total_rp" => $input["tingkat_capaian_total_rp"]
+                    							);
+    if (!empty($input["kd_kegiatan"])) {
+      $data_evaluasi_prog_keg['kd_kegiatan'] = $input["kd_kegiatan"];
+    }
+    if (!empty($input["id_renja"])) {
+      $data_evaluasi_prog_keg['id_renja'] = $input["id_renja"];
+    }
+    if (!empty($input["id_cik"])) {
+      $data_evaluasi_prog_keg['id_cik'] = $input["id_cik"];
+    }
+
+		$data_evaluasi = array(
+                            "indikator" => $input["indikator"],
+            								"satuan" => $input["satuan"],
+                            "target_indikator" => $input["target_indikator"],
+            								"target_akhir_renstra_k" => $input["target_akhir_renstra_k"],
+            								"realisasi_kinerja_sebelum_k" => $input["realisasi_kinerja_sebelum_k"],
+            								"target_anggaran_berjalan_k" => $input["target_anggaran_berjalan_k"],
+            								"realisasi_kinerja_berjalan_k" => $input["realisasi_kinerja_berjalan_k"],
+                            "tingkat_capaian_k" => $input["tingkat_capaian_k"],
+                            "realisasi_kinerja_k" => $input["realisasi_kinerja_k"],
+                            "tingkat_capaian_total_k" => $input["tingkat_capaian_total_k"],
+            							);
+    if(!empty($input["id_indikator_prog_keg"])){
+      ### Renja ###
+      $data_evaluasi["id_indikator_prog_keg"] = $input["id_indikator_prog_keg"];
+    }elseif(!empty($input["id_indikator_prog_keg_cik"])){
+      ### CIK ###
+      $data_evaluasi["id_indikator_prog_keg_cik"] = $input["id_indikator_prog_keg_cik"];
+    }
+
+		// $data_evaluasi_det = array(
+		// 							"triwulan" => $input["triwulan_berjalan"],
+		// 							"tingkat_capaian_k" => $input["tingkat_capaian_k"],
+		// 							"tingkat_capaian_rp" => $input["tingkat_capaian_rp"],
+		// 							"realisasi_kinerja_k" => $input["realisasi_kinerja_k"],
+		// 							"realisasi_kinerja_rp" => $input["realisasi_kinerja_rp"],
+		// 							"tingkat_capaian_total_k" => $input["tingkat_capaian_total_k"],
+		// 							"tingkat_capaian_total_rp" => $input["tingkat_capaian_total_rp"]
+		// 						);
+
+		$result = $this->m_evaluasi_renja->save($data_evaluasi_prog_keg, $realisasi, $data_evaluasi, $id_evaluasi_renja, $id_evaluasi_renja_prog_keg);
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Evaluasi renja berhasil simpan.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kegiatan gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);
+		}
+	}
+
+	function get_veri(){
+		$this->auth->restrict_ajax_login();
+
+		$html = $this->load->view('evaluasi/renja/view_kirim_verifikasi', NULL, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function get_table_veri(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data['veri'] = $this->m_evaluasi_renja->get_data_need_veri($id_skpd, $tahun);
+
+		$html = $this->load->view('evaluasi/renja/table_veri', $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function send_veri(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$triwulan = $this->input->post("triwulan");
+		$status = $this->input->post("status");
+
+		$this->m_evaluasi_renja->kirim_veri($id_skpd, $tahun, $triwulan, $status);
+
+		echo json_encode(array("success" => 1));
+	}
+
+	### Verifikasi ###
+	function veri(){
+		$this->auth->restrict();
+
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$data['tahun'] = $tahun;
+		$data['veri_data'] = $this->m_evaluasi_renja->get_skpd_veri_data($tahun);
+
+		$this->template->load('template','evaluasi/renja/veri/veri_view', $data);
+	}
+
+	function veri_skpd($id_skpd=NULL, $triwulan=NULL, $tahun=NULL){
+		$this->auth->restrict();
+		if (empty($id_skpd) || empty($triwulan) || empty($tahun)) {
+			redirect("evaluasi_renja/veri");
+		}
+
+		$data['triwulan'] = $triwulan;
+		$data['tahun'] = $tahun;
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+
+		$this->template->load('template','evaluasi/renja/veri/veri_skpd', $data);
+	}
+
+	function get_table_veri_skpd(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->input->post('id_skpd');
+		$tahun = $this->input->post('tahun');
+		$triwulan = $this->input->post("triwulan");
+
+		$data['triwulan'] = $triwulan;
+		$data['tahun'] = $tahun;
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['renja'] = $this->m_evaluasi_renja->get_renja_all_with_evaluasi_each_triwulan($tahun, $id_skpd, $triwulan);
+		$data['periode'] = $this->m_evaluasi_renja->get_periode();
+
+		$html = $this->load->view('evaluasi/renja/veri/table_renja', $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function veri_form(){
+		$this->auth->restrict_ajax_login();
+
+		$id_evaluasi_renja = $this->input->post("idev");
+		$data['data'] = $this->m_evaluasi_renja->get_one_evaluasi_detail($id_evaluasi_renja);
+
+		$id_skpd = $data['data']['renja']->id_skpd;
+		$tahun = $data['data']['renja']->tahun;
+		$tw = $this->input->post("tw");
+		$det_tahun = $this->m_evaluasi_renja->get_tahun_now($tahun);
+
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['kolom_now'] = array(
+									"nominal" => "nominal_".$det_tahun->id,
+									"target" => "target_".$det_tahun->id,
+								);
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+		$data['tahun'] = $tahun;
+		$data['periode'] = $this->triwulan[$tw]['nama'];
+		$data['detail_berjalan'] = $this->m_evaluasi_renja->get_one_evaluasi_detail_berjalan_by_id($id_evaluasi_renja, $tw);
+		$data['triwulan'] = $tw;
+
+		$html = $this->load->view("evaluasi/renja/veri/veri_form", $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function save_veri(){
+		$id = $this->input->post("id");
+		$veri = $this->input->post("veri");
+		$ket = $this->input->post("ket");
+
+		$result = $this->m_evaluasi_renja->update_status($veri, $id, $ket);
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Evaluasi renja berhasil diverifikasi.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kegiatan gagal diverifikasi, mohon menghubungi administrator.');
+			echo json_encode($msg);
+		}
+	}
+
+	### Preview && Cetak Verifikasi ###
+	private function cetak_evaluasi_renja_func($id_skpd, $triwulan, $tahun, $css_header_tw='', $css_table=''){
+		$data['triwulan'] = $triwulan;
+		$data['tahun'] = $tahun;
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+
+		$data['triwulan'] = $triwulan;
+		$data['tahun'] = $tahun;
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['renja'] = $this->m_evaluasi_renja->cetak_evaluasi_each_triwulan($tahun, $id_skpd, $triwulan);
+		$data['periode'] = $this->m_evaluasi_renja->get_periode();
+
+		$data['css_header_tw'] = $css_header_tw;
+		$data['css_table'] = $css_table;
+		$data['evaluasi'] = $this->load->view('evaluasi/renja/cetak/table_renja', $data, TRUE);
+		return $data;
+	}
+
+	private function preview_list_func($id_skpd, $tahun, $type=1){
+		if ($type==1) {
+			$data['title'] = "Cetak";
+			$data['link'] = "cetak_evaluasi_renja";
+			$data['class'] = "box_preview_cetak";
+		}else{
+			$data['title'] = "Preview";
+			$data['link'] = "preview_evaluasi_renja";
+			$data['class'] = "box_preview_preview";
+		}
+		$data['preview_data'] = $this->m_evaluasi_renja->get_preview($id_skpd, $tahun);
+
+		$html = $this->load->view('evaluasi/renja/preview_list', $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+
+	function preview_list($type=1){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$this->preview_list_func($id_skpd, $tahun, $type);
+	}
+
+	function preview_evaluasi_renja($tw=NULL){
+		if (empty($tw)) {
+			return FALSE;
+		}
+
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data = $this->cetak_evaluasi_renja_func($id_skpd, $tw, $tahun, "class='header_tw'", 'class="table-common tablesorter" style="width:99%"');
+		$this->template->load('template', 'evaluasi/renja/preview_evaluasi_renja',$data);
+	}
+
+	function cetak_evaluasi_renja($tw=NULL){
+		if (empty($tw)) {
+			return FALSE;
+		}
+
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$skpd = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+
+		$data = $this->cetak_evaluasi_renja_func($id_skpd, $tw, $tahun, "class='header_tw'", 'class="full_width collapse" border="1" style="font-size: 8px;"');
+		$data['qr'] = $this->ciqrcode->generateQRcode("sirenbangda", 'Renstra '. $skpd->nama_skpd ." ". date("d-m-Y_H-i-s"), 1);
+		$filename='Renstra '. $skpd->nama_skpd ." ". date("d-m-Y_H-i-s") .'.pdf';
+
+		$html = $this->template->load('template_cetak', 'evaluasi/renja/cetak/cetak', $data, true);
+		pdf_create($html, $filename, "A4", "Landscape", FALSE);
+	}
+
+	### Pusat ###
+	function pusat(){
+		$this->auth->restrict();
+
+		$this->template->load('template','evaluasi/renja/pusat/evaluasi_renja_view');
+	}
+
+	function pusat_get_table_data(){
+		$this->auth->restrict_ajax_login();
+
+		$data['tahun'] = $this->session->userdata('t_anggaran_aktif');
+		$data['skpd'] = $this->m_evaluasi_renja->get_all_skpd_in_evaluasi_renja();
+		// $data['periode'] = $this->m_evaluasi_renja->get_periode();
+
+		$html = $this->load->view('evaluasi/renja/pusat/table_renja', $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+}

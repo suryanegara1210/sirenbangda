@@ -1,0 +1,26 @@
+<script>
+    $(document).ready(function() {
+        $('a[rel*=facebox]').facebox();
+    }) 
+</script>
+	    <article class="module width_full">
+    		<header><h3><?php if (isset($judul)) echo $judul; ?></h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                    <h2>Silahkan masukan masukan bukti Akuntansi melalui halaman 
+                    <a href="<?php echo site_url("bukti_akuntansi/input/".$jen_bkt."/NOREF"); ?>">Input <?php
+                    switch ($jen_bkt){
+                        case constant::BUK_BKM :
+                            echo "Bukti Kas Masuk";
+                            break;
+                        case constant::BUK_BM : echo "Bukti Memorial"; break;
+                        case constant::BUK_BKK : echo "Bukti Kas Keluar"; break;
+                        default : echo "Bukti Akuntansi";
+                    } ?>
+                    </a>
+                    </h2>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->

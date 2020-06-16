@@ -1,0 +1,312 @@
+<?php
+	$tahun_sekarang=$this->session->userdata('t_anggaran_aktif'); 
+	$nama_skpd = $this->session->userdata('nama_skpd');
+	$max_col_keg=1;
+?>
+<article class="module width_full">
+	<header>
+	  <h3>Tabel pengendalian pelaksanaan renja skpd</h3>
+	</header>
+	<div style='float:right'>
+		<a href="<?php echo site_url('kendali/do_cetak_kendali_renja') ?>"><input style="margin: 3px 10px 0px 0px; float: right;" type="button" value="Cetak Kendali Renja" /></a>
+    	<a href="<?php echo site_url('kendali/preview_kendali_renja') ?>"><input style="margin: 3px 10px 0px 0px; float: right;" type="button" value="Lihat Kendali Renja" /></a>
+	</div><br>
+	<h3>PROVINSI/KABUPATEN/KOTA : BALI/KLUNGKUNG/SEMARAPURA</h3>
+	<h3>SKPD : <?php echo $nama_skpd;?></h3>
+	<h3>PERIODE RENJA SKPD : <?php echo $tahun_sekarang;?></h3>
+	<h3>PERIODE RKA SKPD : <?php echo $tahun_sekarang;?></h3>
+	<div class="module_content" style="overflow:auto">
+		<table id="kendali_skpd" class="table-common tablesorter" style="width:100%" >
+			<thead>
+				<tr>
+					<th rowspan="3" colspan="4">Kode</th>
+					<th rowspan="3" >Program dan Kegiatan</th>
+					<th rowspan="2" colspan="2">indikator kinerja Program / Kegiatan</th>
+					<th colspan="6">rencana tahun(<?php echo $tahun_sekarang;?>)</th>
+					<th colspan="4">prakiraan rencana tahun (<?php echo $tahun_sekarang+1;?>)</th>
+					<th rowspan="2" colspan="2">Kesesuaian</th>
+					<th rowspan="3">Hasil Pengendalian</th>
+					<th rowspan="3">Tindak Lanjut</th>
+					<th rowspan="3">Hasil Tindak Lanjut</th>
+				</tr>
+				<tr>
+					<th colspan = "2">lokasi</th>
+					<th colspan = "2">target capaian</th>
+					<th colspan = "2">dana</th>
+					<th colspan = "2">target capaian kinerja</th>
+					<th colspan = "2">dana</th>
+				</tr>
+				<tr>
+					<th> renja </th>
+					<th> rka   </th>
+					<th> renja </th>
+					<th> rka   </th>
+					<th> renja </th>
+					<th> rka   </th>
+					<th> renja </th>
+					<th> rka   </th>
+					<th> renja </th>
+					<th> rka   </th>
+					<th> renja </th>
+					<th> rka   </th>
+					<th> ya    </th>
+					<th> Tidak </th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+					foreach ($program as $row) {
+						$result = $this->m_kendali->get_kegiatan_rka_4_cetak($row->id,$tahun_sekarang);
+						$kegiatan = $result->result();
+						//$indikator_program = $this->m_kendali->get_indikator_prog_keg($row->id, FALSE, TRUE);
+						$indikator_program = $this->m_kendali->get_indikator_prog($row->id_skpd, $row->tahun, $row->kd_urusan,
+						                     $row->kd_bidang, $row->kd_program);
+						$temp = $indikator_program->result();
+						$total_temp = $indikator_program->num_rows();
+						
+						$col_indikator=1;
+						$go_2_keg = FALSE;
+						$total_for_iteration = $total_temp;
+						if($total_temp > $max_col_keg){
+							$total_temp = $max_col_keg;
+							$go_2_keg = TRUE;
+						}
+				?>
+					<tr>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_urusan; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_bidang; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_program; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_kegiatan; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->nama_prog_or_keg; ?></td>
+						<td>
+							<?php
+								echo $temp[0]->in_renja;
+							?>
+						</td>
+						<td>
+							<?php
+								echo $temp[0]->in_rka;
+							?>
+						</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+						<td align="center">
+							<?php echo $temp[0]->target_renja." ".$temp[0]->satuan_rka;?>
+						</td>
+						<td align="center">
+							<?php echo $temp[0]->target_rka." ".$temp[0]->satuan_rka;?>
+						</td>
+						<td style="border-bottom: 0;" align="right" rowspan="<?php echo $total_temp; ?>"><?php echo Formatting::currency($row->sum_nomrenja);?></td>
+						<td style="border-bottom: 0;" align="right" rowspan="<?php echo $total_temp; ?>"><?php echo Formatting::currency($row->sum_nominal);?></td>
+						<td align="center">
+							<?php echo $temp[0]->target_renja_thndpn." ".$temp[0]->satuan_rka;?>
+						</td>
+						<td align="center">
+							<?php echo $temp[0]->target_rka_thndpn." ".$temp[0]->satuan_rka;?>
+						</td>
+						<td style="border-bottom: 0;" align="right" rowspan="<?php echo $total_temp; ?>"><?php echo Formatting::currency($row->sum_nomrenja_thndpn);?></td>
+						<td style="border-bottom: 0;" align="right" rowspan="<?php echo $total_temp; ?>"><?php echo Formatting::currency($row->sum_nominal_thndpn);?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>">-</td>
+					</tr>
+					<?php 
+						if ($total_for_iteration > 1) {			
+						for ($i=1; $i < $total_for_iteration; $i++) { 
+							$col_indikator++;
+					?>
+						<tr>
+							<?php
+								if ($go_2_keg && $col_indikator > $max_col_keg) { 
+							?>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+							<?php
+								}
+							?>
+							<td>-</td>
+							<td>
+								<?php
+									echo $temp[$i]->indikator;
+								?>
+							</td>
+							<?php
+								if ($go_2_keg && $col_indikator > $max_col_keg) {
+							?>
+								<td style="border-top: 0;border-bottom: 0;" ></td>
+							<?php
+								}
+							?>
+							<td align="center">
+								<?php
+									echo $temp[$i]->target." ".$temp[$i]->satuan_target;
+								?>
+							</td>
+								<?php
+									if ($go_2_keg && $col_indikator > $max_col_keg) {
+								?>
+									<td style="border-top: 0;border-bottom: 0;" ></td>
+									<td style="border-top: 0;border-bottom: 0;" ></td>
+								<?php
+									}
+								?>
+							<td align="center">
+								<?php
+									echo $temp[$i]->target_thndpn." ".$temp[$i]->satuan_target_thndpn;
+								?>
+							</td>
+								<?php
+									if ($go_2_keg && $col_indikator > $max_col_keg) {
+								?>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+						<?php
+											}
+						?>
+						</tr>
+					<?php
+							}
+						}
+
+						foreach ($kegiatan as $row) {						
+							//$indikator_kegiatan = $this->m_kendali->get_indikator_prog_keg($row->id, FALSE, TRUE);
+							$indikator_kegiatan = $this->m_kendali->get_indikator_kegiatan($row->id_skpd, $row->tahun, $row->kd_urusan,
+						                          $row->kd_bidang, $row->kd_program, $row->kd_kegiatan);
+							$temp = $indikator_kegiatan->result();			
+							$total_temp = $indikator_kegiatan->num_rows();
+
+							$go_2_keg = FALSE;
+							$col_indikator_keg=1;
+							$total_for_iteration = $total_temp;
+							if ($total_temp > $max_col_keg) {
+								$total_temp = $max_col_keg;
+								$go_2_keg = TRUE;
+							}
+					?>
+					<tr>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_urusan; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_bidang; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_program; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->kd_kegiatan; ?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->nama_prog_or_keg; ?></td>
+						<td>
+							<?php
+								echo $temp[0]->in_renja;
+							?>
+						</td>
+						<td>
+							<?php
+								echo $temp[0]->in_rka;
+							?>
+						</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->lokasirenja;?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>"><?php echo $row->lokasi;?></td>
+						<td align="center">
+							<?php
+								echo $temp[0]->target_renja." ".$temp[0]->satuan_rka;
+							?>
+						</td>
+						<td align="center">
+							<?php
+								echo $temp[0]->target_rka." ".$temp[0]->satuan_rka;
+							?>
+						</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" ><?php echo Formatting::currency($row->nomrenja);?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" ><?php echo Formatting::currency($row->nominal);?></td>
+						<td align="center">
+							<?php
+								echo $temp[0]->target_renja_thndpn." ".$temp[0]->satuan_rka;
+							?>
+						</td>
+						<td align="center">
+							<?php
+								echo $temp[0]->target_rka_thndpn." ".$temp[0]->satuan_rka;
+							?>
+						</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" ><?php echo Formatting::currency($row->nomrenja_thndpn);?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" ><?php echo Formatting::currency($row->nominal_thndpn);?></td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" >-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" >-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" >-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" >-</td>
+						<td style="border-bottom: 0;" rowspan="<?php echo $total_temp; ?>" align="right" >-</td>
+					</tr>
+					<?php
+					if ($total_for_iteration > 1) {
+						for ($i=1; $i < $total_for_iteration; $i++) { 					
+							$col_indikator_keg++;
+					?>
+						<tr>
+					<?php
+						if ($go_2_keg && $col_indikator_keg > $max_col_keg) {
+					?>
+						<td style="border-top: 0;border-bottom: 0;" ></td>
+						<td style="border-top: 0;border-bottom: 0;" ></td>
+						<td style="border-top: 0;border-bottom: 0;" ></td>
+						<td style="border-top: 0;border-bottom: 0;" ></td>
+						<td style="border-top: 0;border-bottom: 0;" ></td>
+					<?php
+						}
+					?>
+					<td>-</td>
+					<td>
+						<?php
+							echo $temp[$i]->indikator;
+						?>
+					</td>
+					<?php
+						if ($go_2_keg && $col_indikator_keg > $max_col_keg) {
+					?>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+					<?php
+						}
+					?>
+					<td align="center">-</td>
+					<td align="center">
+						<?php
+							echo $temp[$i]->target." ".$temp[$i]->satuan_target;
+						?>
+					</td>
+					<?php
+						if ($go_2_keg && $col_indikator_keg > $max_col_keg) {
+					?>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+					<?php
+						}
+					?>
+					<td align="center">-</td>
+					<td align="center">
+						<?php
+							echo $temp[$i]->target_thndpn." ".$temp[$i]->satuan_target_thndpn;
+						?>
+					</td>
+					<?php
+						if ($go_2_keg && $col_indikator_keg > $max_col_keg) {
+					?>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+							<td style="border-top: 0;border-bottom: 0;" ></td>
+					<?php
+						}
+					?>
+					</tr>
+			<?php
+					}
+				}
+			}
+		}
+			?>
+			</tbody>
+		</table>
+	</div>
+</article>

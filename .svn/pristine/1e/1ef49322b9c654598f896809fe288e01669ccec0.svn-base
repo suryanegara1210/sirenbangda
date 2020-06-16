@@ -1,0 +1,472 @@
+<?php
+/**
+ *
+ * Class ini digunakan untuk menghandle POK di table t_rkakl
+ *
+ * @author I Made Agus Setiawan <madeagus@gmail.com>
+ *
+ */
+class M_pok extends CI_Model {
+    //TODO: INGAT data rkakl field type_kwitansi di set Manual ketika diimport,
+    //sehingga setiap import data tiap awal tahun, field tersebut harus di set
+    //Solusi lainnya, bisa dibuatkan TRIGGER on insert
+
+    function __construct(){
+
+        parent::__construct();
+
+    }
+
+    function get_list_kegiatan($ta, $cdsu, $jnskw) {
+        //DONE-TODO: Cari list kegiatan di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdgiat,nmgiat FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu
+
+        $sql = "
+            SELECT DISTINCT kdgiat,CONCAT(kdgiat,' - ', nmgiat) AS nmgiat
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND type_kwitansi LIKE ?
+            ORDER By kdgiat
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $jnskw));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+        return NULL;
+    }
+
+
+    function get_list_output($ta, $cdsu, $jnskw, $kdgiat) {
+        //DONE-TODO: Cari list output di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdoutput,nmoutput FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi
+
+        $sql = "
+            SELECT DISTINCT kdoutput,CONCAT(kdoutput, ' - ', nmoutput) AS nmoutput
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND type_kwitansi LIKE ?
+                AND kdgiat = ?
+            ORDER BY kdoutput
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $jnskw, $kdgiat));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+
+        return NULL;
+    }
+
+    function get_list_komponen($ta, $cdsu, $jnskw, $kdgiat, $kdoutput) {
+        //DONE-TODO: cari list komponen di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdkomponen,nmkomponen FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput
+
+        $sql = "
+            SELECT DISTINCT kdkomponen,CONCAT(kdkomponen, ' - ', nmkomponen) AS nmkomponen
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND type_kwitansi LIKE ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+            ORDER BY kdkomponen
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $jnskw, $kdgiat,
+                                              $kdoutput));
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+
+        return NULL;
+    }
+
+    function get_list_akun($ta, $cdsu, $jnskw, $kdgiat, $kdoutput, $kdkomponen) {
+        //DONE-TODO: cari list akun di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdakun,nmakun FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen
+
+        $sql = "
+            SELECT DISTINCT kdakun, CONCAT(kdakun, ' - ', nmakun) AS nmakun
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND type_kwitansi LIKE ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+            ORDER BY kdakun
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $jnskw, $kdgiat,
+                                              $kdoutput, $kdkomponen));
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+
+        return NULL;
+    }
+
+    function get_list_header($ta, $cdsu, $jnskw, $kdgiat, $kdoutput, $kdkomponen,
+                             $kdakun) {
+        //DONE-TODO: cari list header di tabel t_rkakl,
+        //INGAT: Tidak lagi menggunakan idheader, pergunakan saja teks nya.
+        //SELECT DISTINCT hdr as kdhdr, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+        $sql = "
+            SELECT DISTINCT hdr as kdhdr, hdr
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND type_kwitansi LIKE ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+                AND kdakun = ?
+            ORDER BY hdr
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $jnskw, $kdgiat,
+                                              $kdoutput, $kdkomponen, $kdakun));
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+
+        return NULL;
+    }
+
+    function get_list_bas() {
+        //TODO: cari informasi ke sudhar
+
+        return NULL;
+    }
+
+    function get_nilai_pok($ta, $cdsu, $kdgiat, $kdoutput, $kdkomponen,
+                             $kdakun, $hdr) {
+        //TODO: cari di tabel rkakl
+        //SELECT tahunkdgiat, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+        $sql = "
+            SELECT tahun, kode_unit, kdgiat, kdoutput, kdkomponen, kdakun, hdr,
+                nmgiat, nmoutput, nmkomponen, nmakun,
+                SUM(jumlah) AS pok_total
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+                AND kdakun = ?
+                AND hdr = ?
+            GROUP BY tahun, kode_unit, kdgiat, kdoutput, kdkomponen, kdakun, hdr,
+                nmgiat, nmoutput, nmkomponen, nmakun
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat,
+                                              $kdoutput, $kdkomponen, $kdakun,
+                                              $hdr));
+        if($query) {
+            if($query->num_rows > 0){
+                return $query->row()->pok_total;
+            }
+        }
+        return 0;
+     }
+
+    function get_nilai_pok_with_info($ta, $cdsu, $kdgiat, $kdoutput, $kdkomponen,
+                             $kdakun, $hdr) {
+
+        $sql = "
+            SELECT tahun, kode_unit, kdgiat, kdoutput, kdkomponen, kdakun, hdr,
+                nmgiat, nmoutput, nmkomponen, nmakun,
+                SUM(jumlah) AS pok_total
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+                AND kdakun = ?
+                AND hdr = ?
+            GROUP BY tahun, kode_unit, kdgiat, kdoutput, kdkomponen, kdakun, hdr,
+                nmgiat, nmoutput, nmkomponen, nmakun
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat,
+                                              $kdoutput, $kdkomponen, $kdakun,
+                                              $hdr));
+
+        if($query) {
+            if($query->num_rows > 0){
+                return $query->row();
+            }
+        }
+        return FALSE;
+     }
+
+    function get_nilai_pok_per_header($ta, $cdsu, $kdgiat, $kdoutput, $kdkomponen,
+                             $kdakun, $hdr) {
+
+        $sql = "
+            SELECT tahun, kode_unit, kdgiat, kdoutput, kdkomponen, kdakun, hdr,
+                nmgiat, nmoutput, nmkomponen, nmakun,
+                SUM(jumlah) AS pok_total
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+                AND kdakun = ?
+                AND hdr = ?
+            GROUP BY tahun, kode_unit, kdgiat, kdoutput, kdkomponen, kdakun, hdr,
+                nmgiat, nmoutput, nmkomponen, nmakun
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat,
+                                              $kdoutput, $kdkomponen, $kdakun,
+                                              $hdr));
+
+        if($query) {
+            if($query->num_rows > 0){
+                return $query->row();
+            }
+        }
+        return FALSE;
+    }
+
+    function get_nilai_pok_per_akun($ta, $cdsu, $kdgiat, $kdoutput, $kdkomponen, $kdakun) 
+    {
+        $sql = "
+            SELECT IFNULL(SUM(jumlah),0) AS pok_total
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+                AND kdakun = ?
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat,
+                                              $kdoutput, $kdkomponen, $kdakun));
+
+        if($query) {
+            if($query->num_rows() > 0){
+                return $query->row()->pok_total;
+            }
+        }
+        return -1;
+    }
+
+    function get_list_pok ($ta, $cdsu,  $kdgiat, $kdoutput, $kdkomponen,
+                             $kdakun, $hdr) {
+        //TODO: harus di JOIN dengan list tender, dan diexclude jika
+        //sudah dimasukkan tender
+        $sql = "
+            SELECT tahun, kode_unit, nama_unit, kdgiat, nmgiat, kdoutput, nmoutput,
+                kdkomponen, nmkomponen, kdakun, nmakun, hdr, uraian, vol as volume,
+                sat as satuan, hargasat as harga_satuan, jumlah
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+                AND kdgiat = ?
+                AND kdoutput = ?
+                AND kdkomponen = ?
+                AND kdakun = ?
+                AND hdr = ?
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat, $kdoutput,
+                                              $kdkomponen, $kdakun, $hdr));
+
+        if($query->num_rows > 0){
+            return $query->result();
+        }
+
+        return FALSE;
+    }
+
+    function get_status_kwitansi() {
+        //DONE-TODO: Cari list kegiatan di tabel t_rkakl dengan query
+        //SELECT DISTINCT kdgiat,nmgiat FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu
+
+        $sql = "
+            SELECT * FROM m_status_kwitansi
+        ";
+
+        $query = $this->db->query($sql, array($jns_belanja));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+        return NULL;
+    }
+
+    function get_nilai_pok_sunit($ta, $cdsu) {
+        //TODO: cari di tabel rkakl
+        //SELECT tahunkdgiat, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+        $sql = "
+            SELECT SUM(jumlah) AS pok_total
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu));
+        if($query) {
+            if($query->num_rows > 0){
+                return $query->row()->pok_total;
+            }
+        }
+        return 0;
+     }
+    function get_list_pok_unit($ta, $cdsu) {
+        //TODO: cari di tabel rkakl
+        //SELECT tahunkdgiat, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+        $sql = "
+            SELECT SUM(jumlah) AS pok_total
+            FROM t_rkakl
+            WHERE tahun = ?
+                AND kode_unit = ?
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu));
+        if($query) {
+            if($query->num_rows > 0){
+                return $query->row()->pok_total;
+            }
+        }
+        return 0;
+     }
+
+    function get_nilai_pok_unit($ta, $cdu) {
+        //TODO: cari di tabel rkakl
+        //SELECT tahunkdgiat, hdr FROM t_rkakl WHERE tahun=$ta AND
+        //kode_unit=$cdsu AND kdgiat=$kdgiat AND jenis=$jns_kwitansi AND
+        //kdoutput=$kdoutput AND kdkomponen=$kdkomponen AND kdakun=$kdakun
+
+        $sql = "
+            SELECT SUM(jumlah) AS pok_total
+            FROM t_rkakl,m_unit,m_subunit
+            WHERE m_unit.id_unit = m_subunit.id_unit
+            AND m_subunit.kode_subunit = t_rkakl.kode_unit
+            AND tahun = ?
+            AND t_rkakl.kode_unit = ?
+        ";
+
+        $query = $this->db->query($sql, array($ta, $cdu));
+        if($query) {
+            if($query->num_rows > 0){
+                return $query->row()->pok_total;
+            }
+        }
+        return 0;
+     }
+
+     function get_daftar_pok($ta, $cdsu)
+     {
+	     $sql = "
+			SELECT a.kdgiat, a.nmgiat, a.kdoutput, a.nmoutput,
+				a.kdkomponen, a.nmkomponen, a.kdakun, a.nmakun, a.hdr,
+				IFNULL(sum(a.jumlah), 0) as jumlah,
+				IFNULL(sum(a.jumlah_old), 0) as jumlah_old
+			FROM t_rkakl a
+			WHERE a.tahun = ? AND a.kode_unit = ?
+			GROUP BY a.kdgiat, a.nmgiat, a.kdoutput, a.nmoutput,
+				a.kdkomponen, a.nmkomponen, a.kdakun, a.nmakun, a.hdr
+			ORDER BY a.kdgiat, a.kdoutput, a.kdkomponen, a.kdakun
+		";
+
+        $query = $this->db->query($sql, array($ta, $cdsu));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+        return NULL;
+
+     }
+
+     function get_daftar_pok_detail($ta, $cdsu, $kdgiat, $kdoutput, $kdkomponen, $kdakun, $hdr)
+     {
+		$sql = "
+			SELECT *
+			FROM t_rkakl
+			WHERE tahun = ? AND kode_unit = ? AND kdgiat = ?
+				AND kdoutput = ? AND kdkomponen = ?
+				AND kdakun = ? AND hdr = ?
+			";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat, $kdoutput,
+        				$kdkomponen, $kdakun, $hdr));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+        return NULL;
+
+     }
+
+     function get_pok_detail ($ta, $cdsu, $kdgiat, $kdoutput, $kdkomponen, $kdakun, $hdr) {
+        $sql = "
+            SELECT *
+            FROM t_rkakl
+            WHERE tahun = ? 
+                AND kode_unit = ? 
+                AND kdgiat = ?
+                AND kdoutput = ? 
+                AND kdkomponen = ?
+                AND kdakun = ? 
+                AND hdr = ?
+            LIMIT 1
+            ";
+
+        $query = $this->db->query($sql, array($ta, $cdsu, $kdgiat, $kdoutput,
+                        $kdkomponen, $kdakun, $hdr));
+
+        if($query) {
+            if($query->num_rows() > 0) {
+                return $query->row();
+            }
+        }
+        return NULL;        
+     }
+
+}?>

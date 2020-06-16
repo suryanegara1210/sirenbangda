@@ -1,0 +1,1042 @@
+<?php
+
+class kwitansi_view extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_gup',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas', 'm_sptb','m_unit'));
+        
+        date_default_timezone_set('Etc/GMT-8');
+    }
+
+    function index()
+    {
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['jns_belanja']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        
+        foreach($data['jns_belanja'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['jns_belanja'][$key]);
+            }
+        }
+ 
+        $this->template->load('template','kwitansi/view/view_kwitansi',$data);		
+    }
+    
+    
+    function get_view_kwitansi()
+    {
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+		
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $status_kwitansi 	= $this->input->post('status_kwitansi');;
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+        
+		$data['isi']		= $this->m_kwitansi->get_view_kwitansi($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi);
+		
+		$this->load->view('kwitansi/view/daftar_kwitansi',$data);
+    }
+
+    function baru()
+    {
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+ 
+        $this->template->load('template','kwitansi/view/view_kwitansi_baru',$data);
+		
+    }//END Create
+
+
+	// cek status kirim kwitansi ke unit
+    function cek_xpersen_kirim_unit($max_status,$type){
+		$idu 			= $this->session->userdata('id_unit');
+		$su  			= $this->session->userdata('id_subunit');
+		$ta  			= $this->m_settings->get_tahun_anggaran();
+		
+		$kwitansi_ini	= $this->m_logic->get_nilai_kwitansi($ta, $su, $type, $max_status);
+		$xPersen		= $this->m_settings->get_nilai_maxpersen();
+		$kwitansi_x_ini	= $xPersen*$kwitansi_ini;
+		//dipakai apabila settingan default untuk UP berjalan untuk sementara dipaka yang dinamis jadi mengambil 
+		//nilai up di t_max_up
+		//$up				= $this->m_logic->get_nilai_up($ta,$su);
+		$up			= $this->m_logic->get_nilai_max_up_sunit($su, $ta);
+		
+		// cek nilai kwitansi yang sekarang > kwitansi * max persen dan < nilai up
+		if($kwitansi_ini>$kwitansi_x_ini && $kwitansi_ini<$up)
+		{
+			return true;
+			}
+		return false;
+		//return $kwitansi_ini.'---'.$kwitansi_x_ini.'---'.$up.'---'.$xPersen;
+    }
+
+    function get_view_kwitansi_baru(){
+
+		$this->auth->restrict();
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $status_kwitansi 	= 0;
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+		$type				= 'Constant::JB_'.$sifat_bayar;
+		
+		$data['status_kirim']	= $this->cek_xpersen_kirim_unit(1,$type);		
+		$data['isi']			= $this->m_kwitansi->get_view_kwitansi($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi);
+		//echo $this->db->last_query();
+		$this->load->view('kwitansi/view/daftar_kwitansi_baru',$data);
+		//echo $data;
+    }
+
+    function hapus(){
+		$id 	= $this->input->post('id');
+        $this->m_kwitansi->hapus_kwitansi($id);
+    }
+
+    function preview(){
+        $idk 			= $this->uri->segment(3); 
+		$idu  			= $this->session->userdata('id_unit');
+		$cek_kw			= $this->m_kwitansi->cek_kwi_available_preview($idk);
+        $data['row'] 	= $this->m_kwitansi->get_kwitansi_preview($idk); 
+        $data['munit'] 	= $this->m_kwitansi->get_munit_by_id($idu); 
+        $data['nmunit'] = $this->m_umum->get_nama_unit_by_id($idu); 
+		if($data['row'] === FALSE)
+		{
+           $this->session->set_userdata('msg_typ','err');
+           $this->session->set_userdata('msg', 'Maaf Kwitansi yang anda cari tidak ada');
+           redirect('kwitansi_view');  			   
+		}
+		else{
+        $this->template->load('template','kwitansi/preview/kwitansi',$data);
+		}
+    }
+	
+	function preview_kw()
+    {
+    	//if($this->auth->restrict_ajax_login()) return;
+
+        $id_kwitansi 	= $this->uri->segment(3); 
+
+        //get kwitansi
+        $kwitansi 		= $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+
+        if(!$kwitansi) {
+        	$data['kwitansi_exist'] = false;
+        } else {
+        	$data['kwitansi_exist'] = true;
+        	$data['unit']	= $this->m_unit->get_unit_by_id($kwitansi->id_unit);
+        	$data['row']	= $kwitansi;
+        	
+			//$this->m_kwitansi->up_jumUnduh_kwi($id_kwitansi);
+			
+        	$this->template->load('doc_template', 'kwitansi/kwitansi_preview', $data);
+        }
+    }
+
+    function cetak_kw()
+    {
+        //if($this->auth->restrict_ajax_login()) return;
+
+        $id_kwitansi    = $this->uri->segment(3);        
+        
+        //get kwitansi
+        $kwitansi       = $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+        //echo $this->db->last_query();
+        
+        if(!$kwitansi) {
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Maaf Kwitansi yang anda cari tidak ada');
+            redirect('kwitansi_view');
+        } else {
+            $data['kwitansi_exist'] = true;
+            $unit_data      = $this->m_unit->get_unit_by_id($kwitansi->id_unit);
+
+            $data['unit']   = $unit_data;
+            $data['row']    = $kwitansi;
+            
+            $this->m_kwitansi->up_jumUnduh_kwi($id_kwitansi);
+
+            $now=DATE('Ymd_Hi');
+            $no_4name=str_replace('/', '-', $kwitansi->no_kwitansi);            
+            $filename= $no_4name .'_'. $unit_data->kode_unit .'_'. $now .'.pdf';
+            
+
+            $output = $this->template->load('doc_template', 'kwitansi/kwitansi_preview', $data, TRUE);
+            generate_pdf_A4($output,$filename);
+            //$this->template->load('doc_template', 'kwitansi/kwitansi_preview', $data);
+        }        
+    }
+
+    function preview_cetak(){
+        $idk 			= $this->uri->segment(3); 
+		$idu  			= $this->session->userdata('id_unit');
+		$cek_kw			= $this->m_kwitansi->cek_kwi_available_preview($idk);
+        $data['row'] 	= $this->m_kwitansi->get_kwitansi_preview($idk); 
+        $data['munit'] 	= $this->m_kwitansi->get_munit_by_id($idu); 
+        $data['nmunit'] = $this->m_umum->get_nama_unit_by_id($idu); 
+		if(!$cek_kw)
+		{
+           $this->session->set_userdata('msg_typ','err');
+           $this->session->set_userdata('msg', 'Maaf Kwitansi yang anda cari tidak ada');
+           redirect('kwitansi_view');  			   
+		}
+		else{
+        $this->template->load('template','kwitansi/preview/kwitansi',$data);
+		}
+    }
+
+    function edit(){
+        $id_kwitansi 		= $this->uri->segment(3); 
+
+		$idu  				= $this->session->userdata('id_unit');
+		$idsu  				= $this->session->userdata('id_subunit');
+		$cdsu				= $this->session->userdata('kode_subunit');
+		$ta 		 		= $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($idsu);
+
+		$data['row_edit']	= $this->m_kwitansi->get_kwitansi_preview($idk);
+		$jns_kwitansi		= $data['row_edit']->jenis_kwitansi;
+		$data['row_honor']	= $this->m_kwitansi->get_honor_by_idK($idk);
+        $data['munit'] 		= $this->m_kwitansi->get_munit_by_id($idu); 
+        $data['nmunit'] 	= $this->m_umum->get_nama_unit_by_id($idu); 
+		$data['jns_pajak'] 	= $this->m_kwitansi->get_jenis_pajak();
+        $data['golongan'] 	= $this->m_kwitansi->get_golongan();
+        $data['kegiatans']  = $this->m_pok->get_list_kegiatan($ta, $cdsu, $jns_kwitansi);
+		$data['jns_kwitansi']= $jns_kwitansi;
+        $data['limit_spjup']= $limit_spjup; 
+		
+		$kdgiat				= $data['row_edit']->kdgiat;
+		$kdoutput			= $data['row_edit']->kdoutput;
+		$kdkomponen			= $data['row_edit']->kdkomponen;
+		$kdakun				= $data['row_edit']->kdakun;
+		$kdhdr				= $data['row_edit']->hdr;
+
+		$data['pok'] 			= $this->m_pok->get_nilai_pok($ta, $cdsu, $kdgiat, $kdoutput,
+                                           $kdkomponen, $kdakun, $kdhdr);
+        
+        $data['pok_terpakai'] 	= $this->m_kwitansi->get_nilai_kwitansi_by_akun_detail(
+                                $ta, $idsu, $kdgiat, $kdoutput, $kdkomponen,
+                                $kdakun, $kdhdr);
+
+		
+		//jika kwitansi tidak ada
+		if($data['row_edit'] === FALSE)
+		{
+           $this->session->set_userdata('msg_typ','err');
+           $this->session->set_userdata('msg', 'Maaf Kwitansi yang anda cari tidak ada');
+           redirect('kwitansi_view');  			   
+		}
+		else{
+			switch($jns_kwitansi){
+				case "HONOR":
+					$this->template->load('template','kwitansi/edit/kwitansi_honor',$data);
+					break;
+				case "KONTRAK":
+					$this->template->load('template','kwitansi/edit/kwitansi_kontrak_PengabdianPenelitian',$data);
+					break;
+				case "PERJADIN":
+					$this->template->load('template','kwitansi/edit/kwitansi_perjadin',$data);
+					break;
+				default:
+					$this->template->load('template','kwitansi/edit/kwitansi_barang',$data);
+			}       
+		}
+    }
+
+
+    function cetak(){
+		
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','kwitansi/view/view_kwitansi_cetak',$data);
+    }
+	
+    function get_view_kwitansi_cetak(){
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $status_kwitansi 	= '';
+        $status_spj_su	 	= 'baru';
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+		$where				= "( t_kwitansi.id_status_kwitansi <=19 )";
+		
+		$data['isi']=$this->m_kwitansi->get_view_kwitansi_spj($ta, $su, $sifat_bayar, $status_kwitansi, 
+																$status_spj_su, $jenis_kwitansi, $where);
+		$this->load->view('kwitansi/view/daftar_kwitansi_cetak',$data);
+		//echo $data;
+    }
+	
+	function print_kwitansi($download_pdf = true){
+        $this->auth->restrict();
+            $idk		= $this->uri->segment(3);
+			//exit();
+            $tgl_skrg 	= date("Y-m-d"); 
+            $jam_skrg 	= date("H:i");
+		 	$idu 		= $this->session->userdata('id_unit');         
+			
+            $pdf_filename='KWITANSI_'.$idk.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+            $link_download 	= ($download_pdf==TRUE)?'': anchor(site_url().'kwitansi_view/print_kwitansi/true/','Download Pdf');
+			
+            $data['link'] 	= $link_download ;
+        	$data['row'] 	= $this->m_kwitansi->get_kwitansi_preview($idk); 
+        	$data['munit'] 	= $this->m_kwitansi->get_munit_by_id($idu); 
+        	$data['nmunit'] = $this->m_umum->get_nama_unit_by_id($idu); 
+            $user_info 		= $this->load->view('kwitansi/preview/print_kwitansi',$data,true);
+
+             if($download_pdf==true)
+                 generate_pdf_A4($user_info,$pdf_filename);  
+             else
+                echo $output;
+                
+            $this->m_kwitansi->up_jumUnduh_kwi($idk); 
+		
+		//echo $this->db->last_query();
+		//redirect('kwitansi/create','refresh');
+    }
+
+/*	function kirim_kwitansi_cetak(){   
+        if($this->auth->is_logged_in() == true){         	
+        $idk 			= $this->uri->segment(3); 
+		
+		$this->m_kwitansi->up_kirirm_kwi_cetak($idk);
+		$this->session->set_userdata('msg_typ','ok');
+        $this->session->set_userdata('msg', 'Kwitansi berhasil dikirim ke verifikator unit');
+		redirect('kwitansi_view/cetak');
+		}
+*/
+	function kirim_kwitansi_cetak($id_spj_su){   
+        if($this->auth->is_logged_in() == true){         	
+        $id_spj_su		= $this->uri->segment(3);
+		 
+		//TODO : PENGGUNAAN TRANSACTION (SUDAH)
+		$this->m_kwitansi->up_kirirm_kwi_cetak($id_spj_su,'19');
+		//$this->m_kwitansi->up_spj_su_byID($id_spj_su,'kwitansi cetak');
+		
+		$this->session->set_userdata('msg_typ','ok');
+        $this->session->set_userdata('msg', 'Kwitansi berhasil dikirim ke verifikator unit');
+		redirect('kwitansi_view/cetak');
+		}
+		
+    }
+
+    function revisi(){
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','kwitansi/view/view_kwitansi_revisi',$data);
+    }
+	
+    function get_view_kwitansi_revisi(){
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $status_kwitansi 	= 2;
+		$where				= "( t_kwitansi.id_status_kwitansi = 2 or t_kwitansi.id_status_kwitansi = 20 )";
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+		
+		$data['isi']=$this->m_kwitansi->get_view_kwitansi($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi, $where);
+		$this->load->view('kwitansi/view/daftar_kwitansi_revisi',$data);
+		//echo $data;
+    }
+	
+	
+    function verifikasi(){
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        $data['subunit'] = $this->m_umum->subunit_semua($idu, constant::WITH_ALL);
+        unset($data['subunit']['']);
+
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','kwitansi/verifikasi/view_kwitansi_verifikasi',$data);
+    }
+	
+	function verifikasi_pusat(){
+		$this->auth->restrict();
+        
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+
+        $unit= $this->m_umum->unit_semua($tipe=constant::WITHOUT_ALL);
+        $unit['']='Semua Unit';
+        $data['unit']=$unit;		
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','kwitansi/verifikasi/view_kwitansi_pusat',$data);
+    }
+	
+    function get_view_kwitansi_verifikasi(){
+		$this->auth->restrict();
+		$idU = $this->session->userdata('id_unit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+
+        $sub_unit           = $this->input->post('sub_unit');
+        $sub_unit           = $sub_unit =='-1' ? null : $sub_unit;
+
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+		$where				= "( t_kwitansi.id_status_kwitansi = 1 or t_kwitansi.id_status_kwitansi = 3 
+								or t_kwitansi.id_status_kwitansi = 19 or t_kwitansi.id_status_kwitansi = 20 )";
+		$data['isi']=$this->m_kwitansi->get_view_kwitansi_verifikasi($ta, $idU, $sifat_bayar, $jenis_kwitansi, $where, $sub_unit);        
+		$this->load->view('kwitansi/verifikasi/daftar_kwitansi_verifikasi',$data);
+    }
+	
+	function get_view_kwitansi_pusat(){
+		$this->auth->restrict();
+		$idU = $this->session->userdata('id_unit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $fak                = $this->input->post('fak');        
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+		$where				= "( t_kwitansi.id_status_kwitansi = 4 )";
+		$data['isi']=$this->m_kwitansi->get_view_kwitansi_verifikasi_pusat($ta, $sifat_bayar, $jenis_kwitansi, $where, $fak);
+		//echo $this->db->last_query();
+		$this->load->view('kwitansi/verifikasi/daftar_verifikasi_pusat',$data);
+    }
+		
+    function veri(){
+        $idk 			= $this->uri->segment(3); 
+		//$idu  			= $this->session->userdata('id_unit');
+		$idu	= $this->m_kwitansi->get_id_unit($idk);
+		//echo $this->db->last_query();
+		//var_dump($idu);
+		
+		//$user=$this->auth->get_user();
+		//$data['ver_unit']=$user->hasPrivilege('ver_unit');
+		//$data['ver_pusat']=$user->hasPrivilege('ver_pusat');
+		
+		$cek_kw			= $this->m_kwitansi->cek_kwi_available_preview($idk);
+        $data['row'] 	= $this->m_kwitansi->get_kwitansi_preview($idk); 
+        $data['munit'] 	= $this->m_kwitansi->get_munit_by_id($idu); 
+        $data['nmunit'] = $this->m_umum->get_nama_unit_by_id($idu); 
+        $data['kelengkapan'] = $this->m_kwitansi->kelengkapan($idk);
+		if($data['row'] === FALSE)
+		{
+           $this->session->set_userdata('msg_typ','err');
+           $this->session->set_userdata('msg', 'Maaf Kwitansi yang anda cari tidak ada');
+           redirect('kwitansi_view');  			   
+		}
+		else{
+        $this->template->load('template','kwitansi/preview/kwitansi_veri',$data);
+		}
+    }
+	
+/*	function verifikasi_simpan()
+    {
+        $idk 			= $this->input->post('id_kwitansi');
+        $status 		= $this->input->post('status');
+        $comment 		= $this->input->post('comment');
+        $id_spj_su 		= $this->input->post('id_spj_su');
+		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id['id_kwitansi']);
+		$levelKini		= $levelTinggi +1;
+		
+		if($status=='4')
+		{$stat_waktu='Siap dijadikan SPTB';}
+		else
+		{$stat_waktu='revisi ke subunit';}
+		
+		if (isset($_POST['kwitansi']))
+            {$st_kwitansi ='1';}
+            else
+            {$st_kwitansi ='0';}
+
+		$get_id_ver = $this->m_kwitansi->kelengkapan($idk);
+              foreach($get_id_ver->result_array() as $row)
+			  {
+                  $nama = $row['id_ver']; 
+					if (isset($_POST[$nama]))
+            		{$flag ='1';}
+            		else
+            		{$flag ='0';}
+				$this->m_kwitansi->up_kelengkapan($flag,$idk);	
+              }
+			  
+		$this->m_kwitansi->up_kwitansi($status, $idk, $st_kwitansi, $id_spj_su);
+		$this->m_kwitansi->simpan_history($idk, $stat_waktu, $comment, $levelKini);
+		$this->session->set_userdata('msg_typ','ok');
+        $this->session->set_userdata('msg', 'Verifikasi Kwitansi Berhasil');
+
+		redirect('kwitansi_view/verifikasi');
+    }
+*/	
+ 	function tampil_history()
+     {       
+        $idk 			= $this->uri->segment(3);
+        $data['row'] 	= $this->m_kwitansi->get_history($idk);
+        $this->load->view('kwitansi/preview/kwitansi_history',$data);   
+    }
+
+ 	/*function preview_honor()
+     {       
+        $idk 		= $this->uri->segment(3); 
+        $jns_honor 	= $this->uri->segment(4); 
+		$idu  		= $this->m_kwitansi->get_id_unit($idk);
+		$idSu  		= $this->m_kwitansi->get_id_subunit($idk);
+		
+        $data['hasil'] 			= $this->m_kwitansi->view_honor($idk);
+        $data['nama_unit'] 		= $this->m_umum->get_nama_unit_by_id($idu); 
+        $data['nama_subunit'] 	= $this->m_umum->get_nama_sunit_by_id($idSu); 
+        $data['munit'] 			= $this->m_kwitansi->get_munit_by_id($idu); 
+        $this->load->view('kwitansi/rincian_honor/rincian_honor_'.$jns_honor,$data);
+    }*/
+	
+	function preview_honor()
+	{
+		//$this->auth->restrict();
+
+        $id_kwitansi 		= $this->uri->segment(3); 
+        $kwitansi 			= $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+
+        if(empty($kwitansi)) {
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Kwitansi tidak ada');						  
+            return;
+        }
+
+        $jns_honor 				= $this->m_kwitansi->get_jenis_honor_by_id_kwitansi($kwitansi->id_kwitansi);
+        $data['hasil'] 			= $this->m_kwitansi->view_honor($kwitansi->id_kwitansi);
+        $data['nama_unit'] 		= $this->m_umum->get_nama_unit_by_id($kwitansi->id_unit); 
+        $data['nama_subunit'] 	= $this->m_umum->get_nama_sunit_by_id($kwitansi->id_subunit); 
+        $data['munit'] 			= $this->m_kwitansi->get_munit_by_id($kwitansi->id_unit);
+        $this->template->load('doc_template', 'kwitansi/rincian_honor/rincian_honor_'.$jns_honor, $data); 
+	}
+
+ 	function print_rincian_honor($download_pdf = ''){
+        
+		$idk 		= $this->uri->segment(3); 
+        $jns_honor 	= $this->uri->segment(4); 
+		$idu  		= $this->session->userdata('id_unit');
+		$idSu  		= $this->session->userdata('id_subunit');
+		
+        $data['hasil'] 			= $this->m_kwitansi->view_honor($idk);
+        $data['nama_unit'] 		= $this->m_umum->get_nama_unit_by_id($idu); 
+        $data['nama_subunit'] 	= $this->m_umum->get_nama_sunit_by_id($idSu); 
+        $data['munit'] 			= $this->m_kwitansi->get_munit_by_id($idu); 
+
+		$pdf_filename='rincian_honor.pdf';
+		$link_download = ($download_pdf==TRUE)?'': anchor(site_url().'kwitansi_view/print_rincian_honor/true/','Download Pdf');
+		$data['link'] = $link_download ;
+		
+		$user_info = $this->load->view('kwitansi/rincian_honor/rincian_honor_'.$jns_honor, $data, true);;            
+		
+		if($download_pdf==true)
+			{generate_pdf($user_info,$pdf_filename);}  
+		else
+			{echo $output;}
+    }
+	
+    function spj(){
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+ 
+        $this->template->load('template','kwitansi/view/view_kwitansi_spj',$data);
+		
+    }
+	
+    function get_create_kwitansi_spj(){
+		
+		$this->auth->restrict();
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+		$jenis_kwitansi 	= 'null';
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $status_kwitansi 	= 0;
+        $jenis_kwitansi 	= $jenis_kwitansi ==='null' ? '' : $jenis_kwitansi;
+		$type				= 'Constant::JB_'.$sifat_bayar;
+		
+		$data['status_kirim']	= $this->cek_xpersen_kirim_unit(1,$type);		
+		$data['isi']			= $this->m_kwitansi->get_view_kwitansi($ta, $su, $sifat_bayar, 
+																	$status_kwitansi, $jenis_kwitansi);
+		$xpersen				= $this->m_settings->get_nilai_maxpersen();
+		$nilai_up				= $this->m_logic->get_nilai_up($ta,$su);
+		$nilai_tup				= $this->m_logic->get_nilai_tup($ta,$su);
+		$pagu_real				= $this->m_logic->get_pagu_real($ta, $su);
+		
+		switch($sifat_bayar){
+		case Constant::JB_GUP:
+			$data['nilai_min']	= ($nilai_up)*($xpersen);
+			$data['nilai_max']	= $nilai_up;
+		break;
+		case Constant::JB_LS:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $pagu_real;
+		break; 
+		case Constant::JB_TUP_NHL:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $nilai_tup;
+		break; 
+		case Constant::JB_GUP_NHL:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $nilai_up;
+		break; 
+		}
+		
+		$this->load->view('kwitansi/view/daftar_kwitansi_spj',$data);
+
+    }
+
+	function save_paket_spj(){
+		$id_kwitansi 	= $this->input->post('id');
+		$sifat_bayar 	= $this->input->post('jns_belanja');
+		$count			= count($id_kwitansi);
+		$idSu  			= $this->session->userdata('id_subunit');
+		$idu  			= $this->session->userdata('id_unit');
+		$status_spj		= 'baru';
+		
+		// membuat paket SPJ
+		//TODO : JADIKAN TRANSACTION (SUDAH)
+		$id_spj_su		= $this->m_kwitansi->simpan_spj_su($idSu, $idu, $status_spj, $sifat_bayar, $count, $id_kwitansi);
+    }
+
+    function validasi_paket(){
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] 		= $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] 	= $this->m_umum->get_nama_sunit_by_id($su);
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']	= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        $data['subunit']		= $this->m_kwitansi->get_list_subunit_sudah_spj($idu);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','kwitansi/view/view_kwitansi_validasi_paket',$data);
+    }
+	
+    function get_view_kwitansi_validasi_paket(){
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$idsu			 	= $this->input->post('subunit');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+        $status_kwitansi 	= '';
+        $status_spj_su	 	= '6';
+		$where				= "( t_kwitansi.id_status_kwitansi <=21 )";
+		
+		$data['isi']=$this->m_kwitansi->get_view_kwitansi_spj($ta, $idsu, $sifat_bayar, $status_kwitansi, 
+																$status_spj_su, '', $where);
+		$this->load->view('kwitansi/view/daftar_kwitansi_validasi_paket',$data);
+		//echo $data;
+    }
+	
+	function kirim_kwitansi_sptb()
+	{   
+		$this->auth->restrict();
+		
+        $id_spj_su		= $this->uri->segment(3); 
+		
+		//TODO : MENGGUNAKAN TRANSACTION (SUDAH)
+		$this->m_kwitansi->kirim_kwitansi_sptb($id_spj_su);
+		
+		$this->session->set_userdata('msg_typ','ok');
+        $this->session->set_userdata('msg', 'Kwitansi Siap dijadikan SPTB');
+		redirect('kwitansi_view/validasi_paket');		
+    }
+	
+    function spj2(){
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','kwitansi/spj/view_kwitansi_spj',$data);
+    }
+
+
+    function get_form_spj(){
+		//$this->output->enable_profiler(TRUE);
+		$sifat_bayar	= $this->input->post('jns_belanja');
+        $idu 			= $this->session->userdata('id_unit');
+		$su  			= $this->session->userdata('id_subunit');
+		$ta  			= $this->m_settings->get_tahun_anggaran();
+		$where			= "status_spj_su < '8'";
+        $data['kunci'] = $this->m_sptb->cek_kunci($idu,$sifat_bayar);
+		$data['isi_spjsu']	= $this->m_kwitansi->get_spjsu($su,$sifat_bayar,$where);
+		$data['isi']		= $this->m_kwitansi->get_view_kwitansi_spj($ta, $su, $sifat_bayar, '', 
+																'', '', $where);
+		
+		$xpersen				= $this->m_settings->get_nilai_maxpersen();
+		//digunakan saat setting usulan default untuk SPJ
+		//$nilai_up				= $this->m_logic->get_nilai_spm_up($ta,$su);
+		$nilai_up				= $this->m_logic->get_nilai_max_up_sunit($su, $ta);
+		//echo $nilai_up;
+		$nilai_tup				= $this->m_logic->get_nilai_spm_tup($ta,$su);
+		$pagu_real				= $this->m_logic->get_pagu_real($ta, $su);
+		$max_up_sunit			= $this->m_logic->get_nilai_max_up_sunit($su, $ta);
+		//echo $max_up_sunit;
+		
+		//=== no rule ===//
+		//$nilai_up				= 10000000;
+		//$nilai_tup				= 10000000;
+		//$pagu_real				= 10000000;
+		//=== end no rule ===//
+		
+		switch($sifat_bayar){
+		case Constant::JB_GUP:
+			// sementara menggunakan set nilai max up subunit karena penginputan usulan di bypass kalau fix menggunakan $nilai_up
+			$data['nilai_min']	= ($max_up_sunit)*($xpersen);
+			$data['nilai_max']	= $max_up_sunit;
+		break;
+		case Constant::JB_LS:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $pagu_real;
+		break; 
+		case Constant::JB_TUP_NHL:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $nilai_tup;
+		break; 
+		case Constant::JB_GUP_NHL:
+			$data['nilai_min']	= 0;
+			// sementara menggunakan set nilai max up subunit karena penginputan usulan di bypass kalau fix menggunakan $nilai_up
+			$data['nilai_max']	= $max_up_sunit;
+		break; 
+		}
+														
+		$this->load->view('kwitansi/spj/form_spj_detail',$data);
+    }
+	
+	function tambah_spj(){
+		$sifat_bayar	= $this->uri->segment(3); 
+		$jum_kwitansi	= $this->uri->segment(4);
+		$nilai_max		= $this->uri->segment(5); 
+		$nilai_min		= $this->uri->segment(6); 
+		$id_spj_su		= $this->uri->segment(7); 
+		$su  			= $this->session->userdata('id_subunit');
+		$where			= "(t_kwitansi.id_status_kwitansi=2 or t_kwitansi.id_status_kwitansi=0)";
+		
+		$data['jum_kwi']	= $jum_kwitansi;
+		$data['nilai_max']	= $nilai_max;
+		$data['nilai_min']	= $nilai_min;
+		$data['id_spj_su']	= $id_spj_su;
+		$data['isi']		= $this->m_kwitansi->get_kwi_tambahspj($su, $sifat_bayar,$where); 
+		$this->load->view('kwitansi/spj/tambah_spj',$data);
+	}
+	
+	function tambah_kwi_keSPJ(){
+		$id_kwitansi 	= $this->input->post('id');
+		$id_spj_su	 	= $this->input->post('id_spj_su');
+		$count			= count($id_kwitansi);
+		// membuat paket SPJ		
+			for($i=0;$i<$count;$i++){
+				//$this->m_kwitansi->up_status_kwitansi_byID($id_kwitansi[$i],$id_status_kwitansi,$id_spjsu);
+				$this->m_kwitansi->up_kwitansi('', $id_kwitansi[$i], '',$id_spj_su);
+			}
+    }
+
+	function hapus_kwi_spj(){
+		$id_kwitansi 	= $this->input->post('id');
+		$this->m_kwitansi->up_kwitansi('', $id_kwitansi, '',NULL);
+    }
+
+    function kirim_spj_unit() {
+		$this->auth->restrict();
+		$id_spj_su 	= $this->input->post('id_spj_su');
+		$st_spj_su 	= $this->input->post('st_spj_su');
+		$this->m_kwitansi->kirim_spjsu($id_spj_su);
+    } 
+	
+	function create_spjsu(){
+		$idSu  			= $this->session->userdata('id_subunit');
+		$idu  			= $this->session->userdata('id_unit');
+		$created_by  	= $this->session->userdata('username');
+		$jenis_belanja 	= $this->input->post('jns_belanja');
+		$created_date 	= date('Y-m-d H:i:s');
+		
+		$this->m_kwitansi->create_spjsu($created_date, $idSu, $jenis_belanja, $idu, $created_by);
+    }
+	
+	function verifikasi_simpan()
+    {
+        $idk 			= $this->input->post('id_kwitansi');
+        $status 		= $this->input->post('status');
+        $comment 		= $this->input->post('comment');
+        $id_spj_su 		= $this->input->post('id_spj_su');
+		
+		$user=$this->auth->get_user();
+		$data['verifikasi_kwitansi_pusat']=$user->hasPrivilege('verifikasi_kwitansi_pusat');
+		
+		if (isset($_POST['kwitansi']))
+            {$st_kwitansi ='1';}
+		else
+            {$st_kwitansi ='0';}
+
+		//TODO : MENGGUNAKAN TRANSACTION
+		$this->m_kwitansi->verifikasi_simpan($idk, $status, $comment, $id_spj_su, $st_kwitansi);
+		
+		
+/*		$levelTinggi 	= $this->m_kwitansi->ambil_level_kwitansi_tinggi($id['id_kwitansi']);
+		$levelKini		= $levelTinggi +1;
+		
+
+		$get_id_ver = $this->m_kwitansi->kelengkapan($idk);
+              foreach($get_id_ver->result_array() as $row)
+			  {
+                  $nama = $row['id_ver']; 
+					if (isset($_POST[$nama]))
+            		{$flag ='1';}
+            		else
+            		{$flag ='0';}
+				$this->m_kwitansi->up_kelengkapan($flag,$idk);	
+              }
+*/
+/*		// update status kwitansi dan status SPJ
+		
+		//update status kwitansi
+		$this->m_kwitansi->up_kwitansi($status, $idk, $st_kwitansi, $id_spj_su);
+		$cek_semua	 	= $this->m_kwitansi->cek_semua_stKwitansi($status, $id_spj_su);
+		switch($status)
+		{
+			case 2:
+			//update kwitansi jadi 2
+			//update status spj jadi 2
+			$this->m_kwitansi->up_spj_su_byID('3', $id_spj_su);
+				break;
+				
+			case 18;
+			//update kwitansi jadi 18
+			//cek kwitansi yg spj-nya sama kalo semua status 18 :
+			//update status spj jadi 4 
+			if($cek_semua)
+			{$this->m_kwitansi->up_spj_su_byID('4', $id_spj_su);}
+				break; 
+				
+			case 21;
+			//update kwitansi jadi 21
+			//cek kwitansi yg spj-nya sama kalo semua status 21 :
+				//update status spj jadi 6 =>kalo tidak tidak update sattsu spj
+			if($cek_semua)
+			{$this->m_kwitansi->up_spj_su_byID('6', $id_spj_su);}
+				break; 
+				
+		}
+		//END update status kwitansi & SPJ ======
+		
+		if($status=='4')
+		{$stat_waktu='Kwitansi siap SPTB';}
+		else
+		{$stat_waktu='revisi ke subunit';}
+*/		
+//		$this->m_kwitansi->simpan_history($idk, $stat_waktu, $comment, $levelKini);
+		$this->session->set_userdata('msg_typ','ok');
+        $this->session->set_userdata('msg', 'Verifikasi Kwitansi Berhasil');
+
+		if($user->hasPrivilege('verifikasi_kwitansi_pusat')){
+			redirect('kwitansi_view/verifikasi_pusat');
+		}else{
+			redirect('kwitansi_view/verifikasi');
+		}
+    }
+	
+	//List untuk SPJ subunit yang sudah di SPJ kan
+	function view_spj(){
+		$non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }
+		$this->template->load('template','kwitansi/spj/view_spj',$data);
+		
+	}
+	
+	function get_view_spj() {
+		//$this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+        $jb = $this->input->post('jenisblj');
+        $data['jenis_belanja'] = $this->input->post('jenisblj');
+        $id_subunit = $this->session->userdata('id_subunit');
+		$id_spj_su = $this->input->post('id_spj_su');
+        
+        $bulan = date('m');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        
+        $data['hasil']= $this->m_kwitansi->list_view_spj($jb,$id_subunit);
+        
+        $this->load->view('kwitansi/spj/list_view_spj',$data);
+	}
+	
+	function ajax_get_kwitansi(){
+		//$this->output->enable_profiler(TRUE);
+		$id_spj_su = $this->input->post('id_spj_su');
+		$jenis_belanja = $this->input->post('jenis_belanja');
+		
+		$result = $this->m_kwitansi->view_list_kwitansi($id_spj_su);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Tanggal</th>
+					<th>No Kwitansi</th>
+					<th>Jenis Kwitansi</th>
+					<th>Ket Kwitansi</th>
+					<th>Status</th>
+					<th>Nominal</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			$str = "
+                <tr>
+                	<td align='center'>{$i}</td>
+					<td align='left'>". DATE('d-m-Y',strtotime($row->tgl_kwitansi)) ."</td>
+                    <td align='left'>{$row->no_kwitansi}</td>
+                    <td align='center'>{$row->jenis_kwitansi}</td>
+                    <td align='left'>". StrUtil::getShortStr($row->ket_kwitansi, 50) ."</td>
+					<td align='center'>{$row->status_kwitansi}</td>		
+                    <td align='right'>" . Formatting::currency($row->nominal,0,false) . "</td>
+					<td align='center'>
+                    </td>				
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	}
+}?>

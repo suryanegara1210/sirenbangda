@@ -1,0 +1,43 @@
+	    <article class="module width_full">
+    		<header><h3>
+            <?php if(isset($isBKM) && $isBKM){
+                echo "Input Bukti Kas Masuk";
+            } else{
+                echo "Input Bukti Memorial";
+            }?>
+            </h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table class="table-common" style="width: 780px;">
+                    <tr>
+                        <th>Nama Fakultas</th>
+                        <th>Tahun Ajaran</th>
+                        <th>Total Penerimaan</th>
+                        <th>Aksi</th>
+                    </tr>
+                    <?php
+                    if (!$penerima){
+                        echo "<tr><td colspan=\"9\"><center><h3>Tidak Ada Data...</h3></center></td></tr>";
+                    }else{
+                        if(isset($isBKM) && $isBKM){
+                            $link="bukti_akuntansi/input/".constant::BUK_BKM."/".constant::MOU_LADIK."/";
+                        }else{
+                            $link="bukti_akuntansi/input/".constant::BUK_BM."/".constant::MOU_LADIK."/";
+                        }
+                        foreach($penerima as $pen){
+                            $add="<a href=".site_url($link.$pen->id_subunit)."><img src=\"".base_url()."asset/images/add.png\"/></a>";
+                            echo "<tr>
+                                    <td>$pen->nama_subunit</td>
+                                    <td>$pen->th_ajar $pen->semester</td>
+                                    <td style=\"text-align: right;\">".$this->uang->angka($pen->jum_nilai)."</td>";
+                                echo " <td style=\"width: 18px;\">".$add."</td>";
+                           echo "</tr>";
+                        }
+                    }
+                    ?>
+                </table>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->

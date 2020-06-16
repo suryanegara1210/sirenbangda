@@ -1,0 +1,21 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Evaluasi_renja extends CI_controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));        
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_cik','m_urusan', 'm_bidang', 'm_program', 'm_kegiatan'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();
+		//$data['url_delete_data'] = site_url('cik/delete_cik');
+		$this->template->load('template','evaluasi/evaluasi_renja_view');
+	}
+}

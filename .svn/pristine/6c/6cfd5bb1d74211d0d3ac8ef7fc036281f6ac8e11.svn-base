@@ -1,0 +1,35 @@
+   <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+* @brief Controller Class yang terkait dengan Penamaan BAS
+*
+* Class Controller ini untuk mengelola data BAS
+* menampilkan tabel dengan proses menambah data, membaca data, mengganti data dan menghapus data BAS
+*
+* @author Praba Santika
+*
+*/
+class Bas extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+        {                                
+            $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->library('konversi');
+            $this->load->model('munit'); 
+        }
+           
+    function list_bas(){   
+        if($this->auth->is_logged_in() == true){
+          $th_sp2d = $this->uri->segment(3);       
+          $id_sp2d = $this->uri->segment(4);       
+          $data['daftar_sp2d'] = $this->munit->list_sp2d3($id_sp2d,$th_sp2d);
+          //echo $this->db->last_query();       
+          $this->template->load('template','bas/preview_bg',$data);
+        }
+    }
+    
+}          

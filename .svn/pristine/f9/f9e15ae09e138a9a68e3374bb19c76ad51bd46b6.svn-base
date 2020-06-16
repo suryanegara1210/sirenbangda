@@ -1,0 +1,269 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+* @brief Controller Class Pembuatan Laporan Akuntansi untuk Rekap
+* di bendahara pengeluaran
+* 
+* Controller Class Pembuatan Laporan Akuntansi
+* Rekap SPM dan SP2d serta Rekap Pengesahan SP2D
+* 
+* @author I Wayan Shandyasa
+*/                                                                                    
+class Rekap extends CI_Controller
+{
+	var $CI = NULL;
+
+	function __construct()
+	{
+		// get CI's object
+		$this->CI =& get_instance(); 
+		parent::__construct();
+		$this->load->helper(array('form','url', 'text_helper','date'));       
+		$this->load->database();
+		$this->load->library(array('Pagination','image_lib'));
+		$this->load->library('konversi');
+		$this->load->library(array('StrUtil','Formatting'));
+		$this->load->model(array('m_rekap', 'm_logic', 'm_settings','m_umum')); 
+	}  
+	/**
+	 * Menampilkan daftar rekap SPM dan SP2D yang sudah status cair
+	 */
+	function daftar_sp2dcair(){
+		$this->auth->restrict();
+		$data['nm_unit'] = $this->m_umum->unit_semua(constant::WITH_ALL); 
+		$this->template->load('template','rekap/daftar_sp2dcair',$data);
+	}
+	
+	function list_sp2dcair(){
+		$bulanx = $this->input->post('bulanx');
+		$bulany = $this->input->post('bulany');
+		$tahun = $this->input->post('tahun');
+        $unit = $this->input->post('unit');
+		
+		$data['bulanx'] = $bulanx;
+		$data['bulany'] = $bulany;
+		$data['tahun'] = $tahun;
+        $data['unit'] = $unit;        
+        $data['sp2d'] = $this->m_rekap->data_sp2dcair($bulanx,$bulany,$tahun,$unit);
+        //echo $this->db->last_query();
+        $this->load->view('rekap/list_sp2dcair',$data);    
+	} 
+    
+	
+	function select_tahun_jurnal(){
+		$bulan = $this->input->post('bulan');
+		$tahun = $this->input->post('tahun');
+		
+		$data['bulan'] = $bulan;
+		$data['tahun'] = $tahun;
+		 
+		$data['isi_jurnal']=$this->m_report->daftar_jurnal($bulan,$tahun);
+		//echo $this->db->last_query();
+		$this->load->view('report/viewlist_jurnal',$data);    
+	} 
+	
+	function buat_jurnal(){   
+		if($this->auth->is_logged_in() == true){ 
+		  $id_bukti = $this->input->post('id');
+		  $bulan = $this->input->post('bulan');
+		  $tahun = $this->input->post('tahun');
+          //FIXME: perlu transaction??
+		  $this->m_report->simpan_jurnal($bulan,$tahun);
+		  $this->m_report->update_status_posting($bulan,$tahun);
+		}
+	}
+	
+	function buku_besar(){
+		$data['akun_kode']=$this->m_report->ambil_akun();
+		
+		$this->template->load('template','report/daftar_bb',$data);
+	}
+	
+	function select_tahun_(){
+		$bulan = $this->input->post('bulan');
+		$tahun = $this->input->post('tahun');
+		$akun_kode = $this->input->post('akun_kode');
+		
+		$data['bulan'] = $bulan;
+		$data['tahun'] = $tahun;
+		$data['akun_kode'] = $akun_kode;
+		 
+		$data['isi_bukti']=$this->m_report->jurnal_daftar_ambil($bulan,$tahun,$akun_kode);
+		$this->load->view('report/list_bb',$data);    
+	}
+    
+    function kunci_jurnal(){
+        $data['unit']=$this->m_report->unit_get_all();
+        $this->template->load('template','report/kunci_jurnal',$data);
+    }
+    function kunci_jurnal_save(){
+        $kunci=$this->input->post('kunci');
+        $this->m_report->kunci_jurnal_save($kunci);
+    }
+    
+    public $bulan=array(
+        '1'=>'Januari',
+        '2'=>'Februari',
+        '3'=>'Maret',
+        '4'=>'April',
+        '5'=>'Mei',
+        '6'=>'Juni',
+        '7'=>'Juli',
+        '8'=>'Agustus',
+        '9'=>'September',
+        '10'=>'Oktober',
+        '11'=>'November',
+        '12'=>'Desember'
+    );
+    
+    function aruskas_set(){
+        $this->template->load('template','report/aruskas_set');
+    }
+    function aruskas_jenis_ambil(){
+        $data['jenis']=$this->m_report->aruskas_jenis_ambil();
+        echo $this->load->view('report/aruskas_set_jenis',$data, true);
+    }
+    function aruskas_jenis_simpan(){
+        $id=$this->input->post('id_jenis');
+        $kode=$this->input->post('kode_jenis');
+        $deskripsi=$this->input->post('deskripsi_jenis');
+        echo $this->m_report->aruskas_jenis_save($id,$kode,$deskripsi);
+    }
+    function aruskas_jenis_del(){
+        $id=$this->input->post('id_aruskas');
+        echo $this->m_report->aruskas_jenis_del($id);
+    }
+    function aruskas_item_ambil(){
+        $data['idjenis']=$this->input->post('id_jenis');
+        echo $this->load->view('report/aruskas_set_item',$data, true);
+    }
+    function aruskas_item_masuk_ambil(){
+        $idjenis=$this->input->post('id_jenis');
+        $data['id_jenis']=$idjenis;
+        $data['arus']='masuk';
+        $data['item']=$this->m_report->aruskas_item_ambil($data['id_jenis'],$data['arus']);
+        echo $this->load->view('report/aruskas_set_item_dt',$data, true);
+    }
+    function aruskas_item_keluar_ambil(){
+        $idjenis=$this->input->post('id_jenis');
+        $data['id_jenis']=$idjenis;
+        $data['arus']='keluar';
+        $data['item']=$this->m_report->aruskas_item_ambil($data['id_jenis'],$data['arus']);
+        echo $this->load->view('report/aruskas_set_item_dt',$data, true);
+    }
+    
+    function aruskas_item_simpan(){
+        $item = new stdClass;
+        $item->id_arus_kas=$this->input->post('id_jenis');
+        $iditem=$this->input->post('id_item');
+        $item->kode_group=$this->input->post('kode_item');
+        $item->deskripsi=$this->input->post('deskripsi_item');
+        if ($this->input->post('arus_item')==='masuk' ){
+            $item->jenis_arus_kas='ARUS MASUK';
+        }else{
+            $item->jenis_arus_kas='ARUS KELUAR';
+        }
+        echo $this->m_report->aruskas_item_save($iditem,$item);
+    }
+    function aruskas_item_del(){
+        $id=$this->input->post('id_item');
+        echo $this->m_report->aruskas_item_del($id);
+    }
+    
+    function aruskas_rincian_ambil(){
+        $data['iditem']=$this->input->post('id_item');
+        $data['arusitem']=$this->input->post('arus_item');
+        $data['rincian']=$this->m_report->aruskas_rincian_ambil($data['iditem']);
+        echo $this->load->view('report/aruskas_set_rincian',$data, true);
+    }
+    function aruskas_rincian_simpan(){
+        $idrincian=$this->input->post('id_rincian');
+        $rincian = new stdClass;
+        $rincian->id_rincian=$this->input->post('iditem');
+        $rincian->kode_bas=$this->input->post('kode_bas_rin');
+        echo $this->m_report->aruskas_rincian_save($idrincian,$rincian);
+        //echo $this->db->last_query();
+    }
+    function aruskas_rincian_del(){
+        $id=$this->input->post('id_rincian');
+        echo $this->m_report->aruskas_rincian_del($id);
+    }
+    
+    function aktivitas(){
+        $data['bulan']=$this->bulan;
+        $this->template->load('template','report/aktivitas_kpl',$data);
+    }
+    function neraca(){
+        $data['bulan']=$this->bulan;
+        $this->template->load('template','report/neraca_kpl',$data);
+    }
+    
+    function arus_kas(){
+        $data['bulan']=$this->bulan;
+        $this->template->load('template','report/aruskas_kpl',$data);
+    }
+    function neraca_saldo(){
+        $data['bulan']=$this->bulan;
+        $data['subunit']=$this->m_umum->subunit_semua('',constant::WITHOUT_ALL);
+        $this->template->load('template','report/neraca_saldo_kpl',$data);
+    }
+    
+    function detail(){
+        $jenis=$this->input->post('jenis');
+        switch($jenis){
+            case 'aktivitas':
+                $data['satker']=$this->input->post('satker');
+                $data['tahun']=$this->input->post('tahun');
+                $data['bulan']=$this->input->post('bulan');
+                $data['nama_bulan']=$this->bulan[$data['bulan']];
+                $data['level']=$this->input->post('maxlev');
+                $data['laporan']=$this->m_report->aktivitas($data['tahun'],$data['bulan'],'4','9',$data['level']);
+                echo $this->db->last_query();
+                $isi='aktivitas_isi';
+                break;
+            case 'arus_kas':
+                $data['satker']=$this->input->post('satker');
+                $data['tahun']=$this->input->post('tahun');
+                $data['bulan']=$this->input->post('bulan');
+                $data['nama_bulan']=$this->bulan[$data['bulan']];
+                $data['list_aruskas']=$this->m_report->arus_kas($data['tahun'],$data['bulan']);
+                echo $this->db->last_query();
+                $isi='aruskas_isi';
+                break;
+            case 'neraca':
+                $data['satker']=$this->input->post('satker');
+                $data['tahun']=$this->input->post('tahun');
+                $data['bulan']=$this->input->post('bulan');
+                $data['nama_bulan']=$this->bulan[$data['bulan']];
+                $data['level']=$this->input->post('maxlev');
+                $data['laporan']=$this->m_report->aktivitas($data['tahun'],$data['bulan'],'1','3',$data['level']);
+                echo $this->db->last_query();
+                $isi='neraca_isi';
+                break;
+            case 'neraca_saldo':
+                $data['satker']=$this->input->post('satker');
+                $data['tahun']=$this->input->post('tahun');
+                $data['bulan']=$this->input->post('bulan');
+                $data['nama_bulan']=$this->bulan[$data['bulan']];
+                $data['minlev']=$this->input->post('minlev');
+                $data['subunit']=$this->input->post('subunit');
+                
+                $data['laporan']=$this->m_report->neraca_saldo($data['tahun'],$data['bulan'],$data['subunit'],$data['minlev']);
+                echo $this->db->last_query();
+                $isi='neraca_saldo_isi';
+                break;
+        }
+        
+        $cetak=$this->input->post('cetak');
+        if($cetak==='cetak'){
+            //TODO: batasin dokumen yang boleh dicetak hanya yg uda beres
+            $sekarang=date("Ymd_Hi");
+            $filename='report_'.$jenis.'_'.$sekarang.'.pdf';
+            $output = $this->load->view('report/'.$isi,$data,true); 
+            generate_pdf_A4($output,$filename);
+        }else{
+            $this->load->view('report/'.$isi,$data);
+        }
+        
+    }
+	
+}

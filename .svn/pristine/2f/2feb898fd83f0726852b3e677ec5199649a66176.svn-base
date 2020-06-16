@@ -1,0 +1,111 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.cb.value == 0){
+    alert("Anda belum mengisikan Cara Bayar.");
+    form.cb.focus();
+    return (false);
+  }
+  if (form.kepada.value == ""){
+    alert("Anda belum mengisikan Isian Kepada.");
+    form.kepada.focus();
+    return (false);
+  }    
+  if (form.no_rek.value == ""){
+    alert("Anda belum mengisikan Nomor Rekening.");
+    form.no_rek.focus();
+    return (false);
+  } 
+  if (form.uraian.value == ""){
+    alert("Anda belum mengisikan Uraian.");
+    form.uraian.focus();
+    return (false);
+  }
+    
+  return (true);
+}
+</script>
+<article class="module width_full">
+    <header><h3>Form Pengisian Surat Perintah Membayar (SPM)</h3></header>
+                    
+    <div class="module_content">     
+    <form method="post" name='form-spp' action="<?php echo base_url();?>ls/simpan_spm" onSubmit='return validasi(this)'> 
+    <table border='0' width='730' > 
+
+    <?php //echo $this->db->last_query(); 
+    //print_r($asi);
+    foreach($spp->result_array() as $u){
+        $id_spp = $u['id_spp'];
+        $th_spp = $u['th_spp'];
+        //$kode_kota = $u['kode_kota_unit'];
+        //$alamat = $u['alamat_unit'];
+        $no_rek = $u['rekening'];
+        $nama_fak = $u['nama_unit']; 
+        $npwp = $u['npwp'];
+        $nama_bank = $u['bank_relasi'];
+        //$kode_digit = $u['kode_digit'];
+        $jumlah = $u['jumlah'];
+        $sifatpembayaran = $u['sifatpembayaran'];
+        $jenispembayaran = $u['jenispembayaran'];
+        $kdkeg = $u['kdkeg'];
+		//---
+        $kdoutput = $u['kdoutput'];
+        $kdakun = $u['kdakun'];
+        $nmoutput = $u['nmoutput'];
+        $nmakun = $u['nmakun'];
+        $j_belanja = $u['j_belanja'];
+		if($j_belanja=51){$nm_jb=$j_belanja. ' (Biaya Layanan)';}
+	  		else if($j_belanja=55){$nm_jb= $j_belanja. ' (Biaya Administrasi Umum)';} 
+			else if($j_belanja=59){$nm_jb= $j_belanja. ' (Biaya Lainnya)';}
+    }
+    foreach($setting->result_array() as $set){
+        $kpd_pusat= $set['kepada'];
+        $npwp_pusat = $set['npwp'];    
+        $norek_pusat = $set['norek_pusat'];    
+        $bank_pusat = $set['bank'];    
+    }
+    $jumlah_spp = number_format($jumlah,0,",","."); 
+    ?>                 
+        <!--<tr><td>Nomor SPM</td><td >:</td><td><input name='nomor_spm' type='' value='<?php echo "$nomor/UP/$kode_digit/$tahun" ?>' size=80 disabled></td></tr>  -->
+        <tr><td>Cara Bayar *)</td><td>:</td><td> <?php echo form_dropdown("cb",$carabayar,"","id='id_carabayar'") ?></td></div></tr>  
+        <tr><td>Sifat Pembayaran </td><td >:</td><td><input name='kpa' type='' value='<?php echo"$sifatpembayaran";?>' size=65 disabled></td></tr>
+        <tr><td>Jenis Pembayaran </td><td >:</td><td><input name='kpa' type='' value='<?php echo"$jenispembayaran";?>' size=65 disabled></td></tr>
+        <tr><td>Satuan Kerja/SKS </td><td >:</td><td><input name='kpa' type='' value='415253' size=5 disabled></td></tr>
+        <tr><td>Kode Kegiatan</td><td >:</td><td><input name='kpa' type='' value='<?php echo "$kdkeg";?>' size=80 disabled></td></tr>
+        <tr><td>Output</td><td >:</td><td><input name='kpa' type='' value='<?php echo "($kdoutput) $nmoutput";?>' size=80 disabled></td></tr>
+        <tr><td>Akun</td><td >:</td><td><input name='kpa' type='' value='<?php echo "($kdakun) $nmakun";?>' size=80 disabled></td></tr>
+        <tr><td>Jenis Belanja</td><td >:</td><td><input name='kpa' type='' value='<?php echo "$nm_jb";?>' size=80 disabled></td></tr>
+        <tr><td>Kode Fungsi/Sub Fungsi/ Program</td><td >:</td><td><input name='kpa' type='' value='023/04/08' size=80 disabled></td></tr>
+         
+        <tr><td>Jumlah Uang (Rp)</td><td >:</td><td><input name='jumlah_uang' type='text' value='<?php echo "$jumlah_spp,-";?>' disabled></td></tr>
+        <input type='hidden' name='no_spm' value='<?php echo "$nomor/UP/$kode_digit/$tahun" ?>'>
+        <input type='hidden' name='id_spp' value='<?php echo "$id_spp" ?>'>
+        <input type='hidden' name='th_spp' value='<?php echo "$th_spp" ?>'>
+        <input type='hidden' name='jum_huruf' value='<?php echo "$terbilang" ?>'>
+        <input type='hidden' name='id_dipa' value='<?php echo "$id_dipa" ?>'>  
+        <input type='hidden' name='kepada' value='<?php echo "Operasional BLU Universitas Udayana " .$nama_fak;?>'>
+        <input type='hidden' name='no_rek' value='<?php echo "$no_rek" ?>'>  
+        <input type='hidden' name='bank' value='<?php echo "$nama_bank" ?>'>  
+        <input type='hidden' name='npwp' value='<?php echo "$npwp"; ?>'>  
+        <tr><td>Terbilang</td><td >:</td><td><textarea style="font-size: 12px" name='terbilang' rows=2 cols=65 wrap='virtual' disabled><?php echo "$terbilang";?> rupiah</textarea></td></tr>
+        <tr><td>Kepada</td><td >:</td><td><input name='kpd' type='text' value='<?php echo "Operasional BLU Universitas Udayana ".$nama_fak;?>' size=80 disabled></td></tr>
+        <tr><td>Nomor Rekening</td><td >:</td><td><input name='rek' type='text' value='<?php echo "$no_rek" ?>' size=80 disabled></td></tr>
+        <tr><td>Bank / Pos</td><td >:</td><td><input name='bnk' type='text' value='<?php echo "$nama_bank"; ?>' size=80 disabled></td></tr>
+        <tr><td>NPWP</td><td >:</td><td><input name='npwp' type='text' value='<?php echo "$npwp"; ?>' size=80 disabled></td></tr>   
+        
+        <tr><td>Uraian *)</td><td >:</td><td><textarea style="font-size: 12px;" name='uraian' rows=2 cols=65 wrap='virtual' placeholder="Keterangan pembayaran SPM"></textarea></td></tr>
+        <tr><td style="font-style: italic; "> *)  harus diisi</td></tr>
+
+    </table>    
+    </div>                                                                              
+    <footer>
+                
+    <div class="submit_link">  
+        <input type='submit' value='Simpan' onclick="return confirm('Apakah anda yakin ingin menyimpan SPM ini?')">
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+       </form>
+
+
+</article>  

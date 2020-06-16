@@ -1,0 +1,97 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-27 04:50:04 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-27 04:50:04 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-27 04:50:04 --> Unable to connect to the database
+ERROR - 2013-05-27 04:50:15 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 04:50:15 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 04:50:15 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:00:25 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:00:25 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:00:25 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:00:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-27 05:12:16 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:12:16 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:12:16 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:14:35 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:14:35 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:14:35 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:14:49 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:14:49 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:14:49 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:19:15 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:19:15 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:19:15 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:19:46 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:19:46 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:19:46 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:20:40 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:20:40 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:20:40 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:21:35 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-27 05:26:34 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-27 05:36:08 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 05:36:08 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 05:36:08 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 05:37:25 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-27 07:40:27 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 07:40:27 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 07:40:27 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 07:46:02 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-27 07:46:56 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-27 09:48:31 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 09:48:31 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 09:48:31 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 09:50:52 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-27 10:13:03 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-27 10:34:31 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 10:34:31 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 10:34:31 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 10:34:36 --> Severity: Warning  --> Missing argument 2 for M_dpt::get_tender_item_by_id(), called in C:\xampp\htdocs\siaku\application\models\m_dpt.php on line 909 and defined C:\xampp\htdocs\siaku\application\models\m_dpt.php 825
+ERROR - 2013-05-27 10:34:36 --> Severity: Notice  --> Undefined variable: hdr C:\xampp\htdocs\siaku\application\models\m_dpt.php 833
+ERROR - 2013-05-27 10:34:36 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE b.hdr = NULL' at line 4
+ERROR - 2013-05-27 10:38:14 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 10:38:14 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 10:38:14 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 10:49:17 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 10:49:17 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 10:49:17 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 10:51:43 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-27 10:57:32 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 10:57:32 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 10:57:32 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:02:16 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:02:16 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:02:16 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:02:22 --> Severity: Warning  --> Missing argument 2 for M_dpt::get_tender_item_by_id(), called in C:\xampp\htdocs\siaku\application\models\m_dpt.php on line 909 and defined C:\xampp\htdocs\siaku\application\models\m_dpt.php 825
+ERROR - 2013-05-27 11:02:22 --> Severity: Notice  --> Undefined variable: hdr C:\xampp\htdocs\siaku\application\models\m_dpt.php 833
+ERROR - 2013-05-27 11:02:22 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE b.hdr = NULL' at line 4
+ERROR - 2013-05-27 11:09:52 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:09:52 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:09:52 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:10:02 --> Severity: Warning  --> Missing argument 2 for M_dpt::get_tender_item_by_id(), called in C:\xampp\htdocs\siaku\application\models\m_dpt.php on line 909 and defined C:\xampp\htdocs\siaku\application\models\m_dpt.php 825
+ERROR - 2013-05-27 11:10:02 --> Severity: Notice  --> Undefined variable: hdr C:\xampp\htdocs\siaku\application\models\m_dpt.php 833
+ERROR - 2013-05-27 11:10:02 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE b.hdr = NULL' at line 4
+ERROR - 2013-05-27 11:11:23 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:11:23 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:11:23 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:11:31 --> Severity: Notice  --> Undefined variable: hdr C:\xampp\htdocs\siaku\application\models\m_dpt.php 909
+ERROR - 2013-05-27 11:11:31 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE b.hdr = NULL' at line 4
+ERROR - 2013-05-27 11:12:55 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:12:55 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:12:55 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:13:00 --> Severity: Notice  --> Undefined variable: hdr C:\xampp\htdocs\siaku\application\models\m_dpt.php 909
+ERROR - 2013-05-27 11:17:23 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:17:23 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:17:23 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:21:04 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:21:04 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:21:04 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:21:15 --> Severity: Notice  --> Undefined variable: hdr C:\xampp\htdocs\siaku\application\models\m_dpt.php 909
+ERROR - 2013-05-27 11:24:30 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:24:30 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:24:30 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-27 11:24:36 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_dpt.php 917
+ERROR - 2013-05-27 11:25:40 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-27 11:25:40 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-27 11:25:40 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91

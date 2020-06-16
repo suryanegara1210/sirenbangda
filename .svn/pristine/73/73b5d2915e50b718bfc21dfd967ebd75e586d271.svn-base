@@ -1,0 +1,26 @@
+<?php echo form_dropdown("id_akun", $option_komponen,'',"id='id_akun'"); ?> 
+<input type="hidden" name="kdoutput" value="<?php echo"$kdoutput" ?>">  
+<script type="text/javascript">
+          $("#id_komponen").change(function(){   
+                var selectValues = $("#id_komponen").val(); 
+                 $("#id_subkomponen").hide();
+                 $("#akun").hide(); 
+                 $("#heder").show();
+                 $("#heder2").hide();
+                if (selectValues == 0){
+                    var msg = "";
+                    $('#cek').html(msg);
+                }else{
+                    var id_komponen = {id_komponen:$("#id_komponen").val(),kdoutput:'<?php echo"$kdoutput" ?>'};
+                    $('#id_akun').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('unit/select_subkomponen')?>",
+                            data: id_komponen,
+                            success: function(msg){
+                                $('#cek').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>

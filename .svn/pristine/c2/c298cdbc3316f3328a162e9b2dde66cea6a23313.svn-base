@@ -1,0 +1,13 @@
+
+<input type="button" id="cek" value="cek">
+
+<script type="text/javascript">
+	$(function() {
+
+		$('#cek').click(function() {
+			$.get("<?php echo base_url('driver/test_get/')?>", { name: 'Agus', id: 1}, function(data) {
+				alert(data);
+			});
+		});
+	});
+</script>

@@ -1,0 +1,27 @@
+<style type="text/css">
+	.no-border{
+		border-collapse: collapse;
+	}
+
+	td.print-no-border{
+		border: none;
+	}
+</style>
+<div style="page-break-after: always;">
+	<center><h4><?php echo $renja_type; ?></h4></center>
+	<table class="full_width no-border" style="font-size: 12px;">
+		<?php
+			echo $header_renja;
+		?>
+	</table>	
+</div>
+<div>	
+	<table class="full_width border" style="font-size: 8px;">
+		<tr>
+			<th colspan="29" align="center"><?php echo $renja_type; ?></th>
+		</tr>
+		<?php
+			echo $renja;
+		?>
+	</table>		
+</div>

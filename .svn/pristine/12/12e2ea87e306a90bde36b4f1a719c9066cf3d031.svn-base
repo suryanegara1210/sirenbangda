@@ -1,0 +1,64 @@
+<table><br></table>  
+    <table  class="table-common" id="list-spj" style= "width:99.5%"; >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Unit</th>
+        		<th>Sifat Pembayaran</th>
+                <th>Status SPJ</th>
+                <th>Jumlah</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if ( COUNT ($hasil)<=0){
+                        echo "<tr><td colspan=\"5\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;   
+                ?>
+                <tr class='accordion'>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="center"><?php echo $row->nama_unit; ?></td>
+                    <td align="center"><?php echo $row->sifat_bayar; ?> </td>
+                    <td align="center"><?php echo $row->status_spj; ?></td>
+                    <td align="right"><?php echo Formatting::currency($row->jumlah,0,false); ?> </td>    
+                </tr>
+                <tr class='detail' id="<?php echo $row->id_spj?>">
+                	<td></td>
+                	<td colspan="7" style="padding: 0px; margin: 0px;"></td> 
+                </tr>
+             <?php endforeach; }?>
+             
+        </tbody>
+</table>
+<p><em><strong>*** Klik pada kolom untuk melihat detail dari data SPJ Unit ***</strong></em></p>
+<script type="text/javascript">
+	$(function () {
+		var table = $('#list-spj');
+		table.find('tr.detail').hide();
+		
+		table.find('tr.accordion').click( function() {
+			$(this).next().toggle();
+            if($(this).next().is(':visible')){
+                $(this).css({ 'background-color': 'lightgrey', 'font-weight' : 'bold'}); 
+				//ambil kwitansinya
+				var jenis_belanja = $("#jenis_belanja").val();
+				var td = $(this).next().find("td").next();
+				td.html('<center> Loading data ... </center>');
+				$.ajax({
+					type: 	"POST",
+					url:	"<?php echo site_url('spj/ajax_get_sptb')?>",
+					data:	{id_spj: $(this).next().attr("id"), jenis_belanja: jenis_belanja},
+					success: function (msg) {
+						td.html(msg);									
+					}
+				});               
+            } else {
+                $(this).css({ 'background-color': 'white', 'font-weight' : 'normal'});
+            }
+		});
+		
+	});
+	
+</script>
+

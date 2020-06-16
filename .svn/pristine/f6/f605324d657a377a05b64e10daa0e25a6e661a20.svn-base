@@ -1,0 +1,122 @@
+<header>
+	<h3>
+	Jendela Kontrol Renja
+</h3>
+</header>
+<div class="module_content"> 		
+	<table class="fcari" width="100%">
+		<tbody>
+			<tr>
+				<td align="center" colspan="6">Proses</td>					
+			</tr>
+			<tr align="center">					
+				<td colspan="3">
+					Rancangan Awal
+				</td>
+				<td colspan="3">
+					Renja Akhir
+				</td>					
+			</tr>
+			<tr>
+				<td width="20%">Kegiatan Baru</td>
+				<td colspan="2" width="30%"><?php echo $jendela_kontrol->baru; ?> Data</td>
+				<td width="20%">Kegiatan Baru</td>
+				<td colspan="2" width="30%"><?php echo $jendela_kontrol->baru2; ?> Data</td>
+			</tr>
+			<tr>
+				<td>Kegiatan Telah dikirim</td>
+				<td colspan="2"><?php echo $jendela_kontrol->kirim; ?> Data</td>
+				<td>Kegiatan Telah dikirim</td>
+				<td colspan="2"><?php echo $jendela_kontrol->kirim2; ?> Data</td>
+			</tr>				
+			<tr>
+				<td>Kegiatan Diproses</td>
+				<td colspan="2"><?php echo $jendela_kontrol->proses; ?> Data</td>
+				<td>Kegiatan Diproses</td>
+				<td colspan="2"><?php echo $jendela_kontrol->proses2; ?> Data</td>
+			</tr>				
+			<tr>
+				<td></td>
+				<td width="15%">Revisi/Tidak disetujui</td>
+				<td>
+					<?php echo $jendela_kontrol->revisi; ?> Data 
+					<?php 
+						if(!empty($jendela_kontrol->revisi)){ 
+					?>
+						<a class="revisi" id-r="<?php echo $renja->id; ?>" idR="revisi_ranwal" href="#" style="font-style: italic;">Lihat</a>
+					<?php 
+						}
+					?>							
+				</td>
+				
+				<td></td>					
+				<td width="15%">Revisi/Tidak disetujui</td>
+				<td>
+					<?php echo $jendela_kontrol->revisi2; ?> Data 						
+					<?php 
+						if (!empty($jendela_kontrol->revisi2)) {
+					?>
+						<a class="revisi" id-r="<?php echo $renja->id; ?>" idR="revisi_akhir" href="#" style="font-style: italic;">Lihat</a>
+					<?php 
+						}
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>Diterima</td>
+				<td><?php echo $jendela_kontrol->veri; ?> Data</td>
+				
+				<td></td>
+				<td>Diterima</td>
+				<td><?php echo $jendela_kontrol->veri2; ?> Data</td>
+			</tr>
+		</tbody>
+	</table>
+	<table style="font-style: italic; color: #666;">
+		<tr>
+			<td colspan="2">*Keterangan:</td>				
+		</tr>
+		<tr>
+			<td valign="top">1. </td>
+			<td>Apabila renja telah dikirim, maka fitur manajemen renja seperti edit akan di non-aktiifkan.</td>
+		</tr>
+		<tr>
+			<td valign="top">2. </td>
+			<td>Fitur manajemen renja seperti edit akan aktif kembali apabila renja telah diproses baik tidak disetujui maupun disetujui.</td>
+		</tr>
+		<tr>
+			<td valign="top">3. </td>
+			<td>
+				Renja yang telah disetujui tetap dapat dirubah, namun renja harus diverifikasi kembali setelah dilakukan perubahan dengan cara mengirim ulang renja. Terdapat ketentuan perubahan renja yang telah disetujui, antara lain:<BR>
+				- Apabila merubah visi, misi dan tujuan, maka semua kegiatan dari SKPD harus diverifikasi kembali.<BR>
+				- Apabila merubah program, maka semua kegiatan yang terkait program tersebut harus diverifikasi kembali.<BR>
+				- Apabila merubah kegiatan, maka hanya kegiatan tersebut yang harus diverifikasi kembali.
+			</td>
+		</tr>
+	</table>		
+</div> 	
+<footer>
+	<div class="submit_link">
+	<?php
+		if (!empty($jendela_kontrol->veri) || !empty($jendela_kontrol->veri2)) {
+	?>
+		<input type="button" class="button-action" id="cetak" value="Cetak" />
+	<?php
+		}
+
+			if (!empty($jendela_kontrol->revisi) || empty($jendela_kontrol->kirim) || !empty($jendela_kontrol->revisi2) || empty($jendela_kontrol->kirim2)){
+		?>
+			<a href="<?php echo site_url('renja/edit_renja_skpd'); ?>"><input type="button" value="Edit Jendela Kontrol Renja" /></a>
+		<?php
+			}
+			
+			if (!empty($jendela_kontrol->baru) || !empty($jendela_kontrol->baru2)){
+		?>
+			<input type="button" id="kirim_renja" value="Kirim Renja" />
+		<?php
+			}
+		?>			
+			<input type="button" value="Back" onclick="history.go(-1)" />
+	</div> 
+</footer>

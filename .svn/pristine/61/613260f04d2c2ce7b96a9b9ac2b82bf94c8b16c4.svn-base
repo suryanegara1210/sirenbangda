@@ -1,0 +1,9 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-08-15 05:47:37 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 362
+ERROR - 2013-08-15 05:47:37 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 323
+ERROR - 2013-08-15 16:49:46 --> Query error: Unknown column 'active' in 'where clause'
+ERROR - 2013-08-15 16:54:09 --> Query error: Unknown column 'active' in 'where clause'
+ERROR - 2013-08-15 16:54:12 --> Query error: Unknown column 'active' in 'where clause'
+ERROR - 2013-08-15 16:54:40 --> Query error: Unknown column 'active' in 'where clause'
+ERROR - 2013-08-15 17:16:37 --> Query error: Unknown column 'active' in 'where clause'

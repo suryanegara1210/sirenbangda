@@ -1,0 +1,268 @@
+<script type="text/javascript">
+    $( function() {
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+		$("#nominal").autoNumeric(numOptions);
+        $("#nilai").autoNumeric(numOptions);
+    });
+    $().ready( function() {
+        
+        $("#resume").validate({
+            rules: {
+                no_mou: "required",
+                tgl_mou: "required",
+                pemberi: "required",
+                penerima: "required",
+				peruntukan: "required",
+                jenis_hibah: "required",
+                nominal: "required",
+                bentuk: "required",
+                banyak: "required",
+				jenis_jasa: "required",
+                nilai: "required",
+                mulai: "required",
+                akhir: "required",
+				peruntukan: "required"
+                
+            },
+            messages: {
+                no_mou: "Mohon diisi nomor MOU yang diajukan ",
+                tgl_mou: "Mohon diisi tanggal MOU yang diajukan",
+                pemberi: "Mohon diisi nama pemberi hibah yang diajukan",
+                penerima: "Mohon diisi nama penerima hibah yang diajukan",
+				peruntukan: "Mohon diisi peruntukan hibah yang diajukan",
+                jenis_hibah: "Mohon dipilih jenis hibah yang diajukan",
+                nominal: "Mohon diisi nominal MOU yang diajukan",
+                bentuk: "Mohon diisi bentuk dari hibah yang diajukan",
+                banyak: "Mohon diisi banyak dari hibah yang diajukan",
+				jenis_jasa: "Mohon diisi jenis jasa dari hibah yang diajukan",
+                nilai: "Mohon diisi nilai dari hibah yang diajukan",
+                mulai: "Mohon diisi tanggal awal hibah yang diajukan",
+                akhir: "Mohon diisi tanggal akhir hibah yang diajukan",
+				peruntukan: "Mohon diisi peruntukan hibah yang diajukan"
+				
+            },
+			submitHandler: function(form){
+				$("#nominal").val($("#nominal").autoNumeric('get'));
+                $("#nilai").val($("#nilai").autoNumeric('get'));
+                form.submit();
+			}
+        });		
+    });
+</script>
+    <form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_HIBAH_TERENCANA);?>" method="POST" name="resume" id="resume" accept-charset="UTF-8">
+	    <article class="module width_full">
+    		<header><h3>Input Ringkasan MOU Hibah</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+				</center>
+	
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_mou\" id=\"id_mou\" value=\"$isi_mou->id_mou\" />";
+        } ?>
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Nomor MOU</td>
+                        <td><input type="text" id="no_mou" name="no_mou" 
+                        placeholder="Nomor MOU" size="40"
+                        <?php if(isset($isi_mou->no_mou)) echo "value=\"$isi_mou->no_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td><input type="text" id="tgl_mou" name="tgl_mou" 
+                        placeholder="Tanggal dibuatkannya MOU" size="40"
+                        <?php if(isset($isi_mou->tgl_mou)) echo "value=\"$isi_mou->tgl_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Pemberi Hibah</td>
+                        <td><input type="text" id="pemberi" name="pemberi" 
+                        placeholder="Nama Pemberi Hibah" size="40"
+                        <?php if(isset($isi_mou->pemberi)) echo "value=\"$isi_mou->pemberi\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Penerima Hibah</td>
+                        <td><input type="text" id="penerima" name="penerima"
+                        placeholder="Nama Penerima Hibah" size="40"
+                        <?php if(isset($isi_mou->penerima)) echo "value=\"$isi_mou->penerima\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Peruntukan Hibah</td>
+                        <td><textarea name="peruntukan" id="peruntukan" cols="35"
+                        rows="3" placeholder="Peruntukan Hibah"/><?php if(isset($isi_mou->uraian)) echo $isi_mou->uraian; ?></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>Jenis Hibah</td>
+                        <td>
+                            <select id="jenis_hibah" name="jenis_hibah">
+                                <option value="Tidak Terikat"
+                                    <?php
+                                        if(isset($isi_mou->jenis_hibah) && $isi_mou->jenis_hibah=="Tidak Terikat"){
+                                            echo "selected";
+                                        } 
+                                    ?> 
+                                    >Tidak Terikat</option>
+                                <option value="Terikat Temporer"
+                                    <?php
+                                        if(isset($isi_mou->jenis_hibah) && $isi_mou->jenis_hibah=="Terikat Temporer"){
+                                            echo "selected";
+                                        } 
+                                    ?>
+                                >Terikat Temporer</option>
+                                <option value="Terikat Permanen"
+                                    <?php
+                                        if(isset($isi_mou->jenis_hibah) && $isi_mou->jenis_hibah=="Terikat Permanen"){
+                                            echo "selected";
+                                        } 
+                                    ?>
+                                >Terikat Permanen</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Bentuk hibah</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Bentuk Hibah</td>
+                        <td>
+                            <select id="bentuk_hibah" name="bentuk_hibah" onChange="viewBentukHibah(value)">
+                                <option value="Uang"
+                                    <?php
+                                        if(isset($isi_mou->bentuk_hibah) && $isi_mou->bentuk_hibah=="Uang"){
+                                            echo "selected";
+                                        } 
+                                    ?>
+                                >Uang</option>
+                                <option value="Aset"
+                                    <?php
+                                        if(isset($isi_mou->bentuk_hibah) && $isi_mou->bentuk_hibah=="Aset"){
+                                            echo "selected";
+                                        } 
+                                    ?>
+                                >Aset</option>
+                                <option value="Jasa"
+                                <?php
+                                        if(isset($isi_mou->bentuk_hibah) && $isi_mou->bentuk_hibah=="Jasa"){
+                                            echo "selected";
+                                        } 
+                                    ?>
+                                >Jasa</option>
+                            </select>
+                        </td>
+                    </tr>
+                    
+                    <tr id="nominaltr">
+                        <td>Nominal</td>
+                        <td><input type="text" id="nominal" name="nominal" 
+                        placeholder="Nominal dari Hibah" size="40"
+                        <?php if(isset($isi_mou->nominal)) echo "value=\"$isi_mou->nominal\""; ?>
+                        /></td>
+                    </tr>
+                    <tr id="bentuk" style="display:none">
+                        <td>Bentuk</td>
+                        <td><input type="text" id="bentuk" name="bentuk" 
+                        placeholder="Bentuk dari Hibah" size="40"
+                        <?php if(isset($isi_mou->bentuk)) echo "value=\"$isi_mou->bentuk\""; ?>
+                        /></td>
+                    </tr>
+                    <tr id="banyak" style="display:none">
+                        <td>Banyak</td>
+                        <td><input type="text" id="banyak"  name="banyak" 
+                        placeholder="Banyak dari Hibah" size="40"
+                        <?php if(isset($isi_mou->banyak)) echo "value=\"$isi_mou->banyak\""; ?>
+                        /></td>
+                    </tr>
+                    <tr id="jenis_jasa" style="display:none">
+                        <td>Jenis Jasa</td>
+                        <td><input type="text" id="jenis_jasa" name="jenis_jasa"
+                        placeholder="Jenis Jasa Hibah" size="40"
+                        <?php if(isset($isi_mou->bentuk)) echo "value=\"$isi_mou->bentuk\""; ?>
+                        /></td>
+                    </tr>
+                    <tr id="nilaitr" style="display:none">
+                        <td>Nilai</td>
+                        <td><input type="text" id="nilai" name="nilai" 
+                        placeholder="Nilai dari Hibah" size="40"
+                        <?php if(isset($isi_mou->nilai)) echo "value=\"$isi_mou->nilai\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Jangka waktu hibah</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Mulai Hibah</td>
+                        <td><input type="text" id="mulai" name="mulai" 
+                        placeholder="Tanggal dimulai Hibah" size="40"
+                        <?php if(isset($isi_mou->mulai)) echo "value=\"$isi_mou->mulai\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Akhir Hibah</td>
+                        <td><input type="text" id="akhir" name="akhir" 
+                        placeholder="Tanggal selesai Hibah" size="40"
+                        <?php if(isset($isi_mou->akhir)) echo "value=\"$isi_mou->akhir\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Ketentuan dan Persyaratn</td></td>
+                        <td><textarea name="syarat" id="peruntukan" cols="35" rows="3" placeholder="Syarat Hibah"/><?php if(isset($isi_mou->syarat)) echo $isi_mou->syarat; ?></textarea></td>
+                    </tr>
+                </table>
+                <script type="text/javascript">
+                    function viewBentukHibah(choice) {
+                            document.getElementById('nominaltr').style.display="none";
+                            document.getElementById('bentuk').style.display="none";
+                            document.getElementById('banyak').style.display="none";
+                            document.getElementById('jenis_jasa').style.display="none";
+                            document.getElementById('nilaitr').style.display="none";
+                        if(choice=='Uang'){
+                            document.getElementById('nominaltr').style.removeProperty("display");
+                       	}else if(choice=='Aset'){
+                            document.getElementById('bentuk').style.removeProperty("display");
+                            document.getElementById('banyak').style.removeProperty("display");
+                            document.getElementById('nilaitr').style.removeProperty("display");
+                       	}else if(choice=='Jasa'){
+                            document.getElementById('jenis_jasa').style.removeProperty("display");
+                            document.getElementById('nilaitr').style.removeProperty("display");
+                       	}
+                    }
+
+        			$(function() {
+        				$( "#tgl_mou" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+                        $( "#mulai" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+                        $( "#akhir" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+                    
+                    viewBentukHibah($("#bentuk_hibah").val());
+                </script>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   
+        </article>
+    </form>
+        <!-- end of styles article --> 

@@ -1,0 +1,362 @@
+<?php /**
+	* @brief Controller Class yang terkait dengan tampilan data unit
+	* menampilkan tabel dan proses CRUD (create read update delete)
+	*
+	* Class Controller ini untuk mengelola tampilan data
+	* menampilkan tabel dengan proses menambah data, membaca data, mengganti data dan menghapus data
+	*
+	* @author Praba Santika
+	*
+	*/
+	class Jq_unit extends CI_Controller {
+
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->helper(array('url'));
+        $this->load->model('munit');
+        $this->load->database();
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN INDEX DARI TABEL UNIT
+*/
+    function index()
+    {
+            $this->load->view('user_grid');
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DARI DATA USER
+*/
+    function tampil_datauser(){
+        $id_umk = $this->uri->segment(3);
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_daftar'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString'"; //create where parameter for search data
+            
+            $where.=" and id_umk='$id_umk'";
+        } else{
+               $where.=" id_umk='$id_umk'";
+        }
+         
+        if(!$sidx) $sidx =1;
+        $count = $this->munit->banyak_semua($id_umk); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->munit->ambilDaftarpegawai($start,$limit,$sidx,$sord,$where); //add parameter to model
+ 
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_daftar;
+            $responce->rows[$i]['cell']=array($row->id_daftar,$row->nama,$row->jabatan,$row->pph,$row->ppn,$row->jumlah); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+	
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL JQ GRID UNIT
+*/
+    function crud(){ 
+        $this->load->model('munit');
+        $oper=$_POST['oper'];  
+        $id_umk=$_POST['id_umk'];  
+        $id=$_POST['id'];  
+        $nama=$_POST['nama']; 
+        $id_jabatan=$_POST['jabatan'];
+        $pph=$_POST['pph'];
+        $ppn=$_POST['ppn'];
+        $jumlah=$_POST['jumlah'];
+        
+        
+        switch ($oper) {
+            case 'add':
+                $user->nama=$nama;
+                $user->id_umk=$id_umk; 
+                $user->id_jabatan=$id_jabatan;
+                $user->pph=$pph;
+                $user->ppn=$ppn; 
+                $user->jumlah=$jumlah; 
+                $this->munit->add_pegawai($user);
+                break;
+            case 'edit':
+                $user->nama=$nama;  
+                $user->id_jabatan=$id_jabatan;
+                $user->pph=$pph;
+                $user->ppn=$ppn; 
+                $user->jumlah=$jumlah;  
+                $this->munit->update_pegawai($user, $id);
+                break;
+            case 'del':
+                $this->munit->delete_pegawai($id);
+            break;
+        }
+    }
+	
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DARI DAFTAR UP
+*/
+ function tampil_daftar_up(){
+        
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_rincian_up'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+        }
+ 
+        if(!$sidx) $sidx =1;
+        $count = $this->munit->banyak_up_semua(); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->munit->ambilDataup($start,$limit,$sidx,$sord,$where); //add parameter to model
+ 
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {  
+            $responce->rows[$i]['id']=$row->id_rincian_up;
+            $responce->rows[$i]['cell']=array($row->id_rincian_up,$row->kdgiat,$row->kdakun,$row->nmakun, $row->jumlah);
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL JQ GRID UP
+*/
+    function crudup(){
+        $oper=$_POST['oper'];
+        $id=$_POST['id'];
+        $kode_unit=$_POST['kode_unit']; 
+        $nama_unit=$_POST['nama_unit']; 
+        $id_keuangan=$_POST['nama_keuangan'];
+        
+        switch ($oper) {
+            case 'add':
+                $tb_unit->kode_unit=$kode_unit;  
+                $tb_unit->nama_unit=$nama_unit; 
+                $tb_unit->id_keuangan=$id_keuangan; 
+                $this->madmin->add_unit($tb_unit);
+                break;
+            case 'edit':
+                $unit->kode_unit=$kode_unit;  
+                $unit->id_keuangan=$id_keuangan;  
+                $unit->nama_unit=$nama_unit;
+                $this->madmin->update_unit($unit, $id);
+                break;
+            case 'del':
+                $this->madmin->delete_unit($id);
+            break;
+        }
+    }
+function tampil_data_maks_up(){
+        //$id_umk = $this->uri->segment(3);
+        $page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+        $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+        $sidx = isset($_POST['sidx'])?$_POST['sidx']:'id_daftar'; // get index row - i.e. user click to sort
+        $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+ 
+        $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+        $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+ 
+        $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+        $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+        $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+        $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+        
+        $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+
+        if ($ssearch == 'true') {
+            $ops = array(
+            'eq'=>'=', //equal
+            'ne'=>'<>',//not equal
+            'lt'=>'<', //less than
+            'le'=>'<=',//less than or equal
+            'gt'=>'>', //greater than
+            'ge'=>'>=',//greater than or equal
+            'bw'=>'LIKE', //begins with
+            'bn'=>'NOT LIKE', //doesn't begin with
+            'in'=>'LIKE', //is in
+            'ni'=>'NOT LIKE', //is not in
+            'ew'=>'LIKE', //ends with
+            'en'=>'NOT LIKE', //doesn't end with
+            'cn'=>'LIKE', // contains
+            'nc'=>'NOT LIKE'  //doesn't contain
+            );
+ 
+            foreach ($ops as $key=>$value){
+                if ($searchOper==$key) {
+                    $ops = $value;
+                }
+            }
+            if($searchOper == 'eq' ) $searchString = $searchString;
+            if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+            if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+            if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+ 
+            $where = "$searchField $ops '$searchString'"; //create where parameter for search data
+                
+        }
+         
+        if(!$sidx) $sidx =1;
+        $count = $this->munit->banyak_semua($id_umk); //get total rows from table daily
+
+        if( $count > 0 ) {
+            $total_pages = ceil($count/$limit);    //calculating total number of pages
+        } else {
+            $total_pages = 0;
+        }
+ 
+        if ($page > $total_pages) $page=$total_pages;
+        $query = $this->munit->ambilDaftarpegawai($start,$limit,$sidx,$sord,$where); //add parameter to model
+ 
+        $responce->page = $page;
+        $responce->total = $total_pages;
+        $responce->records = $count;
+        $i=0;
+        foreach($query as $row) {
+            $responce->rows[$i]['id']=$row->id_daftar;
+            $responce->rows[$i]['cell']=array($row->id_daftar,$row->nama,$row->jabatan,$row->pph,$row->ppn,$row->jumlah); 
+            $i++;
+        }
+        echo json_encode($responce);
+    }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMBAHKAN PROSES INSERT,UPDATE DAN DELETE PADA TABEL JQ GRID UNIT
+*/
+    function crud_maks_up(){ 
+        $this->load->model('munit');
+        $oper=$_POST['oper'];  
+        $id_umk=$_POST['id_umk'];  
+        $id=$_POST['id'];  
+        $nama=$_POST['nama']; 
+        $id_jabatan=$_POST['jabatan'];
+        $pph=$_POST['pph'];
+        $ppn=$_POST['ppn'];
+        $jumlah=$_POST['jumlah'];
+        
+        
+        switch ($oper) {
+            case 'add':
+                $user->nama=$nama;
+                $user->id_umk=$id_umk; 
+                $user->id_jabatan=$id_jabatan;
+                $user->pph=$pph;
+                $user->ppn=$ppn; 
+                $user->jumlah=$jumlah; 
+                $this->munit->add_pegawai($user);
+                break;
+            case 'edit':
+                $user->nama=$nama;  
+                $user->id_jabatan=$id_jabatan;
+                $user->pph=$pph;
+                $user->ppn=$ppn; 
+                $user->jumlah=$jumlah;  
+                $this->munit->update_pegawai($user, $id);
+                break;
+            case 'del':
+                $this->munit->delete_pegawai($id);
+            break;
+        }
+    }
+      
+}

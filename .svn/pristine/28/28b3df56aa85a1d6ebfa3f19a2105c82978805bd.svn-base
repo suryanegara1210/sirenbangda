@@ -1,0 +1,115 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-13 09:50:36 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 09:50:36 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 09:50:36 --> Unable to connect to the database
+ERROR - 2013-05-13 10:03:39 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:03:39 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:03:39 --> Unable to connect to the database
+ERROR - 2013-05-13 10:03:44 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:03:44 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:03:44 --> Unable to connect to the database
+ERROR - 2013-05-13 10:20:30 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-13 10:20:30 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-13 10:22:33 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:22:33 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:22:33 --> Unable to connect to the database
+ERROR - 2013-05-13 10:22:37 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:22:37 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-13 10:22:37 --> Unable to connect to the database
+ERROR - 2013-05-13 10:28:59 --> Severity: Notice  --> Undefined variable: nilai_limit C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 5
+ERROR - 2013-05-13 10:28:59 --> Severity: Notice  --> Undefined variable: sisa_limit_spj C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 6
+ERROR - 2013-05-13 10:52:02 --> Severity: Notice  --> Undefined variable: nmoutput C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 270
+ERROR - 2013-05-13 10:52:02 --> Severity: Notice  --> Undefined variable: nmkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 271
+ERROR - 2013-05-13 10:52:02 --> Severity: Notice  --> Undefined variable: nmsubkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 272
+ERROR - 2013-05-13 10:52:02 --> Severity: Notice  --> Undefined variable: nmakun C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 273
+ERROR - 2013-05-13 10:52:02 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 7
+ERROR - 2013-05-13 10:53:41 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-13 10:53:41 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-13 10:56:53 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 101
+ERROR - 2013-05-13 10:56:53 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 109
+ERROR - 2013-05-13 10:56:53 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 10:56:53 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:00:06 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 101
+ERROR - 2013-05-13 11:00:06 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 109
+ERROR - 2013-05-13 11:00:06 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:00:06 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:00:43 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 101
+ERROR - 2013-05-13 11:00:43 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 109
+ERROR - 2013-05-13 11:00:43 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:00:43 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:03:03 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 101
+ERROR - 2013-05-13 11:03:03 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 109
+ERROR - 2013-05-13 11:03:03 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:03:03 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:05:35 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 101
+ERROR - 2013-05-13 11:05:35 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 109
+ERROR - 2013-05-13 11:05:35 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:05:35 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\kwitansi\spj\form_spj_detail.php 124
+ERROR - 2013-05-13 11:20:47 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-13 11:20:47 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-13 11:22:01 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-13 11:22:01 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-13 11:22:31 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-05-13 11:22:52 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-05-13 11:48:30 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:30 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:30 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:30 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-05-13 11:48:39 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-13 11:48:39 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-13 11:48:43 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:43 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:43 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:43 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-05-13 11:48:52 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-13 11:48:52 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-13 11:48:57 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:57 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:57 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-13 11:48:57 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-05-13 11:49:03 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-13 11:49:03 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-13 11:50:11 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 79
+ERROR - 2013-05-13 11:50:11 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 87
+ERROR - 2013-05-13 11:50:11 --> Severity: Notice  --> Undefined variable: nilai_max C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 102
+ERROR - 2013-05-13 11:50:11 --> Severity: Notice  --> Undefined variable: nilai_min C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 102
+ERROR - 2013-05-13 11:59:51 --> Severity: Notice  --> Undefined property: Spm::$m_spj C:\xampp\htdocs\siaku\system\core\Model.php 51
+ERROR - 2013-05-13 12:00:21 --> Severity: Notice  --> Undefined property: Spm::$m_spj C:\xampp\htdocs\siaku\system\core\Model.php 51
+ERROR - 2013-05-13 12:01:52 --> Severity: Notice  --> Undefined property: Spm::$m_spj C:\xampp\htdocs\siaku\system\core\Model.php 51
+ERROR - 2013-05-13 12:06:01 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 697 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-13 12:06:01 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:01 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:04 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 697 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-13 12:06:04 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:04 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:07 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 697 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-13 12:06:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:19 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 727 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-13 12:06:19 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:19 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:22 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 727 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-13 12:06:22 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:22 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:25 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 727 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-13 12:06:25 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 12:06:25 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-13 13:04:40 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:04:40 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:04:40 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:04:40 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:04:40 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:04:40 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:05:12 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:05:12 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:05:12 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:05:12 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:05:12 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:05:12 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:09:36 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:09:36 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:09:36 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sp2d\siap_terotorisasi.php 36
+ERROR - 2013-05-13 13:12:20 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\view_sp2d.php 76
+ERROR - 2013-05-13 13:12:20 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\view_sp2d.php 76
+ERROR - 2013-05-13 13:12:20 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sp2d\view_sp2d.php 76

@@ -1,0 +1,48 @@
+ <article class="module width_full">
+            <header>
+              <h3>Daftar TUP yang terotorisasi</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" onSubmit='return validasi(this)'> 
+                <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+                 <thead> 
+                <tr >
+                    <th>Nomor</th>
+                    <th>Output / Komponen / MAK</th> 
+                    <th>Jumlah</th> 
+                    <th colspan="2">Aksi</th>
+                    
+                </tr>
+                </thead>
+                <?php $no=1;
+                foreach($daftar_up2 as $row)
+                {  
+                $kdoutput=$row['kdoutput'];
+                $kdkomponen=$row['kdkomponen'];
+                $kdakun=$row['kdakun'];
+                $jm=$row['jumlah'];
+                $jumlah = number_format($jm,0,",",".");   
+                /*<input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>"> 
+                //<input type="hidden" name="status" value="<?php echo "$status"; ?>"> */    
+                ?>
+                  
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="center"><?php echo "$kdoutput / $kdkomponen / $kdakun ";?></td> 
+                    <td align="right"><?php echo "$jumlah";?></td> 
+                    <td align="center" width="10px"><a href='<?php echo base_url()."index.php/tup/detail_up_terotorisasi/".$id;?>' title='Detail TUP'><img src='<?php echo base_url();?>asset/images/detail.png'></a></td> 
+                    <td align="center" width="10px"><a href='<?php echo base_url()."index.php/tup/pengisian_spp2/";?><?php echo "$kdoutput/$kdkomponen/$kdakun"?>' title='Buatkan SPP'><img src='<?php echo base_url();?>asset/images/add.png'></a></td> 
+                <?php $no++;}?>
+                    </table>
+   <table><div id='tabel'></div> </table>
+   
+                 </div>    
+                <footer> 
+                <div class="submit_link">   
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+ <?php echo form_close();     
+

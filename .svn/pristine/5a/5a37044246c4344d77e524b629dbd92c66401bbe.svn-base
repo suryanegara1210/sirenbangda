@@ -1,0 +1,55 @@
+<script>
+    $(document).ready(function() {
+        $('a[rel*=facebox]').facebox();
+    }) 
+</script>
+        <article class="module width_full">
+    		<header><h3><?php if (isset($judul)) echo $judul; ?></h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table class="table-common" style="width: 90%;">
+                    <tr>
+                        <th>No MOU</th>
+                        <th>Tanggal MOU</th>
+                        <th>Penyewa</th>
+                        <th>Jenis Aset</th>
+                        <th>Lokasi Aset</th>
+                        <th>Mulai</th>
+                        <th>Akhir</th>
+                        <th colspan="2" >Aksi</th>
+                    </tr>
+                    <?php if (!$resume_mou){
+                        echo "<tr><td colspan=\"9\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        foreach($resume_mou as $mou){
+                            echo "
+                                <tr>
+                                    <td>$mou->no_mou</td>
+                                    <td>".$this->uang->tanggal($mou->tgl_mou)."</td>
+                                    <td>$mou->pemberi</td>
+                                    <td>$mou->jenis</td>
+                                    <td>$mou->tempat</td>
+                                    <td>".$this->uang->tanggal($mou->mulai)."</td>
+                                    <td>".$this->uang->tanggal($mou->akhir)."</td>
+                                    <td align=\"center\">
+                            ";
+                            
+                            if (isset($link)){
+                                foreach ($link as $li){
+                                    if(isset($li['fb']) && $li['fb']===true){
+                                        $fb="rel=\"facebox\"";
+                                    }else $fb="";
+                                    echo "<a title=\"".$li['judul']."\" href=\"".site_url($li['alamat'].constant::MOU_ASET_RUTIN.'/'.$mou->id_mou)."\"".$fb." ><img src=\"".base_url()."asset/images/".$li['img'].".png\"/></a>";
+                                    echo "&nbsp&nbsp";
+                                }
+                            }
+                            echo "</td></tr>";
+                        }
+                    }
+                    ?>
+                </table>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->

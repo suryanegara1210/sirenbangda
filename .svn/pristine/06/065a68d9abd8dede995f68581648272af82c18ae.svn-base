@@ -1,0 +1,139 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Pendapatan_daerah extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_pendapatan', 'm_jenis_pendapatan', 'm_asal_pendapatan'));
+	}
+
+	function index()
+	{
+        $this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+		$data['url_add_data'] = site_url('pendapatan_daerah/edit_data');
+		//$data['url_delete_data'] = site_url('rka/delete_rka');
+		$data['url_save_data'] = site_url('pendapatan_daerah/save_data');
+		//$data['url_save_data'] = site_url('pendapatan_daerah/cru_pendapatan');
+		$this->template->load('template','pendapatan_daerah/view_pendapatan', $data);
+	}
+
+	
+	
+	function save_data(){
+                $this->auth->restrict();
+        //action save cekbank di table t_cmusrenbangdes
+        $id_pendapatan	= $this->input->post('id_pendapatan');
+        $call_from			= $this->input->post('call_from');
+        $data_post = array(
+            'kd_jenis'			=> $this->input->post('kd_jenis'),
+    		'kd_asal'	 		=> $this->input->post('kd_asal'),
+    		'tahun1'	 	=> $this->input->post('tahun1'),
+    		'realisasi_1'		=> $this->input->post('realisasi_1'),
+    		'tahun2'	=> $this->input->post('tahun2'),
+    		'realisasi_2'			=> $this->input->post('realisasi_2'),
+    		'tahun3'			=> $this->input->post('tahun3'),
+    		'proyeksi_3'		=> $this->input->post('proyeksi_3'),
+    		'tahun4'			=> $this->session->userdata('tahun4'),
+    		'proyeksi_4'			=> $this->session->userdata('proyeksi_4'),
+    		'tahun5'			=> $this->session->userdata('tahun5'),
+    		'proyeksi_5'			=> $this->session->userdata('proyeksi_5')
+    		
+            
+        );
+        
+		if(strpos($call_from, 'pendapatan_daerah/edit_data') != FALSE) {
+			$call_from = '';
+		}
+
+		$cekpend = $this->m_pendapatan->get_data(array('id_pendapatan'=>$id_pendapatan),'table_pendapatan');
+		if($cekpend === empty($cekpend)) {
+			$cekpend= new stdClass();
+			$id_pendapatan = '';
+		}
+		
+		$ret = TRUE;
+		if(empty($id_pendapatan)) {
+			//insert
+			$ret = $this->m_pendapatan->insert($data_post,'table_pendapatan');
+			//echo $this->db->last_query();
+		} else {
+			//update
+            
+			$ret = $this->m_pendapatan->update($id_pendapatan,$data_post,'table_pendapatan','primary_pendapatan');
+			//echo $this->db->last_query();
+		}
+		if ($ret === FALSE){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Data musrenbang Gagal disimpan');						  
+		} else {
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Data musrenbang Berhasil disimpan');
+		}
+
+
+        redirect('pendapatan_daerah');
+		//var_dump($cekbank);
+		//print_r ($id_cek);
+    }
+
+    function edit_data($id_pendapatan=NULL){
+        $this->auth->restrict();
+
+        $data['url_save_data'] = site_url('pendapatan_daerah/save_data');
+        
+		$data['isEdit'] = FALSE;
+        
+        if (!empty($id_pendapatan)) {
+            $data_ = array('id_pendapatan'=>$id_pendapatan);
+            $result = $this->m_pendapatan->get_data_with_rincian($id_pendapatan,'table_pendapatan');
+			if (empty($result)) {
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data musrenbang tidak ditemukan.');
+				redirect('pendapatan_daerah');
+			}
+			
+            $data['id_pendapatan']		= $result->id_pendapatan;
+    		$data['kd_jenis'] = $result->kd_jenis;
+    		$data['kd_asal'] = $result->kd_asal;
+    		$data['tahun1'] = $result->tahun1;
+    		$data['realisasi_1'] = $result->realisasi_1;
+    		
+    		$data['tahun2'] = $result->tahun2;
+    		$data['realisasi_2'] = $result->realisasi_2;
+    		$data['tahun3'] = $result->tahun3;
+    		$data['proyeksi_3'] = $result->proyeksi_3;
+    
+    		$data['tahun4']	= $result->tahun4;
+    		$data['proyeksi_4']				= $result->proyeksi_4;
+    		$data['tahun5']				= $result->tahun5;
+    		$data['proyeksi_5']		= $result->proyeksi_5;
+            $data['isEdit']				= TRUE;
+           
+		}
+        
+        //var_dump($data);
+        
+
+    	$this->template->load('template','pendapatan_daerah/pendapatan', $data);
+    }
+    function autocomplete_jenispendapatan(){
+        $req = $this->input->post('term');      
+        $result = $this->m_pendapatan->get_value_autocomplete_jenis_pendapatan($req);      
+        echo json_encode($result);
+    }
+
+    function autocomplete_asalpendapatan(){       
+        $kd_urusan = $this->input->post('kd_urusan');       
+        $req = $this->input->post('term');      
+        $result = $this->m_musrenbang->get_value_autocomplete_asal_pendapatan($req, $kd_urusan);      
+        echo json_encode($result);
+    }
+
+}

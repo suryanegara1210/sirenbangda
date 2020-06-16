@@ -1,0 +1,45 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-04-28 12:04:16 --> Query error: No tables used
+ERROR - 2014-04-28 12:04:44 --> Query error: No tables used
+ERROR - 2014-04-28 12:06:48 --> Query error: No tables used
+ERROR - 2014-04-28 12:09:48 --> Query error: No tables used
+ERROR - 2014-04-28 12:10:13 --> Query error: No tables used
+ERROR - 2014-04-28 12:10:34 --> Query error: No tables used
+ERROR - 2014-04-28 12:11:29 --> Query error: No tables used
+ERROR - 2014-04-28 12:13:38 --> Query error: No tables used
+ERROR - 2014-04-28 12:13:52 --> Query error: No tables used
+ERROR - 2014-04-28 12:14:47 --> Query error: No tables used
+ERROR - 2014-04-28 12:15:00 --> Query error: No tables used
+ERROR - 2014-04-28 12:18:11 --> Query error: No tables used
+ERROR - 2014-04-28 12:24:46 --> Query error: No tables used
+ERROR - 2014-04-28 13:51:18 --> Severity: Notice  --> Undefined variable: nm_unit C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\input.php 336
+ERROR - 2014-04-28 13:51:18 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\system\helpers\form_helper.php 331
+ERROR - 2014-04-28 14:15:30 --> Query error: No tables used
+ERROR - 2014-04-28 14:15:49 --> Query error: No tables used
+ERROR - 2014-04-28 14:20:31 --> Query error: No tables used
+ERROR - 2014-04-28 14:20:39 --> Query error: No tables used
+ERROR - 2014-04-28 14:36:46 --> Severity: Notice  --> Undefined variable: nm_unit C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\input.php 336
+ERROR - 2014-04-28 14:36:46 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\system\helpers\form_helper.php 331
+ERROR - 2014-04-28 14:42:28 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:30 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:32 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:35 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:37 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:39 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:40 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:42:44 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 60
+ERROR - 2014-04-28 14:50:16 --> Query error: No tables used
+ERROR - 2014-04-28 15:07:11 --> Query error: No tables used
+ERROR - 2014-04-28 15:07:20 --> Query error: No tables used
+ERROR - 2014-04-28 15:17:35 --> Query error: No tables used
+ERROR - 2014-04-28 15:17:37 --> Query error: No tables used
+ERROR - 2014-04-28 15:18:24 --> Query error: No tables used
+ERROR - 2014-04-28 15:18:36 --> Query error: No tables used
+ERROR - 2014-04-28 15:18:37 --> Query error: No tables used
+ERROR - 2014-04-28 15:18:45 --> Query error: No tables used
+ERROR - 2014-04-28 15:22:24 --> Query error: No tables used
+ERROR - 2014-04-28 15:22:26 --> Query error: No tables used
+ERROR - 2014-04-28 15:22:27 --> Query error: No tables used
+ERROR - 2014-04-28 15:22:53 --> Query error: No tables used
+ERROR - 2014-04-28 15:32:28 --> Query error: No tables used

@@ -1,0 +1,104 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_rka extends CI_Model
+{
+	var $table_rka = 't_rka';
+
+	function add_rka()
+	{
+		$data = $this->global_function->add_array($data, $add);		
+
+		$result = $this->db->insert($this->table_rka, $data);
+		return $result;
+	}
+	
+	function get_data($data,$table){
+        $this->db->where($data);
+        $query = $this->db->get($this->$table);
+        return $query->row();
+    }
+	
+	function get_rka_by_id($id_rka)
+	{
+		$sql = "
+				SELECT *
+				FROM t_rka
+				WHERE id_rka = ?
+			";
+
+		$query = $this->db->query($sql, array($id_rka));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return NULL;
+	}
+
+	function simpan_rka($data_rka)			
+	{
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+
+		$data_rka->created_date		= Formatting::get_datetime();
+		$data_rka->created_by		= $this->session->userdata('username');
+		
+		$this->db->set($data_rka);
+    	$this->db->insert('t_rka');
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();		
+	}
+
+	function get_data_table($search, $start, $length, $order)
+	{
+		$order_arr = array('id_rka','kd_urusan','kd_bidang','kd_program','kd_kegiatan');
+		$sql="
+			SELECT * FROM ".$this->table_rka."
+			WHERE kd_urusan LIKE '%".$search['value']."%' 
+            OR kd_bidang LIKE '%".$search['value']."%' 
+            OR kd_program LIKE '%".$search['value']."%' 
+            OR kd_kegiatan LIKE '%".$search['value']."%'
+		";
+		$this->db->limit($length, $start);
+		$this->db->order_by($order_arr[$order["column"]], $order["dir"]);
+
+		$result = $this->db->query($sql);
+		return $result->result();
+	}
+
+	function count_data_table($search, $start, $length, $order)
+	{
+		$this->db->from($this->table_rka);
+		
+		$this->db->like("kd_urusan", $search['value']);
+		$this->db->or_like("kd_bidang", $search['value']);
+		$this->db->or_like("kd_program", $search['value']);
+		$this->db->or_like("kd_kegiatan", $search['value']);
+				
+		$result = $this->db->count_all_results();
+		return $result;
+	}
+
+	function get_data_with_rincian($id_rka,$table)
+	{
+		$sql="
+			SELECT * FROM ".$this->table."
+			WHERE id_rka = ?
+		";
+
+		$query = $this->db->query($sql, array($id_rka));
+
+		if($query) {
+				if($query->num_rows() > 0) {
+					return $query->row();
+				}
+			}
+
+			return NULL;
+	}
+
+}

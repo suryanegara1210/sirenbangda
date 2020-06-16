@@ -1,0 +1,27 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-08-27 11:55:11 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\controllers\sptb.php 325
+ERROR - 2013-08-27 13:28:42 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 79
+ERROR - 2013-08-27 13:28:42 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 87
+ERROR - 2013-08-27 13:30:09 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 84
+ERROR - 2013-08-27 13:30:09 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 92
+ERROR - 2013-08-27 13:30:33 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 84
+ERROR - 2013-08-27 13:30:33 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 92
+ERROR - 2013-08-27 13:31:19 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 92
+ERROR - 2013-08-27 13:36:41 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 90
+ERROR - 2013-08-27 13:38:17 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 90
+ERROR - 2013-08-27 13:38:35 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 90
+ERROR - 2013-08-27 13:52:29 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 88
+ERROR - 2013-08-27 13:53:25 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 88
+ERROR - 2013-08-27 13:53:45 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 88
+ERROR - 2013-08-27 14:16:35 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 362
+ERROR - 2013-08-27 14:16:35 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 323
+ERROR - 2013-08-27 14:16:51 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 98
+ERROR - 2013-08-27 14:16:51 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 100
+ERROR - 2013-08-27 14:16:51 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 104
+ERROR - 2013-08-27 14:16:51 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 106
+ERROR - 2013-08-27 14:18:00 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 98
+ERROR - 2013-08-27 14:18:00 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 100
+ERROR - 2013-08-27 14:18:00 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 104
+ERROR - 2013-08-27 14:18:00 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 106
+ERROR - 2013-08-27 14:25:02 --> Severity: Notice  --> Undefined variable: kunci C:\xampp\htdocs\siaku\application\views\sptb\kunci_sptb.php 105

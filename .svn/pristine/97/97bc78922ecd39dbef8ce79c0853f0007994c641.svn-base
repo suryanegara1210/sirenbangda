@@ -1,0 +1,54 @@
+<?php include('rincian_header.php'); ?>
+
+</br>
+<table class="form-honor-cetak list" width="100%" border="1">
+	<thead>
+  		<tr>
+  		  <th width="25px">No</th>
+        <th width="70px">NIM Mhs</th>
+        <th width="140px">Nama Mahasiswa</th>
+        <th >Nama Penguji</th>
+        <th width="60px">Golongan</th>
+        <th width="120px">Jabatan</th>        
+        <th width="110px">Jumlah Honor / Ujian</th>
+        <th width="80px">PPH</th>
+        <th width="110px">Jumlah Honor Diterima</th>
+        <th width="130px">Tanda Tangan</th>
+    </thead>
+    <tbody>
+<?php if($hasil ==""){
+	 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	 }else{
+     $i=0;
+   $grand_total=0;
+   $grand_pph=0;
+   $grand_terima=0;
+	 foreach($hasil->result() as $row) : $i++;?>
+    <tr>
+        <td class='txt-center'><?php echo $i ?></td>
+        <td class='txt-center'><?php echo $row->nim_mhs ?></td>
+        <td ><?php echo $row->nama_mhs; ?></td>
+        <td ><?php echo $row->nama; ?></td>
+        <td class="txt-center"><?php echo $row->golongan; ?></td>
+        <td ><?php echo $row->jabatan; ?></td>
+        <td class="txt-right"><?php echo Formatting::currency($row->subtotal, 2); ?></td>
+        <td class="txt-right"><?php echo Formatting::currency($row->pph_honor, 2);?></td>
+        <td class="txt-right"><?php echo Formatting::currency($row->subtotal - $row->pph_honor, 2); ?></td>
+        <td class="ttd">........................</td>
+     </tr>
+<?php 
+    $grand_total += $row->subtotal;
+    $grand_pph   += $row->pph_honor;
+    $grand_terima+= ($row->subtotal - $row->pph_honor);
+    endforeach; }?>
+    <tr>
+      <td class="txt-center" colspan="6">Jumlah</td>
+      <td align="right"><?php echo Formatting::currency($grand_total, 2);?></td>
+      <td align="right"><?php echo Formatting::currency($grand_pph, 2);?></td>
+      <td align="right"><?php echo Formatting::currency($grand_terima, 2);?></td>
+      <td>&nbsp;</td>
+    </tr>
+
+    </tbody>
+</table>
+<?php include('rincian_footer.php'); ?>

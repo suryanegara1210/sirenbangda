@@ -1,0 +1,63 @@
+<script type="text/javascript">
+    
+    function ambilspm(){
+        var jenisblj = {jenisblj:$("#jenis_belanja").val()}; 
+          $.ajax({
+              type: "POST",
+              url : "<?php echo site_url('spm/get_list_spm_cair')?>",
+              data: jenisblj,
+              success: function(msg){   
+                  $('#tabel').html(msg);
+              }
+          });
+        
+    }
+    
+    $(function(){
+        $("#jenis_belanja").change(function(){
+             ambilspm();
+             console.log('masuk');
+        });
+    });
+          
+</script>
+
+<style>
+label.error {
+	margin-left: 2px;
+	width: auto;
+	display: block;
+	color:#F00;
+}
+</style>
+
+<article class="module width_full">
+<header>
+<h3>Pencairan Kwitansi </h3>
+</header>             
+ <div class="module_content">      
+
+<table border='0' width='100%' >
+  
+  <tr>
+    <td width="260px;">Sifat Pembayaran</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <select name="jenis_belanja" id="jenis_belanja"  >
+        <option value="">-</option>
+		<?php
+			foreach($sifat_bayar as $row){
+				echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+			}
+		?>
+      </select></td>
+  </tr>
+</table>
+   <div id="tabel">
+  </div>
+
+</article>  
+<style type="text/css">
+.col_akhir {	width:50px;	
+}
+</style>

@@ -1,0 +1,76 @@
+<article class="module width_full">
+            <header><h3>List UP (Uang Persediaan)</h3></header> 
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' onSubmit='return validasi(this)' action="<?php echo base_url();?>unit/kirim_revisi" > 
+
+
+<table style="margin-left: 20px;"><tr><td> Daftar Rincian UP</td></tr></table>
+
+<table  class="table-common" style="margin-left: 20px; width: 880px;" >  
+             <thead> 
+            <tr >
+                <th>No </th>
+                <th>Kode Output /<br> Kode Komponen / Kode Akun</th>
+                <th>Output / Komponen / Akun</th>
+                <th>Jumlah</th>   
+                
+            </tr>
+            </thead>
+            
+            <?php $no = 1;
+            foreach($detail_spm->result_array() as $row)
+            {              
+            $kdoutput=$row['kdoutput'];
+            $nmoutput=$row['nmoutput'];
+            $kdkomponen=$row['kdkomponen'];
+            $nmkomponen=$row['nmkomponen'];
+            $kdakun=$row['kdakun'];
+            $nmakun=$row['nmakun'];
+            $nmakun=$row['nmakun'];
+            $nmheader=$row['nmheader'];       
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",",".");   
+            ?>     
+               <tr>
+                <td> <?php echo "$no";?> </td>
+                <td align='left'> <?php echo "$kdoutput";?> </td>
+                <td><?php echo "$nmoutput";?></td> 
+                <td>&nbsp;</td>  
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td align='left'><?php echo "$kdoutput.$kdkomponen";?></td>
+                <td><?php echo "$nmkomponen";?></td>
+                <td>&nbsp;</td>  
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td align='left'><?php echo "$kdoutput.$kdkomponen.$kdakun";?></td>
+                <td><?php echo "$nmakun";?></td>
+                <td>&nbsp;</td>  
+              </tr>  
+                <tr>
+                <td>&nbsp;</td>
+                <td align='left'>Header</td>
+                <td><?php echo "$nmheader";?></td>
+                <td align="right"><?php echo "$jumlah";?></td>   
+              </tr>  
+              <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>  
+              </tr>
+            <?php $no++ ;}?> 
+</table>
+</form> 
+</div> 
+<br><br><br>
+            <footer>     
+                <div class="submit_link">      
+                     <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+            </footer>  
+</article>     

@@ -1,0 +1,45 @@
+<article class="module width_full">
+    <header><h3>Setting Akun Unit</h3></header>
+        <div class="module_content">
+            <center>
+                <form name="form_rekomendasi" action="<?php echo site_url('setting/bas_unit_del_sim'); ?>" method="POST">
+                <table border="1" class="table-common">
+                    <tr><th>Hapus</th><th>Akun</th><th>Sub Unit</th></tr>
+                    <?php
+                        foreach($bas_unit as $bs){
+                            echo "<tr>";
+                            echo "<td><input type=\"checkbox\" name=\"bas[$bs->id_basunit]\" value=\"1\" ></td>";
+                            echo "<td>$bs->akun_kode $bs->akun_nama</td>";
+                            echo "<td>$bs->nama_subunit</td>";
+                            echo "</tr>";
+                        }
+                    ?>
+                    <tr>
+                        <td colspan="3" align="right">
+                            <input type="submit" value="Hapus" class="alt_btn">
+                        </td>
+                    </tr>
+                </table>
+                </form>
+            </center>
+        </div>
+</article>
+
+
+
+<script type="text/javascript">
+    function ambildata(){
+        var subunit= $("#subunit").val();
+        var level= $("#level").val();
+        var kelompok= $("#kelompok").val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('setting/bas_unit_add_ambil'); ?>",
+                data: { subunit: subunit, level:level, kelompok:kelompok },
+                success: function(msg){
+                        $('#daftar').html('');
+                        $('#daftar').html(msg);
+                }
+        });
+    }
+</script>

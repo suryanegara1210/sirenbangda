@@ -1,0 +1,448 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Kendali_perubahan extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+        $this->load->model(array('m_musrenbang','m_lov','m_template_cetak','m_desa','m_skpd','m_kendali_perubahan','m_template_cetak','m_rka_perubahan',
+		                         'm_urusan', 'm_bidang','m_program', 'm_kegiatan','m_kendali_belanja'));
+	}
+
+	public function kendali_renja()
+	{
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$data['program'] =  $this->m_kendali_perubahan->get_program_rka_4_cetak($id_skpd,$tahun);
+		$data['jendela_kontrol'] = $this->m_rka_perubahan->count_jendela_kontrol($id_skpd,$ta);
+		$this->template->load('template','kendali_renja_perubahan/view_kendali_renja',$data);
+	}
+
+	function kirim_kendali_renja(){
+		$data['skpd'] = $this->session->userdata("id_skpd");
+		$this->load->view('kendali_renja_perubahan/kirim_kendali_renja', $data);
+	}
+
+	function do_kirim_kendali_renja(){
+		$id = $this->input->post('skpd');
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$result = $this->m_rka_perubahan->kirim_kendali_renja($id,$ta);
+		//echo $this->db->last_query();
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kendali Renja Perubahan berhasil dikirim.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kendali Renja Perubahan gagal dikirim, mohon menghubungi administrator.');
+			echo json_encode($msg);
+		}
+	}
+
+		function get_kegiatan_skpd(){
+		$id_skpd = $this->session->userdata("id_skpd");
+		$ta 		= $this->m_settings->get_tahun_anggaran();
+		$data['jendela_kontrol'] = $this->m_rka_perubahan->count_jendela_kontrol($id_skpd,$ta);
+
+		$id			= $this->input->post('id');
+		//echo $id_renstra;
+
+		$data['id']	= $id;
+		$data['kegiatan'] = $this->m_rka_perubahan->get_all_kegiatan($id, $id_skpd, $ta);
+
+		$this->load->view("rka_perubahan/view_kegiatan", $data);
+	}
+
+	function cru_kendali_renja(){
+		//$this->output->enable_profiler(true);
+		$id 	= $this->input->post('id');
+		$tahun	= $this->m_settings->get_tahun_anggaran();
+
+		$data['id_kendali'] = $id;
+		$data['kendali'] = $this->m_kendali_perubahan->get_kendali_renja($id,$tahun);
+		//echo $this->db->last_query();
+
+		$this->load->view("kendali_renja_perubahan/cru_kendali_renja", $data);
+	}
+
+	function preview_history_renja(){
+		//$this->output->enable_profiler(true);
+    	$id = $this->input->post("id");
+		$tahun	= $this->m_settings->get_tahun_anggaran();
+    	$data['result'] = $this->m_kendali_perubahan->get_history($id,$tahun);
+		//echo $this->db->last_query();
+    	$this->load->view('kendali_renja_perubahan/history',$data);
+    }
+
+	function save_kendali_renja(){
+		$id = $this->input->post('id');
+
+		$data = $this->input->post();
+		$id_skpd = $this->input->post("id_skpd");
+		$tahun = $this->input->post("tahun");
+		$kesesuaian    = $this->input->post("kesesuaian");
+		$hasil_kendali = $this->input->post("hasil_kendali");
+		$tindak_lanjut = $this->input->post("tindak_lanjut");
+		$hasil_tl	   = $this->input->post("hasil_tl");
+
+		$data = $this->global_function->clean_array($data);
+		$result = $this->m_kendali_perubahan->add_kendali_renja($data,$id);
+
+
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kendali Renja Perubahan berhasil dibuat.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kendali Renja Perubahan gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);
+		}
+	}
+
+
+		public function kendali_belanja()
+		{
+			$id_skpd = $this->session->userdata('id_skpd');
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$data['program'] = $this->m_kendali->get_program_dpa_4_cetak($id_skpd,$tahun);
+			$this->template->load('template','kendali_belanja/view_kendali_belanja',$data);
+		}
+
+
+
+		public function edit_kinerja_triwulan(){
+			$id_dpa_prog_keg = $this->input->post('id_dpa_prog_keg');
+			$id_triwulan = $this->input->post('id_triwulan');
+
+			$sql= "
+				SELECT b.* FROM (SELECT id AS id_dpa_prog_keg_triwulan,id_dpa_prog_keg FROM tx_dpa_prog_keg_triwulan
+				WHERE id_dpa_prog_keg = '$id_dpa_prog_keg' AND id_triwulan='$id_triwulan') a
+				LEFT JOIN tx_dpa_prog_keg_triwulan_detail b
+				ON a.id_dpa_prog_keg_triwulan = b.id_dpa_prog_keg_triwulan";
+			$data_triwulan = $this->db->query($sql);
+
+
+			$data['kinerja_triwulan'] = $data_triwulan;
+			$data['id_dpa_prog_keg_triwulan'] = $this->db->query("SELECT id FROM `tx_dpa_prog_keg_triwulan` WHERE id_dpa_prog_keg = '$id_dpa_prog_keg' AND id_triwulan = '$id_triwulan'")->row()->id;
+			$data['revisi'] = $this->m_kendali_belanja->show_revisi($data['id_dpa_prog_keg_triwulan']);
+			//var_dump($id_dpa_prog_keg,$id_triwulan);
+			$this->load->view("kendali_belanja/kinerja_triwulan",$data);
+
+		}
+
+		public function save_kinerja_triwulan(){
+			$id_dpa_prog_keg_triwulan = $this->input->post('id_dpa_prog_keg_triwulan');
+
+			$data = $this->input->post();
+
+			$id = $this->input->post("id_kinerja_triwulan");
+			$catatan = $this->input->post("catatan");
+			$keterangan = $this->input->post("keterangan");
+			$capaian = $this->input->post("capaian");
+
+			//$clean = array('id_kinerja_triwulan', 'catatan', 'keterangan', 'satuan_target','capaian');
+			//$data = $this->global_function->clean_array($data, $clean);
+
+
+
+			$result = $this->m_kendali_belanja->kinerja_triwulan($id,$id_dpa_prog_keg_triwulan,$catatan,$keterangan,$capaian);
+
+			if ($result) {
+				$msg = array('success' => '1', 'msg' => 'Program berhasil dibuat.');
+				echo json_encode($msg);
+			}else{
+				$msg = array('success' => '0', 'msg' => 'ERROR! Program gagal dibuat, mohon menghubungi administrator.');
+				echo json_encode($msg);
+			}
+
+		}
+
+//-----------------------------------------------FUNGSI CETAK--------------------------------------------------
+		private function cetak_kendali_renja_func($id_skpd)
+		{
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$data['kendali_type'] = "KENDALI RENJA";
+			$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+			$header = $this->m_template_cetak->get_value("GAMBAR");
+			$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+			$data['header'] = $this->m_template_cetak->get_value("HEADER");
+
+			$data1['program'] = $this->m_kendali_perubahan->get_program_rka_4_cetak($id_skpd,$tahun);
+			$data['kendali'] = $this->load->view('kendali_renja_perubahan/cetak/isi_kendali_renja', $data1, TRUE);
+			return $data;
+
+		}
+
+		function do_cetak_kendali_renja($id_skpd=NULL){
+			ini_set('memory_limit','-1');
+			if(empty($id_skpd)) {
+				$id_skpd = $this->session->userdata('id_skpd');
+			}
+
+			$data = $this->cetak_kendali_renja_func($id_skpd);
+			$data['qr'] = $this->ciqrcode->generateQRcode("sirenbangda", 'Kendali_Renja Perubahan '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s"), 1);
+			$html = $this->template->load('template_cetak', 'kendali_renja_perubahan/cetak/cetak', $data, TRUE);
+
+			$filename = 'Kendali_Renja Perubahan '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i_s") .'.pdf';
+			pdf_create($html,$filename,"A4","Landscape");
+		}
+
+		function preview_kendali_renja(){
+			$this->auth->restrict();
+			$id_skpd = $this->session->userdata('id_skpd');
+
+			$skpd = $this->m_kendali_perubahan->get_one_kendali_renja($id_skpd, TRUE);
+			if (!empty($skpd)) {
+				$data = $this->cetak_kendali_renja_func($id_skpd);
+				$this->template->load('template', 'kendali_renja_perubahan/preview_kendali_renja', $data);
+			}else{
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data Kendali Renja Perubahan tidak tersedia.');
+				redirect('home');
+			}
+		}
+
+		private function cetak_kendali_belanja_func($id_skpd)
+		{
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$data['kendali_type'] = "KENDALI BELANJA";
+			$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+			$header = $this->m_template_cetak->get_value("GAMBAR");
+			$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+			$data['header'] = $this->m_template_cetak->get_value("HEADER");
+
+			$data1['program'] = $this->m_kendali->get_program_dpa_4_cetak($id_skpd,$tahun);
+			$data['kendali'] = $this->load->view('kendali_belanja/cetak/isi_kendali_belanja', $data1, TRUE);
+			return $data;
+
+		}
+
+		function do_cetak_kendali_belanja()
+		{
+			ini_set('memory_limit','-1');
+			if(empty($id_skpd)) {
+				$id_skpd = $this->session->userdata('id_skpd');
+			}
+
+			$data = $this->cetak_kendali_belanja_func($id_skpd);
+			$data['qr'] = $this->ciqrcode->generateQRcode("sirenbangda", 'Kendali_Belanja '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s"), 1);
+			$html = $this->template->load('template_cetak', 'kendali_belanja/cetak/cetak', $data, TRUE);
+
+			$filename = 'kendali_belanja'. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i_s") .'.pdf';
+			pdf_create($html,$filename,"A4","Landscape");
+		}
+		function preview_kendali_belanja(){
+			$this->auth->restrict();
+			$id_skpd = $this->session->userdata('id_skpd');
+
+			$skpd = $this->m_kendali->get_one_kendali_belanja($id_skpd, TRUE);
+			if (!empty($skpd)) {
+				$data = $this->cetak_kendali_belanja_func($id_skpd);
+				$this->template->load('template', 'kendali_belanja/preview_kendali_belanja', $data);
+			}else{
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data kendali belanja tidak tersedia.');
+				redirect('home');
+			}
+		}
+//===================================================================================================================
+	//proses verifikasi kendali renja
+	function veri_view_renja(){
+		$this->auth->restrict();
+		//$this->output->enable_profiler(true);
+		$data['renjas'] = $this->m_kendali_perubahan->get_all_renja_veri();
+		$this->template->load('template','kendali_renja_perubahan/verifikasi/view_all', $data);
+	}
+
+	function veri_renja($id_skpd){
+		$this->auth->restrict();
+		//$this->output->enable_profiler(true);
+		$data['renjas'] = $this->m_kendali_perubahan->get_data_renja($id_skpd);
+		$data['id_skpd'] = $id_skpd;
+		$this->template->load('template','kendali_renja_perubahan/verifikasi/view', $data);
+	}
+
+	function do_veri_renja(){
+		$id = $this->input->post('id');
+		$rka = $this->m_rka_perubahan->get_one_rka_veri($id);
+		$data['rka'] = $rka;
+
+		$this->load->view('kendali_renja_perubahan/verifikasi/veri', $data);
+	}
+
+	function save_veri_renja(){
+		$id = $this->input->post("id");
+		$veri = $this->input->post("veri");
+		$ket = $this->input->post("ket");
+
+		if ($veri == "setuju") {
+			$result = $this->m_rka_perubahan->approved_renja($id);
+		}elseif ($veri == "tdk_setuju") {
+			$result = $this->m_rka_perubahan->not_approved_renja($id, $ket);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Data berhasil diverifikasi.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Data gagal diverifikasi, mohon menghubungi administrator.');
+			echo json_encode($msg);
+		}
+	}
+
+	function disapprove_renja(){
+		$data['id'] = $this->input->post('id');
+		$this->load->view('kendali_renja_perubahan/verifikasi/disapprove_renja', $data);
+	}
+
+	function do_disapprove_renja(){
+		$this->auth->restrict_ajax_login();
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$id = $this->input->post('id');
+		$result = $this->m_rka_perubahan->disapprove_renja($id, $ta);
+		echo json_encode(array('success' => '1', 'msg' => 'Kendali Renja Perubahan telah ditolak.', 'href' => site_url('kendali/veri_view_renja')));
+	}
+
+	//proses verifikasi kendali belanja
+	function veri_view_belanja(){
+		$this->auth->restrict();
+		//$this->output->enable_profiler(true);
+		$data['renjas'] = $this->m_kendali->get_all_belanja_veri();
+		$this->template->load('template','kendali_belanja/verifikasi/view_all', $data);
+	}
+
+	function veri_belanja($id_skpd){
+		$this->auth->restrict();
+
+		$data['belanjas'] = $this->m_kendali->get_data_belanja($id_skpd);
+		$data['id_skpd'] = $id_skpd;
+		$this->template->load('template','kendali_belanja/verifikasi/view', $data);
+	}
+
+	function do_veri_belanja(){
+		$id = $this->input->post('id');
+		$action = $this->input->post('action');
+
+		$data['renja'] = $this->m_rka->get_one_renja_veri($id);
+		$renja = $data['renja'];
+		$data['indikator'] = $this->m_rka->get_indikator_prog_keg($renja->id, TRUE, TRUE);
+		if ($action=="pro") {
+			$data['program'] = TRUE;
+		}else{
+			$data['program'] = FALSE;
+		}
+
+		$this->load->view('kendali_belanja/verifikasi/veri', $data);
+	}
+
+	function save_veri_belanja(){
+		$id = $this->input->post("id");
+		$veri = $this->input->post("veri");
+		$ket = $this->input->post("ket");
+
+		if ($veri == "setuju") {
+			$result = $this->m_rka->approved_renja($id);
+		}elseif ($veri == "tdk_setuju") {
+			$result = $this->m_rka->not_approved_renja($id, $ket);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kegiatan berhasil diverifikasi.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kegiatan gagal diverifikasi, mohon menghubungi administrator.');
+			echo json_encode($msg);
+		}
+	}
+
+	function disapprove_belanja(){
+		$data['id'] = $this->input->post('id');
+		$this->load->view('kendali_renja/verifikasi/disapprove_renja', $data);
+	}
+
+	function do_disapprove_belanja(){
+		$this->auth->restrict_ajax_login();
+
+		$id = $this->input->post('id');
+		$result = $this->m_kendali->disapprove_belanja($id);
+		echo json_encode(array('success' => '1', 'msg' => 'Kendali Renja telah ditolak.', 'href' => site_url('kendali/veri_view_renja')));
+	}
+
+	/*------------------------------------------------------------------------>	
+	| Verifikasi Kendali Belanja	
+	------------------------------*/
+	function kirim_veri()
+	{
+		$this->auth->restrict();
+
+		$id_skpd = $this->session->userdata('id_skpd');		
+		$ta = $this->m_settings->get_tahun_anggaran();
+
+		$this->m_kendali_belanja->kirim_veri($id_skpd, $ta);
+		
+		redirect("kendali/kendali_belanja");
+	}
+
+	function veri_view()
+	{
+		$this->auth->restrict();
+
+		$data['kendali'] = $this->m_kendali_belanja->get_all_veri_list();
+		$this->template->load('template','kendali_belanja/verifikasi_kendali/view_all', $data);
+	}
+
+	function veri($id=NULL)
+	{
+		if (!empty($id)) {
+			$data['kendali'] = $this->m_kendali_belanja->get_veri_list($id);			
+			$this->template->load('template','kendali_belanja/verifikasi_kendali/view_veri', $data);
+		}else{
+			redirect("kendali/veri_view");
+		}
+	}
+
+	function show_view()
+	{
+		$id = $this->input->post('id');
+		$veri = $this->m_kendali_belanja->get_detail_for_veri($id);
+		$data['veri'] = $veri;
+		
+		$data['kriteria'] = $this->m_kendali->get_indikator_prog_keg_dpa($veri->id_dpa_prog_keg, TRUE, TRUE);
+		$data['output'] = $this->m_kendali_belanja->get_dpa_detail($veri->id_tx_dpa_prog_keg_triwulan);
+		$data['revisi'] = $this->m_kendali_belanja->show_revisi($veri->id_tx_dpa_prog_keg_triwulan);
+
+		$this->load->view('kendali_belanja/verifikasi_kendali/veri', $data);	
+	}
+
+	function save_veri()
+	{
+		$id = $this->input->post("id");		
+		$veri = $this->input->post("veri");
+		$ket = $this->input->post("ket");
+
+		if ($veri == "setuju") {
+			$result = $this->m_kendali_belanja->approved_veri_kendali($id);
+		}elseif ($veri == "tdk_setuju") {
+			$result = $this->m_kendali_belanja->not_approved_veri_kendali($id, $ket);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kendali belanja berhasil diverifikasi.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kendali belanja gagal diverifikasi, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	function show_revisi()
+	{
+		$id = $this->input->post("id");		
+		$data['revisi'] = $this->m_kendali_belanja->show_revisi($id);
+
+		$this->load->view('kendali_belanja/show_revisi', $data);		
+	}
+}
+?>

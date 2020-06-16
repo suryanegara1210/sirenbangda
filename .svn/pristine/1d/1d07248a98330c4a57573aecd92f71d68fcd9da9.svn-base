@@ -1,0 +1,20 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-10 06:50:47 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-06-10 12:50:47 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-06-10 06:52:43 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-06-10 12:52:43 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-06-10 07:14:54 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-06-10 13:14:54 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-06-10 07:16:41 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-06-10 13:16:41 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-06-10 07:17:48 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 691
+ERROR - 2013-06-10 07:18:17 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 691
+ERROR - 2013-06-10 09:32:16 --> 404 Page Not Found --> usulan/daftar_usulan
+ERROR - 2013-06-10 09:40:13 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-10 09:40:13 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-10 09:40:13 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-10 09:40:13 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 109
+ERROR - 2013-06-10 09:52:25 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-06-10 09:52:25 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-06-10 09:52:25 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91

@@ -1,0 +1,133 @@
+<article class="module width_3,5_quarter">
+        <header><h3 class="tabs_involved">Daftar UP <?php echo"$nama_unit";?></h3>
+        <ul class="tabs">
+
+            <li><a href="#tab1">UP Sudah Terotorisasi</a></li>
+            <li><a href="#tab2">UP Belum Terotorisasi</a></li>
+            <li><a href="#tab3">Belum Buat Rincian</a></li>
+        </ul>
+        </header>
+
+        <div class="tab_container">
+            <div id="tab1" class="tab_content"> 
+            <form method="post" name='formName4' action="<?php echo base_url();?>unit/pengisian_spm" onSubmit='return validasi(this)'> 
+               
+            <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+                 <thead> 
+                <tr >
+                    <th>Nomor</th>
+                    <th>UNit</th> 
+                    <th>Status Dokumen</th> 
+                    <th colspan="2">Aksi</th>
+                    
+                </tr>
+            </thead>
+            <?php 
+                if($jum_daftar_up >0){
+                  $no=1;
+                foreach($daftar_up->result_array() as $row)
+                {  
+                $id=$row['id_rekap'];
+                $th_rekap=$row['th_rekap'];
+                $nm_unit=$row['nama_subunit'];
+                $kode_unit=$row['id_subunit'];
+                $status_dokumen=$row['status_dokumen'];     
+                $keterangan=$row['keterangan'];     
+                ?>
+                  <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>">  
+                  <input type="hidden" name="th_rekap" value="<?php echo "$th_rekap"; ?>">  
+                  <input type="hidden" name="id_sifatpembayaran" value="1">  
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="center"><?php echo "$nm_unit";?></td>
+                    
+                    <?php if($status_dokumen =="belum diterima"){?> 
+                        <td align="center"><?php echo"$status_dokumen";?></td>
+                        <td align="center" width="10px">
+                        	<a href='<?php echo base_url()."unit/detail_up_terotorisasi/".$th_rekap."/".$id."/".$kode_unit;?>' title='Detail UP'>
+                            	<img src='<?php echo base_url();?>asset/images/detail.png'>
+                            </a>
+                        </td> 
+                    <?php }else{?>
+                        <td align="center" style="background-color:#99ff33"><?php echo"$status_dokumen";?></td>
+                        <td align="center" width="10px">
+                            <a href='<?php echo base_url()."unit/detail_up_terotorisasi/".$th_rekap."/".$id."/".$kode_unit;?>' title='Detail UP'>
+                                <img src='<?php echo base_url();?>asset/images/detail.png'>
+                            </a>
+                        </td> 
+                    	<td align="center" width="10px">                
+                                <img src='<?php echo base_url();?>asset/images/icn_alert_success.png'>
+                        </td>  
+                    <?php }?>
+    
+                <?php $no++;}?>  
+            </table><br />
+            <footer> 
+                <div class="submit_link">
+                    <?php echo form_submit("submit","Buatkan SPM"); ?>   
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>   
+                <?php }else{ ?>   
+                    <tr>
+                    <td align='center' colspan="5" style="padding-top: 20px; padding-bottom: 20px;">Data Kosong</td></tr> 
+            </table><br />
+            <footer> 
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer> 
+            <?php }?>
+                
+            
+            </div><!-- end of #tab1 -->
+            
+            <div id="tab2" class="tab_content">           
+            <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+                 <thead> 
+                <tr >
+                    <th>Nomor</th>
+                    <th>UNit</th> 
+                    
+                </tr>
+            </thead>
+            <?php $no=1;
+                foreach($daftar_up_belum as $row)
+                {         
+                //$id_subunit=$row['id_subunit'];      
+                $nm_unit=$row['nama_subunit'];      
+                ?>
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="center"><?php echo "$nm_unit";?></td> 
+                    <td align="center" width="10px"><a href='<?php echo base_url()."unit/detail_up_terotorisasi2/".$kode_unit;?>' title='Detail UP'><img src='<?php echo base_url();?>asset/images/icn_categories.png'></a></td> 
+                    <?php $no++;}?>  
+            </table> 
+            
+
+            </div><!-- end of #tab2 -->
+            <div id="tab3" class="tab_content">      
+            <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+                 <thead> 
+                <tr >
+                    <th>Nomor</th>
+                    <th>UNit</th>
+                </tr>
+            </thead>
+            <?php $no=1;
+                foreach($telat as $row)
+                {         
+                $nm_unit=$row['nama_subunit'];      
+                ?>   
+                   
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="left"><?php echo "$nm_unit";?></td> 
+                  <?php $no++;}?>  
+            </table><br />  
+            </div><!-- end of #tab2 -->
+            
+        </div><!-- end of .tab_container --> 
+</article><!-- end of content manager article -->   

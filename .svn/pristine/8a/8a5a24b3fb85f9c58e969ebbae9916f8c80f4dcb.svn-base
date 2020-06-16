@@ -1,0 +1,63 @@
+<style>
+.drop_down
+{
+	width:500px;	
+}
+</style>
+<article class="module width_full">
+<header>
+
+
+<h3>Buku Besar</h3>
+</header>
+
+<form>
+<table width="100" border="0"   id="hasil" style="margin-left: 40px; margin-top:20px; width: 780px;">
+  <tr>
+    <td width="19%">Pilih Kode Akun </td>
+    <td width="1%">:</td>
+    <td width="71%"><div id="propinsi "><?php echo form_dropdown("kode1",$kode1,"","id='kode1', class='drop_down' ") ?></td>
+    </tr>
+  <script type="text/javascript">
+		/*===DROPDOWN UNTUK KODE1===*/
+				  $("#kode1").change(function(){
+							var kode1 = {kode1:$("#kode1").val()};
+							$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('c_akun/view_buku_besar')?>",
+									data: kode1,
+									success: function(msg){
+										$('#buku_besar').html(msg);
+									}
+							  });
+						
+				});
+		
+		</script><script type="text/javascript">
+
+
+/*=============================================================================>>>*/
+
+function print_buku_besar()
+{
+$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('c_gu/eks_buku_besar')?>",
+									data: {kode5: $("#kode_5").val();
+									
+									}
+							  });
+}		
+</script>
+  
+  
+</table>
+</form>
+<div class="module_content">
+  <div id="sub-content">
+  <div id="buku_besar">
+  </div>
+  </div>
+
+</div>
+

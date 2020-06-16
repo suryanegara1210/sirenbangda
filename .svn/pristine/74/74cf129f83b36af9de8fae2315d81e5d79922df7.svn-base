@@ -1,0 +1,40 @@
+<div class="honor-layout" 
+  style="text-align: center; display: block; border-bottom: 1px solid; font-weight:bold; 
+    font-style:italic; font-size: 14px; text-transform: capitalize; padding: 10px 0px;">
+  ( <?php echo  $this->uang->terbilang($grand_total);?> )
+</div>
+<table class="form-honor-cetak landscape no-border">
+    <tr>
+      <td width="35%" class="ttd-block">
+        <div class="ttd-form center">
+          Mengetahui<br>
+          Atas Nama Dekan <?php echo $nama_unit;?>  UNUD<br>
+          Pejabat Pembuat Komitmen<br>          
+          <div class='ttd-space'>&nbsp;</div>
+          <div class='ttd-name'><?php echo $nama_ppk; ?></div>
+          NIP. <?php echo Formatting::nip_format($nip_ppk);?>
+        </div>
+      </td>
+
+      <td width="40%" class="ttd-block">
+        <div class="ttd-form center" >
+          Bendahara Pengeluaran Pembantu<br>
+          <?php echo $nama_unit;?> Universitas Udayana<br>
+          <div class='ttd-space'>&nbsp;</div>
+          <div class='ttd-name'><?php echo $nama_bpp; ?></div>
+          NIP. <?php echo Formatting::nip_format($nip_bpp);?>
+        </div>
+      </td>
+
+      <td width="35%" class="ttd-block">
+        <div class="ttd-form center" >
+          Denpasar, <?php echo Formatting::date_format(date('Ymd'), 'date') ?><br>
+          Pembuat Daftar<br>
+          Program <?php echo $nama_subunit;?><br>
+          <div class='ttd-space'>&nbsp;</div>
+          <div class='ttd-name'><?php echo $penerima; ?></div>
+          NIP. <?php echo Formatting::nip_format($nip_penerima);?>
+        </div>
+      </td>
+</table>
+</div>

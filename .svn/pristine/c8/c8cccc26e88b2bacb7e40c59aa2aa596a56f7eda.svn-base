@@ -1,0 +1,71 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-29 05:50:16 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 05:50:16 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 05:50:16 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 06:22:15 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 06:22:15 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 06:22:15 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 06:24:41 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 06:33:12 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-29 06:33:12 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-29 06:33:12 --> Unable to connect to the database
+ERROR - 2013-05-29 06:36:04 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 06:36:04 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 06:36:04 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 08:11:56 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 08:11:56 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 08:11:56 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 08:12:44 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-29 08:12:53 --> Severity: Notice  --> Undefined property: stdClass::$ta C:\xampp\htdocs\siaku\application\models\m_dpt.php 922
+ERROR - 2013-05-29 08:12:53 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`siaku_db_model`.`t_dpt_det`, CONSTRAINT `fk_t_dpt_det_t_dpt_1` FOREIGN KEY (`id_dpt`) REFERENCES `t_dpt` (`id_dpt`))
+ERROR - 2013-05-29 08:18:41 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 08:18:41 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 08:18:41 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 08:18:59 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 562
+ERROR - 2013-05-29 08:19:04 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`siaku_db_model`.`t_dpt_det`, CONSTRAINT `fk_t_dpt_det_t_dpt_1` FOREIGN KEY (`id_dpt`) REFERENCES `t_dpt` (`id_dpt`))
+ERROR - 2013-05-29 08:25:48 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 08:25:48 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 08:25:48 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 08:26:04 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:26:07 --> Severity: Notice  --> Undefined property: stdClass::$tahun C:\xampp\htdocs\siaku\application\models\m_dpt.php 923
+ERROR - 2013-05-29 08:27:59 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:28:12 --> Severity: Notice  --> Undefined property: stdClass::$tahun C:\xampp\htdocs\siaku\application\models\m_dpt.php 923
+ERROR - 2013-05-29 08:28:51 --> Severity: Notice  --> Undefined property: stdClass::$total_usulan C:\xampp\htdocs\siaku\application\models\m_dpt.php 871
+ERROR - 2013-05-29 08:29:13 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:37:13 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 08:37:13 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 08:37:13 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 08:37:29 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:37:47 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:39:08 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:39:23 --> Severity: Notice  --> Undefined property: stdClass::$tahun C:\xampp\htdocs\siaku\application\models\m_dpt.php 923
+ERROR - 2013-05-29 08:48:24 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-29 08:48:24 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-29 08:48:24 --> Unable to connect to the database
+ERROR - 2013-05-29 08:49:18 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 08:49:18 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 08:49:18 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 08:49:32 --> Severity: Notice  --> Undefined property: stdClass::$total_usulan C:\xampp\htdocs\siaku\application\models\m_dpt.php 871
+ERROR - 2013-05-29 08:53:50 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 08:56:52 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 08:56:52 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 08:56:52 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 09:06:47 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 09:06:53 --> Severity: Notice  --> Undefined property: stdClass::$tahun C:\xampp\htdocs\siaku\application\models\m_dpt.php 923
+ERROR - 2013-05-29 09:08:13 --> Severity: Notice  --> Undefined property: stdClass::$total_usulan C:\xampp\htdocs\siaku\application\models\m_dpt.php 871
+ERROR - 2013-05-29 09:08:22 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 10:02:00 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 10:02:00 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 10:02:00 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 11:33:32 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 11:33:32 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 11:33:32 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 11:56:39 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-29 11:56:39 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-29 11:56:39 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-29 11:57:02 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 11:59:01 --> Severity: Notice  --> Undefined property: stdClass::$tahun C:\xampp\htdocs\siaku\application\models\m_dpt.php 923
+ERROR - 2013-05-29 12:03:07 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-29 12:24:25 --> Severity: Notice  --> Undefined property: stdClass::$total_usulan C:\xampp\htdocs\siaku\application\models\m_dpt.php 871
+ERROR - 2013-05-29 12:24:29 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561

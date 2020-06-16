@@ -1,0 +1,43 @@
+<article class="module width_full">
+<header>
+    <h3>Buku Besar</h3>
+</header>
+
+<div class="module_content">
+                   
+<!--<form method="post" name='form_bb' action="#" onSubmit='return validasi(this)'> 
+<table cellspacing="0" >
+    <tr>
+        <td>Tahun</td>
+        <td> : </td>
+        <td><select name="tahun" id="tahun">
+                <option value="0">-- Tahun --</option>
+                <option value="2014">2014</option>
+            </select>
+        </td>        
+        <td>
+            <input  type="button" value="tampil" name="tampil" id="tampil" onClick="viewsAll()">
+        </td>
+    </tr>  
+</table> 
+-->
+
+<table><div id='tabel'></div> </table>
+</div>
+</article> 
+
+<script>
+
+function viewsAll(){    
+    var tahun= "<?php echo $ta; ?>";
+    $.ajax({
+        type: "POST",
+        url : "<?php echo site_url('report/select_bb')?>",
+        data: { tahun: tahun},
+        success: function(msg){
+            $('#tabel').html(msg);
+        }
+    });
+ }
+ viewsAll()
+</script>

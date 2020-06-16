@@ -1,0 +1,261 @@
+<?php
+
+class Sp2d extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_sp2d', 'm_spm',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas', 'm_settings'));
+        
+		date_default_timezone_set('Etc/GMT-8');
+        
+    }
+    
+    function create(){
+        $this->auth->restrict(); 
+        $idu = $this->session->userdata('id_unit');
+        $su  = $this->session->userdata('id_subunit');
+        $ta  = $this->m_settings->get_tahun_anggaran();         
+        //$data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su); 
+        
+        //$non_kw = array('SAH');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+ 
+        $this->template->load('template','sp2d/buat_sp2d',$data);    
+    }
+    
+    function get_view_list_spm()
+    {
+         $this->auth->restrict();
+         $jb = $this->input->post('jenisblj');
+         $data['jenis_belanja'] = $this->input->post('jenisblj');
+         $id_unit = $this->session->userdata('id_unit');
+         
+         $bulan = date('m');
+         $ta = $this->m_settings->get_tahun_anggaran();
+         if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP){
+            $data['hasil']= $this->m_sp2d->get_list_spm_usulan($ta,$jb,58);
+         }else{
+            $data['hasil']= $this->m_sp2d->get_view_list_spm($ta,$jb,$id_unit);
+         } 
+         $this->load->view('sp2d/view_spm',$data);      
+    }
+    
+    function buat_sp2d()
+    {
+		$jb     = $this->input->post('sifatbayar');
+        $id_spm = $this->input->post('id_spm');
+        $id_spj = $this->input->post('id_spj');
+        
+        $ta = $this->m_settings->get_tahun_anggaran();  
+        $success = $this->m_sp2d->cek_adasp2d($ta,$id_spm);
+        if($success){
+            $response['errno'] 	= 1;
+            $response['message']= 'Maaf SPM ini sudah dibuatkan SP2D';
+            
+        }else{                   
+            if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+               $trans = $this->m_sp2d->selek_spp_usulan($ta,$id_spm);
+               $hasil=$this->m_sp2d->buat_sp2d($id_spm,$id_spj,$trans,$ta,$jb,71,0,0);
+            }else{
+                $trans = $this->m_sp2d->selek_spp_trans($ta,$id_spm);
+                $hasil=$this->m_sp2d->buat_sp2d($id_spm,$id_spj,$trans,$ta,$jb,71,59,6);
+            }
+            
+            if($hasil){
+                $response['errno'] 	= 0;
+                $response['message']= 'SP2D berhasil dibuat';
+            }else{
+                $response['errno'] 	= 1;
+                $response['message']= 'SP2D GAGAL dibuat';
+            }
+       }                   
+        echo json_encode($response);
+    }
+    
+    function daftar_sp2d_filter()
+    {
+        $this->auth->restrict(); 
+        $this->template->load('template','sp2d/daftar_sp2d_filter'); 
+    }
+    
+    function tampil_sp2d()
+    {
+        //$this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+        
+        $bulan = $this->input->post('bulan');
+        $tahun = $this->input->post('tahun');
+        $data['hasil']= $this->m_sp2d->get_sp2d_filter($tahun,$bulan);
+        $this->load->view('sp2d/tampil_sp2d',$data); 
+    }
+    
+    function preview_sp2d(){
+            $this->auth->restrict(); 
+            $id_sp2d = $this->uri->segment(3);
+            $jb = $this->uri->segment(4);
+			$data['nm_pr2'] = $this->m_settings->getSettingVal('REKTOR_NAMA');
+			$data['nip_pr2'] = $this->m_settings->getSettingVal('REKTOR_NIP');
+			$data['nm_ben'] = $this->m_settings->getSettingVal('BEN_PENGELUAR_NAMA');
+			$data['nip_ben'] = $this->m_settings->getSettingVal('BEN_PENGELUAR_NIP');
+            $data['tahun'] = $this->m_settings->get_tahun_anggaran();
+            $data['rek_blu'] = $this->m_settings->getSettingVal('REKENING_BLU');
+             if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP){
+                $detail_spm = $this->m_sp2d->detail_sp2d_usulan($id_sp2d);
+				$data['detail_spm']=$detail_spm;
+             }else{
+                $detail_spm = $this->m_sp2d->detail_sp2d($id_sp2d);
+				$data['detail_spm']=$detail_spm;
+             }
+			$cb_list  = $this->m_lov->get_list_lov(Constant::KAP_CARA_BAYAR);
+       		foreach($detail_spm->result_array() as $row){
+            	$cb[] = $row['cara_bayar'];
+        	}
+        	foreach ($cb_list as $row) {
+            	if (in_array($row->kode_value, $cb)) {
+                	$data['carabayar']  = $row->nama_value;
+            	}
+        	} 
+            $this->template->load('template','sp2d/preview_sp2d',$data); 
+    }
+    function siap_terotorisasi()
+    {
+        $this->auth->restrict(); 
+
+        $id_unit = $this->session->userdata('id_unit');  
+        $data['hasil']= $this->m_sp2d->siap_terotorisasi(); 
+        $this->template->load('template','sp2d/siap_terotorisasi',$data);
+    }
+    
+    function print_sp2d($download_pdf = ''){
+            $this->auth->restrict();   
+            $id_sp2d = $this->uri->segment(3);
+            $jb = $this->uri->segment(4);
+            $data['jb']= $jb;
+			$data['nm_pr2'] = $this->m_settings->getSettingVal('REKTOR_NAMA');
+            $data['nip_pr2'] = $this->m_settings->getSettingVal('REKTOR_NIP');
+			$data['nm_ben'] = $this->m_settings->getSettingVal('BEN_PENGELUAR_NAMA');
+			$data['nip_ben'] = $this->m_settings->getSettingVal('BEN_PENGELUAR_NIP');
+            $data['tahun'] = $this->m_settings->get_tahun_anggaran();
+            $data['rek_blu'] = $this->m_settings->getSettingVal('REKENING_BLU');
+            if($jb == Constant::JB_UP  || $jb == Constant::JB_TUP){
+                $detail_spm = $this->m_sp2d->detail_sp2d_usulan($id_sp2d);
+				$data['detail_spm']=$detail_spm;
+             }else{
+                $detail_spm = $this->m_sp2d->detail_sp2d($id_sp2d);
+				$data['detail_spm']=$detail_spm;
+             }
+			$cb_list  = $this->m_lov->get_list_lov(Constant::KAP_CARA_BAYAR);
+       		foreach($detail_spm->result_array() as $row){
+            	$cb[] = $row['cara_bayar'];
+        	}
+        	foreach ($cb_list as $row) {
+            	if (in_array($row->kode_value, $cb)) {
+                	$data['carabayar']  = $row->nama_value;
+            	}
+        	}      
+                
+             $ret = ''; 
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='SP2D'.$jb.'/'.$id_sp2d.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'sp2d/print_sp2d/true/','Download Pdf');
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('sp2d/print_sp2d', $data,  true);     
+            
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+       
+    }
+    
+    function otorisasi_sp2d()
+    {
+        $this->auth->restrict(); 
+
+        $id_spm = $this->uri->segment(3);
+        $id_sp2d = $this->uri->segment(4);
+        $jb = $this->uri->segment(5);
+        $ta = $this->m_settings->get_tahun_anggaran();
+         
+        if($jb != Constant::JB_UP  || $jb != Constant::JB_TUP){
+			$id_spj = $this->m_sp2d->get_id_spj($id_spm);
+	  	    $this->m_sp2d->otor_sp2d($id_sp2d,$id_spj);
+        }else{
+            $this->m_sp2d->set_status_sp2d($id_sp2d,72);
+        }
+        
+        $this->session->set_userdata('msg_typ','ok');
+        $this->session->set_userdata('msg', 'SP2D Berhasil Diotorisasi');  
+        redirect('sp2d/siap_terotorisasi');     
+    }
+	
+	function cairkan(){
+		$this->auth->restrict(); 
+        $idu = $this->session->userdata('id_unit');
+        $su  = $this->session->userdata('id_subunit');
+        $ta  = $this->m_settings->get_tahun_anggaran();         
+        //$data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su); 
+        
+        //$non_kw = array('SAH');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+ 
+        $this->template->load('template','sp2d/cair_sp2d',$data);
+	}
+	
+	function get_list_SP2D(){
+		$this->auth->restrict();
+        $jb = $this->input->post('jenisblj');
+        $data['jenis_belanja'] = $this->input->post('jenisblj');
+        $id_unit = $this->session->userdata('id_unit');
+		$id_sp2d = $this->input->post('id_sp2d');
+        
+        $bulan = date('m');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        
+        $data['hasil']= $this->m_sp2d->list_sp2d($jb);
+        
+        $this->load->view('sp2d/view_sp2d',$data);
+	}
+	
+	function cair_sp2d()
+    {
+		$jb     = $this->input->post('sifatbayar');
+        $id_sp2d = $this->input->post('id_sp2d');
+		$id_spm = $this->m_sp2d->get_id_spm($id_sp2d);
+        
+        $ta = $this->m_settings->get_tahun_anggaran();  
+            if($jb == Constant::JB_UP || $jb == Constant::JB_TUP){
+               	$hasil=$this->m_sp2d->set_status_sp2d($id_sp2d,73);
+				//jangan dipakai nanti di unit akan mencairkan usulan dari list SPM nya
+				//$hasil=$this->m_sp2d->set_status_usulan($id_spm,7);
+            }else{
+                $id_spj = $this->m_sp2d->get_id_spj($id_spm);
+	  	    	$hasil=$this->m_sp2d->cair_sp2d($id_sp2d,$id_spj);
+            }
+            
+            if($hasil){
+                $response['errno'] 	= 0;
+                $response['message']= 'SP2D SUKSES dicairkan';
+            }else{
+                $response['errno'] 	= 1;
+                $response['message']= 'SP2D GAGAL dicairkan';
+            }
+                          
+        echo json_encode($response);
+    }
+	
+	
+    
+    
+} ?>    

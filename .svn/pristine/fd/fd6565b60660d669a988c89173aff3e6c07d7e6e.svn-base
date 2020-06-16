@@ -1,0 +1,93 @@
+<div id="pesan"></div>
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="#" onSubmit='return validasi(this)'>
+<table  class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Tanggal Buku</th>
+                <th>No. Ref</th>
+                <th>Keterangan</th>
+                <th>Debet</th>
+                <th>Kredit</th>
+                <th>Saldo</th> 
+            </tr>
+      </thead>
+           <tbody>            				
+           <?php if ( COUNT ($isi_bukti)<=0){
+                        echo "<tr><td colspan=\"7\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=0;
+                        $sum_debet=0;
+                        $sum_kredit=0;						
+						$saldo=$saldo_awal;                        
+
+						foreach($isi_bukti as $row) : $i++;
+                        
+                        if ($i==1) {
+                            if ($row->saldo_normal == 'K') {
+                                $sa_k=$saldo_awal;
+                                $sa_d=0;                                
+                                $tot_kredit=$saldo_awal;
+                                $tot_debet=0;                                
+                            }else{
+                                $sa_d=$saldo_awal;
+                                $sa_k=0;
+                                $tot_debet=$saldo_awal;
+                                $tot_kredit=0;
+                            }
+                        ?>
+                        <tr>
+                            <td align="center" bgcolor="#FFFF00"></td>
+                            <td colspan="3" align="center" bgcolor="#FFFF00">SALDO AWAL</td>
+                            <td align="right" bgcolor="#FFFF00"><?php echo Formatting::currency($sa_d); ?> </td>
+                            <td align="right" bgcolor="#FFFF00"><?php echo Formatting::currency($sa_k); ?> </td>
+                            <td align="right" bgcolor="#FFFF00"><?php echo Formatting::currency($saldo); ?> </td>
+                        </tr>
+                        <?php
+                        }
+
+                        $sum_debet+= $row->debet;
+                        $sum_kredit+= $row->kredit;
+                        if ($row->saldo_normal == 'K') {
+                            $saldo=$saldo+($row->kredit)-($row->debet);
+                        }else{
+                            $saldo=$saldo+($row->debet)-($row->kredit);
+                        }						
+						?>
+                        
+                        <tr>
+                            <td align="center"><?php echo $i;?></td>
+                            <td align="left"><?php echo DATE("d-m-Y",strtotime($row->tgl_buku)); ?> </td>
+                            <td align="left"><?php echo $row->no_bukti; ?> </td>
+                            <td align="left"><?php echo $row->ket; ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->debet,0,false);?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->kredit,0,false); ?> </td>
+                            <td align="right"><?php echo Formatting::currency($saldo,0,false); ?> </td>
+                        </tr>
+                        <?php endforeach; 
+						
+                        $tot_debet+=$sum_debet;
+                        $tot_kredit+=$sum_kredit;
+						?>
+                        <tr>
+                            <input type="hidden" id="saldo" value="<?php echo $saldo; ?>" />
+                            <input type="hidden" id="id_buku_besar" value="<?php echo $id_buku_besar; ?>" />
+                            <input type="hidden" id="var_pendukung" value="<?php echo $akun_kode; ?>" />
+                            <td colspan="4" align="center" bgcolor="#00FF00">SALDO AKHIR</td>
+                            <td align="right" bgcolor="#00FF00"><?php echo Formatting::currency($tot_debet,0,false); ?> </td>
+                            <td align="right" bgcolor="#00FF00"><?php echo Formatting::currency($tot_kredit,0,false); ?> </td>
+                            <td align="right" bgcolor="#00FF00"><?php echo Formatting::currency($saldo,0,false); ?> </td>
+                        </tr>
+                        <?php
+                        if ($is_posting) {
+                        ?>
+                        <tr><td colspan="7" align="right"><input type="button" id="simpan" value="Posting" name="simpan" onclick="simpanlah()" /></td></tr>
+                        <?php
+                        }
+                        ?>
+            <?php } ?>
+        </tbody>
+</table>
+</form>
+</div>

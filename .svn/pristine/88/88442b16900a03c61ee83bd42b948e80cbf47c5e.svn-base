@@ -1,0 +1,43 @@
+<article class="module width_full">
+<header>
+  <h3>Daftar SPTB Ganti Uang Persediaan (GUP)</h3></header>
+   
+  <table></table>
+  <div id="sub-content"> 
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width: 780px;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+                <th>Kode MAK</th>
+                <th>No. SPTB</th>
+                <th>Tanggal</th>
+                <th colspan="2">Action</th> 
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php if($hasil ==""){
+				 echo "<tr><td colspan='6' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+			 	$i=0;
+			 	foreach($hasil->result() as $row) : $i++;?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                    <td><?php echo $row->kegiatan;?>.<?php echo $row->output;?>.<?php echo $row->id_akun;?></td>
+                    <td><?php echo $row->no_sptb.'/UN.14.1.26/SPTB/'.$nama_unit.'/'.$row->thn ?> </td>
+                    <td><?php echo $row->tgl_sptb; ?> </td>
+                    <td align="center"><?php $id= $row->id_sptb;?>
+                     <a href="<?php echo base_url();?>gup/preview_sptb_gu/<?php echo $row->th_sptb;?>/<?php echo $id;?>" title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/icn_search.png"/></a><td align="center"><?php $id= $row->id_sptb;?>
+                    <a href="<?php echo base_url();?>gup/simpan_spp/<?php echo $row->th_sptb;?>/<?php echo $id;?>" title="Buat SPP" ><img src="<?php echo base_url(); ?>asset/images/icn_edit.png"/></a>
+                    </td><input name="id_sptb" id="id_sptb" type="hidden" value="<?php echo  $row->id_sptb ;?>" />
+                </tr>
+			 <?php endforeach; }?>
+        </tbody>
+</table>
+</div>
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+</article>

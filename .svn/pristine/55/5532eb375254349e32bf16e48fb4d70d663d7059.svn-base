@@ -1,0 +1,252 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Model Class penerimaan dari layanan pendidikan lainnya
+ * 
+ * Model Class penerimaan dari layanan pendidikan lainnya yang merupakan 
+ * bagian dari Bisnis Proses Penerimaan
+ * 
+ * @author Putu Praba Santika
+ */
+    class M_pen_lain extends CI_Model {
+        
+        function __construct(){
+            parent::__construct();
+        }
+              
+       /**
+        * Ambil jenis penerimaan lainnya
+        * @return array jasa pendidikan lainnya 
+        */
+	   function tipe_ambil(){
+            $this->db->from('m_lov');
+            $this->db->where('kode_app',constant::KAP_LADIK_LAIN);
+            $query = $this->db->get();
+            
+            foreach ($query->result() as $row){
+                $result['']= '-->> Tipe Jasa <<--';
+                $result[$row->kode_value]= $row->nama_value;
+            }
+            return $result;
+        }
+        /**
+        * Ambil skema pembayaran
+        * @return array skema pembayaran
+        */
+        function skema_bayar_ambil(){
+            $this->db->from('m_lov');
+            $this->db->where('kode_app',constant::KAP_SKEMA_BAYAR);
+            $query = $this->db->get();
+            
+            foreach ($query->result() as $row){
+                $result['']= '-->> Skema Bayar <<--';
+                $result[$row->kode_value]= $row->nama_value;
+            }
+            return $result;
+        }
+        /**
+        * Ambil jenis sewa aset
+        * @return array jenis sewa aset
+        */
+        function getJenis_aset(){
+            $this->db->from('m_lov');
+            $this->db->where('kode_app',constant::KAP_SEWA);
+            $query = $this->db->get();
+            
+            foreach ($query->result() as $row){
+                $result['']= '-->> Jenis Sewa Aset <<--';
+                $result[$row->kode_value]= $row->nama_value;
+            }
+            return $result;
+        }
+        /**
+        * Ambil jenis investasi
+        * @return array jenis investasi
+        */
+        function jenis_investasi(){
+            $this->db->from('m_lov');
+            $this->db->where('kode_app',constant::KAP_INVESTASI);
+            $query = $this->db->get();
+            
+            foreach ($query->result() as $row){
+                $result['']= '-->> Jenis Investasi <<--';
+                $result[$row->kode_value]= $row->nama_value;
+            }
+            return $result;
+        }
+        /**
+         * simpan mou single table coy
+         */
+        function simpan($master, $detail='', $idmaster=''){
+            $tbl_master='t_mou';
+            $tbl_detail='t_mou_det';
+            
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+            if ($idmaster===false){
+                $this->db->insert($tbl_master,$master);
+                $id_master=$this->db->insert_id();
+            }else{
+                $this->db->where('id_mou', $idmaster);
+                $this->db->update($tbl_master, $master);
+                $id_master=$idmaster;
+            }
+            
+            if(count($detail)>0){
+                //delete detail sebelum save editan
+                $this->db->where('id_mou',$id_master);
+                $this->db->delete($tbl_detail);
+                
+                foreach($detail as $det){
+                    $det['id_mou']=$id_master;
+                    $this->db->insert($tbl_detail,$det);
+                }
+            }
+            
+            $this->db->trans_complete();
+            
+            if($this->db->trans_status() === FALSE){
+                return false;
+            }else{
+                return $id_master;
+            }
+        }
+        function ambil_semua($jenis){
+            $tbl_master='t_mou';
+            
+            $this->db->select('*');
+            $this->db->where('jenis_mou',$jenis);
+            $this->db->from($tbl_master);
+            $query = $this->db->get();
+            return $query->result();
+        }
+        function ambil_non_bukti($bukti,$jenis){
+            $tbl_master='t_mou';
+            
+            $this->db->select('*');
+            $this->db->from($tbl_master);
+            $this->db->where('jenis_mou',$jenis);
+            $this->db->where("
+                id_mou NOT IN 
+                    (
+                        SELECT id_ref
+                        FROM t_bukti_akuntansi
+                        WHERE jenis_bukti='".$bukti."'
+                            AND jenis_ref='".$jenis."'
+                    )
+                ", NULL, FALSE);
+            $query = $this->db->get();
+            return $query->result();
+        }
+        
+        function ambil_non_ss($ss,$jenis){
+            $tbl_master='t_mou';
+            
+            $this->db->select('*');
+            $this->db->from($tbl_master);
+            $this->db->where('jenis_mou',$jenis);
+            $this->db->where("
+                id_mou NOT IN 
+                    (
+                        SELECT id_ref
+                        FROM t_surat_setor
+                        WHERE tipe_ss='".$ss."'
+                            AND jenis_ref='".$jenis."'
+                    )
+                ", NULL, FALSE);
+            $query = $this->db->get();
+            return $query->result();
+        }
+        
+        function ambil_detail($jenis,$id){
+            $tbl_master='t_mou';
+            
+            $this->db->select($tbl_master.'.*');
+            
+            switch($jenis){
+                case Constant::MOU_LADIK_LAIN :
+                    $this->db->select('skema_bayar_nama.nama_value as skema_bayar_nama,tipe_jasa_nama.nama_value as tipe_jasa_nama');
+                    $this->db->join('m_lov as skema_bayar_nama',
+                        'skema_bayar_nama.kode_value=skema_bayar AND skema_bayar_nama.kode_app ='.
+                        constant::KAP_SKEMA_BAYAR);
+                    $this->db->join('m_lov as tipe_jasa_nama',
+                        'tipe_jasa_nama.kode_value=jenis AND tipe_jasa_nama.kode_app ='.
+                        constant::KAP_LADIK_LAIN);
+                    break;
+                case Constant::MOU_HIBAH_TERENCANA :
+                    break;
+                case Constant::MOU_PPPMAS :
+                    $this->db->select('skema_bayar_nama.nama_value as skema_bayar_nama,tipe_jasa_nama.nama_value as tipe_jasa_nama');
+                    $this->db->join('m_lov as skema_bayar_nama',
+                        'skema_bayar_nama.kode_value=skema_bayar AND skema_bayar_nama.kode_app ='.
+                        constant::KAP_SKEMA_BAYAR);
+                    $this->db->join('m_lov as tipe_jasa_nama',
+                        'tipe_jasa_nama.kode_value=jenis AND tipe_jasa_nama.kode_app ='.
+                        constant::KAP_LADIK_LAIN);
+                    break;
+                case Constant::MOU_HIBAH_TAKTER :
+                    break;
+                case Constant::MOU_UNIT_USAHA :
+                    break;
+                case Constant::MOU_ASET :
+                    break;
+                case Constant::MOU_ASET_RUTIN :
+                    break;
+                case Constant::MOU_INVESTASI :
+                    $this->db->select('skema_bayar_nama.nama_value as skema_bayar_nama');
+                    $this->db->join('m_lov as skema_bayar_nama',
+                        'skema_bayar_nama.kode_value=skema_bayar AND skema_bayar_nama.kode_app ='.
+                        constant::KAP_SKEMA_BAYAR);
+                    break;
+                case Constant::MOU_JASA_GIRO :
+                    $this->db->select('skema_bayar_nama.nama_value as skema_bayar_nama');
+                    $this->db->join('m_lov as skema_bayar_nama',
+                        'skema_bayar_nama.kode_value=skema_bayar AND skema_bayar_nama.kode_app ='.
+                        constant::KAP_SKEMA_BAYAR);
+                    break;
+            }
+            
+            $this->db->where('id_mou',$id);
+            $this->db->from($tbl_master);
+            $query = $this->db->get();
+            return $query->row();
+        }
+        
+        function ambil_detail_det($jenis,$id){
+            $tbl_detail='t_mou_det';
+            
+            $this->db->select('*');
+            
+            switch($jenis){
+                case Constant::MOU_LADIK_LAIN :
+                    $this->db->join('m_unit',
+                        'm_unit.id_unit='.$tbl_detail.'.id_unit');
+                    break;
+                case Constant::MOU_HIBAH_TERENCANA :
+                    break;
+                case Constant::MOU_PPPMAS :
+                    $this->db->join('m_unit',
+                        'm_unit.id_unit='.$tbl_detail.'.id_unit');
+                    break;
+                case Constant::MOU_HIBAH_TAKTER :
+                    break;
+                case Constant::MOU_UNIT_USAHA :
+                    break;
+                case Constant::MOU_ASET :
+                    break;
+                case Constant::MOU_ASET_RUTIN :
+                    break;
+                case Constant::MOU_INVESTASI :
+                    break;
+                case Constant::MOU_JASA_GIRO :
+                    break;
+            }
+            
+            $this->db->where('id_mou',$id);
+            $this->db->from($tbl_detail);
+            $query = $this->db->get();
+            return $query->result();
+        }
+        
+        
+    }
+?>

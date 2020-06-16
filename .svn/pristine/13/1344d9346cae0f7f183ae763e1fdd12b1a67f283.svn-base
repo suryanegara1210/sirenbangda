@@ -1,0 +1,62 @@
+<article class="module width_full">
+<header>
+<h3> Road Map Dokumen Kwitansi</h3>
+</header>             
+ <div class="module_content">      
+
+    <table  class="table-common" id="hasil" style="width:99.9%;" >  
+       <thead> 
+            <tr>
+            	<th width="10px">No.</th>
+            	<th>Nama Subunit</th>
+				<th>Pagu Real</th>
+                <th>Total Kwitansi</th>
+                <th>SPTB</th>
+                <th>SPP</th>
+                <th>SPM</th>
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php 
+			 	$i				= 0;
+				$tot_pagureal	= 0;
+				$tot_kwitansi	= 0;
+				
+			 	foreach($isi as $row) : $i++;
+			 	$tot_pagureal += $row->pagu_real;
+				$tot_kwitansi += $row->total_kwitansi;
+				
+?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                	<td align="left"><?php echo $row->nama_subunit; ?></td>
+					<td align="right"><?php echo $this->uang->angka($row->pagu_real); ?></td>
+                    <td align="right"><?php echo $this->uang->angka($row->total_kwitansi); ?> </td>
+                    <td align="center"><?php echo '-'; ?></td>
+                    <td align="center"><?php echo '-'; ?></td>
+                    <td align="center"><?php echo '-'; ?></td>
+                </tr>
+             <?php
+			 endforeach;?>
+             	<tr bgcolor="#FFFF99">
+                	<td align="center" colspan="2"><strong>JUMLAH</strong></td>
+					<td align="right"><?php echo $this->uang->angka($tot_pagureal); ?></td>
+                    <td align="right"><?php echo $this->uang->angka($tot_kwitansi); ?> </td>
+                    <td align="center"><?php echo '-'; ?></td>
+                    <td align="center"><?php echo '-'; ?></td>
+                    <td align="center"><?php echo '-'; ?></td>
+                    
+                    
+                </tr>  
+        </tbody>
+ </table>
+ <br />
+
+ </table>
+
+
+
+
+
+
+

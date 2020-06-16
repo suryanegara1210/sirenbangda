@@ -1,0 +1,96 @@
+<div id="pesan"></div>
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="#" onSubmit='return validasi(this)'>
+<table  class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>      
+                <th>Saldo Tutup Buku</th>          
+                <th>Periode</th>
+                <th>Komentar</th>                
+                <th>Tanggal Posting</th>
+                <th>Action</th> 
+            </tr>
+      </thead>
+           <tbody>           				
+           <?php if ( COUNT ($isi_bukti)<=0){
+                        echo "<tr><td colspan=\"6\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=0;
+                        $del_semua="";
+						foreach($isi_bukti as $row) : $i++;
+			?>
+                        <tr>
+                            <td align="center"><?php echo $i;?></td>
+                            <td align="center"><?php echo Formatting::currency($row->saldo,0,false);?> </td>
+                            <td align="center"><?php if($row->is_input_sa==1){echo "-";}else{echo $this->bulan_array[$row->bulan_awal]." - ".$this->bulan_array[$row->bulan_awal];}?></td>
+                            <td align="center"><?php if($row->is_input_sa==1){echo "Saldo Awal";}else{echo $row->comment;}?></td>
+                            <td align="center"><?php echo DATE("d-m-Y",strtotime($row->tgl_posting));?> </td>                            
+                            <td align="center">
+                                <?php
+                                    $del="";
+                                    if($row->is_input_sa!=1){
+                                        $del_semua=$del_semua.$row->id_buku_besar.",";
+                                        $del="<a Title='Hapus posting buku besar' href='#' onclick=\"hapus_posting('". $row->id_buku_besar ."')\"><img src=\"".base_url()."asset/images/delete.png\"/></a>";
+                                    }
+                                    $edit="<a Title='Detail buku besar' href=".site_url('report/list_bb/'.$row->id_buku_besar)."><img src=\"".base_url()."asset/images/detail.png\"/></a>";
+
+                                    echo $edit."&nbsp;&nbsp;&nbsp;".$del;
+                                ?>
+                            </td>
+                        </tr>
+
+            <?php 
+                        endforeach;
+            ?>
+                        <tr>
+                            <td colspan="5" align="center">Semua Buku Besar</td>
+                            <td align="center">
+                                <?php
+                                    $semua="<a Title='Semua buku besar' href=".site_url('report/list_bb/ALL/'.$tahun)."><img src=\"".base_url()."asset/images/detail.png\"/></a>";
+                                    $del="";
+                                    if (!empty($del_semua)) {                                        
+                                        $del="<a Title='Hapus semua posting buku besar' href='#' onclick=\"hapus_posting('". substr($del_semua, 0, -1) ."')\"><img src=\"".base_url()."asset/images/delete.png\"/></a>";
+                                    }
+                                    echo $semua."&nbsp;&nbsp;&nbsp;".$del;
+                                ?>
+                            </td>
+                        </tr>
+            <?php
+                    } 
+            ?>
+        </tbody>
+</table>
+</form>
+</div>
+<script type="text/javascript">
+    function hapus_posting (var_id) {
+        if (confirm('Apakah anda yakin ingin menghapus posting buku besar ini?')) {
+            $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('report/hapus_bb')?>",
+                data: {id_bb: var_id},
+                success: function(msg){                    
+                    if (msg=='1') {
+                        alert('Posting buku besar berhasil dihapus.');                        
+                    }else{
+                        alert('Posting buku besar gagal dihapus.');
+                    };
+                    viewsAll();
+                }
+            });
+        };
+    }
+
+    function viewsAll(){    
+        var tahun= '<?php echo $tahun; ?>';
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/select_bb')?>",
+            data: { tahun: tahun},
+            success: function(msg){
+                $('#tabel').html(msg);
+            }
+        });
+    }
+</script>

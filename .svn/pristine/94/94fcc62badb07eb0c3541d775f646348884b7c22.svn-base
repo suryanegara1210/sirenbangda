@@ -1,0 +1,197 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_evaluasi_renja extends CI_Model
+{	
+    public function __construct()
+    {
+        parent::__construct();
+    }
+	
+	public function get_renja_all($tahun, $id_skpd)
+	{
+		$where = array(
+						'tahun' => $tahun,
+						'id_skpd' => $id_skpd,
+						'id_status' => 7,
+						'is_prog_or_keg' => 2
+					);
+		$data['renja'] = $this->db->where($where)
+									->get("t_renja_prog_keg")
+									->result();
+
+		$indikator = $this->db->where($where)
+									->select("t_renja_indikator_prog_keg.*")
+									->select("m_lov.nama_value AS satuan", false)
+									->join("t_renja_prog_keg", "t_renja_indikator_prog_keg.id_prog_keg=t_renja_prog_keg.id")
+									->join("m_lov", "t_renja_indikator_prog_keg.satuan_target=m_lov.kode_value AND nama_app='satuan'")
+									->order_by("t_renja_indikator_prog_keg.id_prog_keg")
+									->get("t_renja_indikator_prog_keg")
+									->result();
+		$temp = array();
+		$jumlah = array();
+		foreach ($indikator as $row) {
+			$temp[$row->id_prog_keg][] = $row;
+			
+			if (empty($jumlah[$row->id_prog_keg])) {
+				$jumlah[$row->id_prog_keg]=1;
+			}else{
+				$jumlah[$row->id_prog_keg]++;
+			}
+		}
+		$data['indikator'] = $temp;
+		$data['jumlah_indikator'] = $jumlah;
+
+		return $data;
+	}
+
+	public function get_one_renja($id)
+	{
+		$where = array(
+						't_renja_prog_keg.id' => $id						
+					);
+		$data['renja'] = $this->db->where($where)
+									->get("t_renja_prog_keg")
+									->row();
+
+		$indikator = $this->db->where($where)
+									->select("t_renja_indikator_prog_keg.*")
+									->select("m_lov.nama_value AS satuan", false)
+									->join("t_renja_prog_keg", "t_renja_indikator_prog_keg.id_prog_keg=t_renja_prog_keg.id")
+									->join("m_lov", "t_renja_indikator_prog_keg.satuan_target=m_lov.kode_value AND nama_app='satuan'")
+									->order_by("t_renja_indikator_prog_keg.id_prog_keg")
+									->get("t_renja_indikator_prog_keg")
+									->result();
+											
+		$data['indikator'] = $indikator;
+
+		return $data;
+	}
+
+	public function get_max_tahun()
+	{
+		return $this->db->query("SELECT MAX(tahun_anggaran) AS max FROM m_tahun_anggaran")->row()->max;
+	}
+
+	public function get_tahun_now($tahun)
+	{
+		return $this->db->query("SELECT * FROM m_tahun_anggaran WHERE tahun_anggaran = '". $tahun ."'")->row();
+	}
+
+	public function get_less_tahun($tahun)
+	{
+		$data = $this->db->query("SELECT * FROM m_tahun_anggaran WHERE tahun_anggaran < '". $tahun ."' ORDER BY tahun_anggaran DESC")->row();
+		if (empty($data)) {
+			return NULL;
+		}
+
+		return $data->tahun_anggaran;
+	}
+
+	public function get_indikator_renstra($id_indikator_renja)
+	{
+		$data = $this->db->select("t_renja_indikator_prog_keg.*")
+							->select("t_renja_prog_keg.id_renstra")
+							->where("t_renja_indikator_prog_keg.id", $id_indikator_renja)
+							->join("t_renja_prog_keg", "t_renja_prog_keg.id=t_renja_indikator_prog_keg.id_prog_keg")
+							->get("t_renja_indikator_prog_keg")
+							->row();
+
+		return $this->db->where("indikator", $data->indikator)
+							->where("id_prog_keg", $data->id_renstra)
+							->select("t_renstra_indikator_prog_keg.*")
+							->select("m_lov.nama_value AS satuan", false)
+							->join("m_lov", "t_renstra_indikator_prog_keg.satuan_target=m_lov.kode_value AND nama_app='satuan'")
+							->get("t_renstra_indikator_prog_keg")
+							->row();
+	}
+
+	public function get_renstra($id_renja)
+	{
+		return $this->db->where("t_renja_prog_keg.id", $id_renja)
+							->select("t_renstra_prog_keg.*")
+							->join("t_renstra_prog_keg", "t_renstra_prog_keg.id=t_renja_prog_keg.id_renstra")
+							->get("t_renja_prog_keg")
+							->row();		
+	}
+
+	public function get_renja($id_renja)
+	{
+		return $this->db->where("t_renja_prog_keg.id", $id_renja)							
+							->get("t_renja_prog_keg")
+							->row();		
+	}
+
+	public function get_cik($id_renja)
+	{
+		$renja = $this->get_renja($id_renja);
+		return $this->db->where("kd_urusan", $renja->kd_urusan)
+							->where("kd_bidang", $renja->kd_bidang)
+							->where("kd_program", $renja->kd_program)
+							->where("kd_kegiatan", $renja->kd_kegiatan)
+							->where("tahun", $renja->tahun)
+							->where("id_skpd", $renja->id_skpd)							
+							->get("tx_cik_prog_keg")
+							->row();		
+	}
+
+	public function get_indikator_cik($id_indikator_renja)
+	{
+		$data = $this->db->select("t_renja_indikator_prog_keg.*")
+							->select("t_renja_prog_keg.id_renstra, kd_urusan, kd_bidang, kd_program, kd_kegiatan, tahun, id_skpd")
+							->where("t_renja_indikator_prog_keg.id", $id_indikator_renja)
+							->join("t_renja_prog_keg", "t_renja_prog_keg.id=t_renja_indikator_prog_keg.id_prog_keg")
+							->get("t_renja_indikator_prog_keg")
+							->row();
+
+		return $this->db->where("indikator", $data->indikator)
+							->where("kd_urusan", $data->kd_urusan)
+							->where("kd_bidang", $data->kd_bidang)
+							->where("kd_program", $data->kd_program)
+							->where("kd_kegiatan", $data->kd_kegiatan)
+							->where("tahun", $data->tahun)
+							->where("id_skpd", $data->id_skpd)
+							->select("tx_cik_indikator_prog_keg.*")
+							->select("m_lov.nama_value AS satuan", false)
+							->join("m_lov", "tx_cik_indikator_prog_keg.satuan_target=m_lov.kode_value AND nama_app='satuan'")
+							->join("tx_cik_prog_keg", "tx_cik_prog_keg.id=tx_cik_indikator_prog_keg.id_prog_keg")
+							->get("tx_cik_indikator_prog_keg")
+							->row();
+	}
+
+	public function get_last_evaluasi_renja($id_indikator, $tahun)
+	{
+		$data = $this->db->select("t_evaluasi_renja_detail_berjalan.*")
+							->where("t_evaluasi_renja.id_indikator_prog_keg", $id_indikator)
+							->where("t_evaluasi_renja.tahun", $tahun)
+							->join("t_evaluasi_renja_detail_berjalan", "t_evaluasi_renja.id=t_evaluasi_renja_detail_berjalan.id_evaluasi_renja AND t_evaluasi_renja_detail_berjalan.triwulan=4")
+							->get("t_evaluasi_renja")
+							->row();
+	}
+
+	public function save($data_evaluasi, $realisasi, $data_evaluasi_det)
+	{
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$this->db->insert("t_evaluasi_renja", $data_evaluasi);
+		$id_evaluasi_renja = $this->db->insert_id();
+
+		$insert_realisasi =  array();
+		foreach ($realisasi['k'] as $key => $value) {
+			$insert_realisasi[] = array(
+											'id_evaluasi_renja' => $id_evaluasi_renja,
+											'triwulan' => $key,
+											'realisasi_k' => $value,
+											'realisasi_rp' => $realisasi['rp'][$key]
+										);
+		}
+		$this->db->insert_batch('t_evaluasi_renja_realisasi_kinerja_tw', $insert_realisasi); 
+
+		$data_evaluasi_det['id_evaluasi_renja']	= $id_evaluasi_renja;
+		$this->db->insert("t_evaluasi_renja_detail_berjalan", $data_evaluasi_det);
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+}
+?>

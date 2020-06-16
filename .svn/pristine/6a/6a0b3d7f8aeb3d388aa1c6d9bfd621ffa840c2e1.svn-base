@@ -1,0 +1,16 @@
+<?php
+
+class test extends CI_Controller {
+    
+    function index () {
+        $this->load->library('rbac/user');
+        $this->load->library('rbac/role');
+        
+        
+        $user = $this->user->getByIdUser(1);
+        var_dump(serialize($user));
+        
+    }
+}
+
+?>

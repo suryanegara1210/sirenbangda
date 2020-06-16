@@ -1,0 +1,1157 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+* @brief Controller Class Pembuatan Laporan Akuntansi
+* 
+* Controller Class Pembuatan Laporan Akuntansi
+* Jurnal dan Buku Besar
+* 
+* @author I Wayan Shandyasa
+* @author Praba Santika
+*/                                                                                    
+class Report extends CI_Controller
+{
+	var $CI = NULL;
+    
+	function __construct()
+	{
+		// get CI's object
+		$this->CI =& get_instance(); 
+		parent::__construct();
+		$this->load->helper(array('form','url', 'text_helper','date','dompdf', 'file'));
+		$this->load->database();
+		$this->load->library(array('Pagination','image_lib'));
+		$this->load->library('konversi');
+		$this->load->library(array('StrUtil','Formatting'));		
+		$this->load->model(array('m_report', 'm_bukti_akuntansi', 'm_logic', 'm_settings','m_umum', 'm_lov')); 
+	}  
+
+    public $bulan_array=array(
+        '1'=>'Januari',
+        '2'=>'Februari',
+        '3'=>'Maret',
+        '4'=>'April',
+        '5'=>'Mei',
+        '6'=>'Juni',
+        '7'=>'Juli',
+        '8'=>'Agustus',
+        '9'=>'September',
+        '10'=>'Oktober',
+        '11'=>'November',
+        '12'=>'Desember'
+    );
+
+    public $bulan_periode=array(
+        '1'=> array(
+        			'1'=>'Januari',
+			        '2'=>'Februari',
+			        '3'=>'Maret',
+			        '4'=>'April',
+			        '5'=>'Mei',
+			        '6'=>'Juni',
+			        '7'=>'Juli',
+			        '8'=>'Agustus',
+			        '9'=>'September',
+			        '10'=>'Oktober',
+			        '11'=>'November',
+			        '12'=>'Desember'
+    			),
+        '3'=> array(
+        			'1'=>'Januari - Maret',
+			        '2'=>'April - Juni',
+			        '3'=>'Juli - September',
+			        '4'=>'Oktober - Desember'
+    			),
+        '6'=> array(
+        			'1'=>'Januari - Juni',
+			        '2'=>'Juli - Desember'
+    			),
+        '12'=> array(
+        			'1'=>'Januari - Desember'			        
+    			)
+    );
+
+    public $jenis_periode=array(
+        '1'=>'Bulan',
+        '3'=>'Triwulan',
+        '6'=>'Semester',
+        '12'=>'Tahun',
+        '0'=>'Periode'
+    );
+	/**
+	 * Menampilkan daftar yang akan di tenderkan
+	 */
+	function jurnal(){
+        $jenisbukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        
+        $jen_bkt= Array();
+        $jen_bkt['SEMUA']= 'Semua';
+        foreach ($jenisbukti as $jb){
+            $jen_bkt[$jb->kode_value]= $jb->nama_value;
+        }
+        $data['jen_bkt']=$jen_bkt;
+
+        $data['unit']=$this->m_umum->unit_semua(Constant::WITHOUT_PILIH);
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+		$this->template->load('template','report/daftar_jurnal',$data);
+	}
+	
+	function view_jurnal(){
+        $jenisbukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+
+        $jen_bkt= Array();
+        $jen_bkt['SEMUA']= 'Semua';
+        foreach ($jenisbukti as $jb){
+            $jen_bkt[$jb->kode_value]= $jb->nama_value;
+        }
+        $data['jen_bkt']=$jen_bkt;
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+		$this->template->load('template','report/view_jurnal', $data);
+	}
+	
+	function jurnal_koreksi(){
+        $jenisbukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+
+        $jen_bkt= Array();
+        $jen_bkt['SEMUA']= 'Semua';
+        foreach ($jenisbukti as $jb){
+            $jen_bkt[$jb->kode_value]= $jb->nama_value;
+        }
+        $data['jen_bkt']=$jen_bkt;
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+		$this->template->load('template','report/jurnal_koreksi', $data);
+	}
+	
+	function select_tahun(){
+		$bulan = $this->input->post('bulan');
+        $bulan2 = $this->input->post('bulan2');
+		$tahun = $this->input->post('tahun');
+		$unit = $this->input->post('unit');
+        $jen_bkt = $this->input->post('jen_bkt');
+		
+		//$data['bulan'] = $bulan;
+        //$data['bulan2'] = $bulan2;
+		//$data['tahun'] = $tahun;
+        $data['isKunci']=$this->m_report->cek_kunci($unit);
+        $data['ada_ls_sp2d_blm_cair'] = $this->m_report->ada_ls_sp2d_blm_cair($unit);        
+        //$data['ada_gup_blm_otor_kaprodi'] = $this->m_report->ada_gup_blm_otor_kaprodi($unit);
+        $data['ada_gup_blm_otor_kaprodi'] = null;        
+
+        $data['saldo_awal']=$this->m_report->get_saldo_awal($tahun);
+		$data['isi_bukti']=$this->m_report->bukti_daftar_ambil($bulan, $bulan2, $tahun,$unit, $jen_bkt);
+		//echo $this->db->last_query();
+		$this->load->view('report/list_jurnal',$data);
+	} 
+    	
+	function select_tahun_jurnal(){
+        $bulan = $this->input->post('bulan');
+        $bulan2 = $this->input->post('bulan2');
+        $tahun = $this->input->post('tahun');
+        $jen_bkt = $this->input->post('jen_bkt');
+
+        $data['bulan'] = $bulan;
+        $data['bulan2'] = $bulan2;
+        $data['tahun'] = $tahun;
+        $data['jen_bkt'] = $jen_bkt;
+        
+        $data['isi_jurnal']=$this->m_report->daftar_jurnal($bulan,$bulan2,$tahun, $jen_bkt);
+        //echo $this->db->last_query();
+        $this->load->view('report/viewlist_jurnal',$data);            
+	}
+	
+	function select_tahun_koreksi(){
+		$bulan = $this->input->post('bulan');
+        $bulan2 = $this->input->post('bulan2');
+		$tahun = $this->input->post('tahun');
+        $jen_bkt = $this->input->post('jen_bkt');
+		
+		//$data['bulan'] = $bulan;
+        //$data['bulan2'] = $bulan2;
+		//$data['tahun'] = $tahun;
+		 
+		$data['isi_jurnal']=$this->m_report->daftar_jurnal($bulan,$bulan2,$tahun, $jen_bkt);
+		//echo $this->db->last_query();
+		$this->load->view('report/viewlist_koreksi',$data);    
+	}
+	
+	function buat_jurnal(){   
+		if($this->auth->is_logged_in() == true){ 
+		  $id_bukti = $this->input->post('id');
+		  $bulan = $this->input->post('bulan');
+          $bulan2 = $this->input->post('bulan2');
+		  $tahun = $this->input->post('tahun');
+          $jen_bkt = $this->input->post('jen_bkt');
+          $unit = $this->input->post('id_unit');
+          $saldo = $this->input->post('saldo');          
+          $cmt= $this->input->post('cmt');          
+
+          //FIXME: perlu transaction??                    
+          $id_buku_besar=$this->m_report->simpan_bb($saldo,$tahun,$bulan,$bulan2,$cmt);
+          //echo $this->db->last_query();
+		  $this->m_report->simpan_jurnal($bulan,$bulan2,$tahun,$jen_bkt,$unit,$id_buku_besar);
+		  $this->m_report->simpan_det_bb($bulan,$bulan2,$tahun,$jen_bkt,$unit,$id_buku_besar);
+		  $this->m_report->update_status_posting($bulan,$bulan2,$tahun,$jen_bkt,$unit,$id_buku_besar);
+		}
+	}
+	
+	function buku_besar(){
+		$data['akun_kode']=$this->m_report->ambil_akun();
+		$data['ta']=$this->m_settings->get_tahun_anggaran();
+		$this->template->load('template','report/daftar_bb',$data);
+	}
+	
+	function select_tahun_(){
+		$bulan = $this->input->post('bulan');
+        $bulan2 = $this->input->post('bulan2');
+		$tahun = $this->input->post('tahun');
+		$akun_kode = $this->input->post('akun_kode');
+		        
+        $data['saldo_awal']=$this->m_report->get_saldo_awal();
+        if (!empty($akun_kode) || $akun_kode !="") {
+            $data['is_posting']=FALSE;
+            $data['bulan'] = $bulan;
+            $data['bulan2'] = $bulan2;
+            $data['tahun'] = $tahun;
+            $data['akun_kode'] = $akun_kode;
+             
+            $data['isi_bukti']=$this->m_report->jurnal_daftar_ambil($bulan,$bulan2,$tahun,$akun_kode);
+            //echo $this->db->last_query();
+            $this->load->view('report/list_bb',$data);
+        }else{
+            $data['is_posting']=TRUE;
+            $data['btn_posting']=TRUE;
+            $data['bulan'] = $bulan;
+            $data['bulan2'] = $bulan2;
+            $data['tahun'] = $tahun;
+             
+            $data['isi_bukti']=$this->m_report->bb_semua_akun($bulan,$bulan2,$tahun,$akun_kode);
+            //echo $this->db->last_query();
+            $this->load->view('report/list_bb_semua_akun',$data);
+        }
+	}
+
+    function posting_bb(){   
+        if($this->auth->is_logged_in() == true){           
+            $bulan = $this->input->post('bulan');
+            $bulan2 = $this->input->post('bulan2');
+            $tahun = $this->input->post('tahun');
+            $akun_kode = $this->input->post('akun_kode');
+            $saldo = $this->input->post('saldo');
+            //FIXME: perlu transaction??
+
+            if (!empty($akun_kode) || $akun_kode !="") {
+                $id_buku_besar=$this->m_report->simpan_bb($saldo);
+                $this->m_report->update_status_posting_bb($bulan,$bulan2,$tahun,$akun_kode,$id_buku_besar);
+            }else{
+                $id_buku_besar=$this->m_report->simpan_bb($saldo);
+                $this->m_report->update_status_posting_bb($bulan,$bulan2,$tahun,NULL,$id_buku_besar);
+            }          
+        }
+    }
+
+    function hapus_bb(){
+    	$id = $this->input->post('id_bb');    	    	
+    	if (!empty($id)) {
+    		$result = $this->m_report->hapus_bb($id);
+    		if ($result) {
+    			echo "1";
+    		}else{
+    			echo "0";
+    		}
+    	}
+    }
+
+    function view_bb(){
+    	$data['ta']=$this->m_settings->get_tahun_anggaran();
+        $this->template->load('template','report/view_bb', $data);
+    }
+
+    function select_bb(){
+        $tahun = $this->input->post('tahun');
+        $data['tahun']=$tahun;
+        $data['isi_bukti']=$this->m_report->get_bb($tahun);        
+        $this->load->view('report/view_list_bb',$data);
+    }
+
+    function list_bb($id_bb=null, $tahun=null){
+        $data['tahun']=$tahun;
+
+        if (is_null($id_bb)) {
+            redirect('report/view_bb');
+        }elseif($id_bb==="ALL"){
+            $data['id_buku_besar']=$id_bb;
+
+            $data['is_posting']=FALSE;
+            //$data['saldo_awal']=$this->m_report->get_saldo_awal_by_year($tahun);
+
+            $data['isi_bukti']=$this->m_report->bb_semua_akun_by_year($tahun);
+            $this->template->load('template','report/list_bb_semua_akun',$data);
+        }else{
+            $data['id_buku_besar']=$id_bb;
+            $data['is_posting']=FALSE;
+            $data['first']=TRUE;
+            $data['akun_kode']=$this->m_report->ambil_akun();
+
+            $query=$this->m_report->get_bb_one($id_bb);
+            //$data['saldo_awal']=$this->m_report->get_saldo_awal_list($query->tgl_posting, $query->tahun_anggaran);
+
+            $data['isi_bukti']=$this->m_report->bb_detail_semua_akun($id_bb);
+
+            $this->template->load('template','report/list_bb_semua_akun',$data);
+        }        
+    }
+
+    function get_list_bb(){
+        $akun_kode = $this->input->post('akun_kode');
+        $id_bb = $this->input->post('id_buku_besar');
+        
+        $query=$this->m_report->get_bb_one($id_bb);        
+
+        if (!empty($akun_kode) || $akun_kode !="") {
+        	$data['saldo_awal']=$this->m_report->get_saldo_awal_list_per_akun($akun_kode, $query->tgl_posting, $query->tahun_anggaran);
+            $data['id_buku_besar']=$id_bb;
+            $data['akun_kode'] = $akun_kode;
+
+            $data['is_posting']=FALSE;
+            $data['isi_bukti']=$this->m_report->bb_detail_per_akun($id_bb, $akun_kode);
+
+            $this->load->view('report/list_bb',$data);
+        }else{
+        	//$data['saldo_awal']=$this->m_report->get_saldo_awal_list($query->tgl_posting, $query->tahun_anggaran);
+        	
+            $data['id_buku_besar']=$id_bb;
+            $data['tahun']=null;
+
+            $data['is_posting']=TRUE;
+            $data['isi_bukti']=$this->m_report->bb_detail_semua_akun($id_bb);
+
+            $this->load->view('report/list_bb_semua_akun',$data);            
+        }
+    }
+    
+    function kunci_jurnal(){
+        $data['unit']=$this->m_report->unit_get_all();
+        $this->template->load('template','report/kunci_jurnal',$data);
+    }
+    function kunci_jurnal_save(){
+        $kunci=$this->input->post('kunci');
+        $this->m_report->kunci_jurnal_save($kunci);
+    }
+    
+    public $bulan=array(
+        '1'=>'Januari',
+        '2'=>'Februari',
+        '3'=>'Maret',
+        '4'=>'April',
+        '5'=>'Mei',
+        '6'=>'Juni',
+        '7'=>'Juli',
+        '8'=>'Agustus',
+        '9'=>'September',
+        '10'=>'Oktober',
+        '11'=>'November',
+        '12'=>'Desember'
+    );
+    
+    function aruskas_set(){
+        $this->template->load('template','report/aruskas_set');
+    }
+    function aruskas_jenis_ambil(){
+        $data['jenis']=$this->m_report->aruskas_jenis_ambil();
+        echo $this->load->view('report/aruskas_set_jenis',$data, true);
+    }
+    function aruskas_jenis_simpan(){
+        $id=$this->input->post('id_jenis');        
+        $deskripsi=$this->input->post('deskripsi_jenis');
+        $result = $this->m_report->aruskas_jenis_save($id,$deskripsi);
+        $html="
+        		<script type=\"text/javascript\">
+        			var timerId = setTimeout(function() {
+				        $(\"#msg\").fadeOut();
+				    }, 2000);
+				</script>
+        		<font id=\"msg\" style=\"color: green; font-size: 15;\">
+    				". $result ."
+        		</font>
+        	";
+    	echo $html;
+    }
+    function aruskas_jenis_del(){
+        $id=$this->input->post('id_aruskas');
+        $result = $this->m_report->aruskas_jenis_del($id);
+        $html="
+        		<script type=\"text/javascript\">
+        			var timerId = setTimeout(function() {
+				        $(\"#msg\").fadeOut();
+				    }, 2000);
+				</script>
+        		<font id=\"msg\" style=\"color: green; font-size: 15;\">
+    				". $result ."
+        		</font>
+        	";
+    	echo $html;
+    }
+    /*
+    function aruskas_item_ambil(){
+        $data['idjenis']=$this->input->post('id_jenis');
+        echo $this->load->view('report/aruskas_set_item',$data, true);
+    }
+    function aruskas_item_masuk_ambil(){
+        $idjenis=$this->input->post('id_jenis');
+        $data['id_jenis']=$idjenis;
+        $data['arus']='masuk';
+        $data['item']=$this->m_report->aruskas_item_ambil($data['id_jenis'],$data['arus']);
+        echo $this->load->view('report/aruskas_set_item_dt',$data, true);
+    }
+    function aruskas_item_keluar_ambil(){
+        $idjenis=$this->input->post('id_jenis');
+        $data['id_jenis']=$idjenis;
+        $data['arus']='keluar';
+        $data['item']=$this->m_report->aruskas_item_ambil($data['id_jenis'],$data['arus']);
+        echo $this->load->view('report/aruskas_set_item_dt',$data, true);
+    }
+    
+    function aruskas_item_simpan(){
+        $item = new stdClass;
+        $item->id_arus_kas=$this->input->post('id_jenis');
+        $iditem=$this->input->post('id_item');
+        $item->kode_group=$this->input->post('kode_item');
+        $item->deskripsi=$this->input->post('deskripsi_item');
+        if ($this->input->post('arus_item')==='masuk' ){
+            $item->jenis_arus_kas='ARUS MASUK';
+        }else{
+            $item->jenis_arus_kas='ARUS KELUAR';
+        }
+        echo $this->m_report->aruskas_item_save($iditem,$item);
+    }
+    function aruskas_item_del(){
+        $id=$this->input->post('id_item');
+        echo $this->m_report->aruskas_item_del($id);
+    }
+    */
+    function aruskas_rincian_ambil(){
+        $data['iditem']=$this->input->post('id_jenis');
+        $data['arusitem']=$this->input->post('arus_item');
+        $data['rincian']=$this->m_report->aruskas_rincian_ambil($data['iditem']);        
+        echo $this->load->view('report/aruskas_set_rincian',$data, true);
+    }
+    function aruskas_rincian_simpan(){
+        $idrincian=$this->input->post('id_rincian');
+        $rincian = new stdClass;
+        $rincian->id_arus_kas=$this->input->post('iditem');
+        $rincian->kode_bas=$this->input->post('kode_bas_rin');
+
+        $result = $this->m_report->aruskas_rincian_save($idrincian,$rincian);
+        $html="
+        		<script type=\"text/javascript\">
+        			var timerId = setTimeout(function() {
+				        $(\"#msg\").fadeOut();
+				    }, 2000);
+				</script>
+        		<font id=\"msg\" style=\"color: green; font-size: 15;\">
+    				". $result ."
+        		</font>
+        	";
+    	echo $html;
+    }
+    function aruskas_rincian_del(){
+        $id=$this->input->post('id_rincian');
+        $result = $this->m_report->aruskas_rincian_del($id);
+        $html="
+        		<script type=\"text/javascript\">
+        			var timerId = setTimeout(function() {
+				        $(\"#msg\").fadeOut();
+				    }, 2000);
+				</script>
+        		<font id=\"msg\" style=\"color: green; font-size: 15;\">
+    				". $result ."
+        		</font>
+        	";
+    	echo $html;
+    }
+    
+    function aktivitas(){
+    	$data['jenis_periode']=$this->jenis_periode;
+        $data['bulan']=$this->bulan;
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+        $this->template->load('template','report/aktivitas_kpl',$data);
+    }
+    function neraca(){
+        $data['jenis_periode']=$this->jenis_periode;
+        $data['bulan']=$this->bulan;
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+        $this->template->load('template','report/neraca_kpl',$data);
+    }
+    
+    function arus_kas(){
+    	$data['jenis_periode']=$this->jenis_periode;
+        $data['bulan']=$this->bulan;
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+        $this->template->load('template','report/aruskas_kpl',$data);
+    }
+    function neraca_saldo(){
+        $data['jenis_periode']=$this->jenis_periode;
+        $data['bulan']=$this->bulan;        
+        $data['ta']=$this->m_settings->get_tahun_anggaran();
+        $this->template->load('template','report/neraca_saldo_kpl',$data);
+    }
+
+    function get_bulan_periode(){
+    	$jenis_periode = $this->input->post('jenis_periode');    	
+        if ($jenis_periode == '0') {
+            $bulan=$this->bulan_periode[1];
+            echo "<b>Januari - </b>";
+            echo form_dropdown("bulan",$bulan,"","id='bulan'");
+        }else{
+            $bulan=$this->bulan_periode[$jenis_periode];
+            echo form_dropdown("bulan",$bulan,"","id='bulan'");
+       }
+    }
+    
+    function detail(){
+    	ini_set('memory_limit', '-1');
+        $jenis=$this->input->post('jenis');
+        $cetak=$this->input->post('cetak');
+        switch($jenis){
+            case 'aktivitas':
+                $data['satker']	=$this->input->post('satker');
+                $banding		=$this->input->post('banding');
+                $jenis_periode	=$this->input->post('jenis_periode');
+                $bulan 		 	=$this->input->post('bulan');
+                $tahun 		 	=$this->input->post('tahun');
+                $data['standar']=$this->input->post('standar');
+
+                
+                if ($jenis_periode=='0') {
+                    $data['bln1_skrg']      = 1;
+                    $data['bln2_skrg']      = $bulan;
+                    $data['thn_skrg']       = $tahun;
+
+                    $data['bln1_sblm']      = 1;
+                    $data['bln2_sblm']      = 12;
+                    $data['thn_sblm']       = $tahun-1;
+                }else{
+                    $data['bln1_skrg']		= ($bulan*$jenis_periode)-($jenis_periode-1);
+                    $data['bln2_skrg']		= ($bulan*$jenis_periode);
+                    $data['thn_skrg']		= $tahun;
+
+                    if ($banding==="sbm") {
+                        if ($data['bln1_skrg'] <= $jenis_periode) {
+                            #tahun - 1
+                            $data['bln1_sblm']      = 12-($jenis_periode-1);
+                            $data['bln2_sblm']      = 12;
+                            $data['thn_sblm']       = $tahun-1;
+                        }else{
+                            #dalam tahun yang sama
+                            $data['bln1_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                            $data['bln2_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                            $data['thn_sblm']       = $tahun;
+                        }
+                    }elseif ($banding==="thn") {
+                        $data['bln1_sblm']      = $data['bln1_skrg'];
+                        $data['bln2_sblm']      = $data['bln2_skrg'];
+                        $data['thn_sblm']       = $data['thn_skrg']-1;
+                    }
+                }
+
+                $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+                $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+                $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_sblm']];
+                $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_sblm']];
+
+                $data['level']=$this->input->post('maxlev');                
+                $data['laporan']=$this->m_report->aktivitas($data['bln1_skrg'], $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], '4', '7', $data['level'],$data['standar']);
+                $isi='aktivitas_isi';
+                break;
+            case 'arus_kas':
+                $data['satker']	=$this->input->post('satker');
+                $data['level']	=$this->input->post('maxlev');
+                $banding		=$this->input->post('banding');
+                $jenis_periode	=$this->input->post('jenis_periode');
+                $bulan 		 	=$this->input->post('bulan');
+                $tahun 		 	=$this->input->post('tahun');                
+
+                if ($jenis_periode=='0') {
+                    $data['bln1_skrg']      = 1;
+                    $data['bln2_skrg']      = $bulan;
+                    $data['thn_skrg']       = $tahun;
+                    
+                    $data['bln1_skrg_ak_sblm']      = 1;
+                    $data['bln2_skrg_ak_sblm']      = 12;
+                    $data['thn_skrg_ak_sblm']       = $tahun-1;
+                }else{
+                    $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+                    $data['bln2_skrg']      = ($bulan*$jenis_periode);
+                    $data['thn_skrg']       = $tahun;
+
+                    if ($banding==="sbm") {
+                        if ($data['bln1_skrg'] <= $jenis_periode) {
+                            #tahun - 1
+                            $data['bln1_skrg_ak_sblm']      = 12-($jenis_periode-1);
+                            $data['bln2_skrg_ak_sblm']      = 12;
+                            $data['thn_skrg_ak_sblm']       = $tahun-1;
+                        }else{
+                            #dalam tahun yang sama
+                            $data['bln1_skrg_ak_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                            $data['bln2_skrg_ak_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                            $data['thn_skrg_ak_sblm']       = $tahun;                            
+                        }                        
+                    }elseif ($banding==="thn") {
+                        $data['bln1_skrg_ak_sblm']      = $data['bln1_skrg'];
+                        $data['bln2_skrg_ak_sblm']      = $data['bln2_skrg'];
+                        $data['thn_skrg_ak_sblm']       = $data['thn_skrg']-1;
+                    }                    
+                }
+
+                if ($data['bln1_skrg'] > 1) {
+                    $data['bln1_sblm']  = 1;
+                    $data['bln2_sblm']  = $data['bln1_skrg']-1;
+                    $data['thn_sblm']   = $data['thn_skrg'];
+                }else{
+                    $data['bln1_sblm']  = 1;
+                    $data['bln2_sblm']  = 12;
+                    $data['thn_sblm']   = $data['thn_skrg']-1;
+                }
+
+                if ($data['bln1_skrg_ak_sblm'] > 1) {
+                    $data['bln1_sblm_ak_sblm']  = 1;
+                    $data['bln2_sblm_ak_sblm']  = $data['bln1_skrg_ak_sblm']-1;
+                    $data['thn_sblm_ak_sblm']   = $data['thn_skrg_ak_sblm'];
+                }else{
+                    $data['bln1_sblm_ak_sblm']  = 1;
+                    $data['bln2_sblm_ak_sblm']  = 12;
+                    $data['thn_sblm_ak_sblm']   = $data['thn_skrg_ak_sblm']-1;
+                }
+                
+                $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+                $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+                $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_skrg_ak_sblm']];
+                $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_skrg_ak_sblm']];               
+                
+                //echo $data['bln1_skrg']."-".$data['bln2_skrg']." ".$data['thn_skrg']."<BR>";
+                //echo $data['bln1_sblm']."-".$data['bln2_sblm']." ".$data['thn_sblm']."<BR><BR>";
+                //echo $data['bln1_skrg_ak_sblm']."-".$data['bln2_skrg_ak_sblm']." ".$data['thn_skrg_ak_sblm']."<BR>";
+                //echo $data['bln1_sblm_ak_sblm']."-".$data['bln2_sblm_ak_sblm']." ".$data['thn_sblm_ak_sblm']."<BR><BR>";
+                $data['laporan_data']=$this->m_report->arus_kas_all();
+                $data['setara_awal']=$this->m_report->arus_kas_setara_awal($data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], $data['bln1_sblm_ak_sblm'], $data['bln2_sblm_ak_sblm'], $data['thn_sblm_ak_sblm']);
+                //echo $this->db->last_query()."<BR>";
+                $data['setara_akhir']=$this->m_report->arus_kas_setara_awal(1, $data['bln2_skrg'], $data['thn_skrg'], 1, $data['bln2_skrg_ak_sblm'], $data['thn_skrg_ak_sblm']);
+                //echo $this->db->last_query();
+                $data['list_aruskas']=$this->m_report->arus_kas(1, $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], 1, $data['bln2_skrg_ak_sblm'], $data['thn_skrg_ak_sblm'], $data['bln1_sblm_ak_sblm'], $data['bln2_sblm_ak_sblm'], $data['thn_sblm_ak_sblm'], $data['level']);
+                $isi='aruskas_isi';
+                break;
+            case 'neraca':
+                $data['satker']=$this->input->post('satker');
+                $banding		=$this->input->post('banding');
+                $jenis_periode	=$this->input->post('jenis_periode');
+                $bulan 		 	=$this->input->post('bulan');
+                $tahun 		 	=$this->input->post('tahun');
+                $data['standar']=$this->input->post('standar');
+                
+                $data['bln1_skrg']		= ($bulan*$jenis_periode)-($jenis_periode-1);
+                $data['bln2_skrg']		= ($bulan*$jenis_periode);
+                $data['thn_skrg']		= $tahun;
+
+                if ($jenis_periode=='0') {
+                    $data['bln1_skrg']      = 1;
+                    $data['bln2_skrg']      = $bulan;
+                    $data['thn_skrg']       = $tahun;
+                    
+                    $data['bln1_sblm']      = 1;
+                    $data['bln2_sblm']      = 12;
+                    $data['thn_sblm']       = $tahun-1;
+                }else{
+                    $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+                    $data['bln2_skrg']      = ($bulan*$jenis_periode);
+                    $data['thn_skrg']       = $tahun;
+
+                    if ($banding==="sbm") {
+                        if ($data['bln1_skrg'] <= $jenis_periode) {
+                            #tahun - 1
+                            $data['bln1_sblm']      = 12-($jenis_periode-1);
+                            $data['bln2_sblm']      = 12;
+                            $data['thn_sblm']       = $tahun-1;
+                        }else{
+                            #dalam tahun yang sama
+                            $data['bln1_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                            $data['bln2_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                            $data['thn_sblm']       = $tahun;
+                        }
+                    }elseif ($banding==="thn") {
+                        $data['bln1_sblm']      = $data['bln1_skrg'];
+                        $data['bln2_sblm']      = $data['bln2_skrg'];
+                        $data['thn_sblm']       = $data['thn_skrg']-1;
+                    }
+                }
+                
+                $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+                $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+                $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_sblm']];
+                $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_sblm']];
+
+                $data['level']=$this->input->post('maxlev');
+                $data['laporan']=$this->m_report->aktivitas($data['bln1_skrg'], $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], '1', '3', $data['level'],$data['standar']);
+                $isi='neraca_isi';
+                break;
+            case 'neraca_saldo':
+                $data['satker']=$this->input->post('satker');
+                $banding        =$this->input->post('banding');
+                $jenis_periode  =$this->input->post('jenis_periode');
+                $bulan          =$this->input->post('bulan');
+                $tahun          =$this->input->post('tahun');
+                $data['standar']=$this->input->post('standar');
+                
+                $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+                $data['bln2_skrg']      = ($bulan*$jenis_periode);
+                $data['thn_skrg']       = $tahun;
+
+                if ($jenis_periode=='0') {
+                    $data['bln1_skrg']      = 1;
+                    $data['bln2_skrg']      = $bulan;
+                    $data['thn_skrg']       = $tahun;
+                    
+                    $data['bln1_sblm']      = 1;
+                    $data['bln2_sblm']      = 12;
+                    $data['thn_sblm']       = $tahun-1;
+                }else{
+                    $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+                    $data['bln2_skrg']      = ($bulan*$jenis_periode);
+                    $data['thn_skrg']       = $tahun;
+
+                    if ($banding==="sbm") {
+                        if ($data['bln1_skrg'] <= $jenis_periode) {
+                            #tahun - 1
+                            $data['bln1_sblm']      = 12-($jenis_periode-1);
+                            $data['bln2_sblm']      = 12;
+                            $data['thn_sblm']       = $tahun-1;
+                        }else{
+                            #dalam tahun yang sama
+                            $data['bln1_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                            $data['bln2_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                            $data['thn_sblm']       = $tahun;
+                        }
+                    }elseif ($banding==="thn") {
+                        $data['bln1_sblm']      = $data['bln1_skrg'];
+                        $data['bln2_sblm']      = $data['bln2_skrg'];
+                        $data['thn_sblm']       = $data['thn_skrg']-1;
+                    }
+                }
+                
+                $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+                $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+                $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_sblm']];
+                $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_sblm']];
+
+                $data['level']=$this->input->post('maxlev');
+                $data['laporan']=$this->m_report->neraca_saldo($data['bln1_skrg'], $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], '1', '9', $data['level'],$data['standar']);
+                $isi='neraca_saldo_isi';
+                break;
+        }
+                
+        
+        //TODO: batasin dokumen yang boleh dicetak hanya yg uda beres
+        /*$sekarang=date("Ymd_Hi");
+        $filename='report_'.$jenis.'_'.$sekarang.'.pdf';
+        $output = $this->load->view('report/'.$isi,$data,true); 
+        generate_pdf_A4($output,$filename);*/
+        if ($cetak=='CTK') {        	        	
+	        
+	        $html = $this->load->view('report/'.$isi,$data,true); 
+	        $html = '<html><head>
+	        			<style type="text/css">
+	        				table{
+							    border-collapse: collapse;							    
+							}
+	        				table, th, td {
+							    border: 1px solid black;
+							    font-family:Arial;
+							    background-color: #fff;
+							    color: #000;
+							}							
+							td{
+								vertical-align:middle;						
+								padding-right:5px;
+								padding-left:5px;
+								font-size:12px;								
+							}
+							th{
+								vertical-align:middle;																
+								padding-right:5px;
+								padding-left:5px;
+								font-size:14px;								
+							}
+							h2{								
+								font-size:16px;								
+							}
+	        			</style>
+        			</head><body>
+        				'.$html.'
+    				</body></html>';
+	        //echo $html;
+	        $filename='file_upload/temp_file_pdf/'. $jenis .'.pdf';
+
+		    $data_pdf = pdf_create($html, '', 'A4', 'landscape', false);
+	 		write_file($filename, $data_pdf);
+
+	 		$date_skrg=date("d F Y");
+	        $time_skrg=date("H:i:s");
+		    write_file('file_upload/temp_file_pdf/'. $jenis .'.txt', "Laporan ". $jenis ." di buat pada tanggal: ". $date_skrg ." ". $time_skrg ."<BR>(Periode Laporan: ". $this->bulan[$data['bln1_skrg']] ." - ". $this->bulan[$data['bln2_skrg']] ." ". $data['thn_skrg'] .", Level: ". $data['level'] .")");
+
+	 		echo base_url($filename);
+			
+	 		//$msg=base_url($filename);
+	 		//echo '<center><a href="'. $msg .'"><img src="'. base_url() .'asset/images/download.png" width="50px"/></a><BR><i>Link Download Laporan (pdf)</i></center>';	 		
+        }else{
+        	$this->load->view('report/'.$isi,$data);       
+    	}
+    }
+    
+    function get_info_file_download(){
+    	$jenis = $this->input->post('jenis');
+    	$info = read_file('file_upload/temp_file_pdf/'. $jenis .'.txt');
+    	echo $info;
+    }
+
+    function preview(){
+        $id    = $this->uri->segment(3);
+
+        $data['isi_bkm']=$this->m_bukti_akuntansi->detail($id);
+
+        $jenis_bukti= $this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+
+        foreach ($jenis_bukti as $row){
+            if($row->kode_value == $data['isi_bkm']->jenis_bukti){
+                $data['bukti_transaksi']=$row->nama_value;
+            }
+        }
+
+        $data['det_bkm']=$this->m_bukti_akuntansi->detail_akun($id);
+        
+        $data['link_edit']=base_url('bukti_akuntansi/edit/'.$data['isi_bkm']->id_bukti);
+        $data['link_buat_baru']=site_url("/bukti_akuntansi/inputbukti");
+        $data['title']="Detail Bukti Akuntansi";
+        
+        $this->load->view('report/view_transaksi', $data);
+
+    }    
+
+    function cetak($jenis=null, $var1=null, $var2=null, $var3=null, $var4=null, $var5=null){
+        if ($jenis==='jurnal') {
+            $bulan = $var1;
+            $bulan2 = $var2;
+            $tahun = $var3;
+            $jen_bkt = $var4;
+            
+            $filename='Jurnal_periode_'. $bulan .'_'. $bulan2 .'_'. $tahun .'.pdf';
+            //$link_download = ($jenis==='jurnal')?'': anchor(base_url().'cetak/jurnal/'. $bulan .'/'. $bulan2 .'/'. $tahun .'/SEMUA','Download Pdf');                        
+            $bulan = (int)$bulan;
+            $bulan2 = (int)$bulan2;
+            $data['n_bulan1']=$this->bulan_array[$bulan];
+            $data['n_bulan2']=$this->bulan_array[$bulan2];
+            $data['tahun']=$tahun;
+            $month=(int)DATE('m');
+            $data['tanggal']=DATE('d')." ".$this->bulan_array[$month]." ".DATE('Y');
+            $data['isi_jurnal']=$this->m_report->daftar_jurnal($bulan,$bulan2,$tahun, $jen_bkt);
+
+            //$data['link'] = $link_download ;
+            $output = $this->load->view('report/cetak_jurnal', $data, TRUE);
+            generate_pdf_A4($output,$filename);
+            /*if($jenis==='jurnal')
+            {
+                generate_pdf_portrait($output,$filename);
+            }*/
+        }else if($jenis==='bb'){
+            $id_bb = $var1;            
+
+            $month=(int)DATE('m');
+            $data['tanggal']=DATE('d')." ".$this->bulan_array[$month]." ".DATE('Y');
+
+            if($id_bb==="ALL"){
+                $tahun = $var2;
+
+                $data['saldo_awal']=$this->m_report->get_saldo_awal_by_year($tahun);
+                $data['isi_bukti']=$this->m_report->bb_semua_akun_by_year($tahun);
+                $filename='Buku_besar_'. $id_bb .'_'. $tahun .'.pdf';
+                $data['tahun']=$tahun;
+                $output = $this->load->view('report/cetak_bb', $data, TRUE);
+                //$this->template->load('template','report/list_bb_semua_akun',$data);
+            }else{
+                $akun_kode = $var2;                
+                $data['id_buku_besar']=$id_bb;
+                
+                $query=$this->m_report->get_bb_one($id_bb);
+                $data['saldo_awal']=$this->m_report->get_saldo_awal_list($query->tgl_posting);
+
+                $data['isi_bukti']=$this->m_report->bb_detail_semua_akun($id_bb);                
+                $data['tahun']=DATE('Y-m-d', strtotime($query->tgl_posting));
+
+                if (!empty($akun_kode) || $akun_kode !="") {
+                    $data['akun_kode']=$akun_kode;
+                    $data['isi_bukti']=$this->m_report->bb_detail_per_akun($id_bb, $akun_kode);                    
+                    $output = $this->load->view('report/cetak_bb2', $data, TRUE);
+                    $filename='Buku_besar_'. $akun_kode .'_'. $query->tgl_posting .'.pdf';
+                }else{                    
+                    $data['isi_bukti']=$this->m_report->bb_detail_semua_akun($id_bb);
+                    $output = $this->load->view('report/cetak_bb', $data, TRUE);
+                    $filename='Buku_besar_'. $query->tgl_posting .'.pdf';
+                    //$this->load->view('report/list_bb_semua_akun',$data);            
+                }
+                //$this->template->load('template','report/list_bb_semua_akun',$data);
+            }
+        
+            generate_pdf_A4($output,$filename);
+        }else if($jenis==='ns'){
+        	$banding		=$var5;
+            $jenis_periode	=$var4;
+            $bulan 		 	=$var1;
+            $tahun 		 	=$var2;            
+            
+            $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+            $data['bln2_skrg']      = ($bulan*$jenis_periode);
+            $data['thn_skrg']       = $tahun;
+
+            if ($jenis_periode=='0') {
+                $data['bln1_skrg']      = 1;
+                $data['bln2_skrg']      = $bulan;
+                $data['thn_skrg']       = $tahun;
+                
+                $data['bln1_sblm']      = 1;
+                $data['bln2_sblm']      = 12;
+                $data['thn_sblm']       = $tahun-1;
+            }else{
+                $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+                $data['bln2_skrg']      = ($bulan*$jenis_periode);
+                $data['thn_skrg']       = $tahun;
+
+                if ($banding==="sbm") {
+                    if ($data['bln1_skrg'] <= $jenis_periode) {
+                        #tahun - 1
+                        $data['bln1_sblm']      = 12-($jenis_periode-1);
+                        $data['bln2_sblm']      = 12;
+                        $data['thn_sblm']       = $tahun-1;
+                    }else{
+                        #dalam tahun yang sama
+                        $data['bln1_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                        $data['bln2_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                        $data['thn_sblm']       = $tahun;
+                    }
+                }elseif ($banding==="thn") {
+                    $data['bln1_sblm']      = $data['bln1_skrg'];
+                    $data['bln2_sblm']      = $data['bln2_skrg'];
+                    $data['thn_sblm']       = $data['thn_skrg']-1;
+                }
+            }
+            
+            $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+            $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+            $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_sblm']];
+            $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_sblm']];
+
+            $data['level']=$var3;
+            $data['laporan']=$this->m_report->neraca_saldo($data['bln1_skrg'], $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], '1', '9', $data['level']);
+            
+            $filename='Neraca_saldo_'. $data['level'] .'_'. $data['nama_bulan1'] .'_'. $data['nama_bulan2'] .'_'. $tahun .'.pdf';
+            $output = $this->load->view('report/cetak_neraca_saldo',$data, TRUE);
+            
+            generate_pdf_A4($output,$filename);
+        }else if($jenis==='aktivitas'){            
+            $banding		=$var5;
+            $jenis_periode	=$var4;
+            $bulan 		 	=$var1;
+            $tahun 		 	=$var2;
+            
+            if ($jenis_periode=='0') {
+                $data['bln1_skrg']      = 1;
+                $data['bln2_skrg']      = $bulan;
+                $data['thn_skrg']       = $tahun;
+
+                $data['bln1_sblm']      = 1;
+                $data['bln2_sblm']      = 12;
+                $data['thn_sblm']       = $tahun-1;
+            }else{
+                $data['bln1_skrg']		= ($bulan*$jenis_periode)-($jenis_periode-1);
+                $data['bln2_skrg']		= ($bulan*$jenis_periode);
+                $data['thn_skrg']		= $tahun;
+
+                if ($banding==="sbm") {
+                    if ($data['bln1_skrg'] <= $jenis_periode) {
+                        #tahun - 1
+                        $data['bln1_sblm']      = 12-($jenis_periode-1);
+                        $data['bln2_sblm']      = 12;
+                        $data['thn_sblm']       = $tahun-1;
+                    }else{
+                        #dalam tahun yang sama
+                        $data['bln1_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                        $data['bln2_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                        $data['thn_sblm']       = $tahun;
+                    }
+                }elseif ($banding==="thn") {
+                    $data['bln1_sblm']      = $data['bln1_skrg'];
+                    $data['bln2_sblm']      = $data['bln2_skrg'];
+                    $data['thn_sblm']       = $data['thn_skrg']-1;
+                }
+            }
+
+            $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+            $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+            $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_sblm']];
+            $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_sblm']];
+
+            $data['level']=$var3;
+            $data['laporan']=$this->m_report->aktivitas($data['bln1_skrg'], $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], '4', '7', $data['level']);
+
+            $filename='Laporan_aktivitas_'. $data['level'] .'_'. $data['nama_bulan1'] .'_'. $data['nama_bulan2'] .'_'. $tahun .'.pdf';
+            $output = $this->load->view('report/cetak_aktivasi',$data,TRUE);
+
+            generate_pdf_A4($output,$filename);
+        }else if($jenis==='neraca'){            
+            $banding		=$var5;
+            $jenis_periode	=$var4;
+            $bulan 		 	=$var1;
+            $tahun 		 	=$var2;
+            
+            if ($jenis_periode=='0') {
+                $data['bln1_skrg']      = 1;
+                $data['bln2_skrg']      = $bulan;
+                $data['thn_skrg']       = $tahun;
+
+                $data['bln1_sblm']      = 1;
+                $data['bln2_sblm']      = 12;
+                $data['thn_sblm']       = $tahun-1;
+            }else{
+                $data['bln1_skrg']		= ($bulan*$jenis_periode)-($jenis_periode-1);
+                $data['bln2_skrg']		= ($bulan*$jenis_periode);
+                $data['thn_skrg']		= $tahun;
+
+                if ($banding==="sbm") {
+                    if ($data['bln1_skrg'] <= $jenis_periode) {
+                        #tahun - 1
+                        $data['bln1_sblm']      = 12-($jenis_periode-1);
+                        $data['bln2_sblm']      = 12;
+                        $data['thn_sblm']       = $tahun-1;
+                    }else{
+                        #dalam tahun yang sama
+                        $data['bln1_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                        $data['bln2_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                        $data['thn_sblm']       = $tahun;
+                    }
+                }elseif ($banding==="thn") {
+                    $data['bln1_sblm']      = $data['bln1_skrg'];
+                    $data['bln2_sblm']      = $data['bln2_skrg'];
+                    $data['thn_sblm']       = $data['thn_skrg']-1;
+                }
+            }
+
+            $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+            $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+            $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_sblm']];
+            $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_sblm']];
+
+            $data['level']=$var3;
+            $data['laporan']=$this->m_report->aktivitas($data['bln1_skrg'], $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], '1', '3', $data['level']);
+
+            $filename='Laporan_neraca_'. $data['level'] .'_'. $data['nama_bulan1'] .'_'. $data['nama_bulan2'] .'_'. $tahun .'.pdf';
+            $output = $this->load->view('report/cetak_neraca',$data,TRUE);
+
+            generate_pdf_A4($output,$filename);
+        }else if($jenis==='ak'){        	
+            $data['level']	=$var3;
+            $banding		=$var5;
+            $jenis_periode	=$var4;
+            $bulan 		 	=$var1;
+            $tahun 		 	=$var2;            
+
+            if ($jenis_periode=='0') {
+                $data['bln1_skrg']      = 1;
+                $data['bln2_skrg']      = $bulan;
+                $data['thn_skrg']       = $tahun;
+                
+                $data['bln1_skrg_ak_sblm']      = 1;
+                $data['bln2_skrg_ak_sblm']      = 12;
+                $data['thn_skrg_ak_sblm']       = $tahun-1;
+            }else{
+                $data['bln1_skrg']      = ($bulan*$jenis_periode)-($jenis_periode-1);
+                $data['bln2_skrg']      = ($bulan*$jenis_periode);
+                $data['thn_skrg']       = $tahun;
+
+                if ($banding==="sbm") {
+                    if ($data['bln1_skrg'] <= $jenis_periode) {
+                        #tahun - 1
+                        $data['bln1_skrg_ak_sblm']      = 12-($jenis_periode-1);
+                        $data['bln2_skrg_ak_sblm']      = 12;
+                        $data['thn_skrg_ak_sblm']       = $tahun-1;
+                    }else{
+                        #dalam tahun yang sama
+                        $data['bln1_skrg_ak_sblm']      = $data['bln1_skrg']-$jenis_periode;
+                        $data['bln2_skrg_ak_sblm']      = $data['bln2_skrg']-$jenis_periode;
+                        $data['thn_skrg_ak_sblm']       = $tahun;                            
+                    }                        
+                }elseif ($banding==="thn") {
+                    $data['bln1_skrg_ak_sblm']      = $data['bln1_skrg'];
+                    $data['bln2_skrg_ak_sblm']      = $data['bln2_skrg'];
+                    $data['thn_skrg_ak_sblm']       = $data['thn_skrg']-1;
+                }                    
+            }
+
+            if ($data['bln1_skrg'] > 1) {
+                $data['bln1_sblm']  = 1;
+                $data['bln2_sblm']  = $data['bln1_skrg']-1;
+                $data['thn_sblm']   = $data['thn_skrg'];
+            }else{
+                $data['bln1_sblm']  = 1;
+                $data['bln2_sblm']  = 12;
+                $data['thn_sblm']   = $data['thn_skrg']-1;
+            }
+
+            if ($data['bln1_skrg_ak_sblm'] > 1) {
+                $data['bln1_sblm_ak_sblm']  = 1;
+                $data['bln2_sblm_ak_sblm']  = $data['bln1_skrg_ak_sblm']-1;
+                $data['thn_sblm_ak_sblm']   = $data['thn_skrg_ak_sblm'];
+            }else{
+                $data['bln1_sblm_ak_sblm']  = 1;
+                $data['bln2_sblm_ak_sblm']  = 12;
+                $data['thn_sblm_ak_sblm']   = $data['thn_skrg_ak_sblm']-1;
+            }
+            
+            $data['nama_bulan1'] = $this->bulan[$data['bln1_skrg']];
+            $data['nama_bulan2'] = $this->bulan[$data['bln2_skrg']];
+            $data['nama_bulan1_sblm'] = $this->bulan[$data['bln1_skrg_ak_sblm']];
+            $data['nama_bulan2_sblm'] = $this->bulan[$data['bln2_skrg_ak_sblm']];               
+                        
+            $data['laporan_data']=$this->m_report->arus_kas_all();
+            $data['setara_awal']=$this->m_report->arus_kas_setara_awal($data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], $data['bln1_sblm_ak_sblm'], $data['bln2_sblm_ak_sblm'], $data['thn_sblm_ak_sblm']);
+
+            $data['setara_akhir']=$this->m_report->arus_kas_setara_awal(1, $data['bln2_skrg'], $data['thn_skrg'], 1, $data['bln2_skrg_ak_sblm'], $data['thn_skrg_ak_sblm']);
+
+            $data['list_aruskas']=$this->m_report->arus_kas(1, $data['bln2_skrg'], $data['thn_skrg'], $data['bln1_sblm'], $data['bln2_sblm'], $data['thn_sblm'], 1, $data['bln2_skrg_ak_sblm'], $data['thn_skrg_ak_sblm'], $data['bln1_sblm_ak_sblm'], $data['bln2_sblm_ak_sblm'], $data['thn_sblm_ak_sblm'], $data['level']);
+
+            $filename='Arus_Kas_'. $data['level'] .'_'. $data['nama_bulan1'] .'_'. $data['nama_bulan2'] .'_'. $tahun .'.pdf';
+            $output = $this->load->view('report/cetak_aruskas',$data,TRUE);
+
+            generate_pdf_A4($output,$filename);
+        }
+    }
+	
+	function input_sa(){
+		//must login
+        $this->auth->restrict();
+
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$data['ta']=$ta;
+		$data['akun_sa']=$this->m_report->get_akun_sa_all($ta);		
+
+		$this->template->load('template','report/input_sa/input_sa', $data);
+	}
+
+	function simpan_sa(){
+		$tahun_anggaran = $this->input->post('tahun_anggaran');
+		$akun 			= $this->input->post('akun');
+		$nominal 		= $this->input->post('nominal');
+
+		$result = $this->m_report->simpan_sa($tahun_anggaran, $akun, $nominal);		
+		if ($result) {
+			echo "1";
+		}else{
+			echo "0";
+		}
+	}
+}

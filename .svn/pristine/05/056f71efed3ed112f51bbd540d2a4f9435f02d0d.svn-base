@@ -1,0 +1,84 @@
+ <article class="module width_full">
+ <?php //foreach($nama_unit->result_array() as $row){ $nama_unit = $row['nama_subunit'];$kd = $row['id_subunit'];}?>
+            <header><h3>Rincian Usulan <?php echo "$nama_unit"; ?> </h3>
+            </header>
+
+            <div class="module_content">
+            <form method="post" name='formName4' action="<?php echo base_url();?>usulan/setuju_semua_rincian">
+
+            <table  class="table-common" style="margin-left: 20px; width: 700px;" >
+            <thead>
+            <tr >
+                <th>No </th>
+                <th>Sifat Bayar</th>
+                <th>Kode Output / Kode Komponen / Kode Akun</th>
+                <th>Status</th>
+                <th>Jumlah (Rp.)</th>
+                <th>Aksi</th>
+            </tr>
+            </thead>
+
+            <?php $no = 1;
+            foreach($daftar_up->result_array() as $row)
+            {
+            $id                     = $row['id_usulan_item'];
+            $id_usulan              = $row['ref_id_usulan'];
+            $sifat                  = $row['sifat_bayar'];
+            $id_subunit             = $row['ref_id_subunit'];
+            $kd_output              = $row['kdoutput'];
+            $kd_komponen            = $row['kdkomponen'];
+            $nama_output            = $row['nmoutput'];
+            $nama_komponen          = $row['nmkomponen'];
+            $kd_akun                = $row['kdakun'];
+            $nmakun                 = $row['nmakun'];
+            $status_usulan_item     = $row['status_usulan_item'];
+            $id_status_usulan_item  = $row['id_status_usulan_item'];
+            $header                 = $row['hdr'];
+            $jm                     = $row['jumlah'];
+            $th                     = $row['tahun'];
+            $jns_usulan             = $row['sifat_bayar'];
+            $jumlah                 = number_format($jm,0,",",".");
+            //echo"$th_rekap";
+            ?>
+              <input type="hidden" name="id_usulan" value="<?php echo "$id_usulan"; ?>"/>
+              <input type="hidden" name="th_usulan" value="<?php echo "$th"; ?>"/>
+              <input type="hidden" name="jns_usulan" value="<?php echo "$jns_usulan"; ?>"/>
+              <input type="hidden" name="id_subunit" value="<?php echo "$id_subunit";?>"/>
+
+              <tr>
+                <td align="center"><?php echo "$no";?></td>
+                <td align="center"><?php echo "$sifat";?></td>
+                <td align='center'><?php echo "$kd_output / $kd_komponen / $kd_akun ";?></td>
+
+
+                <?php if($id_status_usulan_item == 2){?>
+                    <td align='center'><?php echo "$status_usulan_item";?></td>
+
+                <?php }elseif($id_status_usulan_item == 3){?>
+                    <td align='center' style="background-color:#F75D59"><?php echo "$status_usulan_item ";?></td>
+                <?php }elseif($id_status_usulan_item == 4){?>
+                    <td align='center' style="background-color:#F75D59"><?php echo "$status_usulan_item ";?></td>
+                <?php }elseif($id_status_usulan_item == 5){?>
+                    <td align='center' style="background-color:#99ff33"><?php echo "$status_usulan_item ";?></td>
+                <?php }?>
+
+                <td align="right"><?php echo "$jumlah";?></td>
+                <?php if($id_status_usulan_item == 2){?>
+                    <td align="center">
+                    <a href='<?php echo site_url()."usulan/cek_usulan/".$th."/".$id_subunit."/".$id."/".$sifat;?>' title='Cek Detail UP' ><img src='<?php echo base_url();?>asset/images/detail.png'/></a></td>
+                <?php }else{?>
+                    <td align="center"><a href='' title='Cek Detail UP' ><img src='<?php echo base_url();?>asset/images/detail.png'/></a></td>
+                <?php }?>
+
+              </tr>
+            <?php $no++ ;  }  ?>
+             </table>
+             </div>
+             <footer>
+                    <div class="submit_link">
+                        <input type="submit" value="Validasi Verifikator Unit" onclick="return confirm('Apakah anda yakin ingin menyetujui semua rincian up?')">
+                        <input type="button" value="Kembali" onclick=self.history.back() >
+                    </div>
+            </footer>
+            </form>
+ </article>

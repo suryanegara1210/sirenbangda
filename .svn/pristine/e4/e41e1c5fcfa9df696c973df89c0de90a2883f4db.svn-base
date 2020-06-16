@@ -1,0 +1,13 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-08-20 15:16:50 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): A socket operation was attempted to an unreachable host.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 15:16:50 --> Unable to connect to the database
+ERROR - 2014-08-20 23:57:52 --> Severity: Warning  --> mysqli_connect(): MySQL server has gone away C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 23:57:52 --> Severity: Warning  --> mysqli_connect(): Error while reading greeting packet. PID=3848 C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 23:57:52 --> Severity: Warning  --> mysqli_connect(): (HY000/2006): MySQL server has gone away C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 23:57:53 --> Unable to connect to the database
+ERROR - 2014-08-20 23:57:54 --> Severity: Warning  --> mysqli_connect(): MySQL server has gone away C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 23:57:54 --> Severity: Warning  --> mysqli_connect(): Error while reading greeting packet. PID=3848 C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 23:57:54 --> Severity: Warning  --> mysqli_connect(): (HY000/2006): MySQL server has gone away C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-08-20 23:57:54 --> Unable to connect to the database

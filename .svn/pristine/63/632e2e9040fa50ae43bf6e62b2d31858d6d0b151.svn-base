@@ -1,0 +1,8 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-19 11:42:18 --> Severity: Notice  --> Undefined variable: idsu C:\xampp\htdocs\siaku\application\views\usulan\form_usulan_detail.php 71
+ERROR - 2013-07-19 11:43:23 --> Severity: Notice  --> Undefined variable: idsu C:\xampp\htdocs\siaku\application\views\usulan\form_usulan_detail.php 71
+ERROR - 2013-07-19 11:43:23 --> Severity: Warning  --> htmlspecialchars() expects parameter 1 to be string, object given C:\xampp\htdocs\siaku\system\libraries\Profiler.php 514
+ERROR - 2013-07-19 11:44:18 --> Severity: Notice  --> Undefined variable: idsu C:\xampp\htdocs\siaku\application\views\usulan\form_usulan_detail.php 71
+ERROR - 2013-07-19 11:47:22 --> Severity: Notice  --> Undefined variable: idsu C:\xampp\htdocs\siaku\application\views\usulan\form_usulan_detail.php 71
+ERROR - 2013-07-19 11:49:51 --> Severity: Notice  --> Undefined variable: idsu C:\xampp\htdocs\siaku\application\views\usulan\form_usulan_detail.php 71

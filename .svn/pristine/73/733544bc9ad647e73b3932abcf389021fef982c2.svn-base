@@ -1,0 +1,28 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-09-25 11:29:42 --> Query error: Unknown column 'c.id_sp2d' in 'field list'
+ERROR - 2014-09-25 11:29:55 --> Query error: Unknown column 'c.id_sp2d' in 'field list'
+ERROR - 2014-09-25 11:30:45 --> Query error: Column 'id_unit' in where clause is ambiguous
+ERROR - 2014-09-25 12:45:33 --> Query error: Unknown column 't.kwitansi.id_unit' in 'where clause'
+ERROR - 2014-09-25 12:49:43 --> Query error: Unknown column 't.kwitansi.id_unit' in 'where clause'
+ERROR - 2014-09-25 12:51:50 --> Query error: Unknown column 't.kwitansi.id_unit' in 'field list'
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437
+ERROR - 2014-09-25 12:52:51 --> Severity: Notice  --> Undefined property: stdClass::$nominal_sp2d C:\xampp\htdocs\siaku\application\controllers\spj.php 437

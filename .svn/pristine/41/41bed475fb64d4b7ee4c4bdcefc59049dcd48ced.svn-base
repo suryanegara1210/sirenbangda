@@ -1,0 +1,22 @@
+<?php echo form_dropdown("kdkomponen3", $option_komponen3,'',"id='kdkomponen3' style='width:450px;' "); ?> 
+<input type="hidden" name="kdoutput3" value="<?php echo"$kdoutput3" ?>">  
+<script type="text/javascript">
+          $("#kdkomponen3").change(function(){
+                var selectValues = $("#kdkomponen3").val();
+                if (selectValues == 0){
+                    var msg = "<select name=kdoutput ><option value=<?php echo "$kdoutput3";?>>Pilih Komponen Dahulu</option></select>";
+                    $('#akun3').html(msg);
+                }else{
+                    var kdkomponen3 = {kdkomponen3:$("#kdkomponen3").val(),kdoutput3:'<?php echo"$kdoutput3" ?>'};
+                    $('#id_akun3').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_akun3')?>",
+                            data: kdkomponen3,
+                            success: function(msg){
+                                $('#akun3').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>

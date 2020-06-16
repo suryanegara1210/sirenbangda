@@ -1,0 +1,123 @@
+		<center><h2>Daftar DIPA BAUK</h2></center>
+		<table  id="list_usulan" class="table-common" style="margin-left: 10px; width: 98%;" >
+		   <thead>
+			 <tr>
+				<th width="100px" align="center">Kode</th>
+				<th width="*" align="left">Kegiatan Output / Komponen / Akun / Header</th>
+				<th width="70px" align="center">Action</th>
+				<th width="100px" align="center">Biaya Total</th>
+				<th width="100px" align="center">Biaya Total OLD</th>
+			 </tr>
+		   </thead>
+
+<?php
+				$no=1;
+				$jumlah_total=0;
+				$arr_kdoutput=array();
+				$arr_kdkomponen=array();
+				$arr_kdakun=array();
+				foreach($lists as $row) {
+					$kdoutput 	= $row->kdgiat.$row->kdoutput;
+					$kdkomponen	= $row->kdgiat.$row->kdoutput.$row->kdkomponen;
+					$kdakun		= $row->kdgiat.$row->kdoutput.$row->kdkomponen.$row->kdakun;
+					$code_item	= "$row->kdgiat|$row->kdoutput|$row->kdkomponen|$row->kdakun|$row->hdr";
+
+					if (!in_array($kdoutput, $arr_kdoutput)){
+						//pemisah antar output
+						if($no > 1){
+							echo '
+							<tr><td colspan="5">&nbsp;</td></tr>';
+						}
+
+						echo '
+						<tr style="background:#CCCCCC">
+							<td valign="top">'.$row->kdgiat.'.'.$row->kdoutput.'</td>
+							<td valign="top" colspan="4">'.$row->nmoutput.'</td>
+						</tr>';
+
+						array_push($arr_kdoutput, $kdoutput);
+					}
+
+					if (!in_array($kdkomponen, $arr_kdkomponen) ||
+						!in_array($kdoutput, $arr_kdoutput)){
+						echo '
+						<tr style="background:#EEEEEE">
+							<td valign="top">'.str_repeat('&nbsp;', 15).$row->kdkomponen.'</td>
+							<td valign="top" colspan="4">'.$row->nmkomponen.'</td>
+						</tr>';
+
+						array_push($arr_kdkomponen, $kdkomponen);
+					}
+
+					if (!in_array($kdakun, $arr_kdakun) ||
+						!in_array($kdkomponen, $arr_kdkomponen) ||
+						!in_array($kdoutput, $arr_kdoutput)){
+
+						echo '
+						<tr style="background:#EEEEEE">
+							<td valign="top">'.str_repeat('&nbsp;', 20).$row->kdakun.'</td>
+							<td valign="top" colspan="4">'.$row->nmakun.'</td>
+						</tr>';
+
+						array_push($arr_kdakun, $kdakun);
+					}
+
+					echo '
+					<tr class="master">
+						<td valign="top">&nbsp;</td>
+						<td valign="top"><a style="cursor: pointer; color: blue" class="accordion">'.$row->hdr.'</a>
+							<span style="float:right"></span></td>
+						<td valign="top" align="center">
+							<img class="btn_detail" style="cursor: pointer"
+							src="'.base_url().'asset/images/detail2.png" border="0" title="uraian">&nbsp;
+							';
+
+					echo '
+						</td>
+						<td valign="top" align="right">'.number_format($row->jumlah,0,",",".").'</td>
+						<td valign="top" align="right">'.number_format($row->jumlah_old,0,",",".").'</td>
+
+					</tr>
+					<tr class="detail" id="'.$code_item.'">
+						<td></td>
+						<td class="content" colspan="2" style="padding: 0px; margin: 0px;"></td>
+						<td></td>
+						<td></td>
+					</tr>';
+
+					$no++;
+				}
+?>
+		</table>
+
+<script type="text/javascript">
+
+	$(function () {
+		var table = $('#list_usulan');
+		table.find('tr.detail').hide();
+
+		table.find('a.accordion').click( function() {
+			$(this).parents('tr.master').find('img.btn_detail').click();
+		});
+
+		table.find('.btn_detail').click(function () {
+			var trdet = $(this).parents('tr.master').next();
+			var td = trdet.find("td.content");
+			var code = trdet.attr("id").split('|');
+
+			td.load(
+				"<?php echo site_url('driver/daftar_dipa_spi_detail')?>",
+				{
+				   kdgiat: code[0],
+				   kdoutput: code[1],
+				   kdkomponen: code[2],
+				   kdakun: code[3],
+				   hdr: code[4]
+				}
+			);
+
+			trdet.fadeToggle('fast');
+		});
+
+	});
+</script>

@@ -1,0 +1,134 @@
+<script type="text/javascript">
+	//script untuk tabs
+	function toggle_tab(oli) {
+		$("ul.innertabs li").removeClass("active"); //Remove any active class
+		$(oli).addClass("active"); //add active class to selected tab
+		$(".tab_content").hide(); //Hide all tab content
+
+		var activeTab = $(oli).find("a").attr("href"); //find the active tab id
+		$(activeTab).show(); //tampilkan active tab
+		
+		return activeTab;
+	}
+
+	$(function() {
+		//when page loads ...
+		$(".tab_content").hide(); //Hide all content
+		$("ul.innertabs li:first").addClass("active").show(); //Activate first tab
+		$(".tab_content:first").show(); //Show first tab content
+
+		//onClick event
+		$("ul.innertabs li").click(function(event) {
+			var activeTab = toggle_tab(this);
+			
+			//intersep event
+			if (typeof tabCallback == 'function') {
+				tabCallback(activeTab);
+			}
+			
+			return false;
+		});
+		
+		function tabCallback(activeTab) {
+			$(activeTab).block();
+			switch (activeTab) {
+				case '#masuk':					
+                    $.post('<?php echo site_url('report/aruskas_item_masuk_ambil')?>',
+						   {id_jenis:<?php echo $idjenis ; ?>},
+						   function(data){
+								$(activeTab).html(data);
+								$(activeTab).unblock();
+						   });
+                    break;
+				case '#keluar':
+                    $.post('<?php echo site_url('report/aruskas_item_keluar_ambil')?>',
+						   {id_jenis:<?php echo $idjenis ; ?>},
+						   function(data){
+								$(activeTab).html(data);
+								$(activeTab).unblock();
+						   });
+                    break;
+			}
+		}
+		
+		$(".tab_list").click();		
+	})
+</script>
+
+                <ul class="innertabs">	
+                    <li class="tab_list"><a href="#masuk">Arus Masuk</a></li>
+                    
+                    <li class="tab_form"><a href="#keluar">Arus Keluar</a></li>	
+                    
+                </ul>
+
+                <div class="tab_container">
+                    <div id="masuk" class="tab_content">
+                    </div>
+                    
+                    <div id="keluar" class="tab_content">
+                    </div>
+
+                </div>
+             
+ 
+<script>
+function edit_item(arus,id){
+    $('#id_item_'+arus).val($('#id_item_'+arus+'_'+id).val());
+    $('#kode_item_'+arus).val($('#kode_item_'+arus+'_'+id).val());
+    $('#deskripsi_item_'+arus).val($('#deskripsi_item_'+arus+'_'+id).val());
+}
+
+function save_item(arus,id_jenis){
+    $.ajax({
+        type: "POST",
+        url : "<?php echo site_url('report/aruskas_item_simpan')?>",
+        data: {
+                id_jenis:$("#id_jenis_"+arus).val(),
+                arus_item:$("#arus_item_"+arus).val(),
+                id_item:$("#id_item_"+arus).val(),
+                kode_item:$("#kode_item_"+arus).val(),
+                deskripsi_item:$("#deskripsi_item_"+arus).val()
+            },
+        success: function(msg){
+            $('#hasil').html(msg);
+        }
+    });
+    $(".tab_list").click();
+}
+
+function del_item(id,id_jenis){
+    var jalan=confirm("Yakin akan menghapus \""+$('#deskripsi_item_'+id).val()+"\"");
+    if (jalan){
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/aruskas_item_del')?>",
+            data: {id_item:id},
+            success: function(msg){
+                $('#hasil').html(msg);
+            }
+        });
+        $(".tab_list").click();
+    }
+}
+
+function reset_item(arus){
+    $('#id_item_'+arus).val('');
+    $('#kode_item_'+arus).val('');
+    $('#deskripsi_item_'+arus).val('');
+}
+
+function rincian_ambil(arus,id){
+    var data = {arus_item:arus,id_item:id};
+    $.ajax({
+        type: "POST",
+        url : "<?php echo site_url('report/aruskas_rincian_ambil')?>",
+        data: data,
+        success: function(msg){
+            $('#rincian_'+arus).html(msg);
+            $('.baris_item').css('background-color', '');
+            $('#baris_item_'+arus+'_'+id).css('background-color', '#B2E28E');
+        }
+    });
+}
+</script>

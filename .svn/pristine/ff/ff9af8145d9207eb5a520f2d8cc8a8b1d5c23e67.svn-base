@@ -1,0 +1,22 @@
+<table style="width: 98%;" bgcolor="#FFFF00">
+	<tr>
+      <td>Unit</td>
+      <td><?php echo $nama_unit;?></td>
+      <td>Maks UP</td>
+      <td><input type="text" style="text-align:right" readonly="readonly" value="<?php echo Formatting::currency($max_up,0,false); ?>"></td>
+      
+    </tr>
+    <tr>
+      <td>Pagu Real</td>
+      <td><input type="text" style="text-align:right" readonly="readonly" value="<?php echo Formatting::currency($pagu_real,0,false); ?>"></td>
+      <td width="9%">Nilai Kwitansi</td>
+      <td width="37%"><input type="text" style="text-align:right" readonly="readonly" value="<?php echo Formatting::currency($nilai_kw,0,false);?>"></td>
+    </tr>
+      <td colspan="4" align="center" bgcolor="#CCCCCC">
+      	<?php if (empty ($kunci)){
+				echo "<input type=\"button\" value=\"Kunci\" id=\"kunci\" onclick=\"lock()\">";
+			  }else{
+				echo "<input type=\"button\" value=\"Buka Kunci\" id=\"bk_kunci\" onclick=\"unlock()\">";
+			  }
+		?></td>
+</table>

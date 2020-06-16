@@ -1,0 +1,183 @@
+<script>
+    $(document).ready(function() {
+        $('a[rel*=facebox]').facebox();
+    }) 
+
+    function kirim(id){
+        var lanjut = confirm('Apakah anda yakin ingin mengirim ke verifikator?');
+        if (lanjut){
+            $.post(
+                "<?php echo  base_url().'bukti_akuntansi/kirim/';?>",
+                {id:id},
+                function(data){
+                        
+                    try {
+                        console.log('data');
+                        console.log(data);
+                        //FIXME: $.parseJSON selalu ngasilin null
+                        //var response = $.parseJSON(data);
+                        var response = data;
+                        console.log('response');
+                        console.log(response);
+                        if(response.errno != 0){
+                            $.blockUI({
+                                message: response.message,
+                                timeout: 3000,
+                                css: window._csserr,
+                                overlayCSS: window._ovcsserr
+                            });								
+                        } else {							
+                            $.blockUI({
+                                message: response.message,
+                                timeout: 1500,
+                                css: window._css,
+                                overlayCSS: window._ovcss
+                            });
+                        }
+                    } catch(e) {
+                        //log error, misal format json salah
+                        console.log('System error : "' + e + '"');
+                        $.unblockUI();
+                    }
+                        
+                    ambildata();
+                }
+                ,'json');
+        }
+        
+    }
+
+    function hapus(var_id){
+        if (confirm('Apakah anda yakin ingin menghapus bukti akuntansi ini?')) {
+            $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('bukti_akuntansi/hapus')?>",
+                data: {id: var_id},
+                success: function(msg){
+                    if (msg=='1') {
+                        alert('Bukti akuntansi berhasil dihapus.');
+                        ambildata();
+                    }else{
+                        alert('Bukti akuntansi gagal dihapus.');
+                    };
+                }
+            });
+        };
+    }    
+</script>
+
+	    <article class="module width_full">
+            <style type="text/css">
+                .center-teks{
+                    text-align: center;
+                }
+                .right-teks{
+                    text-align: right;
+                }
+            </style>
+
+    		<header><h3><?php echo $title; ?></h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table class="table-common" style="width: 98%;">
+                    <tr>
+                        <th>Nomor Bukti</th>
+                        <th>Jenis Bukti</th>
+                        <th>Jenis Trx.</th>
+                        <th>Dari</th>
+                        <th>Tgl.</th>
+                        <th>Keterangan</th>
+                        <th>Nominal</th>
+                        <th>Role Pembuat</th>
+                        
+                        <?php if(!isset($isVeri)){
+                            echo "<th>Status</th>";
+                            echo " <th colspan=\"6\">Aksi</th>";
+                        }else{
+                             echo " <th>Aksi</th>";
+                        }?>
+                       
+                    </tr>
+                    <?php
+                    if (!$bkm){
+                        echo "<tr><td colspan=\"10\"><center><h3>Tidak Ada Data...</h3></center></td></tr>";
+                    }else{
+                        foreach($bkm as $bkmRow){
+                            if(!isset($isVeri)){
+                                $edit="<a title='Edit Bukti Akuntansi' href=".site_url('bukti_akuntansi/edit_rm/'.$bkmRow->id_bukti)."><img src=\"".base_url()."asset/images/edit.png\"/></a>";
+                                $kirim="<a title='Kirim Bukti Akuntansi' href='#' onclick=\"kirim($bkmRow->id_bukti)\"><img src=\"".base_url()."asset/images/send.png\"/></a>";
+                                $cetak="<a title='Cetak Bukti Akuntansi' href=".site_url('bukti_akuntansi/detail/'.$bkmRow->id_bukti."/cetak")."><img src=\"".base_url()."asset/images/print.png\"/></a>";
+                                $history="<a title='Riwayat Bukti Akuntansi' rel=\"facebox\" href=".site_url('bukti_akuntansi/status/'.$bkmRow->id_bukti)."><img src=\"".base_url()."asset/images/history.png\"/></a>";
+                                $hapus ="<a title='Hapus Bukti Akuntansi' href='#' onclick=\"hapus($bkmRow->id_bukti)\"><img src=\"".base_url()."asset/images/delete.png\"/></a>";
+                                
+                                switch ($bkmRow->status) {
+                                    case 'BELUM':
+                                        $cetak=' - ';
+                                        $edit=' - ';
+                                        $kirim=' - ';
+                                        break;
+                                    case 'REVISI':
+                                        $cetak=' - ';
+                                        $kirim=' - ';
+                                        break;
+                                    case 'SUDAH_REVISI':
+                                        $cetak=' - ';
+                                        break;
+                                    case 'DITERIMA':                                                                                
+                                        $kirim=' - ';
+                                        break;
+                                    default:
+                                       $cetak=' - ';
+                                }
+                            }
+
+                            switch ($bkmRow->role) {
+                                    case 'BOTH':
+                                        $bkmRow->role='Bendahara Penerimaan & Pengeluaran';
+                                        break;
+                                    case 'BPM':
+                                        $bkmRow->role='Bendahara Penerimaan';
+                                        break;
+                                    case 'BPL':
+                                        $bkmRow->role='Bendahara Pengeluaran';
+                                        break;                                    
+                                    default:
+                                       $bkmRow->role='-';
+                                }
+                            
+                            if(isset($bkmRow->nama_value)){
+                                $status=$bkmRow->nama_value;
+                            }else{
+                                $status='Baru';
+                            }
+                            echo "<tr>
+                                    <td>$bkmRow->no_bukti</td>
+                                    <td class='center-teks'>$bkmRow->jenis_bukti</td>
+                                    <td class='center-teks'>$bkmRow->jenis_transaksi</td>
+                                    <td>$bkmRow->dari</td>
+                                    <td class='center-teks'>".$this->uang->tanggal($bkmRow->tgl_bukti)."</td>
+                                    <td>$bkmRow->keterangan</td>
+                                    <td class='right-teks'>". Formatting::currency($bkmRow->nominal,0,false) ."</td>
+                                    <td class='center-teks'>$bkmRow->role</td>";
+                            if(!isset($isVeri)){
+                                echo "<td class='center-teks'>$status</td>";
+                                echo " <td style=\"width: 18px;\">".$edit."</td>
+                                        <td style=\"width: 18px;\"><a title='Lihat Bukti Akuntansi' href=".site_url('bukti_akuntansi/detail/'.$bkmRow->id_bukti)."><img src=\"".base_url()."asset/images/detail.png\"/></a></td>
+                                        <td style=\"width: 18px;\">".$history."</td>
+                                        <td style=\"width: 18px;\">".$cetak."</td>
+                                        <td style=\"width: 18px;\">".$kirim."</td>
+                                        <td style=\"width: 18px;\">".$hapus."</td>";
+                            }else{
+                                echo "<td style=\"width: 18px;\"><a title='Verifikasi Bukti Akuntansi' href=".site_url('bukti_akuntansi/detveri/'.$bkmRow->id_bukti)."><img src=\"".base_url()."asset/images/detail.png\"/></a></td>";
+                            }
+                           echo "</tr>";
+                        }
+                    }
+                    ?>
+                </table>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->
+

@@ -1,0 +1,404 @@
+<?php
+
+class Kwitansi extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_gup',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas'));
+        
+        date_default_timezone_set('Etc/GMT-8');
+    }
+
+    function create()
+    {
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$limit_spjup = $this->m_logic->get_limit_spjup($ta,$su);
+		
+        $data['nilai_up']   = $this->m_logic->get_nilai_up($ta, $su);
+        $data['sisa_mp']    = $this->m_logic->get_sisa_mp($ta, $su);
+        $data['nama_unit']  = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        $data['sisa_mp']    = $this->m_logic->get_sisa_mp($ta, $su);
+        //$data['limit_spjup']= $limit_spjup;
+        $data['limit_spjup']= 10000000;
+   
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }
+		
+        $this->template->load('template','kwitansi/buat_kwitansi',$data);
+		
+    }//END Create
+    
+    
+    function get_view_jenis_kwitansi()
+    {
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+		
+		$idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+        
+		$jns_kwitansi 		= $this->input->post('jns_kwitansi');
+        $jns_belanja 		= $this->input->post('jns_belanja');
+		
+		//TODO: Sementara di PENDING filter untuk pengajuan ini, karena sudah
+		//dilakukan di fungsi buat_kwitansi
+		
+		//syarat pengajuan GUP
+		//1. Sudah mengajukan UP, dengan melihat sp2d_up atau nilai UP > 0
+		$is_sp2d_up_avail = $this->m_logic->check_sp2d_up($ta, $su); 
+		
+		/*if(!$is_sp2d_up_avail) {		  
+            echo "
+			<div style='display: block;
+				margin: 20px 20px 0 20px;
+				-webkit-border-radius: 5px;
+				-moz-border-radius: 5px;
+				border-radius: 5px;
+				padding: 5px 5px 5px 5px;
+				background: #F3D9D9;
+				background-position: 10px 10px;
+				border: 1px solid #D20009;
+				color: #7B040F;
+				text-indent: 40px;
+				font-size: 14px;
+				font-weight:bold;
+				' > 
+			<p>
+			Maaf anda belum mengajukan UP (SP2D UP), Kwitansi belum
+            dapat dibuat
+			</p>
+			</div>";
+            return;
+		}*/            
+					
+		//2. hitung nilai limit yang masih bisa di spjkan untuk up 
+		$limit_spjup = $this->m_logic->get_limit_spjup($ta,$su);
+
+		$data['nama_unit'] 		= $this->m_umum->get_nama_unit_by_id($idu);
+		$data['nama_sunit'] 	= $this->m_umum->get_nama_sunit_by_id($su);		
+		$data['jns_kwitansi'] 	= $jns_kwitansi;
+		
+		//ambil jenis belanja dari post parameter
+		$data['jns_belanja'] 	= $jns_belanja;
+        $data['kegiatans']  	= $this->m_pok->get_list_kegiatan($ta, $cdsu,
+                                                              $jns_kwitansi);
+		$data['jenis'] 			= $jns_kwitansi ;
+		$data['jns_pajak'] 		= $this->m_kwitansi->get_jenis_pajak();
+        $data['golongan'] 		= $this->m_kwitansi->get_golongan();
+		
+		switch($jns_kwitansi){
+			case "HONOR":
+				$this->load->view('kwitansi/kwitansi_honor',$data);
+				break;
+			case "KONTRAK":
+				$this->load->view('kwitansi/kwitansi_kontrak_PengabdianPenelitian',$data);
+				break;
+			case "PERJADIN":
+				$this->load->view('kwitansi/kwitansi_perjadin',$data);
+				break;
+			default:
+				$this->load->view('kwitansi/kwitansi_barang',$data);
+		}       
+    }
+    
+    function save()
+    {
+        //action save kwitansi di table t_kwitansi		
+	 	$idsu 			= $this->session->userdata('id_subunit');
+		$idu 			= $this->session->userdata('id_unit');
+		$ta 			= $this->m_settings->get_tahun_anggaran();
+		$jns_kwitansi	= $this->input->post('jns_kwitansi');
+		$sifat_bayar	= $this->input->post('jns_belanja');
+		$tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		
+        $object = new stdClass();
+		$object->id_unit        = $idu;
+		$object->jenis_kwitansi = $jns_kwitansi;
+		$object->sifat_bayar	= $this->input->post('jns_belanja');
+		$object->tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		$object->tpt_kwitansi   = $this->input->post('tempat_kwitansi');
+		$object->kdgiat       	= $this->input->post('kd_giat');
+		$object->kdoutput       = $this->input->post('kd_output');
+		$object->kdkomponen     = $this->input->post('kd_komponen');
+		$object->kdakun         = $this->input->post('kd_akun');
+		$object->hdr            = $this->input->post('kd_hdr');
+		$object->nmheader       = $this->input->post('kd_hdr');
+		$object->akun_kode      = $this->input->post('kd_bas');
+		$object->ket_kwitansi   = $this->input->post('ket_kwitansi');
+		$object->judul_p        = $this->input->post('judul_p');
+		$object->no_kontrak     = $this->input->post('no_kontrak');
+		$object->jangka_waktu_kontrak = $this->input->post('jangka_waktu');
+		$object->pengambil      = $this->input->post('pengambil');
+		$object->nip_pengambil  = $this->input->post('nip_pengambil');
+		$object->penerima       = $this->input->post('penerima');
+		$object->nip_penerima   = $this->input->post('nip_penerima');
+		$object->id_pajak       = $this->input->post('jenis_pajak');
+		
+		$object->ket_sptb       = $this->input->post('ket_sptb');
+		$object->no_sk_rektor   = $this->input->post('no_sk');
+		$object->tgl_sk_rektor  = $this->input->post('tgl_sk');
+		$object->kop_honor      = $this->input->post('kop_honor');
+		
+		$object->pp_spd         = $this->input->post('pp_spd');
+		$object->dari           = $this->input->post('dari');
+		$object->tujuan         = $this->input->post('tujuan');
+		$object->yg_bepergian   = $this->input->post('yg_bepergian');
+		$object->nip            = $this->input->post('nip');
+		$object->gol            = $this->input->post('golongan');
+		$object->maksud         = $this->input->post('maksud');
+		$object->tgl_b          = $this->input->post('tgl_b');
+		$object->tgl_k          = $this->input->post('tgl_k');
+		$object->ket_spd        = $this->input->post('ket_spd');
+		$object->tiket          = $this->input->post('tiket');
+		$object->board          = $this->input->post('board');
+		$object->taxi           = $this->input->post('taxi');
+		$object->uang_saku      = $this->input->post('uang_saku');
+		$object->lama           = $this->input->post('lama_hari');
+		$object->dll            = $this->input->post('dll');
+		$object->represent      = $this->input->post('representatif');
+		$object->created_by     = $this->session->userdata('username');
+
+        $biaya  = $this->input->post('biaya');
+        $pph21  = $this->input->post('pph21');
+
+		$ppn    = $this->input->post('nilai_ppn');
+		$pph    = $this->input->post('nilai_pph');
+		$nominal=$this->input->post('nominal');
+        
+		//perjadin
+		$biaya  = $this->input->post('biaya');
+		$pph21  = $this->input->post('pph21');
+			
+		// rincian honor
+		$jns_honor  = $this->input->post('jns_honor');
+		$honor_param['nama']=$this->input->post('nama');
+		$honor_param['jabatan']=$this->input->post('jabatan');
+		$honor_param['golongan']=$this->input->post('golongan');
+		$honor_param['jml_org']=$this->input->post('jml_org');
+		$honor_param['h_naskah']=$this->input->post('h_naskah');
+		$honor_param['nama_mhs']=$this->input->post('nama_mhs');
+		$honor_param['nim_mhs']=$this->input->post('nim_mhs');
+		$honor_param['kd_mk']=$this->input->post('kd_mk');
+		$honor_param['m_kul']=$this->input->post('m_kul');
+		$honor_param['kls']=$this->input->post('kls');
+		$honor_param['jml_hadir']=$this->input->post('jml_hadir');
+		$honor_param['jml_bln']=$this->input->post('jml_bln');
+		$honor_param['ptkp']=$this->input->post('ptkp');
+		$honor_param['pkp']=$this->input->post('pkp');
+		$honor_param['jml_hari']=$this->input->post('jml_hari');
+		$honor_param['bruto']=$this->input->post('bruto');
+		
+        $result = TRUE;
+        
+		switch($jns_kwitansi){
+			case "HONOR":
+				$result = $this->m_kwitansi->simpan_honor($object, $idsu, $sifat_bayar, $honor_param, $jns_honor, 
+															$ta, $tgl_kwitansi, $jns_kwitansi);
+				break;
+			case "PERJADIN":
+				$result = $this->m_kwitansi->simpan_KontrakModalBarangBansosHonor($object, $biaya, $idsu, $sifat_bayar, 
+																		$ppn, $pph21, $ta, $tgl_kwitansi, $jns_kwitansi);
+				break;
+			default:
+				$result = $this->m_kwitansi->simpan_KontrakModalBarangBansosHonor($object, $nominal, $idsu, $sifat_bayar, 
+																		$ppn, $pph, $ta, $tgl_kwitansi, $jns_kwitansi);
+		}
+        redirect('kwitansi_view/baru');
+    }
+    
+    function jenis_honor() {
+        
+        $jns_honor = $this->input->post('jns_honor');
+        $this->load->view('kwitansi/rincian_honor/honor_'.$jns_honor);
+    } 
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK FUNGSI AUTO COMPLETE
+*/
+function lookup(){
+		// process posted form data (the requested items like province)
+		// Note : matikan CI profiler agar bisa bekerja 
+        $keyword = $this->input->post('term');
+        $data['response'] = 'false'; //Set default response
+        $query = $this->m_kwitansi->lookup($keyword); //Search DB
+        if( ! empty($query) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $query as $row )
+            {
+                $data['message'][] = array( 
+                                        'id'=>$row->id_pegawai,
+										'label'=>$row->nama_pegawai,
+										'value'=>$row->golongan,
+										'desc'=>$row->jabatan,
+                                        ''
+                                     );  //Add a row to array
+            }
+        }
+        if('IS_AJAX')
+        {
+            echo json_encode($data); //echo json string if ajax request
+        }
+        else
+        {
+             $this->template->load('template','kwitansi/kwitansi_honor',$data);
+        }
+	}
+	
+    function kirim_verunit() {
+		
+		$this->auth->restrict();
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');		
+		
+        $status_kwitansi 	= 0;
+        $jenis_kwitansi 	= $jenis_kwitansi ==='' ? '%' : $jenis_kwitansi;
+        $sifat_bayar 		= $sifat_bayar ==='' ? '%' : $sifat_bayar;
+		$this->m_kwitansi->kirim_verunit($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi);
+		//echo $this->db->last_query();
+    } 
+	
+    function update()
+    {        
+        //action save kwitansi di table t_kwitansi
+	 	$idsu 			= $this->session->userdata('id_subunit');
+		$idu 			= $this->session->userdata('id_unit');
+		$ta 			= $this->m_settings->get_tahun_anggaran();
+		$jns_kwitansi	= $this->input->post('jns_kwitansi');
+		$sifat_bayar	= $this->input->post('jns_belanja');
+		$tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		$id_kwitansi    = $this->input->post('id_kwitansi');
+		$id_status_kwi  = $this->input->post('id_status_kwitansi');
+		$id_status_kwitansi 	= $id_status_kwi =='0' ? '0' : $id_status_kwi+1;
+
+		
+        $object = new stdClass();
+		$object->id_unit        = $idu;
+		$object->jenis_kwitansi = $jns_kwitansi;
+		$object->sifat_bayar	= $this->input->post('jns_belanja');
+		$object->tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		$object->tpt_kwitansi   = $this->input->post('tempat_kwitansi');
+		$object->kdgiat       	= $this->input->post('kd_giat');
+		$object->kdoutput       = $this->input->post('kd_output');
+		$object->kdkomponen     = $this->input->post('kd_komponen');
+		$object->kdakun         = $this->input->post('kd_akun');
+		$object->hdr            = $this->input->post('kd_hdr');
+		$object->nmheader       = $this->input->post('kd_hdr');
+		$object->akun_kode      = $this->input->post('kd_bas');
+		$object->ket_kwitansi   = $this->input->post('ket_kwitansi');
+		$object->judul_p        = $this->input->post('judul_p');
+		$object->no_kontrak     = $this->input->post('no_kontrak');
+		$object->jangka_waktu_kontrak = $this->input->post('jangka_waktu');
+		$object->pengambil      = $this->input->post('pengambil');
+		$object->nip_pengambil  = $this->input->post('nip_pengambil');
+		$object->penerima       = $this->input->post('penerima');
+		$object->nip_penerima   = $this->input->post('nip_penerima');
+		$object->id_pajak       = $this->input->post('jenis_pajak');
+		
+		$object->ket_sptb       = $this->input->post('ket_sptb');
+		$object->no_sk_rektor   = $this->input->post('no_sk');
+		$object->tgl_sk_rektor  = $this->input->post('tgl_sk');
+		$object->kop_honor      = $this->input->post('kop_honor');
+		
+		$object->pp_spd         = $this->input->post('pp_spd');
+		$object->dari           = $this->input->post('dari');
+		$object->tujuan         = $this->input->post('tujuan');
+		$object->yg_bepergian   = $this->input->post('yg_bepergian');
+		$object->nip            = $this->input->post('nip');
+		$object->gol            = $this->input->post('golongan');
+		$object->maksud         = $this->input->post('maksud');
+		$object->tgl_b          = $this->input->post('tgl_b');
+		$object->tgl_k          = $this->input->post('tgl_k');
+		$object->ket_spd        = $this->input->post('ket_spd');
+		$object->tiket          = $this->input->post('tiket');
+		$object->board          = $this->input->post('board');
+		$object->taxi           = $this->input->post('taxi');
+		$object->uang_saku      = $this->input->post('uang_saku');
+		$object->lama           = $this->input->post('lama_hari');
+		$object->id_status_kwitansi = $id_status_kwitansi;
+		$object->dll            = $this->input->post('dll');
+		$object->represent      = $this->input->post('representatif');
+		$object->changed_by     = $this->session->userdata('username');
+
+        $biaya  = $this->input->post('biaya');
+        $pph21  = $this->input->post('pph21');
+
+		$ppn    = $this->input->post('nilai_ppn');
+		$pph    = $this->input->post('nilai_pph');
+		$nominal=$this->input->post('nominal');
+        
+		//perjadin
+		$biaya  = $this->input->post('biaya');
+		$pph21  = $this->input->post('pph21');
+			
+		// rincian honor
+		$jns_honor  = $this->input->post('jns_honor');
+		$honor_param['nama']=$this->input->post('nama');
+		$honor_param['jabatan']=$this->input->post('jabatan');
+		$honor_param['golongan']=$this->input->post('golongan');
+		$honor_param['jml_org']=$this->input->post('jml_org');
+		$honor_param['h_naskah']=$this->input->post('h_naskah');
+		$honor_param['nama_mhs']=$this->input->post('nama_mhs');
+		$honor_param['nim_mhs']=$this->input->post('nim_mhs');
+		$honor_param['kd_mk']=$this->input->post('kd_mk');
+		$honor_param['m_kul']=$this->input->post('m_kul');
+		$honor_param['kls']=$this->input->post('kls');
+		$honor_param['jml_hadir']=$this->input->post('jml_hadir');
+		$honor_param['jml_bln']=$this->input->post('jml_bln');
+		$honor_param['ptkp']=$this->input->post('ptkp');
+		$honor_param['pkp']=$this->input->post('pkp');
+		$honor_param['jml_hari']=$this->input->post('jml_hari');
+		$honor_param['bruto']=$this->input->post('bruto');
+		
+        $result = TRUE;
+        
+		switch($jns_kwitansi){
+			case "HONOR":
+				$result = $this->m_kwitansi->update_honor($object, $idsu, $sifat_bayar, $honor_param, $jns_honor, 
+															$ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi);
+				break;
+			case "PERJADIN":
+				$result = $this->m_kwitansi->update_KontrakModalBarangBansos($object, $biaya, $idsu, $sifat_bayar, 
+																		$ppn, $pph21, $ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi);
+				break;
+			default:
+				$result = $this->m_kwitansi->update_KontrakModalBarangBansos($object, $nominal, $idsu, $sifat_bayar, 
+																		$ppn, $pph, $ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi);
+		}
+        redirect('kwitansi_view/baru');
+    }
+	
+	
+	
+}
+
+?>

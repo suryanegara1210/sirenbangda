@@ -1,0 +1,27 @@
+<input type="hidden" name="pok" id="pok" value="<?php echo $pok; ?>" />
+<?php echo form_dropdown("kode_bas1",$kode_bas1,'',"id='kode_bas' style='width:450px;'"); ?>
+
+<script type="text/javascript">
+          $("#kode_bas").change(function(){
+                var selectValues = $("#kode_bas").val();
+                if (selectValues == 0){
+                    var msg = "-";
+                    $('#jn_biaya').html(msg);
+                }else{
+                    var kode_bas1 = $("#kode_bas").val();
+					var jn_bi=kode_bas1.substring(6,8);
+					var jns_bi='';
+					if(jn_bi==51)
+					{jns_bi='Biaya Layanan';}
+					else
+					if(jn_bi==55)
+					{jns_bi='Biaya Administrasi Umum';}
+					else
+					if(jn_bi==59)
+					{jns_bi='Biaya Lainnya';}
+					
+                    $('#jn_biaya').html(jns_bi);
+                }
+        });
+       </script>  
+

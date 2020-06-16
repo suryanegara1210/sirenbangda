@@ -1,0 +1,72 @@
+<h2>
+    <div style="text-align:center">
+        Badan Layana Umum Universitas Udayana<br />
+        Ringkasan Kontrak Layanan Pendidikan Lainnya<br />
+    </div>
+</h2>
+
+<table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No MOU</td>
+                        <td>: <?php echo $isi_mou->no_mou; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td>: <?php echo $this->uang->tanggal($isi_mou->tgl_mou); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Jenis Kerjasama</td>
+                        <td>: <?php echo $isi_mou->tipe_jasa_nama; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Mitra Kerjasama</td>
+                        <td>: <?php echo $isi_mou->pemberi; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Uraian Pekerjaan</td>
+                        <td>: <?php echo $isi_mou->uraian; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Jangka Waktu</td>
+                        <td>: <?php echo $isi_mou->jangka_waktu; ?> hari</td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Kontrak</td>
+                        <td>: <?php echo $this->uang->angka($isi_mou->nilai); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Skema Pembayaran</td>
+                        <td>: <?php echo $isi_mou->skema_bayar_nama; ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Pendapatan bagi Universitas Udayana</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Fee Jasa</td>
+                        <td>: <?php echo $isi_mou->persentase; ?> %</td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Dasar</td>
+                        <td>: <?php echo $this->uang->angka($isi_mou->nila_dasar); ?></td>
+                    </tr>
+                </table>
+                
+                <br /><h3>Pihak Dalam Universitas Udayana</h3>
+                <table id="tbl_display">
+                    <tr>
+                        <th>Nama</th>
+                        <th>Unit</th>
+                        <!--<th>Fee</th>-->
+                    </tr>
+                    <?php foreach($nama_mou as $nama){?>
+                        <tr>
+                			<td><?php echo $nama->nama; ?></td>
+                            <td><?php echo $nama->nama_unit; ?></td>
+                            <!--<td><?php //echo $this->uang->angka($nama->fee); ?></td>-->
+                		</tr>
+                    <?php }?>
+            		
+                </table>

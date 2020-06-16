@@ -1,0 +1,49 @@
+<script type="text/javascript">
+</script>
+
+<article class="module width-full">
+	<header>
+		<h3>
+			Pengajuan Renstra
+		</h3>
+	</header>
+	<div class="module_content">
+		<table class="fcari" width="100%">
+			<tr>
+				<td width="20%">SKPD</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Visi</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td>Misi</td>
+				<td>
+				</td>
+			</tr>
+			<tr>
+				<td>Tujuan</td>
+				<td>
+				</td>
+			</tr>
+			<tr style="background-color: white;">
+				<hr>
+			</tr>
+		</table>
+		<table class="table-common" style="width: 99%">
+			<thead>
+				<tr>
+					<th>Tujuan</th>
+					<th>Sasaran</th>
+					<th>Indikator Kerja</th>
+					<th>Target 1</th>
+					<th>Target 2</th>
+					<th>Target 3</th>
+					<th>Target 4</th>
+					<th>Target 5</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+</article>

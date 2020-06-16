@@ -1,0 +1,17 @@
+<?php echo form_dropdown("kode_5", $hasil,'',"id='kode_5', class='drop_down' "); //echo $this->db->last_query();?>
+<script type="text/javascript">
+
+          $("#kode_5").change(function(){
+							 /* alert(kode1); */ 
+							$.ajax({
+									type: "POST",									
+									url : "<?php echo site_url('c_gu/view_buku_besar')?>",	
+									data: {
+												kode5: $("#kode_5").val()
+											},
+									success: function(msg){
+										$('#buku_besar').html(msg);
+									}
+							  });	
+				});
+       </script>

@@ -1,0 +1,45 @@
+<table class="tablesorter" style="width:99%">	
+	<article class="module width_full">
+	<header>
+		<h3>TABEL KEGIATAN RENSTRA</h3>
+	</header>
+	</article>
+	<tr>
+		<td width="150px">SKPD</td>
+		<td colspan="6"></td>
+	</tr>
+	<tr>
+		<td width="150px">TUJUAN</td>
+		<td colspan="6"></td>
+	</tr>
+	<tr>
+		<td width="150px">SASARAN</td>
+		<td colspan="6"></td>
+	</tr>
+	<tr>
+		<td width="150px">TUJUAN</td>
+		<td colspan="6"></td>
+	</tr>
+	<tr>
+		<td width="150px">PROGRAM</td>
+		<td colspan="6"></td>
+	</tr>
+<table class = "table-common" style="width: 99%">
+<input type="button" class="button-action" id="tambah" value="Pilih Renstra" />
+		<thead>
+			<tr>
+				<th>No</th>					
+				<th>Action</th>
+				<th>Kode</th>
+				<th>Kegiatan</th>
+				<th>Indikator</th>
+				<th>Target 1</th>
+				<th>Target 2</th>
+				<th>Target 3</th>
+				<th>Target 4</th>
+				<th>Target 5</th>
+				<th>Kondisi Akhir</th>
+			</tr>
+		</thead>
+	</table>
+</table>

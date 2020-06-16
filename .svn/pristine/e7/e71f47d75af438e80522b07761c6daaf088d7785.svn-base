@@ -1,0 +1,158 @@
+<script language="javascript">
+$(document).ready(function() {
+	    $('a[rel*=facebox]').facebox();
+})
+
+$( function () {
+	
+		$('#create_spj :checkbox').change(function() {
+			var total=0;
+			var nilai_kwi	= parseFloat($("#nilai_kwitansi").val());
+			var nama 		= "#u"+this.value;
+			//alert(nilai_kwi);
+			if (this.checked)
+				{
+					total = nilai_kwi + parseFloat($(nama).val());
+				}
+			else
+				{
+					total = nilai_kwi - parseFloat($(nama).val());
+				}
+			//tmpilkan nilai kwitansi
+			$("#nilai_kwitansi").val(total);
+			//enable tombol jika nilai kwitansi sudah lebih dari nilai x persen dan kurang dari / = nilai up
+			var nilai_persen	= parseFloat($("#nilai_persen").val());
+			var nilai_up		= parseFloat($("#nilai_up").val());
+			var nilai_kwi_baru	= parseFloat($("#nilai_kwitansi").val());
+			if (nilai_kwi_baru>nilai_persen && nilai_kwi_baru<nilai_up)
+			{
+				$('#kirim_verunit').removeAttr('disabled');
+			}
+			else {
+				$('#kirim_verunit').attr("disabled", "disabled");
+			}
+		});	
+		
+});
+
+// simpan data
+	function simpan(){
+        if (confirm('Apakah Anda Yakin untuk Mengirim Kwitansi ... ?')){
+			var nodeArray = Array();
+			
+			$('#create_spj :checkbox').each(function() {
+				if(this.checked)
+					nodeArray.push($(this).attr('value'));					
+			});							
+			var jenisblj= $("#jenis_belanja").val();
+			var idVar = {id:nodeArray, jns_belanja: jenisblj};
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('kwitansi_view/save_paket_spj')?>",
+                    data: idVar,
+		  });
+		alert('Data Berhasil dikirim');
+		load_view();
+		}
+    }
+
+</script>
+<!--==============================-->
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   }  
+?>
+
+
+<h3>View Kwitansi  sub unit <?php echo ''; ?></h3>
+<form method="post" id="create_spj" name='create_spj' action="" >
+<table width="100%" border="0">
+  <tr>
+    <td width="24%">Jumlah Nilai Max</td>
+    <td width="76%"><label for="nilai_up"></label>
+    <input type="text" name="nilai_up" id="nilai_up" 
+    value="<?php echo $nilai_max;?>" readonly="readonly" />
+    </td>
+  </tr>
+  <tr>
+    <td>Jumlah x persen Min</td>
+    <td><input type="text" name="nilai_persen" id="nilai_persen" readonly="readonly" 
+    value="<?php echo $nilai_min;?>" /></td>
+  </tr>
+  <tr>
+    <td>Jumlah Nilai Kwitansi</td>
+    <td><input type="text" name="nilai_kwitansi" id="nilai_kwitansi" readonly="readonly" value="0"/></td>
+  </tr>
+  <tr>
+    <td colspan="2">
+    <br />
+    *) Untuk membuat paket Kwitansi, jumlah nominal kwitansi yang dipilih harus lebih besar dari X persen Min dan lebih kecil dari nilai Max</td>
+    </tr>
+</table>
+</br>
+    <table  class="table-common" id="hasil" style="width:99.9%;" >  
+       <thead> 
+            <tr>
+            	<th width="10px">No.</th>
+            	<th width="150px">No Kwitansi</th>
+                <th width="100px">Jenis Kwitansi</th>
+                <th width="100px">Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php 
+             if($isi!= false){
+			 	$i=0;
+			 	foreach($isi->result() as $row) : $i++;
+				?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                	<td align="center"><?php echo $row->no_kwitansi; ?></td>
+                    <td align="center"><?php echo $row->jenis_kwitansi; ?> </td>
+                    <td align="center"><?php echo date("d-m-Y", strtotime($row->tgl_kwitansi)); ?> </td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,30)."...";?> </td>
+                    <td align="right"><?php echo $this->uang->angka($row->nominal); ?> </td>
+                    <td align="center"><?php echo $row->status_kwitansi;  ?></td>
+                    <td>
+                    <input type="checkbox" name="cek[]" value="<?php echo $row->id_kwitansi; ?>"/>
+                    <input id="u<?php echo $row->id_kwitansi; ?>" name="" type="hidden" value="<?php echo $row->nominal; ?>" />
+                    </td>
+                </tr>
+             <?php endforeach;?>  
+        </tbody>
+ </table>
+ <br /> 
+ </div>
+<div align="right">
+<input type="submit" name="kirim_verunit" id="kirim_verunit" 
+value="Kirim Kwitansi ke verifikator" disabled="disabled" onclick="simpan()" />
+ <?php
+/*
+  if($status_kirim==true)
+	 {
+		echo '<input type="submit" name="kirim_verunit" id="kirim_verunit" 
+			value="Kirim Kwitansi ke verifikator" onclick="kirim_verunit()" /> ';
+	 }
+		echo $status_kirim;	
+*/
+ ?>
+
+</div>
+
+               <?php }else{ ?>
+                 <tr>
+                 <td align='center' colspan="9" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td></tr>
+                 </tbody>
+ </table>
+ <br />
+ </div>
+             <?php } ?> 
+
+</form>             
+

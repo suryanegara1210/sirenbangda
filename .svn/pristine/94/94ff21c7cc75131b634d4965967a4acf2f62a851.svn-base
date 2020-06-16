@@ -1,0 +1,52 @@
+<article class="module width_full">
+<header>
+  <h3>Buat Kwitansi Baru LS</h3>
+</header>             
+ <div class="module_content">     
+  <table border='0' width='80%' style="margin-left:20px">
+         <tr>
+           <td width="194">Jenis Kwitansi</td>
+           <td width="">:</td>
+           <td width="560">
+             <select name="jns_kwitansi" id="jns_kwitansi"  >
+               <option value="0">-</option>
+               <option value="HONOR">HONOR</option>
+           	   <!--<option value="2">KONTRAKTUAL</option>-->    
+               <option value="MODAL">MODAL</option>
+               <option value="BANSOS">BANSOS</option>
+               <option value="PERJADIN">PERJADIN</option>
+               <option value="KONTRAK_PENELITIAN">KONTRAK PENELITIAN</option>
+               <option value="KONTRAK_PENGABDIAN">KONTRAK PENGABDIAN</option>
+             </select>
+            </td>
+         </tr>
+  </table>
+   <div id="jenis_kwitansi">
+  </div>
+</div>  
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK JENIS KWITANSI===*/
+				  $("#jns_kwitansi").change(function(){
+							var jns_kwitansi=$("#jns_kwitansi").val();							
+								$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('ls/jenis_kwitansi')?>",
+									data: {
+												jns_kwitansi: $("#jns_kwitansi").val()
+											},
+									success: function(msg){
+										$('#jenis_kwitansi').html(msg);
+									}
+							  });
+				});
+				
+</script>  
+
+  <div id="sub-content">
+ 
+  </div>
+
+  <footer>
+</footer>     
+</article>
+ 

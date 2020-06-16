@@ -1,0 +1,65 @@
+<article class="module width_full">
+<header>
+  <h3>Daftar SPTB LS</h3></header>
+   
+
+  <div id="sub-content"> 
+  <form method="post" name='formName4'action="<?php echo site_url();?>ls/simpan_sptb" onSubmit='return validasi(this)'>
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width: 830px;" >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>No. Kwitansi</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Kd. MAK</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil ==""){
+                 echo "<tr><td colspan='7' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;?>
+                 <input type="hidden" name="id_output" value="<?php echo $row->kdoutput; ?>"> 
+                 <input type="hidden" name="id_akun" value="<?php echo $row->kdakun; ?>">
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td><?php echo $row->no_kwitansi; ?> </td>
+                    <td><?php $jenis = $row->jenis_kwitansi; 
+								if($jenis=='1')
+								{echo 'Kwitansi Honor';}
+								else
+								if($jenis=='2')
+								{echo 'Kwitansi Kontrak';}
+								else
+								if($jenis=='3')
+								{echo 'Kwitansi Modal';}
+								else
+								if($jenis=='4')
+								{echo 'Kwitansi Bansos';}
+								else
+								if($jenis=='5')
+								{echo 'Kwitansi Perjadin';}
+								
+						?> 
+                    </td>
+                    <td><?php echo $row->tgl_kwitansi; ?> </td>
+                    <td><?php echo $row->kegiatan;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+                    <td><?php echo $row->nominal; ?> </td>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+ </table>
+ </div>
+             <footer>         
+                <div class="submit_link"> 
+                <input name="simpan" type='submit' id="simpan" value=' Buatkan SPTB'> 
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+        </article>

@@ -1,0 +1,106 @@
+	    <article class="module width_full">
+    		<header><h3>Input Ringkasan MOU Pendapatan Lainnya Hasil Unit Usaha</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+				</center>
+	<form action="<?php echo site_url('unit_usaha/mou_simpan');?>" method="POST" name="resume" accept-charset="UTF-8">
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan MOU Hasil Unit Usaha</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No MOU</td>
+                        <td><input name="no_mou" type="text" placeholder="Nomor isian input MOU" size="40"/></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td><input type="text" id="tgl_mou" name="tgl_mou" placeholder="Tanggal dibuatnya MOU" size="40"/></td>
+                    </tr>
+                    <tr>
+                        <td>Kode Unit Usaha</td>
+                        <td><input type="text" name="kd_unit_usaha" placeholder="Kode untuk Unit Usaha" size="40"/></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Nama Unit Usaha</td>
+                        <td><input type="text" name="nm_unit_usaha" placeholder="Nama untuk Unit Usaha" size="40"/></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Alamat Unit Usaha</td>
+                        <td><textarea name="alamat_unit_usaha" id="alamat_unit_usaha" cols="35" rows="3" placeholder="Alamat Unit Usaha"></textarea></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Deskripsi Hasil Unit Usaha</td>
+                        <td><textarea name="desk_unit_usaha" id="desk_unit_usaha" cols="35" rows="3" placeholder="Deskripsi mengenai Unit Usaha"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Hasil Unit Usaha</td>
+                        <td><input type="text" name="nilai_unit_usaha" placeholder="Jumlah Nominal Unit Usaha" size="40"/></td>
+                    </tr>
+                </table>
+
+                <script language="javascript">
+                var counter=0;
+            		function addRow(tableID) {
+            		  
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount);
+            
+            			var nama = row.insertCell(0);
+            			var inp_nama = document.createElement("input");
+            			inp_nama.type="text";
+                        inp_nama.name= "nama["+counter+"]";
+            			nama.appendChild(inp_nama);
+                        
+                        var unit = row.insertCell(1);
+            			var inp_unit = '<select name="unit['+counter+']">'+$('#unit').html()+'</select>';
+            			unit.innerHTML=inp_unit;
+                        
+                       /** var fee = row.insertCell(2);
+            			var inp_fee = document.createElement("input");
+            			inp_fee.type="text";
+                        inp_fee.name= "fee["+counter+"]";
+            			fee.appendChild(inp_fee);
+                       **/ 
+            			var cell4 = row.insertCell(2);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_nama.focus();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+                    
+                    $(function() {
+        				$( "#tgl_mou" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+            
+            	</script>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   </form>
+        </article>
+        <!-- end of styles article --> 

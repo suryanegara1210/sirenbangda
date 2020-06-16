@@ -1,0 +1,144 @@
+<script type="text/javascript">
+<!--
+    $( function() {
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+		
+		$("#nilai_unit_usaha").autoNumeric(numOptions);
+        		
+    });
+
+    $().ready( function() {
+        		
+        $("#resume").validate({
+            rules: {
+                no_mou: "required",
+                tgl_mou: "required",
+                pemberi: "required",
+                penerima: "required",
+				peruntukan: "required",
+                jenis_hibah: "required",
+                nominal: "required",
+                bentuk: "required",
+                banyak: "required",
+				jenis_jasa: "required",
+                nilai: "required",
+                mulai: "required",
+                akhir: "required",
+				peruntukan: "required"
+                
+            },
+            messages: {
+                no_mou: "Mohon diisi nomor MOU yang diajukan ",
+                tgl_mou: "Mohon diisi tanggal MOU yang diajukan",
+                pemberi: "Mohon diisi nama pemberi hibah yang diajukan",
+                penerima: "Mohon diisi nama penerima hibah yang diajukan",
+				peruntukan: "Mohon diisi peruntukan hibah yang diajukan",
+                jenis_hibah: "Mohon dipilih jenis hibah yang diajukan",
+                nominal: "Mohon diisi nominal MOU yang diajukan",
+                bentuk: "Mohon diisi bentuk dari hibah yang diajukan",
+                banyak: "Mohon diisi banyak dari hibah yang diajukan",
+				jenis_jasa: "Mohon diisi jenis jasa dari hibah yang diajukan",
+                nilai: "Mohon diisi nilai dari hibah yang diajukan",
+                mulai: "Mohon diisi tanggal awal hibah yang diajukan",
+                akhir: "Mohon diisi tanggal akhir hibah yang diajukan",
+				peruntukan: "Mohon diisi peruntukan hibah yang diajukan"
+				
+            },
+			submitHandler: function(form){
+				$("#nilai_unit_usaha").val($("#nilai_unit_usaha").autoNumeric('get'));
+                
+				form.submit();
+			}
+        });		
+    });
+-->
+</script>
+        <form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_UNIT_USAHA);?>" method="POST" id="resume" name="resume" accept-charset="UTF-8">
+	    <article class="module width_full">
+    		<header><h3>Input Ringkasan MOU Pendapatan Lainnya Hasil Unit Usaha</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+				</center>
+	
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_mou\" id=\"id_mou\" value=\"$isi_mou->id_mou\" />";
+        } ?>
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan MOU Hasil Unit Usaha</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No MOU</td>
+                        <td><input name="no_mou" type="text" 
+                        placeholder="Nomor isian input MOU" size="40"
+                        <?php if(isset($isi_mou->no_mou)) echo "value=\"$isi_mou->no_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td><input type="text" id="tgl_mou" name="tgl_mou"
+                        placeholder="Tanggal dibuatnya MOU" size="40"
+                        <?php if(isset($isi_mou->tgl_mou)) echo "value=\"$isi_mou->tgl_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Kode Unit Usaha</td>
+                        <td><input type="text" id="kd_unit_usaha" name="kd_unit_usaha" 
+                        placeholder="Kode untuk Unit Usaha" size="40"
+                        <?php if(isset($isi_mou->kd_unit_usaha)) echo "value=\"$isi_mou->kd_unit_usaha\""; ?>
+                        /></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Nama Unit Usaha</td>
+                        <td><input type="text" id="nm_unit_usaha"  name="nm_unit_usaha" 
+                        placeholder="Nama untuk Unit Usaha" size="40"
+                        <?php if(isset($isi_mou->nm_unit_usaha)) echo "value=\"$isi_mou->nm_unit_usaha\""; ?>
+                        /></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Alamat Unit Usaha</td>
+                        <td><textarea name="alamat_unit_usaha" id="alamat_unit_usaha" 
+                        cols="35" rows="3" placeholder="Alamat Unit Usaha"><?php if(isset($isi_mou->tempat)) echo $isi_mou->tempat; ?></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Deskripsi Hasil Unit Usaha</td>
+                        <td><textarea name="desk_unit_usaha" id="desk_unit_usaha" 
+                        cols="35" rows="3" placeholder="Deskripsi mengenai Unit Usaha"><?php if(isset($isi_mou->uraian)) echo $isi_mou->uraian; ?></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Hasil Unit Usaha</td>
+                        <td><input type="text" id="nilai_unit_usaha" name="nilai_unit_usaha" 
+                        placeholder="Jumlah Nominal Unit Usaha" size="40"
+                        <?php if(isset($isi_mou->nilai)) echo "value=\"$isi_mou->nilai\""; ?>
+                        /></td>
+                    </tr>
+                </table>
+
+                <script language="javascript">
+                    $(function() {
+        				$( "#tgl_mou" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+            
+            	</script>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   
+        </article>
+    </form>
+        <!-- end of styles article --> 

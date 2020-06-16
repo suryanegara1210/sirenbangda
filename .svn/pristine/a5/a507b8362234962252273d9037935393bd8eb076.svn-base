@@ -1,0 +1,115 @@
+<table width="100%">
+	<tr><td width="60%"></td><td width="40%" align="center" style="font-size:11px">LAMPIRAN  V</td></tr>
+    <tr><td></td><td align="justify" style="font-size:10px">
+    PERATURAN DIREKTUR JENDERAL PERBENDAHARAAN NOMOR PER-37/PB/2009 TENTANG PETUNJUK TEKNIS 
+    PENGALIHAN PENGELOLAAN DMINISTRASI BELANJA PEGAWAI NEGERI SIPIL PUSAT KEPADA SATUAN KERJA 
+    KEMENTERIAN NEGARA/LEMBAGA
+    </td></tr>
+</table>
+   
+<table border='0' width='100%'>   
+ <tr><td><img src='<?php echo base_url();?>asset/images/logo_baru.png'></td></tr>
+</table>
+<table border='0' width='100%' style="padding-top: -80px;">   
+ <tr ><td align="center"><strong>KEMENTERIAN PENDIDIKAN DAN KEBUDAYAAN <br>
+UNIVERSITAS UDAYANA</strong></td></tr></table>
+<table border='0' width='100%' style="padding-top: -15px;"> 
+<tr>
+  <td align="center" style="font-size: 10px;">Jalan Kampus Bukit Jimbaran, Badung Bali Telepon:(0361) 701954, 701812, 701797 Fax (0361) 701907</td>
+</tr>
+</table>
+<table border='0' width='100%'>   
+ <tr ><td><img src='<?php echo base_url();?>asset/images/garis.png'></td></tr>  
+</table>
+<?php foreach($hasil->result() as $row):?>
+<table border='0' width='100%'> 
+<tr >
+  <td align="center" style="font-size: 16px;"><strong>SURAT PERNYATAAN TANGGUNG JAWAB MUTLAK</strong></td>
+</tr>
+</table>
+<br>
+
+<table style="font-size: 12px;"> 
+  <tr>
+    <td align="left" colspan="3">Yang bertandatangan di bawah ini :</td>
+  <tr> 
+    <td align="left" colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="left">Nama</td>
+    <td >:</td>
+    <td ><?php echo $row->pd2_nama; ?></td>
+  </tr>
+  <tr>  
+    <td align="left">NIP</td>
+    <td>:</td>
+    <td><?php echo "$row->pd2_nip"; ?></td>
+  </tr>
+  <tr>
+    <td align="left">Jabatan</td> 
+    <td>:</td>
+    <td><?php echo "Pejabat Pembuat Komitmen $row->nama_unit "; ?></td>
+  </tr>
+</table>
+<br>
+<table style="font-size: 12px;"> 
+  <tr>
+    <td align="left">Menyatakan dengan sesungguhnya bahwa :</td> 
+  </tr>
+</table> 
+<table width="100%" style="font-size:12px">
+<tr>
+	<td width="2%" valign="top">1.</td>
+    <td align="justify" colspan="2">Daftar Pembayaran <?php echo "$row->nmakun untuk $row->nmkomponen $row->nama_unit"; ?></td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
+    <td width="18%" align="center"><?php echo $this->uang->angka($row->nominal_sptb) ?></td>
+    <td width="80%" align="left"><?php $terbilang = $this->konversi->terbilang($row->nominal_sptb); echo "$terbilang rupiah"; ?></td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
+    <td align="justify" colspan="2">dihitung dengan benar berdasarkan hak yang seharusnya dibayarkan kepada
+		<?php if ($row->jenis_sptjm=='Barang'){
+			  	echo "Perusahaan / Toko ";
+			  }else{
+				echo "Pegawai "; 
+			  } ?> yang bersangkutan.<br /></td>
+</tr>
+<tr>
+	<td width="2%" valign="top">2.</td>
+    <td align="justify" colspan="2">Apabila di kemudian hari  terdapat kesalahan dan/atau kelebihan atas pembayaran 
+    	<?php echo $row->nmakun ?> tersebut, sebagian atau seluruhnya, kami bertanggung jawab sepenuhnya dan bersedia 
+        menyetorkan atas kesalahan  dan/atau kelebihan pembayaran tersebut ke rekening operasional BLU.</td>
+</tr>
+</table><br><br>
+            <table width="100%" style="font-size: 12px;">
+                <tr>
+                    <td width="40%"></td> 
+                    <td width="20%"></td>
+                    <td width="40%">Bukit, <?php echo date('d/m/Y',strtotime($row->tgl_sptb)); ?></td>   
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>A.n. Kuasa Pengguna Anggaran</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Pejabat Pembuat Komitmen</td>
+                </tr>
+
+                <tr height="40px"><td><br><br><br></td> </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td> <?php echo $row->pd2_nama ?>  </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>NIP. <?php echo $row->pd2_nip ?> </td>
+                </tr>
+            </table>
+ <?php endforeach;?> 

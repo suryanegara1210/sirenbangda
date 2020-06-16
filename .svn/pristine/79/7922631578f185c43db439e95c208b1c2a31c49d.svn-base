@@ -1,0 +1,263 @@
+
+<script type="text/javascript">
+/*==========================================================================
+======================DATE PICKER===========================================*/
+$(function() {
+		 var pickerOpts = {
+          	dateFormat:"yy-mm-dd"
+        };  
+		$( "#tgl_trans" ).datepicker(pickerOpts);
+		$( "#tgl_buku" ).datepicker(pickerOpts);
+	});
+
+/*==========================================================================*/
+
+	$(function() {
+    $( "#create-daily" )
+			.button()
+			.click(function() {
+				$( "#form_input" ).dialog( "open" );
+			});
+	});
+	
+/*==========================================================================
+======================DEBET=================================================*/
+$("#tambah_debet").live("click",function(){
+	var kd_akun_debet = $("#kd_akun_debet").val();
+	var nilai_debet = $("#nilai_debet").val();
+		
+		if(kd_akun_debet == '0') {
+			alert('Pilih Akun Debet Terlebih Dahulu');
+			kd_akun_debet.focus();
+			return false;
+		}
+		
+		else if(nilai_debet == '') {
+			alert('Isi Nilai Terlebih Dahulu');
+			nilai_debet.focus();
+			return false;
+		}
+		else
+		{
+	
+					$.ajax({
+						type: "POST",
+						url : "<?php echo site_url('akuntansi/deb_tambah')?>",
+						data: 
+						 		{
+												kd_akun_debet : $("#kd_akun_debet").val(), 
+												nilai_debet : $("#nilai_debet").val()
+								},
+						success: function(msg){
+							$('#show_db').html(msg);
+						}
+				  	});
+		
+		return false;			
+		}
+    	
+    	return false;
+ 	});	
+	
+	$(".delbutton_deb").live("click",function(){
+    	var element = $(this);
+    	var del_id = element.attr("id");
+    	var info = 'id=' + del_id;
+    	$('#del_id').val(del_id);
+    	var del_id = {del_id : $("#del_id").val()};
+					$.ajax({
+						type: "POST",
+						url : "<?php echo site_url('akuntansi/deb_del')?>",
+						data: del_id,
+						success: function(msg){
+							$('#show_db').html(msg);
+						}
+				  	});
+    	
+    	return false;
+ 	});
+
+/*==========================================================================
+======================KREDIT=================================================*/
+$("#tambah_kredit").live("click",function(){
+	var kd_akun_kredit = $("#kd_akun_kredit").val();
+	var nilai_kredit = $("#nilai_kredit").val();
+	
+		if(kd_akun_kredit == '0')
+		{
+			alert('Pilih Akun Kredit Terlebih Dahulu');
+			kd_akun_kredit.focus();
+			return false;
+		}
+		
+		else if(nilai_kredit == '')
+		{
+			alert('Isi Nilai Terlebih Dahulu');
+			nilai_kredit.focus();
+			return false;
+		}
+		else
+		{
+					$.ajax({
+						type: "POST",
+						url : "<?php echo site_url('akuntansi/kre_tambah')?>",
+						data: 
+						 		{
+												kd_akun_kredit : $("#kd_akun_kredit").val(), 
+												nilai_kredit : $("#nilai_kredit").val()
+								},
+						success: function(msg){
+							$('#show_db').html(msg);
+						}
+				  	});
+			return false;
+		}
+    	
+    	return false;
+ 	});	
+	
+	$(".delbutton_kre").live("click",function(){
+    	var element = $(this);
+    	var del_id = element.attr("id");
+    	var info = 'id=' + del_id;
+    	$('#del_id_kre').val(del_id);
+    	var del_id_kre = {del_id_kre : $("#del_id_kre").val()};
+					$.ajax({
+						type: "POST",
+						url : "<?php echo site_url('akuntansi/kre_del')?>",
+						data: del_id_kre,
+						success: function(msg){
+							$('#show_db').html(msg);
+						}
+				  	});
+    	
+    	return false;
+ 	});
+
+</script>
+    
+<style>
+.nm_col 
+{
+	width:132px;
+}
+.nm_col_hide 
+{
+	width:180px;
+}
+.nm_col2 
+{
+	width:18x;
+}
+.input1
+{
+	width:416px;
+}
+.col_akhir
+{
+	width:50px;	
+}
+</style>
+<?php $nama_unit = $this->session->userdata('nama_unit');?>
+<article class="module width_full">
+  <header>
+  <h3>Insert Transaksi Jurnal</h3></header>
+    
+    <script>
+		function CheckForm(){
+			var f = document.formjurnal;
+			if(f.tgl_buku.value == ""){
+			   alert('Tanggal Pembukuan harus diisi');
+			   f.tgl_buku.focus();
+			   return false;
+			}
+			if(f.tgl_trans.value == ""){
+			   alert('Tanggal Transaksi harus diisi');
+			   f.tgl_trans.focus();
+			   return false;
+			}
+			if(f.bukti.value == ""){
+			   alert('Bukti harus diisi');
+			   f.bukti.focus();
+			   return false;
+			}
+			if(f.ket.value == ""){
+			   alert('Keterangan harus diisi');
+			   f.ket.focus();
+			   return false;
+			}
+			if(f.selisih.value != '0'){
+			   alert('Transaksi tidak balance');
+			   f.selisih.focus();
+			   return false;
+			}
+		}
+	</script>
+    
+    
+    <div class="module_content">  
+    <form method="post" name='formjurnal' action="<?php echo base_url();?>akuntansi/jurnal_simpan" onSubmit='return CheckForm()'> 
+    
+    <table border='0' width='100%' >          
+        <tr>
+          <td class="nm_col_hide">Tanggal Pembukuan</td>
+          <td >:</td><td><label for="jns_tri_dharma">
+            <input name='tgl_buku' type='' value='' size="50" id="tgl_buku" readonly="readonly" />
+          </label></td>
+        </tr>
+         <tr>
+           <td>Tanggal Transaksi</td>
+           <td >:</td><td><label for="jenis_kwitansi">
+             <input name='tgl_trans' type='' value='' size="50" id="tgl_trans"  readonly="readonly"/>
+           </label></td>
+         </tr>
+        <tr>
+          <td>No Bukti</td>
+          <td >:</td>
+          <td><input name='bukti' type='' value='' size="50" id="bukti" /></td>
+        </tr>
+        <tr>
+          <td>Uraian Transaksi</td>
+          <td >:</td>
+          <td><input name='ket' type='' value='' size="50" id="ket" /></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td >&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+          		<div id="show_db">
+                <?php $this->load->view('akuntansi/bj_db'); ?>
+              </div>
+          </td>
+        </tr>
+            <tr>
+              <td valign="top">&nbsp;</td>
+              <td>&nbsp;</td>
+              <td valign="top">&nbsp;</td>
+            </tr>
+            
+          </table>
+    </td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td >&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+    
+     
+  </form>
+  </div>
+<footer>
+                
+    <div class="submit_link">  
+        <input name="simpan" type='submit' id="simpan" value='Simpan'>
+      <input type=button value=Batal onclick=self.history.back()>
+    </div> 
+    </footer> 
+
+</article>

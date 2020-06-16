@@ -1,0 +1,75 @@
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   }  
+?>
+
+<article class="module width_full">
+<header>
+  <h3>Daftar Kwitansi (LS) yang Perlu Direvisi</h3></header>
+   
+<table><br></table>
+  <div id="sub-content"> 
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width: 900px;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+                <th>No. Kwitansi</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Status</th> 
+                <th>Action</th> 
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php if($hasil ==""){
+				 echo "<tr><td colspan='11' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+			 	$i=0;
+			 	foreach($hasil->result() as $row) : $i++;
+				$status=$row->status;
+				?>
+
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                    <td><?php echo $row->id_kwitansi; ?> </td>
+                    <td><?php $jenis = $row->jenis_kwitansi; 
+								if($jenis=='1')
+								{echo 'Kwitansi Honor';}
+								else
+								if($jenis=='2')
+								{echo 'Kwitansi Kontrak';}
+								else
+								if($jenis=='3')
+								{echo 'Kwitansi Modal';}
+								else
+								if($jenis=='4')
+								{echo 'Kwitansi Bansos';}
+								else
+								if($jenis=='5')
+								{echo 'Kwitansi Perjadin';}
+								
+						?> 
+                    </td>
+                    <td><?php echo $row->tgl_kwitansi; ?> </td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+                    <td><?php echo $row->nominal; ?> </td>
+                    <td><?php echo 'Belum Lenkap'; ?></td>
+                    <td align="center"><?php $id= $row->id_kwitansi;?>
+                     <a href="<?php echo base_url();?>ls/update_revisi/<?php echo $row->th_kwitansi;?>/<?php echo $id;?>" title="Edit Kuitansi" ><img src="<?php echo base_url(); ?>asset/images/edit.png"/></a>
+                    </td><input name="id_kwitansi" id="id_kwitansi" type="hidden" value="<?php echo  $row->id_kwitansi ;?>" />
+                </tr>
+			 <?php endforeach; }?>
+        </tbody>
+ </table>
+ </div>
+ <br />
+ <footer style="width:99.9%">
+   <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+   </div>
+   </footer>
+   </article>

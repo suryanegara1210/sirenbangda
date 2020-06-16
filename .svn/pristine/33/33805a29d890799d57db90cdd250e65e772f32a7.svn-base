@@ -1,0 +1,217 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Driver extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {
+        $this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+        $this->load->library(array('Pagination','image_lib'));
+        $this->load->library(array('konversi'));
+        $this->load->model('m_ls');
+        $this->load->model(array('m_pok'));
+    }
+
+	function index() {
+		$this->load->model(array('m_logic', 'm_settings'));
+
+		echo $this->m_logic->get_nilai_sp2d(13, 137, M_logic::JB_TUP, false);
+
+		//echo $this->m_logic->get_nilai_sp2d_tup(13,137);
+
+
+	}
+
+	function test_logic()
+	{
+		$this->load->model(array('m_logic'));
+
+		$ta	= '2013';
+		$su = '81';
+		$idu= '2';
+
+		echo '<pre>';
+
+        $sisa_mp                = $this->m_logic->get_sisa_mp($ta, $su);
+
+        $sp2d_up                = $this->m_logic->get_nilai_sp2d_up($ta, $su);
+        $nilai_up               = $this->m_logic->get_nilai_up($ta, $su);
+        $nilai_up_su            = $this->m_logic->get_nilai_up_sunit($ta, $su);
+
+        $nilai_up_u             = $this->m_logic->get_nilai_up($ta, $idu);
+        $check_sp2d_up          = $this->m_logic->check_sp2d_up($ta, $su);
+
+        $get_nilai_sp2d_tup_f   = $this->m_logic->get_nilai_sp2d_tup($ta, $su, false);
+        $get_nilai_sp2d_tup_t   = $this->m_logic->get_nilai_sp2d_tup($ta, $su, true);
+        $nilai_tup              = $this->m_logic->get_nilai_tup($ta, $su);
+
+        $nilai_kwitansi         = $this->m_logic->get_nilai_kwitansi($ta, $su, Constant::JB_ALL, 6);
+
+
+		$pagu_real_su           = $this->m_logic->get_pagu_real_sunit($ta, $su);
+		$pagu_real_u			= $this->m_logic->get_pagu_real_unit($ta, $idu);
+
+
+        $nilai_pok_su			= $this->m_logic->get_pok_sunit($ta, $su);
+        $nilai_pok_u			= $this->m_logic->get_pok_unit($ta, $idu);
+
+        $get_limit_spjup		= $this->m_logic->get_limit_spjup($ta, $su);
+        $get_limit_spjtup		= $this->m_logic->get_limit_spjtup($ta, $su);
+
+        $is_mp_available        = $this->m_logic->check_mp_available($ta, $su);
+
+        $nilai_dpt              = $this->m_logic->get_nilai_dpt($ta, $su);
+        $nilai_dpt_by_params	= $this->m_logic->get_nilai_dpt_by_params($ta, $su, array('4078', '011', '001', '525112'));
+
+        $nilai_mp				= $this->m_logic->get_nilai_mp($ta, $su);
+        $sisa_mp				= $this->m_logic->get_sisa_mp($ta, $su);
+        $max_up					= $this->m_logic->get_nilai_max_up($ta, $su);
+
+
+        var_dump($pagu_real, $sisa_mp, $nilai_dpt, $nilai_up, $nilai_tup, $nilai_kwitansi);
+//            $sps = 0;
+//    		if($is_mp_available) {
+//                //MP sudah dibuatkan
+//                $sps = $sisa_mp - $nilai_dpt - $nilai_tup - $all_kwitansi_less_6;
+//    		} else {
+//                // MP belum ada
+//    			$sps = $pagu_real - $nilai_up - $nilai_dpt - $nilai_tup - $all_kwitansi_less_6;
+//    		}
+		echo '</pre>';
+	}
+
+
+	function daftar_dipa_spi()
+	{
+		$sql = "
+			SELECT a.kdgiat, a.nmgiat, a.kdoutput, a.nmoutput,
+				a.kdkomponen, a.nmkomponen, a.kdakun, a.nmakun, a.hdr,
+				IFNULL(sum(a.jumlah), 0) as jumlah,
+				IFNULL(sum(a.jumlah_old), 0) as jumlah_old
+			FROM t_rkakl_2013_fak a
+			WHERE a.kode_unit='U008'
+			GROUP BY a.kdgiat, a.nmgiat, a.kdoutput, a.nmoutput,
+				a.kdkomponen, a.nmkomponen, a.kdakun, a.nmakun, a.hdr
+			ORDER BY a.kdgiat, a.kdoutput, a.kdkomponen, a.kdakun
+		";
+
+		$query = $this->db->query($sql);
+
+		$data['lists'] = $query->result();
+
+		$this->template->load('template','driver/list_dipa', $data);
+
+	}
+
+	function daftar_dipa_spi_detail()
+	{
+		$kdgiat = $this->input->post('kdgiat');
+		$kdoutput = $this->input->post('kdoutput');
+		$kdkomponen = $this->input->post('kdkomponen');
+		$kdakun = $this->input->post('kdakun');
+		$hdr = $this->input->post('hdr');
+
+		$sql = "
+			SELECT *
+			FROM t_rkakl_2013_fak
+			WHERE kdgiat = '$kdgiat' AND kdoutput = '$kdoutput' AND kdkomponen = '$kdkomponen' AND
+				kdakun = '$kdakun' AND hdr = '$hdr'
+			";
+
+		$query = $this->db->query($sql);
+
+		$data['lists'] = $query->result();
+
+		$this->load->view('driver/list_belanja', $data);
+
+	}
+
+	function test_jquery()
+	{
+		$this->template->load('template','driver/test-jquery');
+
+	}
+
+	function test_get()
+	{
+		var_dump($this->input->get('name'));
+		var_dump($this->uri->segment(4));
+		var_dump($_GET);
+	}
+
+	function test_assert()
+	{
+		$ret = $this->m_pok->get_nilai_pok_by_params('','','tes');
+	}
+
+	function test_service1()
+	{
+		echo file_get_contents('http://localhost/siaku/services/pegawai/setiawan');
+	}
+
+	function test_func()
+	{
+		$param = $this->session->userdata('PARAM');
+		$param->honor = array();
+		var_dump($param, isset($param), is_null($param), empty($param), isset($param->honor));
+		$param->tes = 'tes';
+
+		if(!empty($param) && !empty($param->honor) && $param->honor != 'HONOR')
+			echo 'masuk';
+
+		static $tar = 0; $tar += 1;
+		echo time(). ' ' . microtime() . ' ' . date('YmdHis') . ' ' . $tar;
+	}
+
+	function test_array() {
+		var_dump($_POST);
+	}
+
+	function test_mpok() {
+		$cdsu = $this->session->userdata('kode_subunit');
+
+		$item = $this->m_pok->get_pok_detail ('2013', $cdsu, '4078',
+									'015', '011',
+									'525111', 'BIMBINGAN AKADEMIS MHS AK');			
+
+		var_dump($item, $_SESSION);
+	}
+
+	function test_array_combine() {
+		$key = array('satu', 'dua', 'tiga', 'empat');
+		$val = array(1, 2, 3);
+
+		$data = array_combine($key, $val);
+		var_dump($data);
+	}
+
+	function test_pdf_kwitansi() {
+        $timestamp 	= date("Y-m-d_H:i"); 
+	 	$idu 		= $this->session->userdata('id_unit');
+	 	$id_kwitansi= '291';
+		$pdf_filename='KWITANSI_'.$id_kwitansi.'_'.$timestamp.'.pdf';
+
+
+		$content = file_get_contents(site_url("kwitansi/preview/$id_kwitansi"));
+		generate_pdf_A4($content,$pdf_filename);  
+		//echo $content;
+
+	}
+
+	function test_pdf_honor() {
+        $timestamp 	= date("Y-m-d_H:i"); 
+	 	$idu 		= $this->session->userdata('id_unit');
+	 	$id_kwitansi= '280';
+		$pdf_filename='HONOR_'.$id_kwitansi.'_'.$timestamp.'.pdf';
+
+
+		$content = file_get_contents(site_url("kwitansi/preview_honor/$id_kwitansi"));
+		generate_pdf_legal_landscape($content,$pdf_filename);  
+		//echo $content;
+
+	}	
+}
+

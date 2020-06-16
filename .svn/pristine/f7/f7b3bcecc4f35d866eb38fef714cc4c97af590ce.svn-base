@@ -1,0 +1,208 @@
+<style>
+.drop_down
+{
+	width:500px;	
+}
+</style>
+<article class="module width_full">
+<header>
+
+<script type="text/javascript">
+	    $(this).ready( function() {
+			/*
+			=========================================================
+			===========================KODE AKUN DEBET===============
+			*/
+    		$("#kode1").autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>c_akun/ac_bukubesar",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+		          		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+            		$("#result").append(
+            			"<li>"+ ui.item.id + "</li>"
+            		);           		
+         		},		
+    		});
+			
+	    });
+		
+	    </script>
+
+<h3>Buku Besar</h3>
+</header>
+<form>
+  <table width="100" border="0"   id="hasil" style="margin-left: 40px; margin-top:20px; width: 780px;">
+  <tr>
+    <td width="19%">Kode Akun </td>
+    <td width="1%">:</td>
+    <td width="71%"><div id="propinsi ">    
+      <?php echo form_input('kode1','','id="kode1" autocomplete="on" style="width:200px"  onfocus="this.value = \'\'"');?></div></td>
+    </tr>
+  <tr>
+    <td>Tahun</td>
+    <td>:</td>
+    <td><label for="bulan"></label>
+      <?php echo date('Y'); ?>
+    </td>
+  </tr>
+  <tr>
+    <td>Jenis Laporan</td>
+    <td>:</td>
+    <td><select name="jenis" id="jenis">
+      <option>- Pilih Jenis -</option>
+      <option value="01">Bulanan</option>
+      <option value="02">Tri Wulan</option>
+      <option value="03">Semester</option>
+    </select></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><div id="pilihan_jenis">
+        </div>
+    </td>
+  </tr>
+  <!--<tr>
+    <td>Bulan</td>
+    <td>:</td>
+    <td><select name="bulan" id="bulan">
+      <option>- Pilih Bulan -</option>
+      <option value="01">Januari</option>
+      <option value="02">Februari</option>
+      <option value="03">Maret</option>
+      <option value="04">April</option>
+      <option value="05">Mei</option>
+      <option value="06">Juni</option>
+      <option value="07">Juli</option>
+      <option value="08">Agustus</option>
+      <option value="09">September</option>
+      <option value="10">Oktober</option>
+      <option value="11">November</option>
+      <option value="12">Desember</option>
+    </select></td>
+  </tr>-->
+  <tr>
+    <td>Tampilan</td>
+    <td>:</td>
+    <td><select name="tampil" id="tampil">
+      <option>- Jenis Tampilan -</option>
+      <option value="1">Normal</option>
+      <option value="2">Detail</option>
+    </select></td>
+  </tr>
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK KODE1===*/
+				  $("#bulans").change(function(){
+							var bulan = {bulan:$("#bulan").val()};
+							var kode1 = $("#kode1").val();
+							
+							
+							if(kode1!='')
+							{
+								$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('akuntansi/buku_besar_view')?>",
+									data: {
+												kode1: $("#kode1").val(),
+												bulan: $("#bulan").val()
+											},
+									success: function(msg){
+										$('#buku_besar').html(msg);
+									}
+							  });
+							}
+							else
+							{
+								alert('Silahkan masukan kode Akun terlebih dahulu');
+							}
+							
+						
+				});
+		
+</script>
+
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK PILIHAN JENIS PELAPORAN ===*/
+          $("#jenis").change(function(){
+                var selectValues = $("#jenis").val();
+                if (selectValues == ''){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Jenis Dahulu</option></select>";
+                    $('#pilihan_jenis').html(msg);
+                }else{
+                    var jenis = {jenis:$("#jenis").val()};
+                    $('#pilihan_jenis').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('akuntansi/pilih_jenis_tampilan')?>",
+                            data: jenis,
+                            success: function(msg){
+                                $('#pilihan_jenis').html(msg);
+                            }
+                      });
+                }
+        });
+</script>  
+
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK PILIHAN TAMPILAN BERUPA DETAIL ATAU NORMAL ===*/
+				  $("#tampil").change(function(){
+							var bulan = {bulan:$("#bulan").val()};
+							var kode1 = $("#kode1").val();
+							var tampil = $("#tampil").val();
+							var url = '';
+							
+							if (tampil==1)
+							{url = "<?php echo site_url('akuntansi/buku_besar_view')?>"}
+							else if (tampil==2)
+							{url = "<?php echo site_url('akuntansi/buku_besar_tampil')?>"}
+							
+							if((kode1!='' && bulan!='' )|| tampil=='')
+							{
+								$.ajax({
+									type: "POST",
+									url : url,
+									data: {
+												kode1: $("#kode1").val(),
+												bulan: $("#bulan").val(),
+												tampil: $("#tampil").val()
+											},
+									success: function(msg){
+										$('#buku_besar').html(msg);
+									}
+							  });
+							}
+							
+							else
+							{
+								alert('Belum Semua dipilih');
+							}
+							
+						
+				});
+		
+</script>
+  
+</table>
+</form>
+<div class="module_content">
+  <div id="sub-content">
+  <div id="buku_besar">
+  </div>
+  </div>
+
+</div>
+

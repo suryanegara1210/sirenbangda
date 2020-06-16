@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="<?php echo base_url();?>asset/css/layout.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="<?php echo base_url();?>asset/css/style-portal-content.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="<?php echo base_url();?>asset/css/style-portal-table.css" type="text/css" media="screen" />  
+
+<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery-ui.min.js"></script>
+
+<article class="module width_full">
+<header>
+  <h3 style="padding-left:20px">Pedoman Tarif DIPA BLU Universitas Udayana Tahun Anggaran 2012</h3>
+</header>             
+    <div class="module_content">  
+<form method="POST" action="">   
+  <table border='0'>
+         <tr>
+           <td>Detail Tarif</td>
+           <td>&nbsp;:</td>
+		   <td><?php echo form_dropdown("tarif",$option_komponen,"","id='tarif' style='width:450px;'") ?></td>
+           <td><button type="button" onclick="tampil()">Tampilkan</button></td>
+         </tr>
+         <tr>
+           <td>&nbsp;</td>
+           <td >&nbsp;</td>
+           <td>&nbsp;</td>
+         </tr>
+  </table>
+</form>
+</div> <div id="jenis_kwitansi"></div> 
+<script type="text/javascript">
+	function tampil() {
+		var tarif = $("#tarif").val();	
+		if( tarif== 0){
+			alert("Pilihlah list tarif terlebih dahulu..");
+		}else{
+			$.ajax({
+				type: "POST",
+				url : "<?php echo site_url('ls/search_tarif')?>",
+				data: {
+							tarif: $("#tarif").val()
+						},
+				success: function(msg){
+					$('#jenis_kwitansi').html(msg);
+				}
+		  	});
+		}
+	};
+</script>  
+  
+
+  <footer>
+</footer>     
+</article>
+ 

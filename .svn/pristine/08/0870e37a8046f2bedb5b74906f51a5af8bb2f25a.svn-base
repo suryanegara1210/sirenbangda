@@ -1,0 +1,57 @@
+<article class="module width_full">
+<header>
+
+  <h3>Daftar SPTB TUP SPJ (Tambahan Uang Persediaan)</h3></header>
+   
+
+  <div id="sub-content"> 
+  <form method="post" name='formName4'action="<?php echo site_url();?>tup_spj/simpan_sptb" onSubmit='return validasi(this)'>
+  
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width: 830px;" >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>No. Kwitansi</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Kd. MAK</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil ==""){
+                 echo "<tr><td colspan='7' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;?>
+                 <input type="hidden" name="id_output" value="<?php echo $row->kdoutput; ?>"> 
+                 <input type="hidden" name="id_akun" value="<?php echo $row->kdakun; ?>">
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="center"><?php echo $row->id_kwitansi; ?> </td>   
+                    
+                    <?php if($row->jenis_kwitansi = 1) {
+                    ?>    <td align="center"><?php echo "Belanja Barang"; ?> </td>
+                    <?php }elseif($row->jenis_kwitansi = 2) {
+                    ?>    <td align="center"><?php echo "Belanja Perjalanan Dinas"; ?> </td>
+                    <?php }elseif($row->jenis_kwitansi = 3) {
+                    ?>    <td align="center"><?php echo "Belanja Perjalanan Dinas"; ?> </td>
+                    <?php } ?>
+                    <td align="center"><?php echo $row->tgl_kwitansi; ?> </td>
+                    <td align="center"><?php echo $row->kegiatan;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td align="center"><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+                    <td><?php echo $row->nominal; ?> </td>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+ </table>
+ </div>
+             <footer>         
+                <div class="submit_link"> 
+                <input name="simpan" type='submit' id="simpan" value=' Buatkan SPTB' onclick="return confirm('Apakah Anda Yakin untuk Membuat SPTB ... ?')"> 
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+        </article>

@@ -1,0 +1,95 @@
+<!--==============================-->
+<link rel="stylesheet" type="text/css" href="<?php echo base_url();?>application/views/gup/facebox/facebox.css" />
+<script language="javascript" src="<?php echo base_url();?>asset/js/jquery-1.5.2.min.js"></script>
+<script language="javascript" src="<?php echo base_url();?>application/views/gup/facebox/facebox.js"></script>
+	 
+<script language="javascript">
+ 
+$(document).ready(function() {
+	    $('a[rel*=facebox]').facebox();
+})
+	                                                   
+</script>
+<!--==============================-->
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   }  
+
+	
+?>
+
+<article class="module width_full">
+<header>
+  <h3>Data  Kwitansi (TUP) pada sub unit <?php echo $this->session->userdata('nama_subunit'); ?></h3></header>
+  <div class="module_content">
+  <form method="post" name='formName4' action="<?php echo base_url();?>index.php/gup/kirim_kwitansi" > 
+<table><br></table>
+
+    <table  class="table-common" id="hasil" style="width: 900px;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+            	<th>No Kwitansi</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Status</th>
+                <th colspan="2">Action</th> 
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php 
+             if($jum_kwitansi > 0){
+			 	$i=0;
+			 	foreach($hasil->result() as $row) : $i++;
+                $status=$row->id_status_kwitansi;
+				$jn=$row->jenis_kwitansi;
+				
+				?>
+
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                	<td align="center"><?php echo $row->no_kwitansi; ?></td>
+                    <td align="center"><?php echo $row->jenis_kwitansi; ?> </td>
+                    <td align="center"><?php echo $row->tgl_kwitansi; ?> </td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,30)."...";?> </td>
+                    <td><?php echo $row->nominal; ?> </td>
+                    <td align="center"><?php echo $row->status_kwitansi;  ?></td>
+                    <td align="center" width="30px">
+                    <?php $id= $row->id_kwitansi; $th= $row->th_kwitansi;?>
+                    <a href="<?php echo base_url();?>gup/preview_kwitansi/<?php echo $th;?>/<?php echo $id;?>" title="Show Kuitansi" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                    <td align="center" width="30px">
+                    <?php if($jn=='Belanja Honor')
+					 {?>
+                     <a class="link_history" href="<?php echo site_url();?>gup/view_honor/<?php echo $row->id_kwitansi;?>/<?php echo $th;?>" rel="facebox" title="Show Rincian Honor"><img src="<?php echo base_url(); ?>asset/images/detail.png"/></a>
+					 <?php }
+					 ?>
+                    </td><input name="id_kwitansi" id="id_kwitansi" type="hidden" value="<?php echo  $row->id_kwitansi ;?>" />
+                </tr>
+             <?php endforeach;?>  
+        </tbody>
+ </table>
+ <br />
+ </div>
+ <footer style="width:99.9%">
+   <div class="submit_link">
+     <input type="button" value="Kembali" onclick=self.history.back() > 
+   </div>
+   </footer>
+               <?php }else{ ?>
+                 <tr>
+                 <td align='center' colspan="8" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td></tr>
+                 </tbody>
+ </table>
+ <br />
+ </div>
+ <footer style="width:99.9%">
+   <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+   </div>
+             <?php } ?> 
+   </form>
+</article>

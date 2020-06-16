@@ -1,0 +1,30 @@
+<table  class="table-common" style="margin-left: 20px; margin-right : 20px;" >  
+         <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Uraian</th>
+                <th>Jabatan</th>
+                <th>Tarif Max (Rp)</th>
+                <th>Satuan</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php $i=1;
+         foreach($search->result_array() as $row){  
+                $uraian_detail = $row['uraian_detail'];
+                $jabatan = $row['jabatan'];
+                $tarif=$row['tarif'];
+                $satuan=$row['satuan'];        
+        ?>   
+          <tr>
+            <td align='right'><?php echo $i++;?></td>
+            <td align='left'><?php echo $uraian_detail;?></td>
+            <td align='left'><?php echo $jabatan;?></td>
+            <td align='right'><?php echo $this->uang->angka($tarif);?></td>
+            <td align='left'><?php echo $satuan;?></td>
+          </tr>      
+        <?php }?> 
+        
+        </tbody>
+</table>
+

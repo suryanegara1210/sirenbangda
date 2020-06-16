@@ -1,0 +1,19 @@
+<?php
+    $i=0;
+	if($hasil == false){  
+	    echo "<tr><td colspan='11' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	}else{
+		?>      
+        <?php foreach($hasil->result() as $row) : $i++;?>
+		<tr>
+			<td align="center"><?php echo $i;?></td>
+			<td align="center"><?php echo $row->akun_kode; ?> </td>  
+			<td align="center"><?php echo $row->sifat_bayar; ?> </td>
+			<td align="center"><?php echo $row->no_spm ;?> </td>
+            <td align="center"><?php echo $row->tgl_spm; ?> </td>
+            <td align="center"><?php echo $row->status_spm; ?> </td>      
+            <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>
+            <td align="center"><a href="<?php echo base_url();?>spm/preview_spm/<?php echo $row->id_spm;?>/<?php echo $row->sifat_bayar;?>" title="Show SPM" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>   
+		</tr>                                    
+        <input type="hidden" id="validasi2" value="ada">
+ <?php  endforeach; }?>

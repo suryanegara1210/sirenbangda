@@ -1,0 +1,975 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Renja extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct(){
+		$this->CI =& get_instance(); 
+        parent::__construct();        
+        $this->load->model(array('m_renja_trx', 'm_skpd', 'm_template_cetak', 'm_lov', 'm_urusan', 'm_bidang', 'm_program', 'm_kegiatan'));
+	}
+
+	function index(){
+		$this->renja_skpd();
+	}
+	##
+	## New Generation
+	##
+	## --------------------------------------------- ##
+	## Tambah, Edit, Delete View Renja setiap SKPD ##
+	## --------------------------------------------- ##
+	private function create_renja_skpd($id_skpd, $edit=FALSE){
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+		
+		if ($edit) {			
+			$renja = $this->m_renja_trx->get_one_renja_skpd($id_skpd);
+			if (empty($renja)) {
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data renja tidak ditemukan.');
+				redirect('home');
+			}
+
+			$data['renja'] = $renja;
+			$data['renja_misi'] = $this->m_renja_trx->get_all_renja_misi($renja->id, TRUE);			
+		}
+
+		$this->template->load('template','renja/create', $data);
+	}
+
+	function get_jendela_kontrol(){
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['jendela_kontrol'] = $this->m_renja_trx->count_jendela_kontrol($id_skpd);			
+		$this->load->view('renja/jendela_kontrol', $data);		
+	}
+
+	function renja_skpd(){
+		$this->auth->restrict();
+
+		$id_skpd = $this->session->userdata("id_skpd");
+
+		$renja = $this->m_renja_trx->get_one_renja_skpd($id_skpd, TRUE);
+		//if (!empty($renja)) {
+			$data['renja'] = $renja;
+			$data['renja_misi'] = $this->m_renja_trx->get_all_renja_misi($renja->id, TRUE);
+			$data['renja_tujuan'] = $this->m_renja_trx->get_all_renja_tujuan($renja->id);
+
+			$data['jendela_kontrol'] = $this->m_renja_trx->count_jendela_kontrol($id_skpd);			
+			$this->template->load('template','renja/view', $data);
+		//}else{
+		//	$this->create_renja_skpd($id_skpd);
+		//}		
+	}
+
+	function edit_renja_skpd(){
+		$this->auth->restrict();
+
+		$id_skpd = $this->session->userdata("id_skpd");
+		$this->create_renja_skpd($id_skpd, TRUE);
+	}
+
+	function save_skpd(){		
+		$id = $this->input->post('id_renja');		
+		$id_skpd = $this->session->userdata("id_skpd");
+		
+		$misi = $this->input->post('misi');
+		$tujuan = $this->input->post('tujuan');
+		$id_tujuan = $this->input->post('id_tujuan');
+		
+		$data = $this->input->post();
+		$clean = array('id_renja','misi', 'tujuan', 'id_tujuan');		
+		$data = $this->global_function->clean_array($data, $clean);		
+		
+		$add = array('id_skpd'=> $id_skpd);
+		$data = $this->global_function->add_array($data, $add);		
+
+		if (!empty($id)) {
+			$result = $this->m_renja_trx->edit_renja_skpd($data, $misi, $tujuan, $id_tujuan, $id);
+		}else{
+			$result = $this->m_renja_trx->add_renja_skpd($data, $misi, $tujuan);
+		}
+
+		if ($result) {
+			$this->session->set_userdata('msg_typ','ok');
+			$this->session->set_userdata('msg', 'Renja berhasil dibuat.');
+			redirect('renja/renja_skpd');
+		}else{
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'ERROR! Renja gagal dibuat, mohon menghubungi administrator.');
+			redirect('renja/renja_skpd');
+		}
+	}
+
+	function get_sasaran_skpd(){
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['jendela_kontrol'] = $this->m_renja_trx->count_jendela_kontrol($id_skpd);
+
+		$id_renja = $this->input->post('id_renja');
+		$id_tujuan = $this->input->post('id_tujuan');
+
+		$data['sasaran'] = $this->m_renja_trx->get_all_sasaran($id_renja, $id_tujuan, TRUE);
+		$this->load->view("renja/view_sasaran", $data);
+	}
+
+	function cru_sasaran_skpd(){
+		$id_renja = $this->input->post('id_renja');
+		$id_tujuan = $this->input->post('id_tujuan');
+		$id_sasaran = $this->input->post('id_sasaran');
+
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+
+		$satuan_edit = NULL;
+		if (!empty($id_sasaran)) {			
+			$result = $this->m_renja_trx->get_one_sasaran($id_renja, $id_tujuan, $id_sasaran);			
+			if (empty($result)) {
+				echo '<div style="width: 400px;">ERROR! Data sasaran tidak ditemukan.</div>';
+				return FALSE;
+			}
+			$data['sasaran'] = $result;
+			$satuan_edit = $result->satuan;
+		}
+
+		$data['id_renja'] = $id_renja;
+		$data['tujuan'] = $this->m_renja_trx->get_one_renja_tujuan($id_renja, $id_tujuan);
+		
+		$satuan = array("" => "~~ Pilih Satuan ~~");
+		foreach ($this->m_lov->get_list_lov(1) as $row) {
+			$satuan[$row->kode_value]=$row->nama_value;
+		}		
+		$data['satuan'] = form_dropdown('satuan', $satuan, $satuan_edit, 'class="common" id="satuan"');
+		$this->load->view("renja/cru_sasaran", $data);
+	}
+
+	function save_sasaran(){
+		$id = $this->input->post('id_sasaran');		
+
+		$data = $this->input->post();
+		$clean = array('id_sasaran');		
+		$data = $this->global_function->clean_array($data, $clean);
+
+		if (!empty($id)) {
+			$result = $this->m_renja_trx->edit_sasaran_skpd($data, $id);
+		}else{
+			$result = $this->m_renja_trx->add_sasaran_skpd($data);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Sasaran berhasil dibuat.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Sasaran gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	function delete_sasaran(){
+		$id = $this->input->post('id_sasaran');
+		$result = $this->m_renja_trx->delete_sasaran($id);
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Sasaran berhasil dibuat.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Sasaran gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	function get_program_skpd(){
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['jendela_kontrol'] = $this->m_renja_trx->count_jendela_kontrol($id_skpd);
+
+		$id_renja = $this->input->post('id_renja');		
+		$id_sasaran = $this->input->post('id_sasaran');
+
+		$data['id_renja'] = $id_renja;
+		$data['id_sasaran'] = $id_sasaran;
+		$data['program'] = $this->m_renja_trx->get_all_program($id_renja, $id_sasaran, TRUE);
+		$this->load->view("renja/view_program", $data);
+	}
+
+	function cru_program_skpd(){
+		$id_renja = $this->input->post('id_renja');		
+		$id_sasaran = $this->input->post('id_sasaran');
+		$id_program = $this->input->post('id_program');
+
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+
+		$satuan_edit = NULL;
+		$kd_urusan_edit = NULL;
+		$kd_bidang_edit = NULL;
+		$kd_program_edit = NULL;
+		if (!empty($id_program)) {			
+			$result = $this->m_renja_trx->get_one_program($id_renja, $id_sasaran, $id_program);			
+			if (empty($result)) {
+				echo '<div style="width: 400px;">ERROR! Data sasaran tidak ditemukan.</div>';
+				return FALSE;
+			}
+			$data['program'] = $result;
+			$satuan_edit = $result->satuan_target;
+			$kd_urusan_edit = $result->kd_urusan;
+			$kd_bidang_edit = $result->kd_bidang;
+			$kd_program_edit = $result->kd_program;
+		}
+
+		$data['id_renja'] = $id_renja;
+		$data['id_sasaran'] = $id_sasaran;
+		$data['tujuan_n_sasaran'] = $this->m_renja_trx->get_info_tujuan_n_sasaran_n_program(NULL, $id_sasaran);
+		
+		$satuan = array("" => "~~ Pilih Satuan ~~");
+		foreach ($this->m_lov->get_list_lov(1) as $row) {
+			$satuan[$row->kode_value]=$row->nama_value;
+		}		
+
+		$kd_urusan = array("" => "");
+		foreach ($this->m_urusan->get_urusan() as $row) {
+			$kd_urusan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_bidang = array("" => "");
+		foreach ($this->m_bidang->get_bidang() as $row) {
+			$kd_bidang[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_program = array("" => "");
+		foreach ($this->m_program->get_prog() as $row) {
+			$kd_program[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$data['satuan'] = form_dropdown('satuan_target', $satuan, $satuan_edit, 'class="common" id="satuan_target"');
+		$data['kd_urusan'] = form_dropdown('kd_urusan', $kd_urusan, $kd_urusan_edit, 'data-placeholder="Pilih Urusan" class="common chosen-select" id="kd_urusan"');
+		$data['kd_bidang'] = form_dropdown('kd_bidang', $kd_bidang, $kd_bidang_edit, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+		$data['kd_program'] = form_dropdown('kd_program', $kd_program, $kd_program_edit, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+		$this->load->view("renja/cru_program", $data);
+	}
+
+	function save_program(){		
+		$id = $this->input->post('id_program');		
+
+		$data = $this->input->post();
+		$clean = array('id_program');		
+		$data = $this->global_function->clean_array($data, $clean);
+
+		if (!empty($id)) {
+			$result = $this->m_renja_trx->edit_program_skpd($data, $id);
+		}else{
+			$result = $this->m_renja_trx->add_program_skpd($data);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Program berhasil dibuat.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Program gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+	
+	function delete_program(){
+		$id = $this->input->post('id_program');
+		$result = $this->m_renja_trx->delete_program($id);
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Program berhasil dibuat.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Program gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	function get_kegiatan_skpd(){
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['jendela_kontrol'] = $this->m_renja_trx->count_jendela_kontrol($id_skpd);
+
+		$id_renja = $this->input->post('id_renja');		
+		$id_sasaran = $this->input->post('id_sasaran');
+		$id_program = $this->input->post('id_program');
+
+		$data['id_renja'] = $id_renja;
+		$data['id_sasaran'] = $id_sasaran;
+		$data['id_program'] = $id_program;
+		$data['kegiatan'] = $this->m_renja_trx->get_all_kegiatan($id_renja, $id_sasaran, $id_program, TRUE);
+		$this->load->view("renja/view_kegiatan", $data);
+	}
+
+	function cru_kegiatan_skpd(){
+		$id_renja = $this->input->post('id_renja');		
+		$id_sasaran = $this->input->post('id_sasaran');
+		$id_program = $this->input->post('id_program');
+		$id_kegiatan = $this->input->post('id_kegiatan');
+
+		$id_skpd = $this->session->userdata("id_skpd");
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+
+		$satuan_edit = NULL;		
+		$kd_kegiatan_edit = NULL;
+		$data['revisi_rpjmd'] = NULL;
+		if (!empty($id_kegiatan)) {			
+			$result = $this->m_renja_trx->get_one_kegiatan($id_renja, $id_sasaran, $id_program, $id_kegiatan);			
+			if (empty($result)) {
+				echo '<div style="width: 400px;">ERROR! Data sasaran tidak ditemukan.</div>';
+				return FALSE;
+			}
+			$data['kegiatan'] = $result;
+			$satuan_edit = $result->satuan_target;			
+			$kd_kegiatan_edit = $result->kd_kegiatan;
+
+			//cek jika RPJMD
+			$proses = $this->m_renja_trx->cek_proses($id_renja, $id_skpd);			
+			if (!empty($proses->proses2)) {
+				//RPJMD
+				$revisi_rpjmd = $this->m_renja_trx->revisi_rpjmd($result->parent);
+				$data['revisi_rpjmd'] = $revisi_rpjmd; 
+				$data['nominal_banding'] = $this->m_renja_trx->cek_nominal_banding_dengan_rpjmd($id_kegiatan, $revisi_rpjmd->kd_urusan, $revisi_rpjmd->kd_bidang, $revisi_rpjmd->kd_program);				
+			}
+		}
+
+		$data['id_renja'] = $id_renja;
+		$data['id_sasaran'] = $id_sasaran;
+		$data['id_program'] = $id_program;
+		$tujuan_sasaran_n_program = $this->m_renja_trx->get_info_tujuan_n_sasaran_n_program(NULL, $id_sasaran, $id_program);
+		$data['tujuan_sasaran_n_program'] = $tujuan_sasaran_n_program;
+		
+		$satuan = array("" => "~~ Pilih Satuan ~~");
+		foreach ($this->m_lov->get_list_lov(1) as $row) {
+			$satuan[$row->kode_value]=$row->nama_value;
+		}		
+	
+		$kd_kegiatan = array("" => "");
+		foreach ($this->m_kegiatan->get_keg($tujuan_sasaran_n_program->kd_urusan, $tujuan_sasaran_n_program->kd_bidang, $tujuan_sasaran_n_program->kd_program) as $row) {
+			$kd_kegiatan[$row->id] = $row->id .". ". $row->nama;
+		}
+		
+		$data['satuan'] = form_dropdown('satuan_target', $satuan, $satuan_edit, 'class="common" id="satuan_target"');		
+		$data['kd_kegiatan'] = form_dropdown('kd_kegiatan', $kd_kegiatan, $kd_kegiatan_edit, 'data-placeholder="Pilih Kegiatan" class="common chosen-select" id="kd_kegiatan"');
+		$this->load->view("renja/cru_kegiatan", $data);
+	}
+
+	function save_kegiatan(){
+		$id = $this->input->post('id_kegiatan');		
+
+		$data = $this->input->post();
+		$clean = array('id_kegiatan');
+		$data = $this->global_function->clean_array($data, $clean);
+		$change = array('id_program'=>'parent');
+		$data = $this->global_function->change_array($data, $change);
+
+		if (!empty($id)) {
+			$result = $this->m_renja_trx->edit_kegiatan_skpd($data, $id);
+		}else{
+			$result = $this->m_renja_trx->add_kegiatan_skpd($data);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kegiatan berhasil dibuat.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kegiatan gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	function delete_kegiatan(){
+		$id = $this->input->post('id_kegiatan');
+		$result = $this->m_renja_trx->delete_kegiatan($id);
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kegiatan berhasil dibuat.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kegiatan gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	function preview_kegiatan_renja(){		
+		$id = $this->input->post("id");
+
+		$result = $this->m_renja_trx->get_one_kegiatan(NULL, NULL, NULL, $id, TRUE);
+		if (!empty($result)) {
+			$data['renja'] = $result;
+			$this->load->view('renja/preview', $data);	
+		}		
+	}
+
+	function kirim_renja(){
+		$data['skpd'] = $this->session->userdata("id_skpd");
+		$this->load->view('renja/kirim_renja', $data);
+	}
+
+	function do_kirim_renja(){
+		$id = $this->input->post('skpd');
+		$result = $this->m_renja_trx->kirim_renja($id);		
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'renja berhasil dikirim.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Renja gagal dikirim, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	## --------------------------------------- ##
+	## Verifikasi renja yang telah di kirim  ##
+	## --------------------------------------- ##
+	function veri_view(){
+		$this->auth->restrict();
+
+		$data['renjas'] = $this->m_renja_trx->get_all_renja_veri();
+		$this->template->load('template','renja/verifikasi/view_all', $data);
+	}
+
+	function veri($id_skpd){
+		$this->auth->restrict();
+
+		$skpd_visi = $this->m_renja_trx->get_one_renja_skpd($id_skpd, TRUE);
+		$data1['skpd_visi'] = $skpd_visi;
+		$data1['misi'] = $this->m_renja_trx->get_all_renja_misi($skpd_visi->id, FALSE);
+		$data1['tujuan'] = $this->m_renja_trx->get_all_renja_tujuan($skpd_visi->id, FALSE);		
+		
+		$data3['sasaran'] = $this->m_renja_trx->get_all_sasaran($skpd_visi->id, NULL, TRUE);		
+		$data1['sasaran'] = "<table class=\"table-common\">".$this->load->view('renja/cetak/header_sasaran', $data3, TRUE)."</table>";
+
+		$data['header'] = $this->load->view('renja/cetak/header', $data1, TRUE);
+
+
+		$data2['program'] = $this->m_renja_trx->get_program_skpd_4_cetak($id_skpd);
+		$data['renja'] = $this->load->view('renja/cetak/program_kegiatan', $data2, TRUE);
+		$data['skpd_visi'] = $skpd_visi;
+		$this->template->load('template','renja/verifikasi/view', $data);
+	}
+
+	function save_veri(){
+		$id = $this->input->post("id");
+		$veri = $this->input->post("veri");
+		$ket = $this->input->post("ket");
+
+		if ($veri == "setuju") {
+			$result = $this->m_renja_trx->approved_renja($id);
+		}elseif ($veri == "tdk_setuju") {
+			$result = $this->m_renja_trx->not_approved_renja($id, $ket);
+		}
+
+		if ($result) {
+			$this->session->set_userdata('msg_typ','ok');
+			$this->session->set_userdata('msg', 'renja berhasil diverifikasi.');
+			redirect('renja/veri_view');
+		}else{
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'ERROR! renja gagal diverifikasi, mohon menghubungi administrator.');
+			redirect('renja/veri_view');
+		}
+
+	}
+
+	function preview_revisi(){
+		$id = $this->input->post("id_renja");
+		$revisi = $this->input->post("id_revisi");
+
+		if ($revisi == "revisi_ranwal") {
+			$data['revisi'] = $this->m_renja_trx->get_revisi_renja_ranwal($id);			
+			$this->load->view('renja/revisi_ranwal', $data);
+		}elseif ($revisi == "revisi_akhir") {
+			$data['revisi'] = $this->m_renja_trx->get_revisi_renja_akhir($id);			
+			$this->load->view('renja/revisi_renja_akhir', $data);
+		}
+	}
+
+	## --------------------------------------------- ##
+	## Verifikasi renja Akhir yang telah di kirim  ##
+	## --------------------------------------------- ##
+	function veri_view_akhir_all(){
+		$this->auth->restrict();
+
+		$data['bidang_urusan'] = $this->m_renja_trx->get_all_renja_veri_akhir();
+		$this->template->load('template','renja/verifikasi_akhir/view_all', $data);
+	}
+
+	function veri_view_akhir($urusan, $bidang){
+		$this->auth->restrict();
+
+		$data['bidang_urusan'] = $this->m_renja_trx->get_bidang_urusan_4_cetak_final($urusan, $bidang);		
+		$this->template->load('template','renja/verifikasi_akhir/view_veri_all', $data);
+	}
+
+	function veri_view_tdk_setuju(){
+		$id = $this->input->post("id");
+		$result = $this->m_renja_trx->get_one_bidang_urusan_skpd_program_final($id);		
+		$data['renja'] = $result;
+		$this->load->view('renja/verifikasi_akhir/veri', $data);
+	}
+
+	function save_veri_akhir(){
+		$id = $this->input->post("id");
+		$veri = $this->input->post("veri");
+
+		$data = $this->input->post();		
+		$clean = array('veri');
+		$data = $this->global_function->clean_array($data, $clean);
+		$change = array('id'=>'id_prog_keg');
+		$data = $this->global_function->change_array($data, $change);
+
+		if ($veri == "setuju") {
+			$result = $this->m_renja_trx->approved_veri_akhir_renja($id);
+		}elseif ($veri == "tdk_setuju") {			
+			$result = $this->m_renja_trx->not_approved_veri_akhir_renja($id, $data);
+		}
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Renja berhasil diverifikasi.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Renja gagal diverifikasi, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+
+	private function cetak_skpd_func($id_skpd){
+		$proses = $this->m_renja_trx->count_jendela_kontrol($id_skpd);
+		if (!empty($proses->veri2)) {
+			$data['renja_type'] = "Renja Akhir";
+		}else{
+			$data['renja_type'] = "Renja Rancangan Awal";
+		}
+
+		$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+		$header = $this->m_template_cetak->get_value("GAMBAR");		
+		$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+		$data['header'] = $this->m_template_cetak->get_value("HEADER");
+		
+		$skpd_visi = $this->m_renja_trx->get_one_renja_skpd($id_skpd, TRUE);
+		$data1['skpd_visi'] = $skpd_visi;
+		$data1['misi'] = $this->m_renja_trx->get_all_renja_misi($skpd_visi->id, FALSE);
+		$data1['tujuan'] = $this->m_renja_trx->get_all_renja_tujuan($skpd_visi->id, FALSE);		
+		
+		$data3['sasaran'] = $this->m_renja_trx->get_all_sasaran($skpd_visi->id, NULL, TRUE);		
+		$data1['sasaran'] = "<table class=\"full_width border\" style=\"font-size: 12px;\">".$this->load->view('renja/cetak/header_sasaran', $data3, TRUE)."</table>";
+
+		$data['header_renja'] = $this->load->view('renja/cetak/header', $data1, TRUE);
+
+
+		$data2['program'] = $this->m_renja_trx->get_program_skpd_4_cetak($id_skpd);
+		$data['renja'] = $this->load->view('renja/cetak/program_kegiatan', $data2, TRUE);
+		return $data;
+	}
+
+	function do_cetak_renja($id_skpd=NULL){
+		$this->auth->restrict();
+		if (empty($id_skpd)) {
+			$id_skpd = $this->session->userdata('id_skpd');
+		}
+				
+		if ($id_skpd == "all") {
+			$all_skpd = $this->m_renja_trx->get_all_skpd();
+			$html="";
+			foreach ($all_skpd as $row) {
+				$data = $this->cetak_skpd_func($row->id_skpd);	
+				$html .= '<div style="page-break-after: always;">'.$this->load->view('renja/cetak/cetak', $data, true).'</div>';
+			}
+			$data['contents'] = $html;
+			$html = $this->load->view('template_cetak', $data, true);
+
+			$filename='renja '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s") .'.pdf';        
+		    pdf_create($html, $filename, "A4", "Landscape");
+		}else{
+			$data = $this->cetak_skpd_func($id_skpd);
+			$html = $this->template->load('template_cetak', 'renja/cetak/cetak', $data, true);
+				
+	        $filename='renja '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s") .'.pdf';        
+		    pdf_create($html, $filename, "A4", "Landscape");
+		}
+
+		
+	}
+
+	function cetak_renja_skpd_all($id_skpd="all"){
+		$this->auth->restrict();
+		
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL, TRUE);
+		$data['dd_skpd'] = form_dropdown('ss_skpd', $all_skpd, $id_skpd, 'id="ss_skpd"');
+		$data['id'] = $id_skpd;
+
+		$data['total_nominal_renja'] = $this->m_renja_trx->get_total_nominal_renja($id_skpd);
+		$this->template->load('template','renja/cetak/view', $data);
+	}
+
+	#########################################################################################################################################
+
+	## --------------------------------------------- ##
+	## Tambah, Edit, Delete View Renja 				 ##
+	## --------------------------------------------- ##
+	function view(){
+		$this->auth->restrict();				
+    	$this->template->load('template','renja/view');
+	}	
+
+	function get_data(){
+		$search = $this->input->post("search");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+		$order = $this->input->post("order");
+		$id_skpd = $this->session->userdata("id_skpd");
+
+		$order_arr = array('id','', 'tujuan','sasaran','indikator_sasaran', '','nm_urusan','nm_bidang','ket_program','ket_kegiatan', 'status_renja');
+		$renja = $this->m_renja_trx->get_all_renja($search, $start, $length, $order["0"], $id_skpd, $order_arr);			
+		$alldata = $this->m_renja_trx->count_all_renja($search, $id_skpd);		
+		
+		$data = array();
+		$no=0;
+		
+		foreach ($renja as $row) {
+			$no++;
+			$preview_action = '<a href="javascript:void(0)" onclick="preview_modal('. $row->id .')" class="icon-search" title="Lihat Renja"/>';
+			$edit_action = '<a href="javascript:void(0)" onclick="edit_renja('. $row->id .')" class="icon2-page_white_edit" title="Edit Renja"/>';
+			$delete_action = '<a href="javascript:void(0)" onclick="delete_renja('. $row->id .')" class="icon2-delete" title="Hapus Renja"/>';
+			$history_action = '<a href="javascript:void(0)" onclick="preview_history('. $row->id .')" title="Preview History">'. $row->status_renja .'</a>';
+
+			if ($row->id_status == 1 || $row->id_status == 3) {
+				//Baru dan Revisi			
+				$action = 	$preview_action.
+							$edit_action.
+							$delete_action;
+			}else{
+				$action = $preview_action;
+			}
+
+			$data[] = array(
+							$no, 
+							$action, 
+							$row->tujuan,
+							$row->sasaran,
+							$row->indikator_sasaran,
+							$row->kd_urusan.". ".$row->kd_bidang.". ".$row->kd_program.". ".$row->kd_kegiatan,
+							$row->nm_urusan,
+							$row->nm_bidang,
+							$row->ket_program,
+							$row->ket_kegiatan,
+							$history_action
+							);
+		}
+		$json = array("recordsTotal"=> $alldata, "recordsFiltered"=> $alldata, 'data' => $data);
+		echo json_encode($json);
+	}
+
+	function cru($id_renja=NULL){
+		$this->auth->restrict();
+
+		$id_skpd = array('id_skpd' => $this->session->userdata('id_skpd'));
+		$skpd = $this->m_skpd->get_skpd_detail($id_skpd);
+		$data['skpd'] = $skpd->row();
+
+		if (!empty($id_renja)) {
+			$id_skpd = $this->session->userdata('id_skpd');
+			$result = $this->m_renja_trx->get_one_renja($id_renja, $id_skpd);
+			if (empty($result)) {
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data Renja tidak ditemukan.');
+				redirect('renja/view');
+			}
+			$data['renja'] = $result;
+		}
+
+    	$this->template->load('template','renja/create', $data);
+	}
+
+	function delete(){
+		$this->auth->restrict_ajax_login();
+
+		$id = $this->input->post("id");
+		$id_skpd = $this->session->userdata('id_skpd');
+		$result = $this->m_renja_trx->delete($id, $id_skpd);		
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Data Renja berhasil dihapus.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'FAILED! Data Renja gagal dihapus, terjadi kesalahan pada sistem.');
+			echo json_encode($msg);
+		}
+	}
+	
+	function save(){
+		$id_skpd = array('id_skpd' => $this->session->userdata('id_skpd'));
+		$skpd = $this->m_skpd->get_skpd_detail($id_skpd);
+		$skpd = $skpd->row();
+
+		$id = $this->input->post('id_renja');		
+
+		$data = $this->input->post();
+		$change = array('Kd_Urusan_autocomplete'=>'nm_urusan', 'Kd_Bidang_autocomplete'=>'nm_bidang', 'Kd_Prog_autocomplete'=>'ket_program', 'Kd_Keg_autocomplete'=>'ket_kegiatan');
+		$add = array('id_skpd'=> $skpd->id_skpd, 'id_bidkoor' => $skpd->id_bidkoor);
+		$clean = array('id_renja');
+		$data = $this->global_function->change_array($data, $change);
+		$data = $this->global_function->add_array($data, $add);		
+		$data = $this->global_function->clean_array($data, $clean);		
+
+		if (!empty($id)) {
+			$result = $this->m_renja_trx->edit($data, $id);				
+		}else{
+			$result = $this->m_renja_trx->add($data);				
+		}
+		
+		if ($result) {
+			$this->session->set_userdata('msg_typ','ok');
+			$this->session->set_userdata('msg', 'renja berhasil disimpan.');
+			redirect('renja/view');
+		}else{
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'ERROR! renja gagal disimpan, mohon menghubungi administrator.');
+			redirect('renja/view');
+		}
+	}
+
+	function preview_modal(){		
+		$id_renja = $this->input->post("id");
+
+		$result = $this->m_renja_trx->get_one_renja_detail($id_renja);
+		if (!empty($result)) {
+			$data['renja'] = $result;
+			$this->load->view('renja/preview', $data);	
+		}		
+	}
+
+	function preview_history(){
+		$id_renja = $this->input->post("id");		
+		$result = $this->m_renja_trx->get_all_histories_renja($id_renja);
+		if (!empty($result)) {
+			$data['renja'] = $result;
+			$this->load->view('renja/preview_history', $data);
+		}			
+	}
+
+	## -------------------------------------- ##
+	## Pengiriman renja untuk Di Verifikasi ##
+	## -------------------------------------- ##
+	function send(){
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+		$data['json_id'] = $this->m_renja_trx->get_all_id_renja_veri_or_approved_to_json($id_skpd);
+		$this->template->load('template','renja/send/send', $data);
+	}
+
+	function get_data_send(){
+		$id = $this->input->post("id");
+
+		$id_skpd = array('id_skpd' => $this->session->userdata('id_skpd'));
+		$skpd = $this->m_skpd->get_skpd_detail($id_skpd);
+		$data['skpd'] = $skpd->row();
+		
+		$renja = $this->m_renja_trx->get_all_renja_by_in($id, TRUE);
+		$data['jml_data'] = $renja->num_rows();
+		$data['renja'] = $renja->result();
+		$data['total_nominal_renja'] = $this->m_renja_trx->get_total_nominal_renja_by_in($id);		
+		$this->load->view('renja/send/view', $data);
+	}
+
+	function pilih_renja(){
+		$this->load->view('renja/send/pilih');
+	}
+
+	function get_data_pilih_renja(){
+		$search = $this->input->post("search");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+		$order = $this->input->post("order");
+		$renjas = $this->input->post("renjas");		
+
+		$id_skpd = $this->session->userdata("id_skpd");		
+
+		$order_arr = array('id','tujuan','sasaran','indikator_sasaran', '','nm_urusan','nm_bidang','ket_program','ket_kegiatan', 'status_renja');
+		$renja = $this->m_renja_trx->get_all_renja($search, $start, $length, $order["0"], $id_skpd, $order_arr, "BARU");
+		$alldata = $this->m_renja_trx->count_all_renja($search, $id_skpd, "BARU");		
+		
+		$data = array();
+		$no=0;
+		foreach ($renja as $row) {			
+			$no++;
+			$checked = (!empty($renjas) && in_array($row->id, $renjas))?"checked":"";
+			$data[] = array(
+							$no, 
+							$row->tujuan,
+							$row->sasaran,
+							$row->indikator_sasaran,
+							$row->kd_urusan.". ".$row->kd_bidang.". ".$row->kd_program.". ".$row->kd_kegiatan,
+							$row->nm_urusan,
+							$row->nm_bidang,
+							$row->ket_program,
+							$row->ket_kegiatan,
+							$row->status_renja,
+							'<input type="checkbox" class="pilih_renja" title="Pilih Renja" value="'. $row->id .'" '. $checked .'/>'
+							);
+		}
+		$json = array("recordsTotal"=> $alldata, "recordsFiltered"=> $alldata, 'data' => $data);
+		echo json_encode($json);
+	}
+
+	function save_sended_renja(){
+		$id = $this->input->post("id");
+		$id_skpd = $this->session->userdata("id_skpd");
+		$result = $this->m_renja_trx->send_renja($id, $id_skpd);
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Data renja berhasil dikirim.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'FAILED! Data renja gagal dikirm, terjadi kesalahan pada sistem.');
+			echo json_encode($msg);
+		}
+	}
+
+	function delete_sended_renja(){
+		$id = $this->input->post("id");
+		$id_skpd = $this->session->userdata("id_skpd");
+		$result = $this->m_renja_trx->delete_sended_renja($id, $id_skpd);
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Data renja berhasil dihapus.');
+			echo json_encode($msg);
+		}else{
+			$msg = array('success' => '0', 'msg' => 'FAILED! Data renja gagal dihapus, terjadi kesalahan pada sistem.');
+			echo json_encode($msg);
+		}	
+	}
+
+	private function cetak_func($data=NULL, $id_skpd=NULL, $page=1, $site_url=NULL, $search_skpd=FALSE){		
+		$data_per_page = 25;
+		$total = $this->m_renja_trx->count_all_renja(NULL, $id_skpd, "APPROVED");
+		$total_page = round(($total/$data_per_page), 0, PHP_ROUND_HALF_UP);
+		
+		if ($page > $total_page || $page < 1) {
+			$page = 1;
+		}
+
+		$start = $page-1;		
+
+		$data['first_page'] = 1;
+		$data['page'] = $page;
+		$data['last_page'] = $total_page;
+		$data['site_url'] = $site_url;
+		$data['search_skpd'] = $search_skpd;
+		$data['renja'] = $this->m_renja_trx->get_all_renja(NULL, $start, $data_per_page, NULL, $id_skpd, NULL, "APPROVED", TRUE);		
+		$data['total_nominal_renja'] = $this->m_renja_trx->get_total_nominal_renja($id_skpd, "APPROVED");
+		$this->template->load('template','renja/cetak/view', $data);
+	}
+
+	function cetak_renja($page=1){
+		$this->auth->restrict();
+
+		$id_skpd = array('id_skpd' => $this->session->userdata('id_skpd'));
+		$skpd = $this->m_skpd->get_skpd_detail($id_skpd);
+		$data['skpd'] = $skpd->row();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$this->cetak_func($data, $id_skpd, $page, "renja/cetak_renja");
+	}
+
+	function cetak_renja_all($page=1, $id_skpd="all"){
+		$this->auth->restrict();
+		
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL, TRUE);
+		$data['dd_skpd'] = form_dropdown('ss_skpd', $all_skpd, $id_skpd, 'id="ss_skpd"');
+		$data['id'] = $id_skpd;
+
+		$this->cetak_func($data, $id_skpd, $page, "renja/cetak_renja_all", TRUE);
+	}
+
+	function do_cetak($id_skpd=NULL){
+		$this->auth->restrict();
+		if (empty($id_skpd)) {
+			$id_skpd = $this->session->userdata('id_skpd');
+		}
+
+		$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+		$header = $this->m_template_cetak->get_value("GAMBAR");		
+		$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+		$data['header'] = $this->m_template_cetak->get_value("HEADER");
+
+		$data['renja'] = $this->m_renja_trx->get_all_renja(NULL, NULL, NULL, NULL, $id_skpd, NULL, "APPROVED", TRUE);
+		$html = $this->template->load('template_cetak', 'renja/cetak/cetak', $data, true);
+        $filename='renja '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s") .'.pdf';        
+	    pdf_create($html, $filename, "A4", "Landscape");
+	}
+
+	## --------------------------------------- ##
+	## Verifikasi renja yang telah di kirim  ##
+	## --------------------------------------- ##
+	/*function veri_view(){
+		$this->auth->restrict();
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL, TRUE);
+		$data['dd_skpd'] = form_dropdown('ss_skpd', $all_skpd, NULL, 'id="ss_skpd"');
+		$this->template->load('template','renja/verifikasi/view', $data);
+	}
+
+	function get_veri_data(){
+		$search = $this->input->post("search");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+		$order = $this->input->post("order");
+		$id_skpd = $this->input->post("ss_skpd");
+
+		$order_arr = array('id','','nama_skpd','nama_koor','tujuan','sasaran','indikator_sasaran', '','nm_urusan','nm_bidang','ket_program','ket_kegiatan');
+		$renja = $this->m_renja_trx->get_all_renja($search, $start, $length, $order["0"], $id_skpd, $order_arr, "VERIFIKASI", TRUE);		
+		$alldata = $this->m_renja_trx->count_all_renja($search, $start, $length, $order["0"], $id_skpd, "VERIFIKASI");
+		
+		$data = array();
+		$no=0;
+		foreach ($renja as $row) {
+			$no++;
+			$preview_action = '<a href="javascript:void(0)" onclick="preview_modal('. $row->id .')" class="icon-search" title="Lihat renja"/>';
+			$veri_action = '<a href="javascript:void(0)" onclick="veri_renja('. $row->id .')" class="icon-edit" title="Verifikasi renja"/>';
+			$history_action = '<a href="javascript:void(0)" onclick="preview_history('. $row->id .')" title="Preview History">'. $row->status_renja .'</a>';
+
+			$data[] = array(
+							$no, 
+							$preview_action.$veri_action,
+							$row->nama_skpd,
+							$row->nama_koor,
+							$row->tujuan,
+							$row->sasaran,
+							$row->indikator_sasaran,
+							$row->kd_urusan.". ".$row->kd_bidang.". ".$row->kd_program.". ".$row->kd_kegiatan,
+							$row->nm_urusan,
+							$row->nm_bidang,
+							$row->ket_program,
+							$row->ket_kegiatan,
+							$history_action
+							);
+		}
+		$json = array("recordsTotal"=> $alldata, "recordsFiltered"=> $alldata, 'data' => $data);
+		echo json_encode($json);
+	}
+
+	function veri($id_renja=NULL){
+		$this->auth->restrict();
+
+		$result = $this->m_renja_trx->get_one_renja_detail($id_renja, "VERIFIKASI");
+		if (empty($result)) {
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'Data renja tidak ditemukan.');
+			redirect('renja/home');
+		}
+		$data['renja'] = $result;	
+		$this->template->load('template','renja/verifikasi/veri', $data);
+	}
+
+	function save_veri(){
+		$id = $this->input->post("id");
+		$veri = $this->input->post("veri");
+		$ket = $this->input->post("ket");
+
+		if ($veri == "setuju") {
+			$result = $this->m_renja_trx->approved_renja($id);
+		}elseif ($veri == "tdk_setuju") {
+			$result = $this->m_renja_trx->not_approved_renja($id, $ket);
+		}
+
+		if ($result) {
+			$this->session->set_userdata('msg_typ','ok');
+			$this->session->set_userdata('msg', 'renja berhasil diverifikasi.');
+			redirect('renja/veri_view');
+		}else{
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'ERROR! renja gagal diverifikasi, mohon menghubungi administrator.');
+			redirect('renja/veri_view');
+		}
+
+	}*/
+}

@@ -1,0 +1,191 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class berkaitan pembuatan surat setor penerimaan 
+ * 
+ * Controller Class berkaitan pembuatan surat setor untuk masing masing jenis
+ * penerimaan (Layanan Pendidikan Lain, Layanan Masyarakat, Hibah, Penyewaan Aset)
+ * 
+ * @author Putu Praba Santika
+ */
+
+class Surat_setor extends CI_Controller {
+    
+    public function __construct(){
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->model(array('m_umum','m_lov','m_pen_lain','m_surat_setor', 'm_settings'));
+    }
+    
+    function index(){
+        redirect(base_url());
+    }
+    
+    /**
+    * Auto complete kode akun
+    */
+    function cariAkun(){
+		// process posted form data
+        $keyword = $this->input->post('term');
+        
+        $data['response'] = 'false'; //Set default response
+        $akun = $this->m_umum->cariAkun($keyword); //Search DB
+		//echo $this->db->last_query();
+        if( ! empty($akun) ){
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $akun as $row ){
+                $data['message'][] = array( 
+                        'id'=>$row->akun_kode,
+                        'label'=>$row->akun_kode.". ".$row->akun_nama,
+                        'value'=>$row->akun_kode,
+                        'desc'=>$row->akun_kode.". ".$row->akun_nama,
+                        'saldoNormal'=>$row->saldo_normal
+                );  //Add a row to array
+            }
+        }
+        
+        echo json_encode($data); //echo json string
+	}
+    
+    /**
+     * Menampilkan form input surat setor
+     */
+    function input(){
+        $tipe_ss=$this->uri->segment(3);
+        $jenis_mou=$this->uri->segment(4);
+        $id=$this->uri->segment(5);
+        //case per jenis mou, panggil detail masing2
+        switch ($jenis_mou){
+            case constant::MOU_LADIK:
+                break;
+            case constant::MOU_LADIK_LAIN:
+            case constant::MOU_HIBAH_TERENCANA:
+            case constant::MOU_PPPMAS:
+            case constant::MOU_HIBAH_TAKTER:
+            case constant::MOU_UNIT_USAHA:
+            case constant::MOU_ASET:
+            case constant::MOU_ASET_RUTIN:
+            case constant::MOU_INVESTASI:
+            case constant::MOU_JASA_GIRO:
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$id);
+                break;
+            default:
+                $data['isNoRef']=true;
+                break;
+        }
+        $data['tipe_ss']=$tipe_ss;
+        $data['jenis_mou']=$jenis_mou;
+        $this->template->load('template','surat_setor/input',$data);
+    }
+    
+    function edit(){
+        $id=$this->uri->segment(3);
+        $data['isi_ss']=$this->m_surat_setor->detail($id);
+        //case per jenis mou, panggil detail masing2
+        $jenis_mou=$data['isi_ss']->jenis_ref;
+        switch ($jenis_mou){
+            case constant::MOU_LADIK:
+                break;
+            case constant::MOU_LADIK_LAIN:
+            case constant::MOU_HIBAH_TERENCANA:
+            case constant::MOU_PPPMAS:
+            case constant::MOU_HIBAH_TAKTER:
+            case constant::MOU_UNIT_USAHA:
+            case constant::MOU_ASET:
+            case constant::MOU_ASET_RUTIN:
+            case constant::MOU_INVESTASI:
+            case constant::MOU_JASA_GIRO:
+                $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis_mou,$data['isi_ss']->id_ref);
+                break;
+            default:
+                $data['isNoRef']=true;
+                break;
+        }
+        $data['tipe_ss']=$data['isi_ss']->tipe_ss;
+        $data['isEdit']=true;
+        $data['jenis_mou']=$data['isi_ss']->jenis_ref;
+        $this->template->load('template','surat_setor/input',$data);
+    }
+    
+    /**
+     * Menyimpan surat setor
+     */
+    function simpan(){
+        $objek = new stdClass();
+        $objek->tgl_setor=$this->input->post('tgl_setor');
+        $objek->id_ref=$this->input->post('id_mou');
+        $objek->jenis_ref=$this->input->post('jenis_mou');
+        $objek->nomor_rekening=$this->input->post('nomor_rekening');
+        $objek->nomor_kontrak=$this->input->post('nomor_kontrak');
+        $objek->npwp=$this->input->post('npwp');
+        $objek->nama=$this->input->post('nama');
+        $objek->alamat=$this->input->post('alamat');
+        $objek->kementrian='023';
+        $objek->eselon1='004';
+        $objek->satuan_kerja='415253';
+        $objek->fungsi='10';
+        $objek->subfungsi='06';
+        $objek->program='0601';
+        $objek->kegiatan='0001';
+        $objek->subkegiatan='0001';
+        $objek->lokasi='2207';
+        $objek->akun=$this->input->post('akun');
+        $objek->keperluan=$this->input->post('keperluan');
+        $objek->jumlah_setor=$this->input->post('jumlah_setor');
+        
+        $objek->tipe_ss=$this->input->post('tipe_ss');
+        switch($objek->tipe_ss){
+            case constant::SS_SSBP:
+                $objek->spn_nomor=$this->input->post('no_spn');
+                $objek->spn_tgl=$this->input->post('tgl_spn');
+                $objek->kppn=$this->input->post('kppn');
+                break;
+            case constant::SS_SSPB:
+                $objek->dipa_tgl=$this->input->post('tgl_dipa');
+                $objek->dipa_nomor=$this->input->post('no_dipa');
+                $objek->sp2d_tgl=$this->input->post('tgl_sp2d');
+                $objek->sp2d_nomor=$this->input->post('no_sp2d');
+                break;
+        }
+        
+        $id_edit=$this->input->post('id_setor');
+        $hasil=$this->m_surat_setor->simpan($objek,$id_edit);
+        if($hasil===false){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL menyimpan Surat Setor.');
+            redirect('surat_setor/input/'.$objek->jenis_ref."/".$objek->id_ref);
+        }else{
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil menyimpan Surat Setor.');
+            redirect('surat_setor/detail/'.$hasil);
+        }
+    }
+    /**
+     * Menampilkan semua surat setor
+     */
+    function semua(){
+        $data['surat_setor']=$this->m_surat_setor->semua();
+       // $data['jenis_mou']=$jenis_mou;
+        $this->template->load('template','surat_setor/daftar',$data);
+    }
+    /**
+     * Menampilkan detail surat setor
+     */
+    function detail($id,$cetak=''){
+        $data['isi_ss']=$this->m_surat_setor->detail($id);
+        
+        $data['tantang'][1]['ket']="Disetujui Oleh";
+        $data['tantang'][1]['nama']=$this->m_settings->getSettingVal('BEN_PENERIMA_NAMA');
+        $data['tantang'][1]['nip']=$this->m_settings->getSettingVal('BEN_PENERIMA_NIP');
+        
+        if($cetak==='cetak'){
+            //TODO: batasin dokumen yang boleh dicetak hanya yg uda beres
+            $sekarang=date("Y-m-d_H-i");
+            $filename='suratsetor_'.$id.'_'.$sekarang.'.pdf';
+            $output = $this->load->view('surat_setor/isi', $data,  true); 
+            generate_pdf_A4($output,$filename);
+        }else{
+            $this->template->load('template','surat_setor/detail',$data);
+        }
+    }
+}

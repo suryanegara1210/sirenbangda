@@ -1,0 +1,218 @@
+<?php if(in_array($id_status_usulan, array(Constant::USULANITM_BARU, Constant::USULANITM_REVISI))) {?>
+		<input type="button" id="add_uraian" value="Tambah Uraian" style="float: right;
+		position: relative; top: 10px; margin-right: 10px">
+<?php }?>
+		<center><h2>Daftar Usulan</h2></center>
+		<table  id="list_usulan" class="table-common" style="margin-left: 10px; width: 98%;" >
+		   <thead>
+			 <tr>
+				<th width="100px" align="center">Kode</th>
+				<th width="*" align="left">Kegiatan Output / Komponen / Akun / Header</th>
+				<th width="70px" align="center">Action</th>
+				<th width="100px" align="center">Biaya Total</th>
+			 </tr>
+		   </thead>
+			<?php
+			if($list_usulan === FALSE ){ ?>
+			 <tr>
+				<td style='height:50px; padding-top: 15px; text-align:center; font-size:12px;' colspan='4'>
+				   <strong>Belum Ada Data</strong>
+				</td>
+			 </tr>
+			<?php
+			} else {
+				$no=1;
+				$jumlah_total=0;
+				$arr_kdoutput=array();
+				$arr_kdkomponen=array();
+				$arr_kdakun=array();
+				foreach($list_usulan as $row) {
+					$kdoutput 	= $row->kdgiat.$row->kdoutput;
+					$kdkomponen	= $row->kdgiat.$row->kdoutput.$row->kdkomponen;
+					$kdakun		= $row->kdgiat.$row->kdoutput.$row->kdkomponen.$row->kdakun;
+					$code_item	= "$row->kdgiat|$row->kdoutput|$row->kdkomponen|$row->kdakun|$row->hdr";
+
+					if (!in_array($kdoutput, $arr_kdoutput)){
+						//pemisah antar output
+						if($no > 1){
+							echo '
+							<tr><td colspan="4">&nbsp;</td></tr>';
+						}
+
+						echo '
+						<tr style="background:#CCCCCC">
+							<td valign="top">'.$row->kdgiat.'.'.$row->kdoutput.'</td>
+							<td valign="top" colspan="3">'.$row->nmoutput.'</td>
+						</tr>';
+
+						array_push($arr_kdoutput, $kdoutput);
+					}
+
+					if (!in_array($kdkomponen, $arr_kdkomponen) ||
+						!in_array($kdoutput, $arr_kdoutput)){
+						echo '
+						<tr style="background:#EEEEEE">
+							<td valign="top">'.str_repeat('&nbsp;', 15).$row->kdkomponen.'</td>
+							<td valign="top" colspan="3">'.$row->nmkomponen.'</td>
+						</tr>';
+
+						array_push($arr_kdkomponen, $kdkomponen);
+					}
+
+					if (!in_array($kdakun, $arr_kdakun) ||
+						!in_array($kdkomponen, $arr_kdkomponen) ||
+						!in_array($kdoutput, $arr_kdoutput)){
+
+						echo '
+						<tr style="background:#EEEEEE">
+							<td valign="top">'.str_repeat('&nbsp;', 20).$row->kdakun.'</td>
+							<td valign="top" colspan="3">'.$row->nmakun.'</td>
+						</tr>';
+
+						array_push($arr_kdakun, $kdakun);
+					}
+
+					echo '
+					<tr class="master">
+						<td valign="top">&nbsp;</td>
+						<td valign="top"><a style="cursor: pointer; color: blue" class="accordion">'.$row->hdr.'</a>
+							<span style="float:right">'.$row->status_usulan_item.'</span></td>
+						<td valign="top" align="center">
+							<img class="btn_detail" style="cursor: pointer"
+							src="'.base_url().'asset/images/detail2.png" border="0" title="uraian">&nbsp;
+							';
+
+					//tampilkan tombol aksi jika status 1=BARU dan 3=REVISI, 4=SDH REVISI
+					if(in_array($row->id_status_usulan_item , 
+													array(Constant::USULANITM_BARU, 
+														Constant::USULANITM_REVISI, 
+														Constant::USULANITM_SDHREVISI))){
+						  echo '
+							 <img class="btn_edit" id="'.$code_item.'" style="cursor: pointer"
+							 src="'.base_url().'asset/images/edit.gif" border="0" title="edit">&nbsp;
+
+							 <img class="btn_delete" id="'.$row->id_usulan_item.'" style="cursor: pointer"
+							 src="'.base_url().'asset/images/delete.gif" border="0" title="delete"></a>
+						  ';
+					}
+
+					echo '
+						</td>
+						<td valign="top" align="right">'.number_format($row->jumlah,0,",",".").'</td>
+					</tr>
+					<tr class="detail" id="'.$row->id_usulan_item.'">
+						<td></td>
+						<td class="content" colspan="2" style="padding: 0px; margin: 0px;"></td>
+						<td></td>
+					</tr>';
+
+					$no++;
+				}
+		}?>
+		</table>
+
+<script type="text/javascript">
+
+	$(function () {
+		var table = $('#list_usulan');
+		table.find('tr.detail').hide();
+
+		table.find('a.accordion').click( function() {
+			$(this).parents('tr.master').find('img.btn_detail').click();
+		});
+
+		//set event tambah uraian
+		$('#add_uraian').click(function() {
+			show_form({
+					id_usulan: $('#id_usulan').val()
+				});
+		});
+
+		table.find('.btn_detail').click(function () {
+			var trdet = $(this).parents('tr.master').next();
+			var td = trdet.find("td.content");
+
+			td.load(
+				"<?php echo site_url('usulan/ajax_get_uraian_item_usulan')?>",
+				{
+				   id_usulan_item: trdet.attr("id")
+				}
+			);
+
+			trdet.fadeToggle('fast');
+		});
+
+		table.find('.btn_edit').click(function () {
+			var code = $(this).attr('id').split('|');
+
+			show_form({
+					   oper:		'edit',
+					   kdgiat: 		code[0],
+					   kdoutput:	code[1],
+					   kdkomponen:	code[2],
+					   kdakun:		code[3],
+					   hdr:			code[4],
+					   id_usulan:	$('#id_usulan').val()
+				   });
+		});
+
+		function post_delete_process() {
+			//perbaharui data total_usulan
+			$.post('<?php echo site_url('usulan/ajax_get_total_usulan')?>',
+				   {id_usulan: $('#id_usulan').val()},
+				function(data) {
+					$('#total_usulan').autoNumeric('set', data);
+				}
+			);
+		}
+
+		table.find('.btn_delete').click(function () {
+			var id = $(this).attr('id');
+
+			$('#list_usulan').block({
+                    message: 'Penghapusan data sedang diproses, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+            });
+
+			if (! confirm('Anda akan menghapus data item usulan ini. Lanjutkan?')) {
+				return;
+			}
+
+			$.post('<?php echo site_url('usulan/ajax_delete_item_usulan')?>',
+				   { id_usulan_item: id },
+				   function(data){
+						try {
+							var json = $.parseJSON(data);
+
+							catch_expired_session(json);
+
+							//tampilkan message
+							$.blockUI({
+								message: json.msg,
+								timeout: 2000,
+								css: window._css,
+								overlayCSS: window._ovcss
+							});
+
+							if(json.errno != 0){
+								//do nothing for error
+							} else {
+								//MUST: trigger reload
+								post_delete_process();
+								show_list();
+							}
+						} catch(e) {
+							//log error, misal format json salah
+							console.log('System error : "' + e + '"');
+							$.blockUI({
+								message: 'Terjadi kesalahan sistem, mohon hubungi administrator.',
+								timeout: 2000,
+								css: window._css,
+								overlayCSS: window._ovcss
+							});
+						}
+				   });
+		});
+	});
+</script>

@@ -1,0 +1,49 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+ 
+<html>       
+<head>
+    <meta charset="utf-8"/>
+    <title>SIMKEU-UNUD</title>                                            
+    
+    <link rel="stylesheet" href="<?php echo base_url();?>asset/css/admin.css" type="text/css" media="screen" />
+     
+</head>   
+<body>
+                
+      <?php // tampilkan sidebar menu HANYA apabila user telah login
+      if($this->auth->is_logged_in() == true):
+      //-------------------------------------
+      //  PINDAHAN DARI VIEW INDEX.PHP
+      //-------------------------------------
+      // level untuk user ini
+      $level = $this->session->userdata('level');
+      // ambil menu dari database sesuai dengan level
+      //$menu = $this->usermodel->get_menu_for_level($level); 
+      include"admin/inc/judul.php";
+      include"admin/inc/menu.php";
+      ?>
+      
+    
+    <section id="main" class="column">
+        
+        <h4 class="alert_info">Selamat Datang di Halaman Administrator SIMKEU Universitas Udayana.</h4>
+        
+       <div id="sidebar-menu">
+         <ul class="menu">
+            
+         </ul>
+      </div>
+      <?php //--------------------------------------
+      //    END PINDAHAN
+      //--------------------------------------
+      endif;
+      ?>
+      <?php // dynamic content loaded here
+         echo $contents;
+      ?>
+      <div class="clear"></div>
+   </div>
+   
+   </div>
+</body>
+</html>

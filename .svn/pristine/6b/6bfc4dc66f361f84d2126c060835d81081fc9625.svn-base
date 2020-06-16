@@ -1,0 +1,120 @@
+<style type="text/css">
+table.fcari tr:nth-child(odd) {
+  background-color: #EEE;
+}
+
+table.fcari tr:nth-child(even) {
+  background-color: #FFF;
+}
+</style>
+
+<script type="text/javascript">
+    function search() {
+      var postData = new Object();
+
+      if($('#ck_no').is(':checked')) postData['param_no'] = $('#param_no').val();
+      if($('#ck_ma').is(':checked')) postData['param_ma'] = $('#param_ma').val();
+      if($('#ck_sb').is(':checked')) postData['param_sb'] = $('#param_sb').val();
+      if($('#ck_jk').is(':checked')) postData['param_jk'] = $('#param_jk').val();
+      if($('#ck_sk').is(':checked')) postData['param_sk'] = $('#param_sk').val();
+
+      $.post('<?php echo site_url('kwitansi/search')?>',
+            postData, function(data) {
+              catch_expired_session2(data);
+
+              $('#view_kwitansi').html(data);
+            });
+    }
+
+    $(function() {
+      $('#search').click(function() {        
+        search();
+        return false;
+      });
+
+      $('#search').trigger('click');
+    });
+</script>
+
+<article class="module width_full">
+<header>
+  <h3>View Kwitansi Sub Unit</h3>
+</header>             
+ <div class="module_content">      
+
+<table style='background-color: yellow'>
+  <tr >
+    <td width='100px'>Unit Kerja</td>
+    <td>:</td>
+    <td><input type="text" name="unit" id="unit" readonly size="50" value="<?php echo $nama_unit; ?>"/></td>
+    <td width='10px'></td>
+    <td>Sub Unit</td>
+    <td>:</td>
+    <td><input type="text" name="subunit" id="subunit" readonly size="30" value="<?php echo $nama_sunit; ?>"/></td>
+  </tr>    
+</table>
+<hr>
+<form>
+<table class='fcari' width='100%'>
+  <tr>
+    <td width='150px'>
+      <input type='checkbox' id='ck_no' name='ck_no' for='param_no'>&nbsp;
+      No Kwitansi</td>
+    <td><input type='text' id='param_no' name='param_no' placeholder='no kwitansi' size='35'></td>      
+  </tr>
+  <tr>
+    <td>
+      <input type='checkbox' id='ck_ma' name='ck_ma' for='param_ma'>&nbsp;
+      Mata Anggaran</td>
+    <td><input type='text' id='param_ma' name='param_ma' placeholder='____.___.___.______' size='25'></td>      
+  </tr>
+  <tr>
+    <td>
+      <input type='checkbox' id='ck_sb' name='ck_sb' for='param_sb'>&nbsp;
+      Sifat Pembayaran</td>
+    <td>
+        <select name="param_sb" id="param_sb">
+          <?php foreach($sifat_bayar as $sb){
+            echo "<option value='{$sb->kode_value}'>{$sb->nama_value}</option>";
+          }
+          ?>
+        </select>
+    </td>      
+  </tr>    
+  <tr>
+    <td>
+      <input type='checkbox' id='ck_jk' name='ck_jk' for='param_jk'>&nbsp;
+      Jenis Kwitansi</td>
+    <td>
+        <select name="param_jk" id="param_jk">
+          <?php foreach($jenis_kwitansi as $jk){
+            echo "<option value='{$jk->kode_value}'>{$jk->nama_value}</option>";
+          }
+          ?>
+        </select>
+    </td>      
+  </tr>    
+  <tr>
+    <td>
+      <input type='checkbox' id='ck_sk' name='ck_sk' for='param_sk'>&nbsp;
+      Status Kwitansi</td>
+    <td>
+        <select name="param_sk" id="param_sk">
+          <?php foreach($status_kwitansi as $sk){
+            echo "<option value='{$sk->kode_value}'>{$sk->nama_value}</option>";
+          }
+          ?>
+        </select>
+    </td>      
+  </tr>    
+  <tr>
+    <td></td>
+    <td><input type="submit" name="search" id="search" value="Tampilkan" />      
+    </td>      
+  </tr>    
+</table>
+<div style='float:right'><a href="<?php echo site_url('kwitansi/create')?>">Buat Kwitansi</a></div><br>
+</form>
+<hr>
+<div id="view_kwitansi">
+</div>

@@ -1,0 +1,2088 @@
+<?php
+
+class print_rincian_honor extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_gup',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas'));
+        
+        
+    }
+
+
+function eksport_excel(){
+        $idk		= $this->uri->segment(3);
+        $jenis		= $this->uri->segment(4);
+		$fungsi		= "print_excel_r".$jenis;
+		$this->$fungsi($idk); 
+    }
+
+function jurnal_buat($idk){
+		$jurnal_all = $this->m_kwitansi->view_honor($idk);
+		$idu  		= $this->session->userdata('id_unit');
+		$idSu  		= $this->session->userdata('id_subunit');
+        $munit		= $this->m_kwitansi->get_munit_by_id($idu); 
+		
+        $jurnal=array();
+		foreach($munit->result() as $row){
+			$jur['nama_ppk']	= $row->pd2_nama;
+			$jur['nip_ppk']		= $row->pd2_nip;
+			$jur['nama_bpp']	= $row->bpp_nama;
+			$jur['nip_bpp']		= $row->bpp_nip;
+		}
+
+        foreach($jurnal_all->result() as $rows) { 
+            $jur['nama']=$rows->nama;
+            $jur['jabatan']=$rows->jabatan;
+            $jur['golongan']=$rows->golongan;
+            $jur['bruto']=$rows->bruto;
+            $jur['jum_bruto']=$rows->jum_bruto;
+            $jur['jum_bln']=$rows->jum_bln;
+            $jur['jum_org']=$rows->jum_org;
+            $jur['jum_hadir']=$rows->jum_hadir;
+            $jur['jum_hari']=$rows->jum_hari;
+            $jur['kd_mk']=$rows->kd_mk;
+            $jur['m_kul']=$rows->m_kul;
+            $jur['nama_mhs']=$rows->nama_mhs;
+            $jur['nim_mhs']=$rows->nim_mhs;
+            $jur['honor_naskah']=$rows->honor_naskah;
+			
+            $jur['pph_honor']=$rows->pph_honor;
+            $jur['nama_subunit']= $this->m_umum->get_nama_sunit_by_id($idSu); 
+            $jur['nama_unit']= $this->m_umum->get_nama_unit_by_id($idu); 
+            $jur['kop_honor']=$rows->kop_honor;
+            $jur['no_sk_rektor']=$rows->no_sk_rektor;
+            $jur['tgl_sk_rektor']=date("Y-m-d", strtotime($rows->tgl_sk_rektor));
+            $jur['tgl_kwitansi']=date("Y-m-d", strtotime($rows->tgl_kwitansi));
+            $jur['kdoutput']=$rows->kdoutput;
+            $jur['kdkomponen']=$rows->kdkomponen;
+            $jur['penerima']=$rows->penerima;
+            $jur['nip_penerima']=$rows->nip_penerima;
+            $jur['tahun']=$rows->tahun;
+        }
+            $jurnal[]=$jur;
+        return $jurnal;
+    }
+
+
+
+function print_excel_r1($id){
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    $this->excel->setActiveSheetIndex(0);
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);
+	}
+
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'Jabatan');
+    $sheet->setCellValue('D11', 'GoL');
+    $sheet->setCellValue('E11', 'Jumlah Bulan');
+    $sheet->setCellValue('F11', 'Tarif / Bulan');
+    $sheet->setCellValue('G11', 'Jumlah Honor Bruto');
+    $sheet->setCellValue('H11', 'pph');
+    $sheet->setCellValue('I11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('J11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:J11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(10);
+    $sheet->getColumnDimension('F')->setWidth(18);
+    $sheet->getColumnDimension('G')->setWidth(20);
+    $sheet->getColumnDimension('H')->setWidth(10);
+    $sheet->getColumnDimension('I')->setWidth(20);
+    $sheet->getColumnDimension('J')->setWidth(30);
+    
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+	$tot_jum_bln=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['jabatan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['jum_bln']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['bruto']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(9,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':J'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		$tot_jum_bln=$tot_jum_bln+($jurnal['jum_bln']);
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+		$sheet->mergeCells("A".($no+11).":D".($no+11));
+        $sheet->setCellValueByColumnAndRow(4,$no+11,$tot_jum_bln);
+        $sheet->setCellValueByColumnAndRow(5,$no+11,$tot_brut);
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(9,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':J'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":J".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+	
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 2
+*/
+function print_excel_r2($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'GoL');
+    $sheet->setCellValue('D11', 'Kode MK');
+    $sheet->setCellValue('E11', 'Mata Kuliah');
+    $sheet->setCellValue('F11', 'Kehadiran');
+    $sheet->setCellValue('G11', 'Tarif / Kehadiran');
+    $sheet->setCellValue('H11', 'Jumlah Honor Bruto');
+    $sheet->setCellValue('I11', 'pph');
+    $sheet->setCellValue('J11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('K11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:K11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(10);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(18);
+    $sheet->getColumnDimension('F')->setWidth(10);
+    $sheet->getColumnDimension('G')->setWidth(18);
+    $sheet->getColumnDimension('H')->setWidth(20);
+    $sheet->getColumnDimension('I')->setWidth(18);
+    $sheet->getColumnDimension('J')->setWidth(20);
+    $sheet->getColumnDimension('K')->setWidth(30);
+    
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+	$tot_jum_bln=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['kd_mk']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['m_kul']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['jum_hadir']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['bruto']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(9,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(10,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':K'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		$tot_jum_bln=$tot_jum_bln+($jurnal['jum_hadir']);
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(4,$no+11,'');
+				$sheet->mergeCells("A".($no+11).":E".($no+11));
+        $sheet->setCellValueByColumnAndRow(5,$no+11,$tot_jum_bln);
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_brut);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(9,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(10,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':K'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":I".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 3
+*/
+function print_excel_r3($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);
+	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'GoL');
+    $sheet->setCellValue('D11', 'Kode MK');
+    $sheet->setCellValue('E11', 'Mata Kuliah');
+    $sheet->setCellValue('F11', 'Jumlah Peserta Ujian');
+    $sheet->setCellValue('G11', 'Tarif Koreksi / Mahasiswa');
+    $sheet->setCellValue('H11', 'Jumlah Honor Koreksi');
+    $sheet->setCellValue('I11', 'Honor Naskah');
+    $sheet->setCellValue('J11', 'Jumlah Honor');
+    $sheet->setCellValue('K11', 'pph');
+    $sheet->setCellValue('L11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('M11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:M11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(10);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(18);
+    $sheet->getColumnDimension('F')->setWidth(10);
+    $sheet->getColumnDimension('G')->setWidth(18);
+    $sheet->getColumnDimension('H')->setWidth(18);
+    $sheet->getColumnDimension('I')->setWidth(18);
+    $sheet->getColumnDimension('J')->setWidth(18);
+    $sheet->getColumnDimension('K')->setWidth(18);
+    $sheet->getColumnDimension('L')->setWidth(20);
+    $sheet->getColumnDimension('M')->setWidth(30);
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+	$tot_jum_bln=0;
+	$tot_jum_hn=0;
+	$tot_jum_koreksi=0;
+	$tot_hn=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['kd_mk']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['m_kul']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['jum_org']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['bruto']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,(($jurnal['jum_org'])*($jurnal['bruto'])));
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,$jurnal['honor_naskah']);
+        $sheet->setCellValueByColumnAndRow(9,$baris+12,((($jurnal['jum_org'])*($jurnal['bruto']))+($jurnal['honor_naskah'])));
+        $sheet->setCellValueByColumnAndRow(10,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(11,$baris+12,((($jurnal['jum_org'])*($jurnal['bruto']))+($jurnal['honor_naskah']))-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(12,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':M'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+(($jurnal['jum_org'])*($jurnal['bruto']));
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ (((($jurnal['jum_org'])*($jurnal['bruto']))+($jurnal['honor_naskah']))-($jurnal['pph_honor']));
+		$tot_jum_bln=$tot_jum_bln+($jurnal['jum_org']);
+		$tot_jum_hn=$tot_jum_hn+($jurnal['honor_naskah']);
+		$tot_hn=$tot_hn+((($jurnal['jum_org'])*($jurnal['bruto']))+($jurnal['honor_naskah']));
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(4,$no+11,'');
+				$sheet->mergeCells("A".($no+11).":E".($no+11));
+        $sheet->setCellValueByColumnAndRow(5,$no+11,$tot_jum_bln);
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_brut);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,$tot_jum_hn);
+        $sheet->setCellValueByColumnAndRow(9,$no+11,$tot_hn);
+        $sheet->setCellValueByColumnAndRow(10,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(11,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(12,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':M'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":M".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 4
+*/
+function print_excel_r4($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'Jabatan');
+    $sheet->setCellValue('D11', 'GoL');
+    $sheet->setCellValue('E11', 'Nama Mahasiswa');
+    $sheet->setCellValue('F11', 'NIM');	
+    $sheet->setCellValue('G11', 'Honor Penelitian');
+    $sheet->setCellValue('H11', 'pph');
+    $sheet->setCellValue('I11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('J11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:j11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(18);
+    $sheet->getColumnDimension('F')->setWidth(10);
+    $sheet->getColumnDimension('G')->setWidth(10);
+    $sheet->getColumnDimension('H')->setWidth(20);
+    $sheet->getColumnDimension('I')->setWidth(20);
+    $sheet->getColumnDimension('j')->setWidth(30);
+    
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['jabatan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['nama_mhs']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['nim_mhs']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(9,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':j'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+		$sheet->mergeCells("A".($no+11).":F".($no+11));   
+        $sheet->setCellValueByColumnAndRow(4,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(5,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(9,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':j'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":I".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 5
+*/
+function print_excel_r5($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Mahasiswa');
+    $sheet->setCellValue('C11', 'NIM');
+    $sheet->setCellValue('D11', 'Nama Penguji');
+    $sheet->setCellValue('E11', 'Golongan');
+    $sheet->setCellValue('F11', 'Jabatan');
+    $sheet->setCellValue('G11', 'Honor / Ujian');
+    $sheet->setCellValue('H11', 'pph');
+    $sheet->setCellValue('I11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('J11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:J11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(30);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(30);
+    $sheet->getColumnDimension('E')->setWidth(18);
+    $sheet->getColumnDimension('F')->setWidth(18);
+    $sheet->getColumnDimension('G')->setWidth(10);
+    $sheet->getColumnDimension('H')->setWidth(20);
+    $sheet->getColumnDimension('I')->setWidth(20);
+    $sheet->getColumnDimension('J')->setWidth(30);
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama_mhs']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['nim_mhs']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['jabatan']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(9,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':J'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+		$sheet->mergeCells("A".($no+11).":F".($no+11));
+        $sheet->setCellValueByColumnAndRow(4,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(5,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(9,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':J'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":J".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 6
+*/
+function print_excel_r6($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'Jabatan');
+    $sheet->setCellValue('D11', 'GoL');
+    $sheet->setCellValue('E11', 'Hari');
+    $sheet->setCellValue('F11', 'Tarif / Hari');
+    $sheet->setCellValue('G11', 'Jumlah Honor Bruto');
+    $sheet->setCellValue('H11', 'pph');
+    $sheet->setCellValue('I11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('J11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:J11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(10);
+    $sheet->getColumnDimension('F')->setWidth(18);
+    $sheet->getColumnDimension('G')->setWidth(20);
+    $sheet->getColumnDimension('H')->setWidth(18);
+    $sheet->getColumnDimension('I')->setWidth(20);
+    $sheet->getColumnDimension('J')->setWidth(30);
+    
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+	$tot_jum_hari=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['jabatan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['jum_hari']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['bruto']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(9,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':J'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		$tot_jum_hari=$tot_jum_hari+($jurnal['jum_hari']);
+		
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+		$sheet->mergeCells("A".($no+11).":D".($no+11));
+        $sheet->setCellValueByColumnAndRow(4,$no+11,$tot_jum_hari);
+        $sheet->setCellValueByColumnAndRow(5,$no+11,$tot_brut);
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(9,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':J'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":J".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 7
+*/
+
+function print_excel_r7($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'Jabatan');
+    $sheet->setCellValue('D11', 'GoL');
+    $sheet->setCellValue('E11', 'Tarif / Kegiatan');
+    $sheet->setCellValue('F11', 'Jumlah Honor Bruto');
+    $sheet->setCellValue('G11', 'pph');
+    $sheet->setCellValue('H11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('I11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:I11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(18);
+    $sheet->getColumnDimension('F')->setWidth(20);
+    $sheet->getColumnDimension('G')->setWidth(10);
+    $sheet->getColumnDimension('H')->setWidth(20);
+    $sheet->getColumnDimension('I')->setWidth(30);
+    
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['jabatan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['bruto']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(8,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':I'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+11,'');
+		$sheet->mergeCells("A".($no+11).":D".($no+11));        
+        $sheet->setCellValueByColumnAndRow(4,$no+11,$tot_brut);
+        $sheet->setCellValueByColumnAndRow(5,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(8,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':I'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":I".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK PRINT RINCIAN HONOR 8
+*/
+function print_excel_r8($id){
+        //load our new PHPExcel library
+    $this->load->library('3rd/excel');
+    $this->excel->getDefaultStyle()->getFont()->setName('Arila')->setSize(10); //set default font
+    //activate worksheet number 1
+    $this->excel->setActiveSheetIndex(0);
+    //name the worksheet
+    $sheet=$this->excel->getActiveSheet();
+    $sheet->setShowGridlines(false);
+    $sheet->setTitle('Rician Honor');
+
+	//============================
+    $default_border = array(
+        'style' => PHPExcel_Style_Border::BORDER_THIN,
+        'color' => array('rgb'=>'000000')
+    );
+    $style_header = array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+        ),
+        'font' => array(
+            'bold' => true,
+        ),
+        'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            'wrap'       => true
+        )
+    );
+    $style_isi=array(
+        'borders' => array(
+            'allborders' => $default_border
+        ),
+        'alignment' => array(
+             'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+        )
+    );
+
+	//============================
+    $jurnal_arr =$this->jurnal_buat($id);
+    foreach($jurnal_arr as $baris=>$jurnal)
+	{
+	$nama_sub=($jurnal['nama_subunit']);
+	$kop_honor=($jurnal['kop_honor']);
+	$no_sk_rektor=($jurnal['no_sk_rektor']);
+	$tgl_sk_rektor=($jurnal['tgl_sk_rektor']);
+	$tgl_kwitansi=($jurnal['tgl_kwitansi']);
+	$kdoutput=($jurnal['kdoutput']);
+	$kdkomponen=($jurnal['kdkomponen']);
+	$tahun=($jurnal['tahun']);
+	
+	$penerima=($jurnal['penerima']);
+	$nip_penerima=($jurnal['nip_penerima']);
+	
+	$nm_subunit	=($jurnal['nama_subunit']);
+	$nm_unit	=($jurnal['nama_unit']);
+	$nm_ppk		=($jurnal['nama_ppk']);
+	$nip_ppk	=($jurnal['nip_ppk']);
+	$nm_bpp		=($jurnal['nama_bpp']);
+	$nip_bpp	=($jurnal['nip_bpp']);	
+	}
+	//========================
+    $sheet->setCellValue('A1', 'KEMENTRIAN PENDIDIKAN DAN KEBUDAYAAN');//set cell A1 content with some text
+    $sheet->getStyle('A1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A1')->getFont()->setBold(true);//make the font become bold
+    //$sheet->mergeCells('A1:H1');//merge cell A1 until D1
+    //========================
+    $sheet->setCellValue('A2', 'UNIVERSITAS UDAYANA');//set cell A1 content with some text
+    $sheet->getStyle('A2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('A3', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('A3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A3')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('G1', 'PROGRAM  '.$nama_sub);//set cell A1 content with some text
+    $sheet->getStyle('G1')->getFont()->setSize(8);//change the font size
+    $sheet->getStyle('G1')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('G1:G3');//merge cell A1 until D1
+    $sheet->getStyle('G1')->getAlignment()->setWrapText(true);	
+    //========================
+    $sheet->getStyle('G1:G3')->applyFromArray( $style_isi );
+    $sheet->getStyle('H1:H3')->applyFromArray( $style_isi );
+    $sheet->getStyle('I1:I3')->applyFromArray( $style_isi );
+	//====== KANAN ===========
+    $sheet->setCellValue('H1', 'KAS BUKU');//set cell A1 content with some text
+    $sheet->getStyle('H1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H2', 'TANGGAL');//set cell A1 content with some text
+    $sheet->getStyle('H2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('H3', 'KODE / MAK');//set cell A1 content with some text
+    $sheet->getStyle('H3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('H3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+    $sheet->setCellValue('I1', '');//set cell A1 content with some text
+    $sheet->getStyle('I1')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I1')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I2', $tgl_kwitansi);//set cell A1 content with some text
+    $sheet->getStyle('I2')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I2')->getFont()->setBold(true);//make the font become bold
+    //========================
+    $sheet->setCellValue('I3', '4078 . '.$kdoutput.' . '.$kdkomponen);//set cell A1 content with some text
+    $sheet->getStyle('I3')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('I3')->getFont()->setBold(true);//make the font become bold
+    //========================
+	
+	//=== KOP ===
+    $sheet->setCellValue('A6', $kop_honor);//set cell A1 content with some text
+    $sheet->getStyle('A6')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A6')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A6:I6');//merge cell A1 until D1
+    $sheet->getStyle('A6')->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A7', 'Yang dibayar dari dana DIPA BLU Universitas Udayana Tahun Anggaran '.$tahun);//set cell A1 content with some text
+    $sheet->getStyle('A7')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A7')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A7:I7');//merge cell A1 until D1
+    $sheet->getStyle('A7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A8', 'Berdasarkan SK Rektor Nomor : '.$no_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A8')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A8')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A8:I8');//merge cell A1 until D1
+    $sheet->getStyle('A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+    $sheet->setCellValue('A9', 'Tanggal  '.$tgl_sk_rektor);//set cell A1 content with some text
+    $sheet->getStyle('A9')->getFont()->setSize(11);//change the font size
+    $sheet->getStyle('A9')->getFont()->setBold(true);//make the font become bold
+	$sheet->mergeCells('A9:I9');//merge cell A1 until D1
+    $sheet->getStyle('A9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    //========================
+
+	//=== TABEL ===	
+    $sheet->setCellValue('A11', 'No');
+    $sheet->setCellValue('B11', 'Nama Dosen');
+    $sheet->setCellValue('C11', 'GoL');
+    $sheet->setCellValue('D11', 'Tarif / Kegiatan');
+    $sheet->setCellValue('E11', 'Jumlah Honor Bruto');
+    $sheet->setCellValue('F11', 'pph');
+    $sheet->setCellValue('G11', 'Jumlah Honor Diterima');
+    $sheet->setCellValue('H11', 'Tanda Tangan');
+    
+    
+    $sheet->getStyle('A11:H11')->applyFromArray( $style_header );
+    
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(40);
+    $sheet->getColumnDimension('C')->setWidth(10);
+    $sheet->getColumnDimension('D')->setWidth(18);
+    $sheet->getColumnDimension('E')->setWidth(20);
+    $sheet->getColumnDimension('F')->setWidth(10);
+    $sheet->getColumnDimension('G')->setWidth(20);
+    $sheet->getColumnDimension('H')->setWidth(30);
+    $sheet->getColumnDimension('I')->setWidth(20);
+    $no='1';
+	$tot_brut=0;
+	$tot_jum_brut=0;
+	$tot_pph=0;
+	$tot_jum_terima=0;
+    foreach($jurnal_arr as $baris=>$jurnal){
+
+        $sheet->setCellValueByColumnAndRow(0,$baris+12,$no++);
+        $sheet->setCellValueByColumnAndRow(1,$baris+12,$jurnal['nama']);
+        $sheet->setCellValueByColumnAndRow(2,$baris+12,$jurnal['golongan']);
+        $sheet->setCellValueByColumnAndRow(3,$baris+12,$jurnal['bruto']);
+        $sheet->setCellValueByColumnAndRow(4,$baris+12,$jurnal['jum_bruto']);
+        $sheet->setCellValueByColumnAndRow(5,$baris+12,$jurnal['pph_honor']);
+        $sheet->setCellValueByColumnAndRow(6,$baris+12,($jurnal['jum_bruto'])-($jurnal['pph_honor']));
+        $sheet->setCellValueByColumnAndRow(7,$baris+12,'-');
+        $sheet->getStyle('A'.($baris+12).':H'.($baris+12))->applyFromArray( $style_isi );
+		
+		$tot_brut=$tot_brut+($jurnal['bruto']);
+		$tot_jum_brut=$tot_jum_brut+($jurnal['jum_bruto']);
+		$tot_pph=$tot_pph+($jurnal['pph_honor']);
+		$tot_jum_terima=$tot_jum_terima+ ($jurnal['jum_bruto'])-($jurnal['pph_honor']);
+		
+		//===================================================
+
+    }
+        $sheet->setCellValueByColumnAndRow(0,$no+11,'Jumlah');
+        $sheet->setCellValueByColumnAndRow(1,$no+11,'');
+        $sheet->setCellValueByColumnAndRow(2,$no+11,'');
+		$sheet->mergeCells("A".($no+11).":C".($no+11));        
+        $sheet->setCellValueByColumnAndRow(3,$no+11,$tot_brut);
+        $sheet->setCellValueByColumnAndRow(4,$no+11,$tot_jum_brut);
+        $sheet->setCellValueByColumnAndRow(5,$no+11,$tot_pph);
+        $sheet->setCellValueByColumnAndRow(6,$no+11,$tot_jum_terima);
+        $sheet->setCellValueByColumnAndRow(7,$no+11,'');
+        $sheet->getStyle('A'.($no+11).':H'.($no+11))->applyFromArray( $style_isi );
+		
+		
+        $sheet->setCellValueByColumnAndRow(0,$no+13,'( '.$this->uang->terbilang($tot_jum_brut).' )');
+		$sheet->mergeCells("A".($no+13).":I".($no+13));        
+    	$sheet->getStyle('A'.($no+13))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(0,$no+15,'Mengetahui');
+        $sheet->setCellValueByColumnAndRow(0,$no+16,'Atas Nama Dekan '.$nm_subunit.' Unud');
+        $sheet->setCellValueByColumnAndRow(0,$no+17,'Pejabat Pembuat Komitmen');
+        $sheet->setCellValueByColumnAndRow(0,$no+20,$nm_ppk);
+        $sheet->setCellValueByColumnAndRow(0,$no+21,$nip_ppk);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(3,$no+15,'Bendahara Pengeluaran Pembantu');
+        $sheet->setCellValueByColumnAndRow(3,$no+16,$nm_subunit.' Udayana');
+        $sheet->setCellValueByColumnAndRow(3,$no+17,'');
+        $sheet->setCellValueByColumnAndRow(3,$no+20,$nm_bpp);
+        $sheet->setCellValueByColumnAndRow(3,$no+21,$nip_bpp);
+		
+		//===============================================
+        $sheet->setCellValueByColumnAndRow(7,$no+15,'Denpasar, '.$tgl_kwitansi);
+        $sheet->setCellValueByColumnAndRow(7,$no+16,'Pembuat Daftar');
+        $sheet->setCellValueByColumnAndRow(7,$no+17,'Program '.$nama_sub);
+        $sheet->setCellValueByColumnAndRow(7,$no+20,$penerima);
+        $sheet->setCellValueByColumnAndRow(7,$no+21, 'Nip'.$nip_penerima);
+
+		
+    $filename='Rincian_Honor.xls'; //save our workbook as this file name
+    header('Content-Type: application/vnd.ms-excel'); //mime type
+    header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+    header('Cache-Control: max-age=0'); //no cache
+                 
+    //save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+    //if you want to save it as .XLSX Excel 2007 format
+    $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+    //force user to download the Excel file without writing it to server's HD
+    $objWriter->save('php://output');
+    }
+
+
+
+}
+
+?>

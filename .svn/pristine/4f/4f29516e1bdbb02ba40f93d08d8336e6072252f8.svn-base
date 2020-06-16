@@ -1,0 +1,118 @@
+<style type="text/css">
+    #tr_sa:hover{
+        background-color: pink;
+    }
+    .table_inline_edit tr td{        
+        vertical-align: middle;
+    }
+    input{ 
+        text-align:right; 
+    }
+</style>
+<article class="module width_full">
+    <header><h3>
+        Input Saldo Awal
+    </h3></header>    
+
+    <form action="" name="form_sa" id="form_sa" method="post">
+        <input type="hidden" name="tahun_anggaran" value="<?php echo $ta; ?>">
+        <div class="module_content">
+            <table  class="table-common table_inline_edit">  
+                <thead> 
+                   <tr>
+                       <th>No</th>
+                       <th>Akun</th>
+                       <th>Nama Akun</th>
+                       <th>Saldo Awal</th>   
+                   </tr>
+                </thead>
+                <tbody>
+                <?php
+                    $i=1;
+                    foreach ($akun_sa as $row) {
+                ?>
+                    <tr id="tr_sa">
+                        <td style="width: 5%;" align='center'><?php echo $i; ?></td>
+                        <td style="width: 10%;" align='center'><?php echo $row->akun_kode; ?></td>
+                        <td style="width: 65%;"><?php echo $row->akun_nama; ?></td>
+                        <td class="sa_edit" style="width: 20%; height: 32px; cursor: pointer;" align='right' title="Klik disini untuk memperbaharui Saldo Awal.">
+                            <input type="hidden" name="akun[<?php echo $i; ?>]" value="<?php echo $row->akun_kode; ?>">
+                            <input style="width: 100%;" id="edit_sa" type="hidden" name="nominal[<?php echo $i; ?>]" value="<?php echo (float)$row->nominal; ?>">
+                            <div id="nilai_sa"><?php echo number_format((float)$row->nominal, 0, ",", "."); ?></div>
+                        </td>
+                   </tr>
+                <?php
+                        $i++;
+                    }
+                ?>
+                </tbody>
+            </table>
+        </div>
+        <footer>
+            <div class="submit_link">            
+                <input id="submit" type="button" value="Simpan" class="alt_btn" name="submit">            
+            </div>
+        </footer>
+    </form>
+</article>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        var td_sa;
+        var config_num = {aSep: '.', dGroup: '3', aDec: ',', vMax: '10000000000000', vMin: '-10000000000000', aPad: false};
+
+        $(".sa_edit").click(function(){            
+            td_sa = $(this);
+            td_sa.find("#nilai_sa").html('');
+            td_sa.find("#edit_sa").prop("type","text");            
+            td_sa.find("#edit_sa").autoNumeric(config_num);
+            td_sa.find("#edit_sa").focus();
+            td_sa.find("#edit_sa").select();            
+        });
+
+        $('#edit_sa').live('blur',function(){                        
+            var old_value = td_sa.find("#edit_sa").autoNumeric('get', config_num);
+            var old_value2= td_sa.find("#edit_sa").val();
+            td_sa.find("#edit_sa").autoNumeric('destroy');
+            td_sa.find("#edit_sa").val(old_value);
+            td_sa.find("#edit_sa").prop("type","hidden");
+            td_sa.find("#nilai_sa").html(old_value2);
+            td_sa=null;
+        });
+
+        $('.sa_edit input').keydown(function(event){
+            if(event.which == 13) {                        
+                return false;
+            }            
+        });
+
+        $('#submit').click(function(){
+            if (confirm("Apakah benar akan menyimpan perubahan data saldo awal ini?")){
+                $.blockUI({
+                    message: 'Menyimpan perubahan Saldo Awal, Mohon tunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+                });
+
+                $.ajax({
+                    url : "<?php echo site_url('report/simpan_sa'); ?>",
+                    type: "POST", 
+                    data:$('#form_sa').serialize(),
+                    success:function(response){                        
+                        if(response == 1)
+                        {                            
+                            alert("Perubahan data saldo awal berhasil disimpan . . .");
+                            window.location.href="<?php echo site_url('report/input_sa'); ?>";
+                        }
+                        else
+                        {                            
+                            alert("Data gagal di simpan!");
+                        }
+                    }
+                });
+                return false;                
+            }
+            return false;
+        });
+    });
+</script>

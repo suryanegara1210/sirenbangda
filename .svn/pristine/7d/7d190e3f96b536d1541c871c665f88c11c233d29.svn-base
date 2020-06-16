@@ -1,0 +1,337 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+    if($this->auth->is_logged_in() != true){
+        redirect(base_url()); 
+    }
+?>
+ 
+<html>  
+      
+<head>
+    <noscript><meta http-equiv="refresh" content="0;url=<?php echo  base_url().'login/js_err' ?>"></noscript>
+    <meta charset="utf-8"/>
+    <title>SIAKU-UNUD</title>                                            
+    
+	<link rel="stylesheet" href="<?php echo base_url();?>asset/css/layout.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo base_url();?>asset/css/style-portal-content.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo base_url();?>asset/css/style-portal-table.css" type="text/css" media="screen" />
+	<link rel="stylesheet" href="<?php echo base_url();?>asset/css/tabs.css" type="text/css" media="screen" />
+	
+    <link ilo-full-scr="images/favicon-unud.ico" rel="shortcut icon" href="images/favicon-unud.ico" type="image/x-icon">
+    <!--[if lt IE 9]>
+    <link rel="stylesheet" href="css/ie.css" type="text/css" media="screen" />
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+	
+	<!-- jquery start -->
+    <style type="text/css">@import url("<?php echo base_url(); ?>asset/jquery/css/jquery-ui.css");</style> 
+	<style>label.error {margin-left: 2px;width: auto;display: block;color:#F00;}</style>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.validate.min.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/autoNumeric.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/js/accounting.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/js/common.js"></script>
+    <!-- jquery end -->
+	
+    
+	<link rel="stylesheet" type="text/css" href="<?php echo base_url();?>application/views/ls/facebox/facebox.css" />
+	<script language="javascript" src="<?php echo base_url();?>application/views/ls/facebox/facebox.js"></script>
+    <script language="javascript">
+    $(document).ready(function() {
+            $('a[rel*=facebox]').facebox();
+    })
+	</script>
+	
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/js/stayput.js"></script> 
+ 
+    <script type="text/javascript">   	
+		function Start(page) {
+			OpenWin = this.open(page, "CtrlWindow", "toolbar=no,menubar=no,location=center,scrollbars=yes,resizable=yes,width=800,height=650");
+		}
+    </script>
+	
+    <script type="text/JavaScript">
+    function Start2(page) {
+        OpenWin = this.open(page, "CtrlWindow", "toolbar=no,menubar=no,location=center,scrollbars=yes,resizable=yes,width=500,height=350");
+    }
+    </script>
+       <script type="text/JavaScript">
+    function Start3(page) {
+        OpenWin = this.open(page, "CtrlWindow", "toolbar=no,menubar=no,location=center,scrollbars=yes,resizable=yes,width=900,height=650");
+    }
+    </script>
+<!--jqGrid-->
+<!-- CSS + JS PLUGIN - GRID //-->
+        <link rel="stylesheet" type="text/css" media="screen" href="<?php echo base_url(); ?>asset/jqgrid/css/ui.jqgrid.css"/>
+        <script type="text/javascript" src="<?php echo base_url(); ?>asset/jqgrid/js/i18n/grid.locale-id.js"></script>
+        <script type="text/javascript" src="<?php echo base_url(); ?>asset/jqgrid/js/jquery.jqGrid.min.js"></script>
+        
+    	<script>
+			$(function() {
+				$( "#tgl_kwitansi" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+		</script>
+		<script>
+			$(function() {
+				$( "#tgl_spd" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+		</script>
+        <script>
+			$(function() {
+				$( "#tgl_b" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+		</script>
+        <script>
+			$(function() {
+				$( "#tgl_k" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+		</script>
+       
+      
+        <!-- fancybox -->
+        <link rel="stylesheet" href="<?php echo base_url(); ?>asset/facebox/facebox.css" media="screen" type="text/css"/>
+        <script src="<?php echo base_url(); ?>asset/facebox/facebox.js" type="text/javascript"></script>
+        <!-- end fancybox -->
+       
+ 		<script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_up').load('<?php echo base_url(); ?>notifikasi/countUpSubunit').fadeIn("slow");
+			//	$('#load_tup').load('<?php echo site_url(); ?>notifikasi/countTupSubunit').fadeIn("slow");
+			//	$('#load_gup').load('<?php echo base_url(); ?>notifikasi/countGupSubunit').fadeIn("slow");
+			//	$('#load_ls').load('<?php echo base_url(); ?>notifikasi/countLsSubunit').fadeIn("slow");
+			//	$('#load_total').load('<?php echo base_url(); ?>notifikasi/countTotalSubunit').fadeIn("slow");
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+       
+       <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_up_ver').load('<?php echo base_url(); ?>notifikasi/countUpVer').fadeIn("slow");
+			//	$('#load_tup_ver').load('<?php echo site_url(); ?>notifikasi/countTupVer').fadeIn("slow");
+			//	$('#load_gup_ver').load('<?php echo base_url(); ?>notifikasi/countGupVeriUnit').fadeIn("slow");
+			//	$('#load_ls_ver').load('<?php echo base_url(); ?>notifikasi/countLsVeriUnit').fadeIn("slow");
+			//	$('#load_total_veri_unit').load('<?php echo base_url(); ?>notifikasi/countTotalVeriUnit').fadeIn("slow");
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+       
+        <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_total_bk_unit').load('<?php echo base_url(); ?>notifikasi/countTotalBk').fadeIn("slow");
+			//	$('#load_up_bk').load('<?php echo base_url(); ?>notifikasi/countUpBk').fadeIn("slow");
+			//	$('#load_tup_bk').load('<?php echo site_url(); ?>notifikasi/countTupBk').fadeIn("slow");
+			//	$('#load_gup_bk').load('<?php echo base_url(); ?>notifikasi/countGupBk').fadeIn("slow");
+			//	$('#load_ls_bk').load('<?php echo base_url(); ?>notifikasi/countLsBk').fadeIn("slow");
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+      
+      <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_total_penerima').load('<?php echo base_url(); ?>notifikasi/countTotalPenerima').fadeIn("slow");
+			//	$('#load_up_penerima').load('<?php echo base_url(); ?>notifikasi/countUpPenerima').fadeIn("slow");
+			//	$('#load_tup_penerima').load('<?php echo base_url(); ?>notifikasi/countTupPenerima').fadeIn("slow");
+			//	$('#load_gup_penerima').load('<?php echo base_url(); ?>notifikasi/countGupPenerima').fadeIn("slow");
+			//	$('#load_ls_penerima').load('<?php echo base_url(); ?>notifikasi/countLsPenerima').fadeIn("slow");			
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+       <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_total_veri').load('<?php echo base_url(); ?>notifikasi/countTotalVeri').fadeIn("slow");
+			//	$('#load_up_veri').load('<?php echo base_url(); ?>notifikasi/countUpVeri').fadeIn("slow");
+			//	$('#load_tup_veri').load('<?php echo base_url(); ?>notifikasi/countTupVeri').fadeIn("slow");
+			//	$('#load_gup_veri').load('<?php echo base_url(); ?>notifikasi/countGupVeri').fadeIn("slow");
+			//	$('#load_ls_veri').load('<?php echo base_url(); ?>notifikasi/countLsVeri').fadeIn("slow");			
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+       <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_total_subag').load('<?php echo base_url(); ?>notifikasi/countTotalSubag').fadeIn("slow");
+			//	$('#load_up_subag').load('<?php echo base_url(); ?>notifikasi/countUpSubag').fadeIn("slow");
+			//	$('#load_tup_subag').load('<?php echo base_url(); ?>notifikasi/countTupSubag').fadeIn("slow");
+			//	$('#load_gup_subag').load('<?php echo base_url(); ?>notifikasi/countGupSubag').fadeIn("slow");
+			//	$('#load_ls_subag').load('<?php echo base_url(); ?>notifikasi/countLsSubag').fadeIn("slow");
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+       <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_total_kabag').load('<?php echo base_url(); ?>notifikasi/countTotalKabag').fadeIn("slow");
+			//	$('#load_up_kabag').load('<?php echo base_url(); ?>notifikasi/countUpKabag').fadeIn("slow");
+			//	$('#load_tup_kabag').load('<?php echo base_url(); ?>notifikasi/countTupKabag').fadeIn("slow");
+			//	$('#load_gup_kabag').load('<?php echo base_url(); ?>notifikasi/countGupKabag').fadeIn("slow");
+			//	$('#load_ls_kabag').load('<?php echo base_url(); ?>notifikasi/countLsKabag').fadeIn("slow");
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+      <script type="text/javascript">
+			//var time_interval = setInterval(function (){
+			//	$('#load_total_ppsp2d').load('<?php echo base_url(); ?>notifikasi/countTotalPpsp2d').fadeIn("slow");
+			//	$('#load_up_ppsp2d').load('<?php echo base_url(); ?>notifikasi/countUpPpsp2d').fadeIn("slow");
+			//	$('#load_tup_ppsp2d').load('<?php echo base_url(); ?>notifikasi/countTupPpsp2d').fadeIn("slow");
+			//	$('#load_gup_ppsp2d').load('<?php echo base_url(); ?>notifikasi/countGupPpsp2d').fadeIn("slow");
+			//	$('#load_ls_ppsp2d').load('<?php echo base_url(); ?>notifikasi/countLsPpsp2d').fadeIn("slow");
+			//	
+			//}, 5000); // refresh every 5000 milliseconds
+	   </script>
+</head>   
+<body> 
+ <header id="header">
+        <div id="judul">
+            <img src="<?php echo base_url();?>asset/images/putar.png"/>
+            <h2 class="namauniv"><a href="http://unud.ac.id">Universitas Udayana</a></h1>
+            <h1 class="namasistem">Sistem Informasi Akuntansi dan Keuangan</h2>
+        </div>
+</header> <!-- end of header bar -->
+    <!-- bagian menu -->
+    <section id="secondary_bar">
+        <div id="menu" style="height: 38px; ">
+            <div id="nav">
+             <ul>
+                <li><a href="<?php echo base_url(); ?>">Beranda</a></li>
+             </ul>
+            <?php
+				$menu=$this->session->userdata('menu');
+                if (isset($menu)) {
+                    echo $menu;
+                } else {
+                    redirect('login/logout');
+                }
+            ?>
+              <ul>
+                <li> <a>[<?php echo $this->session->userdata('nama_p');?>]</a> 
+                    <ul>
+                       <!-- <li> <a href="<?php echo  base_url();?>user/edit_pass">Edit Password</a> </li>   -->
+                        <li> <a href="<?php echo  site_url('login/logout');?>">LogOut</a></li>  
+                    </ul>
+                </li>
+             </ul>
+             <ul>
+                <li>
+                    <?php
+					  $id = $this->session->userdata('id_group');
+					  if($id == '2'){
+					?>
+                        <a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total"></span></a>
+                        <ul>
+                          <span id="load_up"></span>
+                          <span id="load_tup"></span>
+                          <span id="load_gup"></span>
+                          <span id="load_ls"></span>
+                        </ul>
+                    <?php }else if($id == '11'){ ?>
+                    	<a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_veri_unit"></span></a>
+                    	<ul>
+                        	<span id="load_up_ver"></span>
+                            <span id="load_tup_ver"></span>
+                          	<span id="load_gup_ver"></span>
+                          	<span id="load_ls_ver"></span>
+                        </ul>
+                    <?php }else if($id == '3'){?>
+                    	<a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_bk_unit"></span></a>
+                    	<ul>
+                        	<span id="load_up_bk"></span>
+                            <span id="load_tup_bk"></span>
+                          	<span id="load_gup_bk"></span>
+                          	<span id="load_ls_bk"></span>
+                        </ul>
+                    <?php }else if($id == '4'){?>
+                    	<a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_penerima"></span></a>
+                    	<ul>
+                        	<span id="load_up_penerima"></span>
+                            <span id="load_tup_penerima"></span>
+                            <span id="load_gup_penerima"></span>
+                            <span id="load_ls_penerima"></span>
+                        </ul>
+				   <?php }else if($id == '5'){?>
+                        <a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_veri"></span></a>
+                        <ul>
+                            <span id="load_up_veri"></span>
+                            <span id="load_tup_veri"></span>
+                            <span id="load_gup_veri"></span>
+                            <span id="load_ls_veri"></span>
+                        </ul>
+                   <?php }else if($id == '6'){?>
+                        <a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_subag"></span></a>
+                        <ul>
+                            <span id="load_up_subag"></span>
+                            <span id="load_tup_subag"></span>
+                            <span id="load_gup_subag"></span>
+                            <span id="load_ls_subag"></span>
+                        </ul>
+				   <?php }else if($id == '7'){?>
+                        <a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_kabag"></span></a>
+                        <ul>
+                            <span id="load_up_kabag"></span>
+                            <span id="load_tup_kabag"></span>
+                            <span id="load_gup_kabag"></span>
+                            <span id="load_ls_kabag"></span>
+                        </ul>
+                   <?php }else if($id == '8'){?>
+                        <a href="<?php echo base_url(); ?>">Notifikasi <span id="load_total_ppsp2d"></span></a>
+                        <ul>
+                            <span id="load_up_ppsp2d"></span>
+                            <span id="load_tup_ppsp2d"></span>
+                            <span id="load_gup_ppsp2d"></span>
+                            <span id="load_ls_ppsp2d"></span>
+                        </ul>
+                    <?php }?>
+                </li>
+             </ul>
+			 <div id="id" style='float: right; padding-right: 15px; padding-top: 10px'>
+				Tahun Anggaran :
+				<?php
+				    $ta = $this->m_settings->get_tahun_anggaran();
+					echo "<select>
+							<option value='$ta'>$ta</option>
+						  </select>";
+				?>
+			 </div>
+				
+			 </div>
+            </div>
+			
+        </div>
+    </section><!-- end of secondary bar -->
+
+   
+    <section id="main" class="column">
+        <?php $msg=$this->session->userdata('msg');
+            $msg_typ=$this->session->userdata('msg_typ');
+			//var_dump($msg,$msg_typ,$_SESSION);
+			
+            if($msg_typ=='err'){
+                echo "<h4 class=\"alert_error\"><p>".$msg."</p></h4>";
+            }
+            if($msg_typ=='ok'){
+                echo "<h4 class=\"alert_info\">".$msg."</h4>";
+            }
+            $this->session->unset_userdata('msg');
+            $this->session->unset_userdata('msg_typ');
+            //exit;
+            //print_r($this->session->all_userdata()) 
+        ?>
+          
+      <?php
+         // dynamic content loaded here
+         echo $contents;
+      ?>
+ 
+      <div class="spacer">elapsed-time:{elapsed_time}, memory-usage:{memory_usage}</div> 
+   </div>
+   
+   </div>
+</body>
+</html>

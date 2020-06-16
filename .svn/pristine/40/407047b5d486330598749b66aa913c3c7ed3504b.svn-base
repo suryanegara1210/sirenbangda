@@ -1,0 +1,5 @@
+<select name="bulan" id="bulan">
+  <option>- Pilih Semester -</option>
+  <option value="06">Semester 1</option>
+  <option value="12">Semester 2</option>
+</select>

@@ -1,0 +1,265 @@
+<style type="text/css">
+
+.table_inline_edit tr td {
+    height: 24px;
+    vertical-align: middle;
+}
+
+.table_inline_edit tr .edit {
+    cursor: pointer;
+}
+
+.table_inline_edit tr td input {
+    width: 130px;
+    height: 18px;
+}
+</style>
+
+<article class="module width_full">
+<header><h3>Form Pengisian Maksimum Uang Persediaan (UP)</h3></header>
+                    
+<div class="module_content">
+<form method="post" > 
+    <table  class="table-common table_inline_edit">  
+    <thead> 
+       <tr >
+           <th>No</th>
+           <th>Nama Subunit</th>   
+           <th>Pagu_real</th>   
+           <th>Maksimum UP</th>   
+       </tr>
+    </thead>
+    <?php
+        $no = 0;
+        $sum_pagu=0;
+        $sum_max_up=0;
+        foreach ($max_up as $row) {
+            $no++;
+            $sum_pagu=$sum_pagu+$row->pagu_real;
+            $sum_max_up=$sum_max_up+$row->nilai_max;
+    ?>    
+    <tr>
+        <td width="20px" align='center'><?php echo $no;?></td>
+        <td width="300px" align="left"><?php echo $row->nama_subunit;?></td>   
+        
+        <td width="130px" align="right" class="edit_pagu <?php echo $row->id_subunit?>"
+            title="Klik disini untuk memperbaharui Nilai Pagu Real">
+            <input type="hidden" id="pagu_real<?php echo $row->id_subunit?>"
+                    value="<?php echo $row->pagu_real?>">
+        <?php echo number_format($row->pagu_real, 0, ",", ".");?></td>
+        
+        <td width="130px" align="right" class="edit <?php echo $row->id_subunit?>"
+            title="Klik disini untuk memperbaharui nilai Max UP">
+            <input type="hidden" id="max_up<?php echo $row->id_subunit?>"
+                    value="<?php echo $row->nilai_max?>">
+        <?php echo number_format($row->nilai_max, 0, ",", ".");?></td>
+    </tr>
+    <?php } ?>
+    <tr>
+        <td></td>
+        <td align="center">Total</td>
+        <td id="sum_pagu" align="right"><?php echo number_format($sum_pagu, 0, ",", "."); ?></td>
+        <td id="sum_max_up" align="right"><?php echo number_format($sum_max_up, 0, ",", "."); ?></td>
+    </tr>
+    </table>
+    <div>*) Klik kolom [maksimum UP] untuk memperbaharui data, dan tekan [Enter].</div>
+    </div>
+    
+    <footer>
+    <div class="submit_link">  
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+</form>
+</article>  
+<script type="text/javascript">
+    $(function () {
+        var oldvalue = 0;
+        var oldvalue_text = '';
+        
+        $('td.edit').click (function () {
+            
+            //editable gantian antar row
+            $('.ajax').html(oldvalue_text);
+            $('.ajax').removeClass('ajax');
+            
+            //set editable
+            $(this).addClass('ajax');
+            
+            oldvalue_text   = $(this).text();
+            oldvalue        = parseFloat(oldvalue_text.replace(/[\.\,]/g, ''));
+            $(this).html(
+                '<input id="editbox" type="text" style="text-align: right" size="15">'
+            );
+            $('#editbox').autoNumeric(window.numOptions);
+            $('#editbox').autoNumeric('set', oldvalue);
+            $('#editbox').focus();
+            $('#editbox').select();
+        });
+
+        $('td.edit_pagu').click (function () {
+            
+            //editable gantian antar row
+            $('.ajax_pagu').html(oldvalue_text);
+            $('.ajax_pagu').removeClass('ajax_pagu');
+            
+            //set editable
+            $(this).addClass('ajax_pagu');
+            
+            oldvalue_text   = $(this).text();
+            oldvalue        = parseFloat(oldvalue_text.replace(/[\.\,]/g, ''));
+            $(this).html(
+                '<input id="editbox_pagu" type="text" style="text-align: right" size="15">'
+            );
+            $('#editbox_pagu').autoNumeric(window.numOptions);
+            $('#editbox_pagu').autoNumeric('set', oldvalue);
+            $('#editbox_pagu').focus();
+            $('#editbox_pagu').select();
+        });
+        
+        $('td.edit').keydown(function(event) {
+            arr = $(this).attr('class').split(' ');
+            
+            if(event.which == 13) {
+                //cek validasi maksimal disini
+                value_text  = $('.ajax input').val();
+                value       = parseFloat($('.ajax input').autoNumeric('get'));
+                value_ref   = parseFloat($('#pagu_real'+arr[1]).val());
+                
+                if (value > value_ref) {
+                    alert("Nilai Max UP tidak bisa melebihi nilai pagu real");
+                    return;
+                }
+                
+                //block page
+                $.blockUI({
+                        message: 'Nilai Max UP sedang disimpan, mohon ditunggu ...',
+                        css: window._css,
+                        overlayCSS: window._ovcss
+                });
+                
+                $.post('<?php echo site_url('usulan/save_max_up');?>',
+                        {
+                            idsu: arr[1],
+                            nilai_max: value
+                        }, function (data) {
+                            try {						
+                                var json = $.parseJSON(data);
+                                //tampilkan message
+                                $.blockUI({
+                                    message: json.message,
+                                    timeout: 1500,
+                                    css: window._css,
+                                    overlayCSS: window._ovcss
+                                });	
+                                
+                                if(json.errno == 0){
+                                    //pakai data baru  
+                                    $('.ajax').html(value_text);
+                                    update_total_max_up(oldvalue, value);
+                                } else {
+                                    //pakai data lama  
+                                    $('.ajax').html(oldvalue_text);
+                                }                                
+                                $('.ajax').removeClass('ajax');
+                                
+                            } catch(e) {
+                                //pakai data lama  
+                                $('.ajax').html(oldvalue_text);
+                                $('.ajax').removeClass('ajax');
+                                $.unblockUI();
+                            }		                            
+                                                       
+                        });
+            }
+        });
+
+        $('td.edit_pagu').keydown(function(event) {
+            arr = $(this).attr('class').split(' ');
+            
+            if(event.which == 13) {
+                //cek validasi maksimal disini
+                value_text  = $('.ajax_pagu input').val();
+                value       = parseFloat($('.ajax_pagu input').autoNumeric('get'));                
+                                
+                //block page
+                $.blockUI({
+                        message: 'Nilai Pagu Real sedang disimpan, mohon ditunggu ...',
+                        css: window._css,
+                        overlayCSS: window._ovcss
+                });
+                
+                $.post('<?php echo site_url('usulan/save_pagu_real');?>',
+                        {
+                            idsu: arr[1],
+                            nilai_pagu: value
+                        }, function (data) {                            
+                            try {                       
+                                var json = $.parseJSON(data);
+                                //tampilkan message
+                                $.blockUI({
+                                    message: json.message,
+                                    timeout: 1500,
+                                    css: window._css,
+                                    overlayCSS: window._ovcss
+                                }); 
+                                
+                                if(json.errno == 0){
+                                    //pakai data baru  
+                                    $('.ajax_pagu').html(value_text);
+                                    $('#pagu_real'+arr).val(value);
+                                    update_total_pagu(oldvalue, value);
+                                } else {
+                                    //pakai data lama  
+                                    $('.ajax_pagu').html(oldvalue_text);
+                                }                                
+                                $('.ajax_pagu').removeClass('ajax_pagu');
+                                
+                            } catch(e) {
+                                //pakai data lama  
+                                $('.ajax_pagu').html(oldvalue_text);
+                                $('.ajax_pagu').removeClass('ajax_pagu');
+                                $.unblockUI();
+                            }
+                        });
+            }
+        });
+        
+        $('#editbox').live('blur',function(){
+            //editable dihilangkan
+            $('.ajax').html(oldvalue_text);
+            $('.ajax').removeClass('ajax');     
+        });
+
+        $('#editbox_pagu').live('blur',function(){
+            //editable dihilangkan
+            $('.ajax_pagu').html(oldvalue_text);
+            $('.ajax_pagu').removeClass('ajax_pagu');     
+        });
+        
+    });  
+
+    function update_total_pagu(var_old_pagu, var_new_pagu)
+    {
+        oldtotal_pagu_text      = $("td#sum_pagu").text();        
+        oldtotal_pagu           = parseFloat(oldtotal_pagu_text.replace(/[\.\,]/g, ''));        
+
+        new_pagu                = parseFloat(var_new_pagu);        
+        old_pagu                = parseFloat(var_old_pagu);        
+
+        var newtotal_pagu       = (oldtotal_pagu-old_pagu)+new_pagu;        
+        $("td#sum_pagu").text(newtotal_pagu);
+    }  
+
+    function update_total_max_up(var_old_max_up,var_new_max_up)
+    {        
+        oldtotal_max_up_text    = $("td#sum_max_up").text();
+        oldtotal_max_up         = parseFloat(oldtotal_max_up_text.replace(/[\.\,]/g, ''));
+        
+        new_max_up              = parseFloat(var_new_max_up);        
+        old_max_up              = parseFloat(var_old_max_up);
+        
+        var newtotal_max_up     = (oldtotal_max_up-old_max_up)+new_max_up;
+        $("td#sum_max_up").text(newtotal_max_up);
+    }  
+</script>

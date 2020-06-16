@@ -1,0 +1,76 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Evaluasi_rkpd extends CI_controller
+{
+	var $CI = NULL;
+	public $triwulan = array(
+								"1" => array(
+												"nama" => "Triwulan 1",
+												"awal" => 1,
+												"akhir" => 3,
+												"romawi" => "I"
+											),
+								"2" => array(
+												"nama" => "Triwulan 2",
+												"awal" => 4,
+												"akhir" => 6,
+												"romawi" => "II"
+											),
+								"3" => array(
+												"nama" => "Triwulan 3",
+												"awal" => 7,
+												"akhir" => 9,
+												"romawi" => "III"
+											),
+								"4" => array(
+												"nama" => "Triwulan 4",
+												"awal" => 10,
+												"akhir" => 12,
+												"romawi" => "IV"
+											),
+							);
+							
+	public function __construct()
+	{
+		$this->CI =& get_instance();
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_evaluasi_rkpd', 'm_evaluasi_renja'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();
+		//$data['url_delete_data'] = site_url('cik/delete_cik');
+		$this->template->load('template','evaluasi/rkpd/view');
+	}
+
+	function get_table_data()
+	{
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$tw = $this->input->post("tw");
+
+		$html = $this->cetak_evaluasi_renja_func($tw, $tahun, "class='header_tw'", 'class="table-common tablesorter" style="width:99%"');
+		echo json_encode(array("html" => $html['evaluasi']));
+	}
+
+	private function cetak_evaluasi_renja_func($triwulan, $tahun, $css_header_tw='', $css_table=''){
+		$data['triwulan'] = $triwulan;
+		$data['tahun'] = $tahun;
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;
+		}
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['evaluasi_rkpd'] = $this->m_evaluasi_rkpd->get_rkpd_urusan_bidang($tahun, $triwulan);
+
+		$data['css_header_tw'] = $css_header_tw;
+		$data['css_table'] = $css_table;
+		$data['evaluasi'] = $this->load->view('evaluasi/rkpd/table_rkpd', $data, TRUE);
+		return $data;
+	}
+}

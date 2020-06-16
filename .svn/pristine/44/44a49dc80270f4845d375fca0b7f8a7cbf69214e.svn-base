@@ -1,0 +1,295 @@
+<?php /**
+* @brief Model Class yang berhubungan dengan proses bisnis belanja pembuatan kwitansi
+*
+* Class Model ini digunakan untuk mengelola kwitansi
+* Long Description
+* @Package
+*/
+
+class M_sptb extends CI_Model {
+       
+    public function __construct()
+    {
+        parent::__construct();
+        $this->table_name = 't_kwitansi';
+    }
+
+    /**
+     * Nilai kwitansi yang diambil adalah semua kwitansi yang sudah dibuat tanpa
+     * memperhitungkan jenis nya (GUP, LS, TUP)
+     * 
+     */
+    function rkakl_list($ta,$id_unit)
+    {      
+            $this->db->select('kdgiat,kdoutput,nmoutput,kdakun,nmakun');
+            $this->db->from('t_rkakl');
+            $this->db->join("m_subunit",'m_subunit.kode_subunit=t_rkakl.kode_unit','inner'); 
+            $this->db->where('m_subunit.id_unit',$id_unit);
+            $this->db->where('tahun',$ta);
+            $this->db->group_by('kdgiat,kdoutput,kdakun');        
+            $q= $this->db->get();    
+            return $q->result_array();
+    }
+    
+    function banyak_kwitansi_sptb($kdouput, $kdakun,$ta,$jenis_belanja,$id_unit)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_kwitansi");  
+            $this->db->join("m_subunit",'m_subunit.id_subunit=t_kwitansi.id_subunit','inner');
+            $this->db->where('m_subunit.id_unit',$id_unit);
+            $this->db->where('t_kwitansi.kdoutput',$kdouput);
+            $this->db->where('t_kwitansi.kdakun',$kdakun);
+			$this->db->where('t_kwitansi.id_sptb is NULL',NULL,FALSE);
+            $this->db->where('YEAR(t_kwitansi.tgl_kwitansi)',$ta);
+            $this->db->where('t_kwitansi.sifat_bayar',$jenis_belanja);
+            $this->db->where('t_kwitansi.id_status_kwitansi',22);
+            $this->db->group_by('t_kwitansi.id_kwitansi'); 
+            $result = $this->db->get();
+            return $result->num_rows() ;
+    }
+    function data_kuitansi_sptb($kdoutput,$id_akun,$ta,$jb){    
+            $id_unit = $this->session->userdata('id_unit');    
+            $q=$this->db->query("SELECT *, nominal as jumlah, subunit.nama_subunit as nama_subunit 
+			FROM t_kwitansi 
+			JOIN (SELECT id_subunit, nama_subunit FROM m_subunit WHERE id_unit=$id_unit) AS subunit 
+			ON t_kwitansi.id_subunit=subunit.id_subunit 
+			WHERE `id_status_kwitansi` = '22'
+			AND sifat_bayar = '$jb' 
+			AND year(tgl_kwitansi) = '$ta' 
+			AND `kdoutput` = $kdoutput 
+			AND `kdakun` = $id_akun 
+			AND t_kwitansi.id_sptb IS NULL;");
+            return $q;
+    }
+    function simpan_sptb(){    
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+			
+		$id_unit = $this->session->userdata('id_unit');            
+		$id_output = $this->input->post('id_output');
+		$id_akun = $this->input->post('id_akun');
+		$jb = $this->input->post('jb');
+
+		if($id_output=="" or $id_akun=="")
+		{
+		  $this->session->set_userdata('msg_typ','err');
+		  $this->session->set_userdata('msg', 'Maaf data SPTB yang anda maksudkan tidak ada');
+		  redirect('tup_spj/daftar_sptb_gu'); 
+		  exit;
+		}
+		$bulan = date('m');
+		$kwitansi = $this->m_sptb->ambil_id($id_output,$id_akun,$jb);
+		$tgl_skrg = date("Y-m-d H:i:s");
+		
+						   
+		$id=$this->nomer->gen_no_sptb($tgl_skrg,$id_unit, $jb); 
+		$id_sptb = $id['id_sptb']; 
+		
+		//var_dump($kwitansi->result_array());
+		 //echo $this->db->last_query();
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$jum_nominal_kwi = 0;
+		foreach($kwitansi->result_array() as $row)
+		 {  
+			$id_k = $row ['id_kwitansi'];
+			$this->m_sptb->update_kwitansi($id_sptb,$id_k);
+			
+			$jum_nominal_kwi+=$row['nominal'];
+		 }
+		$sptjm=$row['nmakun'];
+
+		//update nominal sptb
+		$this->db->set('nominal_sptb',$jum_nominal_kwi);
+		$this->db->set('jenis_sptjm',$sptjm);
+		$this->db->set('tahun_anggaran',$ta);
+		$this->db->where('id_sptb', $id_sptb);
+		$this->db->update('t_sptb');
+		
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+    } 
+    function ambil_id($kdoutput,$id_akun,$jb){
+            $id_unit = $this->session->userdata('id_unit');            
+            $q=$this->db->query("
+				SELECT * FROM t_kwitansi 
+				JOIN (SELECT id_subunit FROM m_subunit WHERE id_unit='".$id_unit."') AS subunit 
+				ON t_kwitansi.id_subunit=subunit.id_subunit 
+				WHERE `id_status_kwitansi` = '22'
+				AND t_kwitansi.id_sptb IS NULL 
+				AND sifat_bayar ='$jb' AND 
+				`kdoutput` = '$kdoutput' AND 
+				`kdakun` ='".$id_akun."' ;");
+            return $q;
+    }
+    function update_kwitansi($id_sptb,$id){            
+            $q=$this->db->query("UPDATE t_kwitansi
+			SET id_sptb='$id_sptb' 
+            WHERE id_kwitansi='$id'");
+            return $q;
+    }
+    function ambil_level_tertinggi($id_kwitansi)
+        {  
+           $this->db->select_max('level');
+           $this->db->from('tb_waktu_kwitansi');    
+           $this->db->where('id_kwitansi',$id_kwitansi);
+           $query = $this->db->get(); 
+           return $query;
+        }
+    function masuk_waktu_dibuatkan_sptb($id_kwitansi,$level_terkini,$th)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th','$tgl_skrg $jam_skrg','dibuatkan sptb','$level_terkini')");
+        }
+    function data_sptb($ta,$bulan,$id_unit,$jb){            
+            $this->db->select('*, year(tgl_sptb) as thn');
+            $this->db->from('t_kwitansi');
+            $this->db->join("t_sptb",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');
+            $this->db->join("m_status_sptb",'m_status_sptb.id_status_sptb=t_sptb.id_status_sptb','inner');
+            $this->db->where('t_sptb.sifat_bayar',$jb);
+            $this->db->where('MONTH(tgl_sptb)',$bulan);
+            $this->db->where('YEAR(tgl_sptb)',$ta);
+            $this->db->where('t_sptb.id_status_sptb <> 11 ');
+            $this->db->where('t_kwitansi.id_unit', $id_unit);
+            $this->db->group_by('t_sptb.id_sptb');
+            return $this->db->get(); 
+    }
+    function get_sptb_kwitansi($id,$ta){
+            $q=$this->db->query("
+                SELECT *, SUBSTRING(akun_kode,7,2) AS jenis_belanja, year(tgl_sptb) as thn, 
+                `t_kwitansi`.`kdoutput` as kd_out 
+				FROM t_kwitansi,t_sptb,t_rkakl,m_unit 
+                WHERE t_kwitansi.id_sptb=t_sptb.id_sptb AND 
+				`t_kwitansi`.`kdakun`=`t_rkakl`.`kdakun` AND  
+				`t_sptb`.`id_unit`=`m_unit`.`id_unit` AND 
+				`t_sptb`.`id_sptb` = '$id' AND 
+				YEAR(tgl_sptb) = '$ta' 
+				GROUP BY `t_sptb`.`id_sptb` 
+				");
+            return $q; 
+    }
+	
+	function get_sptb_sptjm($id,$ta){
+            $q=$this->db->query("
+                SELECT b.id_sptb, b.id_unit, b.nominal_sptb, b.tgl_sptb, b.jenis_sptjm,
+				   a.nmkomponen, a.nmakun, c.nama_unit, c.pd2_nama, c.pd2_nip
+				FROM t_sptb b
+				JOIN t_kwitansi a ON a.id_sptb = b.id_sptb
+				JOIN m_unit c ON c.id_unit =  b.id_unit
+				WHERE YEAR(tgl_sptb) = '$ta' AND
+				b.id_sptb = '$id'
+				GROUP BY b.id_sptb 
+				");
+            return $q;
+	}
+	
+    function get_sptb_kwitansi_detail($id,$ta){
+            $this->db->select('*','SUBSTRING(t_kwitansi.akun_kode,7,2) as jenis_belanja');
+            $this->db->from('t_kwitansi, m_subunit');
+            $this->db->where('id_sptb',$id);
+            $this->db->where('YEAR(tgl_kwitansi)='.$ta);
+            $this->db->where('t_kwitansi.id_subunit = m_subunit.id_subunit');
+            $kueri=$this->db->get();
+            return $kueri->result();
+    }
+    function get_sptb_filter($ta,$bulan,$id_unit,$where=""){            
+            $this->db->select('*, year(tgl_sptb) as thn, sum(nominal) as jumlah, GROUP_CONCAT(distinct nama_subunit) as nama_subunit');
+            $this->db->from('t_kwitansi');
+            $this->db->join("t_sptb",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');           
+            $this->db->join("m_status_sptb",'t_sptb.id_status_sptb=m_status_sptb.id_status_sptb','inner'); 
+            $this->db->join("m_subunit",'t_kwitansi.id_subunit=m_subunit.id_subunit','inner'); 
+            $this->db->like('MONTH(tgl_sptb)',$bulan);
+			$this->db->where('t_sptb.tahun_anggaran',$ta);       
+            $this->db->where('t_sptb.id_unit', $id_unit);
+			if($where!="")
+			{$this->db->where($where);}
+			$this->db->group_by('t_sptb.id_sptb');			
+		$query = $this->db->get();
+        return $query;
+    }
+    function update_sptb_unduh($id_sptb){            
+            $q=$this->db->query("UPDATE t_sptb SET jum_unduh = jum_unduh+1 
+			            WHERE id_sptb='$id_sptb'");
+            return $q;
+    }
+    function update_sptb_status($id_sptb,$status){            
+            $q=$this->db->query("UPDATE t_sptb SET id_status_sptb = $status
+			            WHERE id_sptb='$id_sptb'");
+            return $q;
+    }
+    function cek_unduh($id_sptb){
+        $this->db->select('*');
+        $this->db->from('t_sptb');
+		$this->db->where('id_sptb',$id_sptb);
+        $query = $this->db->get();
+		$result= $query->row();
+        $jum_unduh= $result->jum_unduh;
+		
+		if ($jum_unduh>0)
+		{return true;}
+		return false;	
+    }
+    
+	function subunit_get_all($idu){
+        $this->db->select('m_subunit.id_subunit,nama_subunit,kunci');
+        $this->db->from('m_subunit');
+        $this->db->join('t_kunci_sptb','m_subunit.id_subunit=t_kunci_sptb.id_subunit','left');
+		$this->db->where('m_subunit.id_unit',$unit);
+        $query=$this->db->get();
+        return $query->result();
+    }
+	
+	function cek_kunci($idu,$sifat_bayar){
+	$this->db->select('kunci');
+	$this->db->from('t_kunci_sptb');
+	$this->db->where('id_unit',$idu);
+	$this->db->where('sifat_bayar',$sifat_bayar);	
+		
+	$query=$this->db->get();
+	$kunci = $query->row();
+	
+	if(isset($kunci->kunci) && $kunci->kunci=='1'){
+		return true;
+	}else{
+		return false;
+	}
+        
+    }
+	
+	function get_total_kwitansi($idu, $sifat_bayar){
+		$sql = "
+			SELECT SUM(nominal) AS nominal
+			FROM t_kwitansi
+			WHERE id_unit='$idu'
+			AND sifat_bayar='$sifat_bayar'
+			AND id_status_kwitansi >= '19'
+			AND id_sptb IS NULL
+		";
+		
+		if($sql !== "") {
+                $result = $this->db->query($sql);
+                if ($result) {
+                    $result = $result->row();
+                    return $result->nominal;
+                }
+            }
+
+            return 0;
+	}
+	
+	function lock($idu,$sifat_bayar,$created_by,$created_date){
+		$q=$this->db->query("
+			INSERT INTO t_kunci_sptb(id_unit,sifat_bayar,kunci,created_by,created_date)
+			VALUES('$idu','$sifat_bayar','1','$created_by','$created_date')
+		");
+	}
+	
+	function unlock($idu,$sifat_bayar){
+		$q=$this->db->query("
+			DELETE FROM t_kunci_sptb
+			WHERE id_unit='$idu' 
+			AND sifat_bayar='$sifat_bayar';
+		");
+	}
+}
+?>

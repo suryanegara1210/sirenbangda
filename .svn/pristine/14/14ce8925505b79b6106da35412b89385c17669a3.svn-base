@@ -1,0 +1,62 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+
+<div id="main-content">   
+        <?php $user=$this->session->userdata('session_data'); 
+           //print_r($user['menu']);
+		?> 
+        <?php 
+            $id_kategori = $this->session->userdata('id_kategori');
+            if($id_kategori==2)
+            {
+                ?> 
+<article class="module width_full">
+        
+            <header><h3>BELANJA SUBUNIT <?php echo "$nama_sunit"; ?> </h3></header>          
+    <table class="table-list" style="margin-left: 20px;">
+      <tr >
+        <th width='200px'>TOTAL PAGU POK</th>
+        <td></td>
+        <td align="right"><?php echo $this->uang->angka($total_pagu_pok);?></td>
+      </tr>
+      <tr >
+        <th width='100px'>TOTAL PAGU REALISASI</th>
+        <td>.</td>
+        <td align="right"><?php echo $this->uang->angka($total_pagu_real);?></td>
+      </tr> 
+      <tr >
+        <th width='100px'>UP YANG TELAH DIAJUKAN</th>
+        <td>Rp.</td>                                                                                     
+        <td align="right">&nbsp;</td>
+      </tr> 
+      <tr >
+        <th width='100px'>TUP YANG TELAH DIAJUKAN</th>
+        <td>Rp.</td>
+        <td align="right">&nbsp;</td>
+      </tr>
+      <tr >
+        <th width='100px'>GUP YANG TELAH DIAJUKAN</th>
+        <td>Rp.</td>
+        <td align="right">&nbsp;</td>
+      </tr> 
+      <tr >
+        <th width='100px'>LS YANG TELAH DIAJUKAN</th>
+        <td>Rp.</td>
+        <td align="right">&nbsp;</td>
+      </tr>  
+      <tr >
+        <th>SISA PAGU REALISASI</th>
+        <td>Rp</td>
+        <td align="right">&nbsp;</td>
+      </tr>
+    </table>         
+        
+        
+            <div class="module_content">
+            
+             </div> 
+             <?php         
+            }
+        
+        ?>    
+</article>  
+</div>

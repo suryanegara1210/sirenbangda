@@ -1,0 +1,32 @@
+	    <article class="module width_full">
+    		<header><h3>Status Bukti</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                
+                <?php
+                    $xml = new SimpleXMLElement($bukti->riwayat_bukti);
+                    echo "<center>";
+                    echo "nomor bukti ".$bukti->no_bukti;
+                    echo "<table class=\"table-common\" style=\"width: 90%;\">";
+                        echo "<tr>";
+                        echo "<th>REV</th>";
+                        echo "<th>Tanggal</th>";
+                        echo "<th>Status</th>";
+                        echo "<th>Komentar</th>";
+                        echo "<th>Eksekutor</th>";
+                        echo "<tr>";
+                    foreach($xml as $xmlrow){
+                        echo "<tr>";
+                        echo "<td>".$xmlrow['rev']."</td>";
+                        echo "<td>".$this->uang->tanggal_jam($xmlrow->date)."</td>";
+                        echo "<td>".$xmlrow->status."</td>";
+                        echo "<td>".$xmlrow->coment."</td>";
+                        echo "<td>".$xmlrow->by."</td>";
+                        echo "<tr>";
+                    }
+                    echo "</table>";
+                    echo "</center>";
+                 ?>
+            </div>
+        </article>
+        <!-- end of styles article -->

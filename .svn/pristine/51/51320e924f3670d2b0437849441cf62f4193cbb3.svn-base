@@ -1,0 +1,56 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-16 07:34:08 --> 404 Page Not Found --> spj/list_spj
+ERROR - 2013-05-16 09:32:27 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 09:32:27 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 09:32:27 --> Unable to connect to the database
+ERROR - 2013-05-16 09:33:39 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:33:45 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:33:48 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:33:53 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-05-16 09:34:14 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:34:16 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:39:03 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:39:05 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-16 09:39:10 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-05-16 09:39:20 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-05-16 11:34:45 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:34:45 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:34:45 --> Unable to connect to the database
+ERROR - 2013-05-16 11:35:40 --> Severity: Notice  --> Undefined variable: id_spj C:\xampp\htdocs\siaku\application\controllers\spm.php 811
+ERROR - 2013-05-16 11:35:40 --> Severity: Notice  --> Undefined variable: ta C:\xampp\htdocs\siaku\application\models\m_spm.php 866
+ERROR - 2013-05-16 11:35:40 --> Severity: Notice  --> Undefined variable: id_spj C:\xampp\htdocs\siaku\application\models\m_spm.php 869
+ERROR - 2013-05-16 11:35:43 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-16 11:36:48 --> Severity: Notice  --> Undefined variable: ta C:\xampp\htdocs\siaku\application\models\m_spm.php 866
+ERROR - 2013-05-16 11:36:48 --> Severity: Notice  --> Undefined variable: jenis_belanja C:\xampp\htdocs\siaku\application\models\m_spm.php 867
+ERROR - 2013-05-16 11:36:48 --> Severity: Notice  --> Undefined variable: id_spj C:\xampp\htdocs\siaku\application\models\m_spm.php 869
+ERROR - 2013-05-16 11:36:48 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-16 11:37:58 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-16 11:38:35 --> Severity: Notice  --> Undefined property: stdClass::$jenis_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 838
+ERROR - 2013-05-16 11:40:32 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:40:32 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:40:32 --> Unable to connect to the database
+ERROR - 2013-05-16 11:40:53 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SUM(t_kwitansi.nominal) AS jumlah
+				FROM t_spm
+				INNER JOIN t_kwitansi
+		' at line 3
+ERROR - 2013-05-16 11:45:47 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:45:47 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:45:47 --> Unable to connect to the database
+ERROR - 2013-05-16 11:45:49 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:45:49 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:45:49 --> Unable to connect to the database
+ERROR - 2013-05-16 11:45:50 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:45:50 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-16 11:45:50 --> Unable to connect to the database
+ERROR - 2013-05-16 11:54:17 --> Query error: Unknown column 't_usulan.no_usulan' in 'field list'
+ERROR - 2013-05-16 12:23:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\controllers\spm.php 809
+ERROR - 2013-05-16 12:23:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\controllers\spm.php 843
+ERROR - 2013-05-16 12:23:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\controllers\spm.php 844
+ERROR - 2013-05-16 12:23:17 --> Severity: Notice  --> Undefined property: stdClass::$id_usulan C:\xampp\htdocs\siaku\application\controllers\spm.php 844
+ERROR - 2013-05-16 12:24:26 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\controllers\spm.php 809
+ERROR - 2013-05-16 12:53:15 --> Query error: Unknown column 'id_kwitansi=' in 'where clause'
+ERROR - 2013-05-16 12:54:49 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '$id_kwitansi' at line 1
+ERROR - 2013-05-16 13:07:55 --> Severity: Notice  --> Undefined property: stdClass::$status_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 841
+ERROR - 2013-05-16 13:09:49 --> Severity: Notice  --> Undefined property: stdClass::$id_status_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 841
+ERROR - 2013-05-16 13:55:59 --> 404 Page Not Found --> spm/index

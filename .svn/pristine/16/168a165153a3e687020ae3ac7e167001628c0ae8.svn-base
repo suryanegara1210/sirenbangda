@@ -1,0 +1,881 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Model Class penerimaan dari layanan pendidikan
+ * 
+ * Model Class penerimaan dari layanan pendidikan yang merupakan bagian 
+ * dari Bisnis Proses Penerimaan
+ * 
+ * @author Putu Praba Santika
+ * @author I Wayan Shandyasa
+ */
+    class M_ladik extends CI_Model {
+
+        function tahunAmbil($unit,$subunit,$tipe='1'){
+            $this->db->select('th_ajar');
+            $this->db->distinct();
+            if ($unit!=-1){
+            if($subunit==-1){
+			    $this->db->where("(id_ps) IN (SELECT kode_sim_reg FROM m_subunit where id_unit='".$unit."' AND kode_sim_reg IS NOT NULL)", NULL, FALSE);
+		     }else{
+			    $this->db->where('id_ps',$subunit);
+		     }
+            }
+            if ($tipe==='1'){
+                $this->db->where('status','CLOSED');
+                $this->db->where('veri_pen IS NULL', null, false);
+            }
+          
+	      $this->db->from('t_pen_mhs');
+	      $query = $this->db->get();
+	      $result= $query->result_array();
+	      return $result;
+       }
+       
+        function unitAmbil(){
+            $this->db->select('m_unit.id_unit,nama_unit');
+            $this->db->distinct();
+            $this->db->from('t_pen_mhs');
+            $this->db->join('m_subunit','id_ps=kode_sim_reg');
+            $this->db->join('m_unit','m_subunit.id_unit=m_unit.id_unit');
+            $this->db->order_by('nama_unit');
+            $query = $this->db->get();
+            $unit = array();
+            $unit['']="~~~ Pilih Fakultas ~~~";
+            foreach ($query->result() as $row){
+                $unit[$row->id_unit]= $row->nama_unit;
+            }
+            return $unit;        
+        }
+	   
+       /**
+        * ambil penerimaan yang belum diverifikasi
+        */
+       
+        function penNonVeri ($unit,$sub_unit, $tahun, $semester, $tipe=1){
+            $this->auth->has_privileges('verify_pen_ladik');
+	      
+          $this->db->from('t_pen_mhs');
+	      $this->db->where('veri_pen IS NULL', null, false);
+	      //$this->db->join('m_lov',"t_pen_mhs.jenis_pen=m_lov.kode_value and kode_app='7'");
+	      if ($unit!=='-1'){
+		     if($sub_unit==='-1'){
+			    $this->db->where("(id_ps) IN (SELECT kode_sim_reg FROM m_subunit where id_unit='".$unit."' AND kode_sim_reg IS NOT NULL)", NULL, FALSE);
+		     }else{
+			    $this->db->where('id_ps',$sub_unit);
+		     }
+            }
+	      
+	      if ($tahun!=='-1'){
+		     $this->db->where('th_ajar',$tahun);
+	      }
+            
+	      if($semester!=='-1'){
+		     $this->db->where('semester',$semester); 
+	      }
+	      
+	      $this->db->where('t_pen_mhs.status','CLOSED');
+		
+	      switch ($tipe){
+		     case 1:
+			    $this->db->select("t_pen_mhs.*");
+			    $query = $this->db->get();
+			    return $query->result();
+			    break;
+		     case 2: //ambil banyak bayar
+			    $this->db->select('count(*) as banyak');
+			    $query = $this->db->get();
+			    $hasil= $query->row();
+                return $hasil->banyak;
+			    break;
+		     case 3: //ambil jumlah bayar
+			    $this->db->select_sum('nilai');
+			    $query = $this->db->get();
+			    $hasil= $query->row();
+			    return $hasil->nilai;
+			    break;
+	      }
+            
+       }
+        
+		/**
+         * Fungsi untuk menyimpan verifikasi BAK
+         * @param objek nilai dari data verifikasi yang disimpan
+         */
+		function saveVeriPen($objek){
+            
+            $this->auth->has_privileges('verify_pen_ladik');
+            
+            $this->db->where('nim', $objek->nim);
+            $this->db->where('th_ajar', $objek->th_ajar);
+            $this->db->where('semester', $objek->semester);
+            $this->db->where('jenis_pen', $objek->jenis_pen);
+            
+            $this->db->update('t_pen_mhs', $objek);
+        }
+       
+       /** 
+         * Ambil yang sudah membayar untuk grid
+         * @param start dimulai dari nomor ke
+         * @param limit batas diambil dari database
+         * @param sidx kolom yang digunakan untuk pengurutan
+         * @param sord jenis pengurutan yang digunakan
+         * @param where query untuk pencarian
+         * @param unit id unit
+         * @param sub_unit id subunit
+         * @param tahun taun ajaran yang akan diambil
+         * @param semester semester yang akan diambil (E/O)
+         * @param tipe jenis yang mau diambil
+         * @return tipe-1 array daftar yang membayar
+         * @return tipe-2 banyak yang membayar
+         * @return tipe-3 jumlah yang dibayarkan
+         * @return tipe-4 array jumlah yang dibayarkan per jenis penerimaan
+         */
+        function realisai_bayar_ambil($start,$limit,$sidx,$sord,$where, $unit,$sub_unit, $tahun, $semester, $tipe){
+    		//$this->db->select("t_pen_mhs.nim as nim, m_mahasiswa.nama as nama,jenis_pen title_pen,t_pen_mhs.tgl_bayar, t_pen_mhs.th_ajar, t_pen_mhs.semester, t_pen_mhs.nilai, t_pen_mhs.jenis_pen ");
+            $this->db->where('t_pen_mhs.status','CLOSED');
+            $this->db->where("veri_pen",1);
+            //$this->db->join('m_mahasiswa',"t_pen_mhs.nim=m_mahasiswa.nim");
+            //$this->db->join('m_lov',"t_pen_mhs.jenis_pen=m_lov.kode_value and kode_app='7'");
+            if ($unit!=-1){
+                    if($sub_unit==-1){
+                        $this->db->where("(id_ps) IN (SELECT kode_sim_reg FROM m_subunit where id_unit='".$unit."' AND kode_sim_reg IS NOT NULL)", NULL, FALSE);
+                    }else{
+                        $this->db->where('id_ps',$sub_unit);
+                    }
+                }
+            if ($tahun!=-1){
+                $this->db->where('th_ajar',$tahun);
+            }
+            
+            if($semester!=-1){
+               $this->db->where('semester',$semester); 
+            }
+                
+    		if($where != NULL && $where != '' )$this->db->where($where,NULL,FALSE);
+    		if($sidx != NULL && $sidx != '' )$this->db->order_by($sidx,$sord);
+            
+            
+            switch ($tipe){
+                case 1:
+                    if($limit!=''){
+                      $query = $this->db->get('t_pen_mhs',$limit,$start);  
+                    } else{
+                        $query = $this->db->get('t_pen_mhs');
+                    }
+            		return $query->result();
+                    break;
+                case 2: //ambil banyak bayar
+                    $this->db->from('t_pen_mhs');
+                    return $this->db->count_all_results();
+                    break;
+                case 3: //ambil jumlah bayar
+                    $this->db->select_sum('nilai');
+                    $query = $this->db->get('t_pen_mhs');
+                    $hasil= $query->row();
+                    return $hasil->nilai;
+                    break;
+                case 4: //ambil jumlah per jenis penerimaan
+                    $this->db->select('sum(nilai) jumlah, jenis_pen');
+                    $this->db->order_by('jenis_pen');
+                    $query = $this->db->get('t_pen_mhs');
+                    return $query->result_array();
+                    break;
+            }
+            
+		}
+       
+       /** 
+         * Ambil yang belum membayar untuk grid
+         * @param start dimulai dari nomor ke
+         * @param limit batas diambil dari database
+         * @param sidx kolom yang digunakan untuk pengurutan
+         * @param sord jenis pengurutan yang digunakan
+         * @param where query untuk pencarian
+         * @param unit id unit
+         * @param sub_unit id subunit
+         * @param tahun taun ajaran yang akan diambil
+         * @param semester semester yang akan diambil (E/O)
+         * @param tipe jenis yang mau diambil
+         * @return tipe-1 array daftar yang belum membayar
+         * @return tipe-2 banyak yang belum membayar
+         * @return tipe-3 jumlah yang belum dibayarkan
+         * @return tipe-4 array jumlah yang belum dibayarkan per jenis penerimaan
+         */
+        function realisai_tunggakan_ambil($start,$limit,$sidx,$sord,$where, $unit,$sub_unit, $tahun, $semester,$tipe){
+            
+            //$this->db->select("t_pen_mhs.nim as nim, m_mahasiswa.nama as nama,m_lov.nama_value as title_pen,t_pen_mhs.tgl_bayar, t_pen_mhs.th_ajar, t_pen_mhs.semester, t_pen_mhs.nilai, t_pen_mhs.jenis_pen ");
+    		$this->db->where('t_pen_mhs.status !=','CLOSED');
+            //$this->db->join('m_mahasiswa',"t_pen_mhs.nim=m_mahasiswa.nim");
+            //$this->db->join('m_lov',"t_pen_mhs.jenis_pen=m_lov.kode_value and kode_app='7'");
+            $this->db->order_by('t_pen_mhs.nim');
+            if ($unit!=-1){
+                    if($sub_unit==-1){
+                        $this->db->where("(id_ps) IN (SELECT kode_sim_reg FROM m_subunit where id_unit='".$unit."' AND kode_sim_reg IS NOT NULL)", NULL, FALSE);
+                    }else{
+                        $this->db->where('id_ps',$sub_unit);
+                    }
+                }
+            if ($tahun!=-1){
+                $this->db->where('th_ajar',$tahun);
+            }
+            
+            if($semester!=-1){
+               $this->db->where('semester',$semester); 
+            }
+                
+    		if($where != NULL && $where != '' )$this->db->where($where,NULL,FALSE);
+    		//if($sidx != NULL && $sidx != '' )$this->db->order_by($sidx,$sord);
+            
+            switch ($tipe){
+                case 1:
+                    if($limit!=''){
+                      $query = $this->db->get('t_pen_mhs',$limit,$start);  
+                    } else{
+                        $query = $this->db->get('t_pen_mhs');
+                    }
+                    return $query->result();
+                    break;
+                case 2:
+                    $this->db->from('t_pen_mhs');
+                    return $this->db->count_all_results();
+                    break;
+                case 3:
+                    $this->db->select_sum('nilai');
+                    $query = $this->db->get('t_pen_mhs');
+                    $hasil= $query->row();
+                    return $hasil->nilai;
+                    break;
+                case 4:
+                    $this->db->select('sum(nilai) as jumlah_tung, jenis_pen');
+                    $this->db->order_by('jenis_pen');
+                    $query = $this->db->get('t_pen_mhs');
+                    return $query->result_array();
+                    break;
+            }
+            
+        }
+       
+       /**
+        * Ambil agregat penerimaan untuk dibuatkan bukti ka masuk.
+        */
+       function ambilBKM(){
+            $this->db->select('id_ps, th_ajar, semester, jenis_pen,  SUM(nilai) as jum_nilai, simreg_tb_item_pembayaran.jenis_pen_simper ,simreg_tb_item_pembayaran.kode_bas, m_subunit.`id_subunit`');
+            $this->db->from('t_pen_mhs');
+            $this->db->join('simreg_tb_item_pembayaran',"jenis_pen=CONCAT(simreg_tb_item_pembayaran.group_item,'-',simreg_tb_item_pembayaran.simple_code)");
+            $this->db->join('m_subunit','id_ps=m_subunit.`kode_sim_reg`');
+            $this->db->where('status','CLOSED');
+            $this->db->where('veri_pen','1');
+            $this->db->where('sudah_bkm is null',null,false);
+            $this->db->group_by('id_ps, jenis_pen, th_ajar, semester');
+            $query=$this->db->get();
+            return $query->result();
+       }
+       
+       function ambilUnitBKM(){
+        /*
+            SELECT `strata`, `th_ajar`, `semester`, `nama_subunit`, SUM(nilai) AS jum_nilai, `m_subunit`.`id_subunit`
+            FROM (`t_pen_mhs`)
+            JOIN `m_subunit` ON `t_pen_mhs`.`id_ps` =`m_subunit`.`kode_sim_reg`
+            WHERE `status` =  'CLOSED'
+            AND `veri_pen` =  '1'
+            AND sudah_bkm IS NULL
+            GROUP BY `m_subunit`.`id_subunit`
+        */
+        $this->db->select('strata,th_ajar,semester,nama_subunit,jenis_pen,
+                            SUM(nilai) AS jum_nilai,m_subunit.id_subunit');
+        $this->db->from('t_pen_mhs');
+        $this->db->join('m_subunit','t_pen_mhs.id_ps =m_subunit.kode_sim_reg');
+        $this->db->where('status','CLOSED');
+        $this->db->where('veri_pen','1');
+        $this->db->where('sudah_bkm IS NULL',null,false);
+        $this->db->group_by('m_subunit.id_subunit');
+        $query=$this->db->get();
+        return $query->result();
+       }
+       
+       
+       function ambilBKMperSubunit($id_subunit,$tipe='1'){
+            $this->db->select('nama_subunit,id_ps, th_ajar, semester, jenis_pen,  SUM(nilai) as nilai, simreg_tb_item_pembayaran.jenis_pen_simper ,simreg_tb_item_pembayaran.kode_bas as akun_bas, m_subunit.`id_subunit`');
+            $this->db->from('t_pen_mhs');
+            $this->db->join('simreg_tb_item_pembayaran',"jenis_pen=CONCAT(simreg_tb_item_pembayaran.group_item,'-',simreg_tb_item_pembayaran.simple_code)");
+            $this->db->join('m_subunit','id_ps=m_subunit.`kode_sim_reg`');
+            $this->db->where('status','CLOSED');
+            $this->db->where('veri_pen','1');
+            if($tipe=='1'){
+                $this->db->where('sudah_bkm is null',null,false);
+            }
+            $this->db->where('m_subunit.id_subunit',$id_subunit);
+            $this->db->group_by('id_ps, jenis_pen, th_ajar, semester');
+            $query=$this->db->get();
+            return $query->result();
+       }
+       
+       function updatePenBKM($id_subunit,$jenpen){
+            $this->db->where('status','CLOSED');
+            $this->db->where('veri_pen','1');
+            $this->db->where('jenis_pen',$jenpen);
+            $this->db->where("(id_ps) in (select kode_sim_reg from m_subunit where id_subunit=$id_subunit)", null, false);
+            
+            $this->db->set('sudah_bkm','1');
+            $this->db->update('t_pen_mhs'); 
+       }
+       
+       function ambilUnitBM(){
+        $this->db->select('strata,th_ajar,semester,nama_subunit,jenis_pen,
+                            SUM(nilai) AS jum_nilai,m_subunit.id_subunit');
+        $this->db->from('t_pen_mhs');
+        $this->db->join('m_subunit','t_pen_mhs.id_ps =m_subunit.kode_sim_reg');
+        //FIXME: statusnya close? pending? atau???
+        //$this->db->where('status !=','OPEN');
+        $this->db->where('veri_pen IS NULL',null, false);
+        $this->db->group_by('m_subunit.id_subunit');
+        $query=$this->db->get();
+        return $query->result();
+       }
+       function ambilBMperSubunit($id_subunit,$tipe='1'){
+            $this->db->select('nama_subunit,id_ps, th_ajar, semester, jenis_pen,  SUM(nilai) as nilai, simreg_tb_item_pembayaran.jenis_pen_simper ,simreg_tb_item_pembayaran.kode_bas as akun_bas, m_subunit.`id_subunit`');
+            $this->db->from('t_pen_mhs');
+            $this->db->join('simreg_tb_item_pembayaran',"jenis_pen=CONCAT(simreg_tb_item_pembayaran.group_item,'-',simreg_tb_item_pembayaran.simple_code)");
+            $this->db->join('m_subunit','id_ps=m_subunit.`kode_sim_reg`');
+            //$this->db->where('status !=','OPEN');
+            $this->db->where('veri_pen IS NULL',null, false);
+            //FIXME: sudah bm ga bole bm lagi ya?
+            if($tipe=='1'){
+                $this->db->where('sudah_bkm is null',null,false);
+            }
+            $this->db->where('m_subunit.id_subunit',$id_subunit);
+            $this->db->group_by('id_ps, jenis_pen, th_ajar, semester');
+            $query=$this->db->get();
+            return $query->result();
+       }
+       
+       function ambilCloseNonVeri($id_subunit){
+           /* SELECT * FROM t_pen_mhs WHERE STATUS='CLOSED' AND veri_pen IS NULL AND (id_ps) IN (SELECT kode_sim_reg FROM m_subunit WHERE id_subunit=177) 
+            */
+            $this->db->from('t_pen_mhs');
+            $this->db->where('status','CLOSED');
+            $this->db->where('veri_pen IS NULL',null,false);
+            $this->db->where("(id_ps) in (select kode_sim_reg from m_subunit where id_subunit=$id_subunit)", null, false);
+            $query=$this->db->get();
+            return $query->num_rows();
+            
+;        }
+       
+       function updatePenBM($id_unit,$jenpen){
+            $this->db->where('status !=','CLOSED');
+            $this->db->where('jenis_pen',$jenpen);
+            $this->db->where("(id_ps) in (select kode_sim_reg from m_subunit where id_unit=$id_unit)", null, false);
+            
+            $this->db->set('sudah_bm','1');
+            $this->db->update('t_pen_mhs'); 
+       }
+       
+       function hitung_proporsi(){
+        /*
+        select kredit,jenis_pen_simper, kode_subunit,kode_pen,unit_tujuan,proporsi, remark from t_bkm_det
+        join m_subunit on sub_unit=id_subunit
+        JOIN SIMPER_m_proporsi ON jenis_pen_simper=SIMPER_m_proporsi.kode_pen and unit_asal=kode_subunit
+        where (id_bkm, th_bkm) in (select id_bkm, th_bkm from t_bkm where jenis_mou=0) and tahun='2013'
+        */
+        $this->db->select(' id_bkmdet, th_bkmdet,th_ajar, semester, kredit,jenis_pen_simper, kode_subunit,kode_pen,unit_tujuan,proporsi, remark');
+        $this->db->from('t_bkm_det');
+        $this->db->join('m_subunit','sub_unit=id_subunit');
+        $this->db->join('SIMPER_m_proporsi','jenis_pen_simper=SIMPER_m_proporsi.kode_pen and unit_asal=kode_subunit');
+        $this->db->where('(id_bkm, th_bkm) in (select id_bkm, th_bkm from t_bkm where jenis_mou=0)', null, false);
+        $this->db->where('tahun',date('Y'));
+        $this->db->where('sudah_proporsi is null',null,false);
+        $query=$this->db->get();
+        $penerimaan= $query->result();
+        //echo $this->db->last_query();
+        //print_r($penerimaan);
+        $this->load->model('m_umum');
+        $penerimaan_arr=array();
+
+        foreach($penerimaan as $pen){
+            if (!isset($penerimaan_arr[$pen->unit_tujuan])){
+                $penerimaan_arr[$pen->unit_tujuan]['total']=0;
+            }
+            
+            $subunitDet=$this->m_umum->subunit_detail($pen->unit_tujuan,$tipe=Constant::JR_CD);
+            $nama=$subunitDet->nama_subunit;
+            $id=$subunitDet->id_subunit;
+            
+            $penerimaan_arr[$pen->unit_tujuan]['nama']=$nama;
+            $penerimaan_arr[$pen->unit_tujuan]['total']=($penerimaan_arr[$pen->unit_tujuan]['total']+($pen->proporsi/100*$pen->kredit));
+            //print_r($pen->id_pem_mhs); echo "<br />";
+            $penerimaan_arr[$pen->unit_tujuan]['kode_unit_tujuan']=$pen->unit_tujuan;
+            $penerimaan_arr[$pen->unit_tujuan]['th_ajar']=$pen->th_ajar;
+            $penerimaan_arr[$pen->unit_tujuan]['semester']=$pen->semester;
+            $penerimaan_arr[$pen->unit_tujuan]['id']=$id;
+            $penerimaan_arr[$pen->unit_tujuan]['transaksi'][]=$pen->id_bkmdet."-".$pen->th_bkmdet;
+        }
+        
+            //print_r($penerimaan_arr);
+            foreach ($penerimaan_arr as $pen){
+                //print_r($pen);
+                foreach ($pen['transaksi'] as $trx){
+                    $trxEx=explode("-", $trx);
+                    $this->db->where('id_bkmdet',$trxEx[0]);
+                    $this->db->where('th_bkmdet',$trxEx[1]);
+                    
+                    $this->db->set('sudah_proporsi','1');
+            
+                    $this->db->update('t_bkm_det');
+                }
+                    $this->db->where('tahun',$pen['th_ajar']);
+                    $this->db->where('semester',$pen['semester']);
+                    $this->db->where('subunit',$pen['id']);
+                    $this->db->from('t_pagu_real');
+                    if ($this->db->count_all_results() == 0) {
+                        
+                    $data = array(
+                        'tahun' => $pen['th_ajar'] ,
+                        'semester' => $pen['semester'] ,
+                        'subunit' =>$pen['id'],
+                        'pagu_real'=>$pen['total']
+                        );
+                        
+                        $this->db->insert('t_pagu_real', $data); 
+                    } else {
+                        $this->db->where('tahun',$pen['th_ajar']);
+                        $this->db->where('semester',$pen['semester']);
+                        $this->db->where('subunit',$pen['id']);
+                        $this->db->from('t_pagu_real');
+                        $query=$this->db->get();
+                        $pagu_real= $query->row();
+                        $this->db->where('tahun',$pen['th_ajar']);
+                        $this->db->where('semester',$pen['semester']);
+                        $this->db->where('subunit',$pen['id']);
+                        $nilai_pagu_real= $pagu_real->pagu_real; 
+                        $pagu_baru=$nilai_pagu_real+$pen['total'];
+                        $this->db->set('pagu_real',$pagu_baru);
+                        
+                        $this->db->update('t_pagu_real');
+                      // A record does exist, update it.
+                      //$query = $this->db->update('products', $record, array('sku'=>$sku));
+                    }  
+            
+                 
+            }
+       }
+       
+       /**
+        * Ambil agregat tunggakan untuk dibuatkan bukti memorial.
+        */
+       function ambilBM(){
+            $this->db->select('id_ps, th_ajar, semester, jenis_pen,  SUM(nilai) as jum_nilai, simreg_tb_item_pembayaran.jenis_pen_simper ,simreg_tb_item_pembayaran.kode_bas, m_subunit.`id_subunit`');
+            $this->db->from('t_pen_mhs');
+            $this->db->join('simreg_tb_item_pembayaran',"jenis_pen=CONCAT(simreg_tb_item_pembayaran.group_item,'-',simreg_tb_item_pembayaran.simple_code)");
+            $this->db->join('m_subunit','id_ps=m_subunit.`kode_sim_reg`');
+            $this->db->where('status !=','CLOSED');
+            $this->db->group_by('id_ps, jenis_pen, th_ajar, semester');
+            $query=$this->db->get();
+            return $query->result();
+        }
+       
+       /**
+        * Ambil total penerimaan per jenis pendapatan
+        * @param unit id unit yang mau dilihat
+        * @param sub_unit id sub unit yang mau dilihat
+        * @param tahun tahun jajaran yang mau dilihat
+        * @param semester semster yang mau dilihat
+        * @return daftar penerimaan dikelompokkkan berdasar jenis penerimaan
+        */
+        function realisai_bayar_jenis_ambil($unit,$sub_unit, $tahun, $semester){
+    		$this->db->select('sum(nilai) as jumlah_bayar, t_pen_mhs.jenis_pen,t_pen_mhs.jenis_pen as title_pen');
+            $this->db->where('t_pen_mhs.status','CLOSED');
+            $this->db->where("veri_pen",1);
+            //$this->db->join('m_lov',"t_pen_mhs.jenis_pen=m_lov.kode_value and kode_app='7'");
+            
+            if ($unit!=-1){
+                    if($sub_unit==-1){
+                        $this->db->where("(id_ps) IN (SELECT kode_sim_reg FROM m_subunit where id_unit='".$unit."' AND kode_sim_reg IS NOT NULL)", NULL, FALSE);
+                    }else{
+                        $this->db->where('id_ps',$sub_unit);
+                    }
+                }
+            if ($tahun!=-1){
+                $this->db->where('th_ajar',$tahun);
+            }
+            
+            if($semester!=-1){
+               $this->db->where('semester',$semester); 
+            }
+            
+            $this->db->group_by('t_pen_mhs.jenis_pen');
+            $query = $this->db->get('t_pen_mhs');
+            return $query->result_array();
+		}
+        
+        /**
+         * Ambil proporsi sesuai unit asal dan tahun anggaran,
+         * nama unit tujuan ada di colom nama_unit
+         * nama subunit tujuan ada di colom nama_subunit
+         * @param kode_unit_asal kode unit asal (yang mau dibagi)
+         * @param tahun_anggaran tahun anggaran yang mau diambil
+         * @return array proporsi
+         */
+        function proprsi_ambil($kode_unit_asal, $tahun_anggaran){
+            $this->db->select('m_proporsi.*, nama_unit, nama_subunit');
+            $this->db->from('m_proporsi');
+            $this->db->join('m_unit','m_unit.kode_unit=m_proporsi.unit_tujuan','left');
+            $this->db->join('m_subunit','m_subunit.kode_subunit =m_proporsi.unit_tujuan','left');
+            $this->db->where('unit_asal',$kode_unit_asal);
+            $this->db->where('tahun',$tahun_anggaran);
+            $query = $this->db->get();
+            return $query->result_array();
+        }
+        
+        /**
+         * Buat bukti kas masuk
+         * @param tahun tahun yang akan diambil
+         * @param tipe tipe pengambilan
+         * @return tipe-1 daftar object surat setor
+         * @retun tipe-2 banyaknya surat setor
+         */
+        function bukti_kas_masuk($tahun, $tipe){
+            $ambil=" 
+            FROM (
+                SELECT kode_nim_sub, id_subunit,kode_subunit, t_pen_mhs.jenis_pen, SUM(nilai) AS jumlah 
+                FROM t_pen_mhs 
+                JOIN m_subunit ON MID(nim,3,3)=kode_nim_sub
+                WHERE tgl_bayar IS NOT NULL
+                GROUP BY kode_nim_sub, jenis_pen
+            ) AS pen 
+            LEFT JOIN m_proporsi ON m_proporsi.unit_asal=pen.kode_subunit AND m_proporsi.kode_pen=pen.jenis_pen 
+            WHERE tahun='".$tahun."'";
+            if($tipe=='1'){
+                $ambil='SELECT kode_nim_sub, kode_subunit AS unit_asal,m_proporsi.`unit_tujuan` , pen.jenis_pen, proporsi, t_pen_mhs.nilai '.$ambil;
+                $hasil=$this->db->query($ambil);
+                return $hasil->result();
+            }else{
+                $ambil='SELECT COUNT(kode_nim_sub) as banyak '.$ambil;
+                $hasil=$this->db->query($ambil);
+                $baris= $hasil->row();
+                return $baris->banyak;
+            }
+        }
+        /**
+         * Buat ringkasan eksekutif untuk semua
+         * @param tahun_ajaran tahun ajaran yang akan diambil
+         * @return daftar object daftar penerimaan per jenis penerrimaan, program studi
+         */
+        function realisai_ringkasan_eks($th_ajar){
+            $this->db->select('MID(nim,'.$this->nim_kfak_mulai.','.$this->nim_kfak_panjang.') as kode_prodi, nama_unit, `group`, SUM(nilai) AS jumlah', false);
+            $this->db->from('t_pen_mhs');
+            $this->db->join('m_unit','kode_nim=MID(nim,'.$this->nim_kfak_mulai.','.$this->nim_kfak_panjang.')', 'left');
+            $this->db->join('m_jenis_penerimaan','t_pen_mhs.jenis_pen=m_jenis_penerimaan.jenis_pen',false);
+            $this->db->group_by('kode_prodi, m_jenis_penerimaan.group');
+            $query = $this->db->get();
+            return $query->result();
+       }
+       /**
+        * Ambil semua data penerimaan yang belum dibuatkan surat setor sekaligus proporsinya
+        * @param tahun integer tahun anggaran yang mau diambil
+        * @return daftar objek transaksi pembayaran yang belum dibuatkan surat setor beseta proporsinya. 
+        */
+       function belumSuratSetorAmbil($tahun)
+       {
+            $ambil=" 
+                SELECT pen.*,unit_tujuan, proporsi
+                FROM( 
+                	SELECT id_pen, nim, th_ajar, nilai, jenis_pen,kode_subunit, nama_subunit 
+                	FROM t_pen_mhs JOIN m_subunit ON (t_pen_mhs.prodi=m_subunit.`kode_subunit`) 
+                	WHERE id_pen 
+                	NOT IN (
+                		SELECT id_pen FROM t_bks_ladik_det
+                		)
+                	AND t_pen_mhs.`status` ='CLOSED' 
+                ) AS pen 
+                LEFT JOIN m_proporsi ON m_proporsi.unit_asal=pen.kode_subunit AND m_proporsi.kode_pen=pen.jenis_pen 
+                WHERE tahun='".$tahun."'";
+            $hasil=$this->db->query($ambil);
+            return $hasil->result();
+       }
+       /**
+        * Simpan bukti kas masuk yang dibuat
+        * @param $objek objek yang berisi sebuah bukti kas masuk
+        * @return bolean true jika berhasil beserta id dan th
+        */
+       function buktiKasMasukSimpan($objek)
+       {
+            $no_baru=$this->nomer->id_baru('t_bks_ladik','bks',date("y"));
+            
+            $this->db->where('id_bks', $no_baru['id_bks']);
+            $this->db->where('th_bks', $no_baru['th_bks']);
+            
+            if($this->db->update('t_bks_ladik', $objek)){
+                $hasil['berhasil']=true;
+                $hasil['id']=$no_baru['id_bks'];
+                $hasil['th']=$no_baru['th_bks'];
+            }else{
+                $hasil['berhasil']= false;
+            }
+            return $hasil;
+       }
+       /**
+        * Simpan detail bukti kas masuk yang dibuat
+        * @param $master objek yang berisi detail bukti kas masuk, serta id dan th master bukti kas masuk
+        * @return bolean true jika berhasil
+        */
+       function buktiKasMasukDetSimpan($master)
+       {
+            $no_baru=$this->nomer->id_baru('t_bks_ladik_det','bksdet',date("y"));
+            $this->db->where('id_bksdet', $no_baru['id_bksdet']);
+            $this->db->where('th_bksdet', $no_baru['th_bksdet']);
+            if($this->db->update('t_bks_ladik_det', $master)){
+                return true;
+            }else{
+                return false;
+            }
+       }
+       /**
+        * Ambil bukti kas masuk yang belum verifikasi
+        * @param $jenis jenis yang mau diambil, 1: belum verifikasi bak, 2: belum verifikasi PRII
+        * @return daftar objek surat setor yang belum verifikasi
+        */
+       function bkmAmbilNonVeri($jenis)
+       {
+            $this->db->select('t_bks_ladik.*, nama_unit, nama_subunit');
+            $this->db->from('t_bks_ladik');
+            if ($jenis==1){
+                $this->db->where('verified_bak IS ','NULL',false);
+            }else{
+                $this->db->where('verified_bak','1');
+                $this->db->where('verified_pr2 IS ','NULL',false);
+            }
+            $this->db->join('m_unit', 't_bks_ladik.kode_unit=m_unit.kode_unit','left');
+            $this->db->join('m_subunit', 't_bks_ladik.kode_unit=m_subunit.kode_subunit','left');
+            $query = $this->db->get();
+            return $query->result();
+       }
+       /**
+        * simpan hasil verifikasi surat setor 
+        * @param $data array berisi id, th, dan hasil verifikasi
+        * @return bolean true jika berhasil
+        */
+       function veriSaveBKM($data){
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+            foreach ($data as $dat){
+                $this->db->update('t_bks_ladik', $dat, array('th_bks'=>$dat['th_bks'],'id_bks' => $dat['id_bks']));
+            }
+            $this->db->trans_complete();
+            if($this->db->trans_status() === true){
+                return true;
+            } else {
+                return false;
+            }
+       }
+	   
+       function nmFakutas(){
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+            foreach ($data as $dat){
+                $this->db->update('t_bks_ladik', $dat, array('th_bks'=>$dat['th_bks'],'id_bks' => $dat['id_bks']));
+            }
+            $this->db->trans_complete();
+            if($this->db->trans_status() === true){
+                return true;
+            } else {
+                return false;
+            }
+       }
+	  function getunitList()
+        {
+            
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_unit');
+            $this->db->order_by('kode_unit','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Fakultas-';
+                $result[$row->id_unit]= ("$row->kode_unit - $row->nama_unit");
+            }
+            
+            return $result;
+        }
+       function proporsi ($id_unit)
+        {
+            $q=$this->db->query("
+                SELECT m_subunit.nama_subunit AS u_asal, a.nama_subunit AS u_tujuan,m_subunit.id_subunit AS id_asal, a.id_subunit AS id_tujuan,
+                proporsi, remark, title_singkat, SUM(kredit) AS jum_kredit,(proporsi*(SUM(kredit))/100) as jum_pro,GROUP_CONCAT(DISTINCT id_bukti_det) AS id_bukti_det_gb 
+                FROM t_bukti_det
+                JOIN t_bukti_akuntansi
+                    ON t_bukti_det.id_bukti=t_bukti_akuntansi.id_bukti
+                        AND t_bukti_akuntansi.`jenis_bukti` ='".constant::BUK_BKM."'
+                        AND t_bukti_akuntansi.`jenis_ref` = '".constant::MOU_LADIK."'
+                JOIN m_bas #gabung ke m_bas cari kode_penerimaan_simper
+                    ON akun_bas=m_bas.akun_kode
+                JOIN m_subunit #gabung subunit untuk unit tertentu, cari kode_subunit
+                    ON t_bukti_akuntansi.id_subunit=m_subunit.id_subunit
+                        AND m_subunit.id_unit='".$id_unit."'
+                JOIN simper_m_proporsi
+                    ON simper_m_proporsi.unit_asal = m_subunit.kode_subunit 
+                JOIN simper_m_jenis_penerimaan
+                    ON simper_m_proporsi.kode_pen = simper_m_jenis_penerimaan.kode_pen
+                        AND m_bas.kode_pen_simper=simper_m_proporsi.`kode_pen`
+                JOIN m_subunit AS a
+                    ON unit_tujuan = a.kode_subunit
+                WHERE  ISNULL(t_bukti_det.sudah_proporsi)
+                GROUP BY t_bukti_akuntansi.id_subunit, kode_pen_simper, remark");
+            return $q->result_array();
+        }
+		function simpan_proporsi ($ta,$semester,$id_unit)
+        {
+            $now = date("Y-m-d H:i:s");
+            $nama_user = $this->session->userdata('username');
+            $pro_data=$this->proporsi($id_unit);
+            //var_dump($pro_data);
+            $sudah_upd_pro=Array();
+            
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+            
+            foreach ($pro_data as $pd){
+                $data = array(
+                   'tahun' => $ta ,
+                   'semester' => $semester ,
+                   'subunit_asal' => $pd['id_asal'],
+                   'subunit_tujuan' => $pd['id_tujuan'],
+                   'proporsi' => $pd['proporsi'],
+                   'jumlah' => $pd['jum_kredit'],
+                   'jum_pro' => $pd['jum_pro'],
+                   'remark' => $pd['remark'],
+                   'jen_pen' => $pd['title_singkat'],
+                   'create_date' => $now,
+                   'create_by' => $nama_user
+                );
+
+                $this->db->insert('t_proporsi', $data);
+                
+                
+                $id_bukti_det=explode(',',$pd['id_bukti_det_gb']);
+                foreach($id_bukti_det as $id_det){
+                    if(!in_array($id_det,$sudah_upd_pro)){
+                        //update id bukti
+                        $data = array(
+                                   'sudah_proporsi' => '1'
+                                );
+
+                        $this->db->where('id_bukti_det', $id_det);
+                        $this->db->update('t_bukti_det', $data); 
+                        $sudah_upd_pro[]=$id_det;
+                    }
+                }
+            }
+            $this->db->trans_complete();
+                return $this->db->trans_status();
+        }
+		function ambil_subunit($id_unit)
+        {
+            
+            $this->db->from("m_subunit");   
+            $this->db->where('m_subunit.id_unit',$id_unit); 
+            $result = $this->db->get();
+			return $result;
+		}
+		function cek_pro($id_subunit,$semester,$tahun)
+        {
+            
+            $this->db->from("t_proporsi");   
+            $this->db->where('tahun',$tahun);
+			$this->db->where('semester',$semester); 
+			$this->db->where('subunit_asal',$id_subunit);   
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {      
+                return false;
+            }
+            else    
+            {   
+                return true;
+            }
+        }
+		function delete_proporsi($id_subunit,$semester,$tahun)
+        {     
+			$this->db->where('tahun',$tahun);
+			$this->db->where('semester',$semester);
+            $this->db->where('subunit_asal',$id_subunit);
+            $this->db->delete('t_proporsi');
+        }
+
+
+		function delete_proporsix($u_asal, $u_tujuan, $proporsi, $remark)
+        {     
+			$this->db->where('subunit_asal',$u_asal);
+			$this->db->where('subunit_tujuan',$u_tujuan);
+            $this->db->where('proporsi',$proporsi);
+            $this->db->where('remark',$remark);
+            $this->db->delete('t_proporsi');
+        }
+
+//------------------------
+		function select_proporsi ($id_unit)
+        {
+            $q=$this->db->query("
+SELECT m_subunit.id_subunit AS u_asal, a.id_subunit AS u_tujuan,proporsi, SUM(kredit) AS jum_kredit, remark FROM t_bkm_det 
+JOIN m_bas ON akun=m_bas.akun_kode
+JOIN m_subunit ON sub_unit=m_subunit.id_subunit AND id_unit='$id_unit'
+JOIN SIMPER_m_proporsi ON unit_asal = kode_subunit
+JOIN m_subunit AS a ON unit_tujuan = a.kode_subunit
+where SUBSTRING(akun, 1,1)='4'
+GROUP BY sub_unit, kode_pen_simper, remark ");
+            return $q;
+        }
+		function rekap_pagu ()
+        {
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s"); 
+            $nama_user = $this->session->userdata('username');
+            $q=$this->db->query("
+INSERT INTO t_pagu_real(`tahun`,`subunit`,`pagu_real`,`create_date`,`create_by`)
+SELECT tahun, subunit_tujuan, SUM(jum_pro),'$tgl_skrg $jam_skrg','$nama_user' FROM t_proporsi GROUP BY tahun, subunit_tujuan");
+            return $q;
+        }
+		function preview_pagu_real ()
+        {
+            $q=$this->db->query("
+SELECT nama_subunit, tahun, subunit_tujuan, SUM(jum_pro) AS jumlah FROM t_proporsi, m_subunit WHERE t_proporsi.subunit_tujuan=m_subunit.id_subunit GROUP BY tahun, subunit_tujuan
+");
+            return $q;
+        }
+		
+		
+		function pagu_real($semester)
+        {
+            $tahun = date('Y');
+            $this->db->from("t_pagu_real"); 
+			$this->db->join("m_subunit",'t_pagu_real.subunit=m_subunit.id_subunit','inner');  
+            $this->db->where('tahun',$tahun); 
+			$this->db->where('semester',$semester);
+            $result = $this->db->get();
+			return $result;
+		}
+        function cek_proporsi($id_unit)
+        {   
+            //$bulan= date('m'); 
+            $tahun = date('Y'); 
+            $qf=$this->db->query("select count(*) as jumlah  from t_proporsi join ( SELECT id_subunit FROM m_subunit WHERE id_unit=$id_unit ) as apa on t_proporsi.subunit_asal=apa.id_subunit where tahun=$tahun;");
+            $hasil = $qf->row();
+            return $hasil->jumlah;
+        }
+        function ambil_id_sub ()
+        {
+            $q=$this->db->query("SELECT id_subunit FROM t_proporsi, m_subunit WHERE t_proporsi.subunit_tujuan=m_subunit.id_subunit GROUP BY tahun,semester, subunit_tujuan");
+            return $q;
+        }
+        function delete_pagu_real($id_subunit)
+        {   
+            $tahun = date("Y");  
+            $this->db->where('subunit',$id_subunit);
+            $this->db->where('tahun',$tahun);     
+            $this->db->delete('t_pagu_real');
+        }
+
+//------------------------		
+
+	}
+?>

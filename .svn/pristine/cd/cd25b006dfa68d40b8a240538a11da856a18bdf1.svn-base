@@ -1,0 +1,75 @@
+<?php class M_uraian_tup extends CI_Model {
+
+/** 
+* Fungsi untuk mengambil Data user
+* @param start is integer
+* @param limit is integer
+* @param sidx is integer
+* @param sord is integer
+* @param where is varchar
+* @return list of object
+*/      
+    function ambilDatauser($start,$limit,$sidx,$sord,$where)
+        {
+            $this->db->select("*, nama_value as satuan"); 
+            $this->db->from("t_uraian");
+            $this->db->join("m_lov",'t_uraian.kode_value=m_lov.kode_value','inner');
+			$this->db->where("t_uraian.id_jenisbelanja = 2");
+            $this->db->limit($limit);
+            if($where != NULL)$this->db->where($where,NULL,FALSE);
+            $this->db->order_by($sidx,$sord);
+            $this->db->limit($limit,$start);
+            $query = $this->db->get();
+            return $query->result();
+        }
+/** 
+* Fungsi untuk mengambil banyak data uraian
+* @return list of object
+*/ 
+    function banyak_semua()
+        {
+			$this->db->from('t_uraian');
+			$this->db->where("t_uraian.id_jenisbelanja = 2");
+			$this->db->where("t_uraian.flag_cek = 0");
+			return $this->db->count_all_results();
+        }
+/** 
+* Fungsi untuk mengambil semua data user
+* @return list of object
+*/ 
+    function semua_user()
+        {
+            $q = $this->db->query("select * from t_uraian");
+            return $q;
+        }
+/** 
+* Fungsi untuk menambahkan data artis
+* @param user is varchar
+* @return list of object
+*/ 
+    function add_artis($user)
+        {
+            $this->db->insert('t_uraian', $user);       
+        } 
+/** 
+* Fungsi untuk mengupdate semua data artis
+* @param user is varchar
+* @param id is integer
+*/  
+    function update_artis($user,$id)
+        {
+            $this->db->where('id_uraian', $id);
+            $this->db->update('t_uraian', $user);
+        }
+/** 
+* Fungsi untuk mendelete data artis
+* @param id_uraian is integer
+*/ 
+    function delete_artis($id_uraian)
+        {
+            $this->db->where('id_uraian', $id_uraian);
+            $this->db->delete('t_uraian'); 
+        }
+ 
+}
+?>

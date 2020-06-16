@@ -1,0 +1,149 @@
+<table border="1" style="border-collapse:collapse; padding:5px; align: center; width:100%">
+        <tr>
+            <td style="text-align: center" >
+                DEPARTEMEN KEUANGAN RI<BR/>
+                DITJEN PERBENDAHARAAN<BR/>
+                KPPN
+                <h2>037</h2>
+            </td>
+            <td><h2 style="text-align: center">
+                <?php
+                    switch ($isi_ss->tipe_ss){
+                        case constant::SS_SS:
+                            echo "SURAT SETOR";
+                            break;
+                        case constant::SS_SSPB:
+                            echo "SURAT SETORAN<br/>PENGEMBALIAN BELANJA<br/>(SSPB)";
+                            break;
+                        case constant::SS_SSBP:
+                            echo "SURAT SETORAN<br/>BUKAN PAJAK<br/>(SSPB)";
+                            break;
+                        default:
+                            echo "surat setor ".$isi_ss->tipe_ss;
+                            break;
+                    }
+                ?>
+               </h2><br/>
+                Nomor: <?php echo $isi_ss->no_suratsetor;?><br/>
+                Tanggal: <?php echo $this->uang->tanggal($isi_ss->tgl_setor);?>
+            </td>
+            <td style="text-align: center">Lembar<h1>1</h1></td>
+        </tr>
+        <tr>
+            <td colspan="3">Jenis Setoran</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <table>
+                    <tr>
+                        <td>Nomor Kontrak</td>
+                        <td>: <?php echo $isi_ss->nomor_kontrak;?></td>
+                    </tr>
+                    <tr>
+                        <td>Unit/Sub Unit</td>
+                        <td>: <?php if(isset($isi_ss->nama_unit)){echo $isi_ss->nama_unit;} ?></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+            
+                    <table>
+                        <tr>
+                            <td>A.</td>
+                            <td colspan="2">Identitas Pihak yang Bekerjasama</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>1. NPWP</td>
+                            <td>: <?php echo $isi_ss->npwp;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>2. Nama</td>
+                            <td>: <?php echo $isi_ss->nama;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>3. Alamat</td>
+                            <td>: <?php echo $isi_ss->alamat;?></td>
+                        </tr>
+                        <tr>
+                            <td>B.</td>
+                            <td>1. Kementrian/Lembaga</td>
+                            <td>: <?php echo $isi_ss->kementrian;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>2. Unit Organisasi Eselon I</td>
+                            <td>: <?php echo $isi_ss->eselon1;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>3. Satuan Kerja</td>
+                            <td>: <?php echo $isi_ss->satuan_kerja;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>4. Fungsi/Subfungsi/Program</td>
+                            <td>: <?php echo $isi_ss->fungsi."/".$isi_ss->subfungsi."/".$isi_ss->program;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>5. Kegiatan/Sub Kegiatan</td>
+                            <td>: <?php echo $isi_ss->kegiatan."/".$isi_ss->subkegiatan;?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>6. Lokasi</td>
+                            <td>: <?php echo $isi_ss->lokasi;?></td>
+                        </tr>
+                        <tr>
+                            <td>C.</td>
+                            <td>Akun</td>
+                            <td>: <?php echo $isi_ss->akun;?></td>
+                        </tr>
+                        <tr>
+                            <td>D.</td>
+                            <td>Jumlah Setor</td>
+                            <td>: <?php echo $this->uang->angka($isi_ss->jumlah_setor);?></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Dengan Huruf</td>
+                            <td>: <?php echo $this->uang->terbilang($isi_ss->jumlah_setor);?></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">E.</td>
+                            <td rowspan="2">Surat Penagihan (SPN) atau<br>Surat Pemindahan Penagihan<br>Piutang Negara (SP3N)</td>
+                            <td>Nomor: <?php echo $isi_ss->spn_nomor ?> Tanggal: <?php echo $this->uang->tanggal($isi_ss->spn_tgl); ?></td>
+                        </tr>
+                        <tr>
+                            <td>KPPN: <?php echo $isi_ss->kppn ?></td>
+                        </tr>
+                    </table>
+            </td>
+        </tr>
+        
+        <tr>
+            <td width="200px">PERHATIAN<br />
+            Bacalah dahulu petunjuk pengisian formulir SSP pada halaman belakang lembar ini
+            </td>
+            <td colspan='2'>
+                    Untuk Keperluan: <?php echo $isi_ss->keperluan;?><br/>
+                    <?php if ($isi_ss->tipe_ss === constant::SS_SSPB){ ?>
+                    DIPA tanggal/nomor: <?php echo date("d-m-Y", strtotime($isi_ss->dipa_tgl)).'/'.$isi_ss->dipa_nomor;?><br/>
+                    SP2D tanggal/nomor: <?php echo $isi_ss->sp2d_tgl.'/'.$isi_ss->sp2d_nomor;?><br/>
+                    <?php } ?>
+            </td>
+        </tr>
+        <tr>
+            <td align="center"><?php echo $tantang[1]['ket']; ?>
+            <br/><br/><br/><br/><br/><br/><br/>
+            <?php echo $tantang[1]['nama']."<br>".$tantang[1]['nip']; ?>
+            </td>
+            <td></td>
+            <td align="center" valign="top">Diterima Oleh</td>
+        </tr>
+    </table>

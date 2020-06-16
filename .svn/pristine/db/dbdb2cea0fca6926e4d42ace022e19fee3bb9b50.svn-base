@@ -1,0 +1,92 @@
+	    <article class="module width_full">
+    		<header><h3>Status Dokumen</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                
+                <?php
+                    if (isset ($bkm)){
+                        echo "<h3>Bukti Kas Masuk</h3>";
+                        if (count($bkm)<1){
+                            //FIXME: Filter user yang boleh nginput
+                            echo "Bukti Kas Masuk belum diinput, silahkan input ";
+                            echo anchor("bukti_akuntansi/input/".constant::BUK_BKM."/".$jenis."/".$id, 'DISINI');
+                        }else{
+                            
+                            $xml = new SimpleXMLElement($bkm->riwayat_bukti);
+                            echo "<center>";
+                            echo "nomor bukti kas masuk ".$bkm->no_bukti;
+                            echo "<table class=\"table-common\" style=\"width: 90%;\">";
+                                echo "<tr>";
+                                echo "<th>REV</th>";
+                                echo "<th>Tanggal</th>";
+                                echo "<th>Status</th>";
+                                echo "<th>Komentar</th>";
+                                echo "<th>Eksekutor</th>";
+                                echo "<tr>";
+                            foreach($xml as $xmlrow){
+                                echo "<tr>";
+                                echo "<td>".$xmlrow['rev']."</td>";
+                                echo "<td>".$this->uang->tanggal_jam($xmlrow->date)."</td>";
+                                echo "<td>".$xmlrow->status."</td>";
+                                echo "<td>".$xmlrow->coment."</td>";
+                                echo "<td>".$xmlrow->by."</td>";
+                                echo "<tr>";
+                            }
+                            echo "</table>";
+                            echo "</center>";
+                            //echo htmlentities($xml->asXML()) ;
+                        }
+                    }
+                 ?>
+                 
+                <?php
+                    if (isset ($bm)){
+                        echo "<h3>Bukti Memorial</h3>";
+                        if (count($bm)<1){
+                            //FIXME: Filter user yang boleh nginput
+                            echo "Bukti Memorial belum diinput, silahkan input ";
+                            echo anchor("bukti_akuntansi/input/".constant::BUK_BM."/".$jenis."/".$id, 'DISINI');
+                        }else{
+                            $xml = new SimpleXMLElement($bm->riwayat_bukti);
+                            echo "<center>";
+                            echo "<table class=\"table-common\" style=\"width: 90%;\">";
+                                echo "<tr>";
+                                echo "<th>REV</th>";
+                                echo "<th>Tanggal</th>";
+                                echo "<th>Status</th>";
+                                echo "<th>Komentar</th>";
+                                echo "<th>Eksekutor</th>";
+                                echo "<tr>";
+                            foreach($xml as $xmlrow){
+                                echo "<tr>";
+                                echo "<td>".$xmlrow['rev']."</td>";
+                                echo "<td>".$xmlrow->date."</td>";
+                                echo "<td>".$xmlrow->status."</td>";
+                                echo "<td>".$xmlrow->coment."</td>";
+                                echo "<td>".$xmlrow->by."</td>";
+                                echo "<tr>";
+                            }
+                            echo "</table>";
+                            echo "</center>";
+                            //echo htmlentities($xml->asXML()) ;
+                        }
+                    }
+                 ?>
+                 
+                <br/>
+                
+                <?php 
+                    if (isset ($ssbp)){
+                        echo "<h3>Surat Setoran Bukan Pajak</h3>";
+                        if(count($ssbp)<1){
+                            //FIXME: Filter user yang boleh nginput
+                            echo "Surat Setoran Bukan Pajak belum diinput, silahkan input ";
+                            echo anchor("surat_setor/input".constant::SS_SSBP."/".$jenis."/".$id, 'DISINI');
+                        }else{
+                            echo $ssbp->no_suratsetor;
+                        }
+                    }
+                 ?>
+            </div>
+        </article>
+        <!-- end of styles article -->

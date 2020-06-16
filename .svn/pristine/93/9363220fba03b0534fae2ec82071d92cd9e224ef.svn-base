@@ -1,0 +1,260 @@
+<script type="text/javascript">
+	$(function() {
+        $("#total_usulan").autoNumeric(window.numOptions);
+		$("#pagu_real").autoNumeric(window.numOptions);
+		$("#max_usulan").autoNumeric(window.numOptions);
+
+	});
+
+	function show_list() {
+		var tab = $('#tab_list');
+		var tabin = $('#tab_list div:first');
+
+		//hide all
+		$('.t_content').hide();
+
+		tabin.html(loader());
+		tab.show();
+
+		$.post('<?php echo site_url('usulan/ajax_get_list_usulan')?>',
+			   {id_usulan: $('#id_usulan').val()},
+			   function(data){
+			   	  try {
+					var response = $.parseJSON(data);
+
+					catch_expired_session(response);
+
+			   	  } catch (e) {
+					tabin.hide();
+					tabin.html(data);
+					tabin.slideDown('fast');
+			   	  }
+			   });
+	}
+
+	function show_form(postdata) {
+		var tab = $('#tab_form');
+		var tabin = $('#tab_form div:first');
+
+		//hide all
+		$('.t_content').hide();
+
+		tabin.html(loader());
+		tab.show();
+
+		$.post('<?php echo site_url('usulan/ajax_get_form_insert_uraian')?>',
+			   postdata,
+			   function(data){
+			   	  try {
+					var response = $.parseJSON(data);
+
+					catch_expired_session(response);
+
+			   	  } catch (e) {
+					tabin.hide();
+					tabin.html(data);
+					tabin.slideDown('fast');
+			   	  }
+			   });
+	}
+
+	$(function() {
+		show_list();
+	})
+</script>
+
+<form method="post" name='form_usulan_detail' id='form_usulan_detail' action="save_uraian">
+<input type='hidden' name='id_usulan' id='id_usulan' value='<?php echo $id_usulan?>'>
+
+<h4><?php echo $jns_usulan?></h4>
+<table  width="100%" cellspacing="0" style='margin-top: 10px;background-color: yellow;
+	padding: 3px' border="0">
+    <tr>
+        <td width='120px'>Tgl Usulan</td><td>:</td>
+            <td><input type='text' name='tgl_usulan' id='tgl_usulan'
+                       value='<?php echo $tgl_usulan?>' readonly='true' size='11'></td>
+        <td width='10px'></td>
+        <td width='120px'>Total Usulan</td><td>:</td>
+        <td><input type='text' name='total_usulan' id='total_usulan'
+                   value='<?php echo $total_usulan?>' readonly='true'
+				   class='currency'></td>
+        <td width='10px'></td>
+        <td width='120px'>Status Kirim</td><td>:</td>
+        <td><input type='text' name='flag_kirim' id='flag_kirim'
+                   value='<?php echo $flag_kirim == 1 ? 'Sudah Dikirim' : 'Belum Dikirim' ?>'
+                   readonly='true' style='text-align: center'>
+			<input type="hidden" id="id_flag_kirim" value="<?php echo $flag_kirim?>">
+		</td>
+		<td width='*'></td>
+    </tr>
+    <tr>
+        <td width='120px'>Pagu Real</td><td>:</td>
+            <td><input type='text' name='pagu real' id='pagu_real'
+                       value='<?php echo $pagu_real?>' readonly='true'
+					   class='currency'></td>
+        <td width='10px'></td>
+        <td width='120px'>Maks Usulan</td><td>:</td>
+        <td><input type='text' name='max_usulan' id='max_usulan'
+                   value='<?php echo $max_usulan?>' readonly='true'
+				   class='currency'></td>
+		<td width='10px'></td>
+		<td width='120px'>Status Usulan</td><td>:</td>
+        <td><input type='text' name='status_usulan' id='status_usulan'
+                   value='<?php echo $status_usulan?>'
+                   readonly='true' style='text-align: center'>
+			<input type="hidden" id="id_status_usulan" value="<?php echo $id_status_usulan?>">
+		</td>
+		<td align="right">
+			<?php if ($show_btn_kirim == TRUE) { ?>
+			<input type="button" id="send_usulan" value="Kirim Usulan">
+
+<script type="text/javascript">
+	$(function() {
+		$('#send_usulan').click(function() {
+			var total_usulan= parseFloat($('#total_usulan').autoNumeric('get'));
+			var max_usulan  = parseFloat($('#max_usulan').autoNumeric('get'));
+
+			if (total_usulan == 0) {
+				alert('Belum ada uraian kegiatan yang dimasukkan. Penyimpanan dibatalkan');
+				return;
+			}
+
+			if (total_usulan > max_usulan) {
+				alert('Maaf, Uraian yang diajukan melebihi MAX Usulan yang diperbolehkan.');
+				return;
+			}
+
+			if (! confirm('Apakah semua data sudah benar? Lanjutkan pengiriman data Usulan?')) {
+				return;
+			}
+
+			//block page
+            $.blockUI({
+                    message: 'Proses kirim usulan, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+            });
+
+			//send usulan by ajax
+			$.post('<?php echo site_url('usulan/send_usulan')?>',
+				{ id_usulan: $('#id_usulan').val() },
+				function(data) {
+					try {
+						var json = $.parseJSON(data);
+						//tampilkan message
+						$.blockUI({
+							message: json.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+
+						if(json.errno != 0){
+							//do nothing for error
+						} else {
+							//MUST: trigger set jenis usulan
+							$('#pilih_sb').trigger('click');
+						}
+					} catch(e) {
+						//log error, misal format json salah
+						console.log('System error : "' + e + '"');
+						$.blockUI({
+							message: 'Terjadi kesalahan sistem, mohon hubungi administrator.',
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					}
+				}
+			);
+		});
+	});
+</script>
+			<?php } //end button kirim ?>
+		</td>
+    </tr>
+</table>
+<?php if($id_status_usulan >= Constant::USULANSU_OK) { ?>
+<table  width="100%" cellspacing="0" style='margin-top: 10px;background-color: yellow;
+	padding: 3px' border="0">
+    <tr>
+		<td>
+		<a href="<?php echo site_url()."usulan/print_up_baru/$id_usulan";?>">
+        	<img src='<?php echo base_url();?>asset/images/pdf.gif' />
+        Rincian UP </a>&nbsp;
+		<a href="<?php echo site_url()."usulan/print_surat_pernyataan_up";?>">
+        	<img src='<?php echo base_url();?>asset/images/pdf.gif' />
+        Surat Pernyataan</a>&nbsp;
+		<a href="<?php echo site_url()."usulan/print_surat_pengantar_sub";?>">
+        	<img src='<?php echo base_url();?>asset/images/pdf.gif' />
+        Surat Pengantar</a>
+		<?php if($id_status_usulan == Constant::USULANSU_OK) { ?>
+		<input type="button" value="otorisasi pimpinan sub unit" id="otorisasi_pimsu">
+		<script type="text/javascript">
+			$(function() {
+				$('#otorisasi_pimsu').click(function() {
+
+					if (! confirm('Apakah dokumen sudah diotorisasi pimpinan? Lanjutkan ?')) {
+						return;
+					}
+
+					$.blockUI({
+							message: 'Proses otorisasi usulan, mohon ditunggu ...',
+							css: window._css,
+							overlayCSS: window._ovcss
+					});
+
+					$.post('<?php echo site_url('usulan/otorisasi_su_usulan')?>',
+						{id_usulan: $('#id_usulan').val()},
+						function(data) {
+							try {
+								var json = $.parseJSON(data);
+								//tampilkan message
+								$.blockUI({
+									message: json.msg,
+									timeout: 2000,
+									css: window._css,
+									overlayCSS: window._ovcss
+								});
+
+								if(json.errno != 0){
+									//do nothing for error
+								} else {
+									//MUST: trigger set jenis usulan
+									setTimeout("$('#pilih_sb').click()", 2000);
+									//setTimeout('alert("tes")',2000);
+								}
+							} catch(e) {
+								//log error, misal format json salah
+								console.log('System error : "' + e + '"');
+								$.blockUI({
+									message: 'Terjadi kesalahan sistem, mohon hubungi administrator.',
+									timeout: 2000,
+									css: window._css,
+									overlayCSS: window._ovcss
+								});
+							}
+						}
+
+					);
+				});
+			})
+		</script>
+		<?php } ?>
+		</td>
+	</tr>
+</table>
+<?php } ?>
+
+<div class="t_container">
+	<div id="tab_list" class="t_content">
+		<div class='t_content_in'></div>
+	</div>
+
+	<div id="tab_form" class="t_content">
+		<div class='t_content_in'></div>
+	</div>
+</div>
+
+
+</form>

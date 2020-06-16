@@ -1,0 +1,424 @@
+<style>
+.col_akhir {	width:50px;	
+}
+</style>
+<script type="text/javascript">
+<!--
+    $( function(){
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+              
+        $("#nominal_bb").autoNumeric(numOptions);
+        $("#nilai_pok").autoNumeric(numOptions);
+        
+        $("#nilai_ppn").autoNumeric(numOptions);
+        $("#nilai_pph").autoNumeric(numOptions);
+        
+    });
+    
+    
+    $().ready( function() {
+        
+        $("#form_barang").validate({
+            rules: {
+                tpt_kwitansi: "required",
+                pp_spd: "required",
+                dari: "required",
+                tujuan: "required",
+                yg_bepergian: "required",
+                nip: "required",
+                golongan: "required",
+                maksud: "required",
+                tgl_b: "required",
+                tgl_k: "required",
+                ket_spd: "required",
+                tiket : "required",
+                board : "required",
+                taxi : "required",
+                dll : "required",
+                uang_saku : "required",
+                pph21 : "required",
+                representatif : "required"
+            },
+            messages: {
+                tpt_kwitansi: "Mohon diisi tempat dibuatnya kwitansi",
+                pp_spd: "Mohon diisi penerbit pembuat kwitansi",
+                dari: "Mohon diisi kota asal",
+                tujuan: "Mohon diisi kota tujuan perjadin",
+                yg_bepergian: "Mohon diisi orang yang bepergiian",
+                nip: "Mohon diisi NIP yang bepergian",
+                golongan: "Mohon diisi golongan yang bepergian",
+                maksud: "Mohon diisi maksud perjalanan dinas",
+                tgl_b: "Mohon diisi tanggal berangkat",
+                tgl_k: "Mohon diisi tanggal kembali",
+                ket_spd: "Mohon diisi keterrangan perjalanan dinas",
+                tiket: "Mohon diisi nominal tiket",
+                board: "Mohon diisi nominal biaya",
+                taxi: "Mohon diisi nominal biaya taxi",
+                dll: "Mohon diisi nominal biaya lainnya",
+                uang_saku: "Mohon diisi besar uang saku",
+                pph21: "Mohon diisi nominal pajaki",
+                representatif: "Mohon diisi nominal represnteatif"
+            }           
+        });    
+    });
+-->
+</script>
+<form method="post" name='form_barang' id='form_barang' 
+action="" >
+<table border="0" width="100%">
+  <tr>
+    <td width="305px;"><span class="nm_col_hide">Tanggal</span></td>
+    <td>:</td>
+    <td><input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="18" style="width:230px;" readonly placeholder="Tanggal dari Kwitansi dibuat"/></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide" >Kegiatan </td>
+    <td >:</td>
+    <td><select name="kd_giat" id="kd_giat">
+      <option value="4078">4078 Layanan Tridharma di Perguruan Tianggi</option>
+    </select></td>
+  </tr>
+    <tr>
+    	<div id="propinsi">
+            <td>Output</td>
+            <td>:</td>
+            <td><?php echo form_dropdown("kdoutput",$output,"","id='kdoutput' style='width:450px;'") ?>
+            </td>
+        </div>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="komponen">
+				<?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Output Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+    	<td>Sub Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="subkomponen">
+				<?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Komponen Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>	
+    <tr id="akun"></tr>  
+    <tr id="akun2"></tr>  	
+
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+        <td>
+            <div id="heder">
+                <?php echo form_dropdown("hdr",array('Pilih Header'=>'Pilih Header Dahulu'),'',' style="width:450px;" disabled');?>
+            </div>
+            
+        </td>
+    </tr>
+    <tr>
+        <td>Kode BAS</td>
+        <td>:</td>
+        <td>
+          <div id="kode_bas1"> <?php echo form_dropdown("kode_bas",array('Pilih Bas'=>'Pilih Bas Dahulu'),'',' style="width:450px;" disabled');?>
+            
+          </div>
+</td>
+    </tr>
+    <tr>
+        <td>Jenis Biaya</td>
+        <td>:</td>
+        <td>
+          <div id="jn_biaya"></div>
+</td>
+    </tr>
+  <tr>
+    <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+    <td >:</td>
+    <td><input name='tpt_kwitansi' type='text' value='' id="tpt_kwitansi" style="width:450px;" placeholder="Tempat Kwitansi dibuat" ></td>
+  </tr>
+  <tr>
+    <td width="272">Pejabat Pemberi Perintah</td>
+    <td width="12" >:</td>
+    <td width="865"><input name='pp_spd' type='text' value='' size="65" id="pp_sppd" style="width:450px;" placeholder="Nama Pejabat Pembuat perintah Perjalanan Dinas"/></td>
+  </tr>
+  <!--        <tr>
+          <td>No. SK Perintah</td>
+          <td >:</td><td><input name='no_sk_spd' type='text' value='' size="65" id="no_sk_spd" style="width:450px;" placeholder="No SK Perintah SPD"/></td>
+          
+        </tr>-->
+  <tr>
+    <td>Dari</td>
+    <td >:</td>
+    <td><input name='dari' type='text' value='' size="65" id="dari" style="width:450px;" placeholder="Kota Asal Perjalanan"/></td>
+  </tr>
+  <tr>
+    <td>Tujuan</td>
+    <td >:</td>
+    <td><input name='tujuan' type='text' value='' size="65" id="tujuan" style="width:450px;" placeholder="Kota Tujuan Perjalanan"/></td>
+  </tr>
+  <tr>
+    <td>Yang Bepergian (Nama)</td>
+    <td >:</td>
+    <td><input name='yg_bepergian' type='text' value='' size="65" id="yg_bepergian" style="width:450px;" placeholder="Nama orang yang melakukan Perjalanan Dinas"/></td>
+  </tr>
+  <tr>
+    <td>NIP / NIM</td>
+    <td >:</td>
+    <td><input name='nip' type='text' value='' size="65" id="nip" style="width:450px;" placeholder="NIP / NIM orang yang bepergian"/></td>
+  </tr>
+  <tr>
+    <td>Golongan</td>
+    <td >:</td>
+    <td><?php echo form_dropdown("golongan_spd",$golongan,"","id='golongan' style='width:200px;'") ?></td>
+  </tr>
+  <tr>
+    <td>Maksud Perjalanan Dinas</td>
+    <td >:</td>
+    <td><input name='maksud' type='text' value='' size="65" id="maksud" style="width:450px;" placeholder="Tujuan dari dilakukan Pejalanan Dinas"/></td>
+  </tr>
+  <tr>
+    <td>Tanggal Berangkat</td>
+    <td >:</td>
+    <td><input name='tgl_b' type='text' value='' size="65" id="tgl_b" style="width:230px;" readonly placeholder="Tanggal Berangkat"/></td>
+  </tr>
+  <tr>
+    <td>Tanggal Kembali</td>
+    <td >:</td>
+    <td><input name='tgl_k' type='text' value='' size="65" id="tgl_k" style="width:230px;" readonly placeholder="Tanggal Kembali"/></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td><span id="lama_hari">Lama keberangkatan = 0 Hari</span></td>
+  </tr>
+  <tr>
+    <td>Keterangan SPD</td>
+    <td >:</td>
+    <td><textarea name="ket_spd" id="ket_spd" style="width:450px; height:100px;" placeholder="Keterangan Detail Mengenai Kwitansi SPD"></textarea></td>
+  </tr>
+  <tr>
+    <td><p>&nbsp;</p></td>
+  </tr>
+  <tr>
+    <td><strong>Rincian Biaya</strong></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide">Biaya Tiket</td>
+    <td >:</td>
+    <td><input name='tiket' type='text' value='' id="tiket" style="width:450px;" placeholder="Nominal biaya tiket" ></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide">Biaya Boarding Pass</td>
+    <td >:</td>
+    <td><input name='board' type='text' value='' id="board" style="width:450px;" placeholder="Nominal biaya boarding pass" ></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide">Biaya Taxi</td>
+    <td >:</td>
+    <td><input name='taxi' type='text' value='' id="taxi" style="width:450px;" placeholder="Nominal biaya taxi" ></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide">Penginapan, UM, dan Transport</td>
+    <td >:</td>
+    <td><input name='dll' type='text' value='' id="dll" style="width:450px;" placeholder="Nominal Penginapan, UM, dan Transport" ></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide">Uang Saku</td>
+    <td >:</td>
+    <td><input name='uang_saku' type='text' value='' id="uang_saku" style="width:220px;" placeholder="Nominal uang Saku" >
+      PPh. 21 :
+      <input name='pph21' type='text' value='' id="pph21" style="width:175px;" placeholder="Nominal total PPh. 21" ></td>
+  </tr>
+  <tr>
+    <td class="nm_col_hide">Uang Representatif</td>
+    <td >:</td>
+    <td><input name='representatif' type='text' value='' id="representatif" style="width:450px;" placeholder="Nominal uang representatif" ></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td align="right"><strong>TOTAL BIAYA </strong></td>
+    <td><strong>:</strong></td>
+    <td><table width="450">
+      <tr>
+        <td width="184"><span id="jumlah_biaya">Rp. 0</span></td>
+        <td width="74"><strong>Total PPh. 21</strong></td>
+        <td width="10">:</td>
+        <td width="162"><span id="pph_tampil">Rp. 0</span></td>
+      </tr>
+    </table></td>
+  </tr>
+</table>
+<div class="submit_link" style="padding-top:18px">  
+	  <input name='jenis_kwitansi' value='PERJADIN' id="yg_bepergian" type="hidden"/>
+	  <input name='biaya' value='' id="biaya" type="hidden"/>
+      <input name='lama_hari' id="lama" value='' type="hidden"/>
+      <input name="simpan" type='submit' id="simpan" value='Simpan' >
+      <input type=button value=Batal onclick=self.history.back()>
+    </div> 
+
+</form>
+        <script type="text/javascript">
+          $("#kdoutput").change(function(){
+                var selectValues = $("#kdoutput").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen').html(msg);
+                }else{
+                    var kdoutput = {kdoutput:$("#kdoutput").val()};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_komponen')?>",
+                            data: kdoutput,
+                            success: function(msg){
+                                $('#komponen').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK JENIS PAJAK===*/
+				  $("#jns_pajak").change(function(){
+					var jns_pajak1 = $("#jns_pajak").val();
+					var jns_pajak = {jns_pajak:$("#jns_pajak").val()};
+						if(jns_pajak1 != 0){
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('ls/select_pajak')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}else{
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo base_url('application/views/ls/buat_kwitansi/gu_select_ppn.php')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}
+				});
+		</script>
+<script>
+	   $("#tgl_b").change(function(){
+		   rentang();
+		});
+		$("#tgl_k").change(function(){
+			rentang();
+		});
+		
+		function rentang(){
+			if($('#tgl_b').val()!=''){
+				var b=$('#tgl_b').datepicker('getDate');
+			}else{
+				var b='';
+			}
+			if($('#tgl_k').val()!=''){
+				var k=$('#tgl_k').datepicker('getDate');
+			}else{
+				var k='';
+			}
+			
+			if(b!='' && k!=''){
+				if(b >= k){
+					alert("Tanggal kembali < Tanggal berangkat");
+					$('#tgl_k').val('');
+				}else{
+					diff = Math.floor((k.getTime() - b.getTime()) / 86400000);
+					var lama="Lama Keberangkatan : " + diff + " hari";
+					$('#lama_hari').html(lama);
+					$('#lama').val(diff);
+				}
+				
+			}
+		}
+	   </script>
+<script>
+	    Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) {
+			var n = this,
+			decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+			decSeparator = decSeparator == undefined ? "." : decSeparator,
+			thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
+			sign = n < 0 ? "-" : "",
+			i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
+			j = (j = i.length) > 3 ? j % 3 : 0;
+			return sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
+		};
+	   		
+	   		$('#taxi').keyup(function(){
+				jumlah_rincian();	
+			})
+			$('#tiket').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#board').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#dll').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#uang_saku').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#representatif').keyup(function(){
+				jumlah_rincian();
+			})
+			
+				function jumlah_rincian(){
+					var taxi  = $('#taxi').val(); if(taxi ==''){taxi = 0};
+					var tiket = $('#tiket').val(); if(tiket ==''){tiket = 0};
+					var board = $('#board').val(); if(board ==''){board = 0};
+					var dll   = $('#dll').val(); if(dll ==''){dll = 0};
+					var saku  = $('#uang_saku').val(); if(saku ==''){saku = 0};
+					var repre = $('#representatif').val(); if(repre ==''){repre = 0};
+					
+						var jumlah = parseFloat(taxi) + parseFloat(tiket) + parseFloat(board) + parseFloat(dll) + parseFloat(saku) + parseFloat(repre);
+						var jumlah2 = 'Rp.' + jumlah.formatMoney(0,'.',',');
+						$('#jumlah_biaya').html(jumlah2);
+						$('#biaya').val(jumlah);		
+				}
+				
+				$('#pph21').keyup(function(){
+					var pph = parseFloat($('#pph21').val());
+					var nom_pph = 'Rp.'+pph.formatMoney(0,'.',','); 
+						$('#pph_tampil').html(nom_pph);
+				})	;	
+       </script>
+
+<script>
+			$(function() {
+				$( "#tgl_kwitansi" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+				
+				$( "#tgl_spd" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+				$( "#tgl_b" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+				$( "#tgl_k" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+</script>

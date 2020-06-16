@@ -1,0 +1,18 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-30 09:25:14 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-30 09:25:14 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-30 09:25:14 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-30 09:25:43 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-30 10:49:17 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-30 10:49:17 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-30 10:49:17 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-30 10:49:30 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-30 11:03:32 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-30 11:03:32 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-30 11:03:32 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-30 11:03:39 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561
+ERROR - 2013-05-30 11:07:13 --> Severity: Notice  --> Undefined variable: total_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 79
+ERROR - 2013-05-30 11:07:13 --> Severity: Notice  --> Undefined variable: pagu_real C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 86
+ERROR - 2013-05-30 11:07:13 --> Severity: Notice  --> Undefined variable: max_usulan C:\xampp\htdocs\siaku\application\views\dpt\form_usulan_detail.php 91
+ERROR - 2013-05-30 11:07:21 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\controllers\dpt.php 561

@@ -1,0 +1,30 @@
+
+<article class="module width_full">
+<?php foreach($ep->result_array() as $pengumuman)
+{
+$judul= $pengumuman['judul_pengumuman'];
+$tgl= $pengumuman['tanggal'];
+$isi=$pengumuman['isi'] ?> 
+
+
+
+            <header><h3> PENGUMUMAN <?php echo"$judul";?></h3></header>
+
+                <div class="module_content">
+                        <fieldset>
+                            <label>Tanggal Posting</label>
+                            <input type="text" value="<?php echo"$tgl";?>">
+                        </fieldset>
+    
+                            <?php echo"$isi";?>
+                     
+                        
+                </div>
+            <footer>
+
+                
+
+            </footer>
+        </article>
+<?php } 
+?>

@@ -1,0 +1,60 @@
+<h2>
+    <div style="text-align:center">
+        RINGKASAN EKSEKUTIF<br />
+        Penerimaan Uang Kuliah<br/>
+        Tahun Ajaran <?php echo $tahun_ajaran;?>
+    </div>
+</h2>
+<?php //print_r($ringkas_eks);
+//echo $this->db->last_query();
+
+?>
+<table width="100%" border="1" id="tbl_display"width=100%>
+    <tr>
+        <th rowspan="2" align="center" width="30">No.</th>
+        <th rowspan="2" align="center">Fakultas</th>
+        <th rowspan="2" align="center">Total</th>
+        <th colspan="2" align="center">SPP & SDPP</th>
+        <th colspan="2" align="center">SPP</th>
+        <th colspan="2" align="center">SDPP</th>
+        <th colspan="2" align="center">UKT</th>
+    </tr>
+    <tr>
+        <th align="center">Rp.</th>
+        <th align="center">%</th>
+        <th align="center">Rp.</th>
+        <th align="center">%</th>
+        <th align="center">Rp.</th>
+        <th align="center">%</th>
+        <th align="center">Rp.</th>
+        <th align="center">%</th>
+    </tr>
+    <?php $no=1;
+        foreach($ringkas_eks as $ringkas){
+            $spp=$ringkas['SPP'];
+            $sdpp=$ringkas['SDPP'];
+            $sdppsdpp=$spp+$sdpp;
+            $ukt=$ringkas['UKT'];
+            //$ukt=0;
+            $totoal=$spp+$sdpp+$ukt;
+            
+            echo "<tr>";
+            echo "<td align=\"center\" width=\"30\">$no</td>";
+            echo "<td>".$ringkas['nama']."</td>";
+            echo "<td>".$this->uang->angka($totoal)."</td>";
+            echo "<td>".$this->uang->angka($sdppsdpp)."</td>";
+            echo "<td>".$this->uang->persen($sdppsdpp/$totoal*100)."</td>";
+            echo "<td>".$this->uang->angka($spp)."</td>";
+            echo "<td>".$this->uang->persen($spp/$totoal*100)."</td>";
+            echo "<td>".$this->uang->angka($sdpp)."</td>";
+            echo "<td>".$this->uang->persen($sdpp/$totoal*100)."</td>";
+            echo "<td>".$this->uang->angka($ukt)."</td>";
+            echo "<td>".$this->uang->persen($ukt/$totoal*100)."</td>";
+            echo "</tr>";
+            $no++;
+
+            
+        }
+        
+    ?> 
+</table>

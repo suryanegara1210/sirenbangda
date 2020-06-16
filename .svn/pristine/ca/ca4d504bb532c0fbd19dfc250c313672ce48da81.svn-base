@@ -1,0 +1,95 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-29 14:55:05 --> Severity: Notice  --> Undefined variable: fakultas C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 1
+ERROR - 2013-07-29 14:55:22 --> Severity: Notice  --> Undefined variable: fakultas C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 1
+ERROR - 2013-07-29 15:04:25 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 43
+ERROR - 2013-07-29 15:04:25 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 48
+ERROR - 2013-07-29 15:04:25 --> Severity: Notice  --> Undefined variable: ppk_jab C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 52
+ERROR - 2013-07-29 15:04:25 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 104
+ERROR - 2013-07-29 15:04:25 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 109
+ERROR - 2013-07-29 15:05:30 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 19
+ERROR - 2013-07-29 15:05:30 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 24
+ERROR - 2013-07-29 15:05:30 --> Severity: Notice  --> Undefined variable: ppk_jab C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 28
+ERROR - 2013-07-29 15:05:30 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 80
+ERROR - 2013-07-29 15:05:30 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 85
+ERROR - 2013-07-29 15:17:32 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 20
+ERROR - 2013-07-29 15:17:32 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 25
+ERROR - 2013-07-29 15:17:32 --> Severity: Notice  --> Undefined variable: ppk_jab C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 29
+ERROR - 2013-07-29 15:17:32 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 81
+ERROR - 2013-07-29 15:17:32 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 86
+ERROR - 2013-07-29 15:56:55 --> Severity: Notice  --> Undefined variable: data C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 21
+ERROR - 2013-07-29 15:56:55 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 21
+ERROR - 2013-07-29 15:56:55 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 26
+ERROR - 2013-07-29 15:56:55 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 26
+ERROR - 2013-07-29 15:56:55 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 82
+ERROR - 2013-07-29 15:56:55 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 87
+ERROR - 2013-07-29 16:10:49 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 82
+ERROR - 2013-07-29 16:10:49 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 87
+ERROR - 2013-07-29 16:10:49 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 93
+ERROR - 2013-07-29 16:12:01 --> Severity: Notice  --> Undefined property: stdClass::$nama_fakultas C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 30
+ERROR - 2013-07-29 16:12:01 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 82
+ERROR - 2013-07-29 16:12:01 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 87
+ERROR - 2013-07-29 16:12:01 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 93
+ERROR - 2013-07-29 16:12:28 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 82
+ERROR - 2013-07-29 16:12:28 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 87
+ERROR - 2013-07-29 16:12:28 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 93
+ERROR - 2013-07-29 16:14:06 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 82
+ERROR - 2013-07-29 16:14:06 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 87
+ERROR - 2013-07-29 16:14:06 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 93
+ERROR - 2013-07-29 16:17:25 --> Severity: Notice  --> Undefined variable: ppk_nama C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 86
+ERROR - 2013-07-29 16:17:25 --> Severity: Notice  --> Undefined variable: ppk_nip C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 91
+ERROR - 2013-07-29 16:17:25 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:18:14 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:19:03 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:22:18 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 69
+ERROR - 2013-07-29 16:22:18 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:23:08 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:23:28 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:25:05 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:27:11 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:28:40 --> Severity: 4096  --> Object of class Konversi could not be converted to string C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 47
+ERROR - 2013-07-29 16:28:40 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:30:08 --> Severity: 4096  --> Object of class Konversi could not be converted to string C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 47
+ERROR - 2013-07-29 16:30:08 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:31:25 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 97
+ERROR - 2013-07-29 16:32:50 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:33:05 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:33:15 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:34:57 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:35:22 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:35:42 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:37:03 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:37:38 --> Severity: Notice  --> Undefined variable: id_sptb C:\xampp\htdocs\siaku\application\views\sptb\preview_sptjm.php 99
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$thn C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 12
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$kdgiat C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 44
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$kdoutput C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 44
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$kdakun C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 49
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$jenis_belanja C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 54
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined variable: detail C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 81
+ERROR - 2013-07-29 16:47:03 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 81
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$bpp_nama C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 132
+ERROR - 2013-07-29 16:47:03 --> Severity: Notice  --> Undefined property: stdClass::$bpp_nip C:\xampp\htdocs\siaku\application\views\sptb\print_sptb.php 138
+ERROR - 2013-07-29 16:47:51 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:47:51 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:48:44 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:48:44 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:51:25 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:51:25 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:52:40 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:52:40 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:58:23 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 16:58:23 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:01:30 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:01:30 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:01:36 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:01:36 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:02:08 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:02:08 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:02:24 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:02:24 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:02:57 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:02:57 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:04:21 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:04:21 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:15:08 --> Severity: 4096  --> Argument 1 passed to DOMNode::appendChild() must be an instance of DOMNode, null given, called in C:\xampp\htdocs\siaku\system\helpers\dompdf\include\table_frame_decorator.cls.php on line 303 and defined C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725
+ERROR - 2013-07-29 17:15:08 --> Severity: Warning  --> DOMNode::appendChild() expects parameter 1 to be DOMNode, null given C:\xampp\htdocs\siaku\system\helpers\dompdf\include\frame.cls.php 725

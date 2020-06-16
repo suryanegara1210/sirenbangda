@@ -1,0 +1,102 @@
+<?php
+
+/**
+ *
+ * @author	I Made Agus Setiawan
+ * 
+ */
+
+class M_unit extends CI_Model {
+
+	function get_unit_by_id($idu)
+	{
+		$sql = "
+			SELECT *
+			FROM m_unit
+			WHERE id_unit = ?
+		";
+
+		$query = $this->db->query($sql, array($idu));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return NULL;
+	}
+
+	function get_list_sub_unit($id_unit, $where = NULL)
+	{
+		$sql = "
+			SELECT *
+			FROM m_subunit a
+			WHERE a.id_unit = ?
+		";
+		
+		$bind = array($id_unit);
+		if(isset($where)) {
+			if(is_array($where)) {
+				$w = array();
+				foreach($where as $field=>$value) {
+					$w[] 	= "$field = ?";
+					$bind[]	= $value;
+				}
+				
+				$sql .= ' AND ' . implode(' AND ', $w);
+			} else {
+				$sql .= ' AND ' . $where;
+			}
+		}
+		
+		//order by
+		$sql .= ' ORDER BY orderby';
+		
+		$query = $this->db->query($sql, $bind);
+		
+		if($query->num_rows() > 0)
+			return $query->result();
+		
+		return FALSE;
+	}
+	
+	function get_list_unit($where = NULL)
+	{
+		
+		$sql = "
+			SELECT *
+			FROM m_unit a			
+		";
+		
+		$bind = array();
+		if(isset($where)) {
+			if(is_array($where)) {
+				$w = array();
+				foreach($where as $field=>$value) {
+					$w[] 	= "$field = ?";
+					$bind[]	= $value;
+				}
+				
+				$sql .= 'WHERE ' . implode(' AND ', $w);
+			} else {
+				$sql .= "WHERE " . $where;
+			}
+		}
+		
+		//order by
+		$sql .= ' ORDER BY orderby';
+		
+		
+		$query = $this->db->query($sql, $bind);
+		
+		if($query->num_rows() > 0)
+			return $query->result();
+		
+		return FALSE;		
+	}
+}
+
+/* End of file m_unit.php */
+/* Location: ./application/models/m_unit.php */
+?>

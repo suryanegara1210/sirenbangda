@@ -1,0 +1,255 @@
+<script type="text/javascript">
+    $( function() {
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        var numOptionsPersen = {aSign: ' %', mDec: 0,vMax: '100', pSign: 's'};
+		
+        $("#nilai_kontrak").autoNumeric(numOptions);
+		$("#nilai_dasar").autoNumeric(numOptions);
+        $("#fee_jasa").autoNumeric(numOptionsPersen);
+    });
+    $().ready( function() {
+        		
+        $("#resume").validate({
+            rules: {
+                no_sk: "required",
+                tgl_sk: "required",
+                jenis_kerjasama: "required",
+                tempat_tugas: "required",
+				uraian_pekerjaan: "required",
+                jangka_waktu: "required",
+                nilai_kontrak: "required",
+                skema_bayar: "required",
+                fee_jasa: "required",
+				nilai_dasar: "required"               
+				                
+            },
+            messages: {
+                no_sk: "Mohon diisi nomor SK yang diajukan ",
+                tgl_sk: "Mohon diisi tanggal SK yang diajukan",
+                jenis_kerjasama: "Mohon diisi jenis kerjasama yang diajukan",
+                tempat_tugas: "Mohon diisi tempat tugas yang diajukan",
+				uraian_pekerjaan: "Mohon diisi uraian pekerjaan yang diajukan",
+                jangka_waktu: "Mohon diisi jangka waktu yang diajukan",
+                nilai_kontrak: "Mohon diisi nilai kontrak yang diajukan",
+                skema_bayar: "Mohon diisi skema pembayaran yang diajukan",
+                fee_jasa: "Mohon diisi persentase jasa yang diajukan",
+				nilai_dasar: "Mohon diisi nilai dasar kerjasama yang diajukan"
+				
+            },
+			submitHandler: function(form){
+				$("#nilai_kontrak").val($("#nilai_kontrak").autoNumeric('get'));
+				$("#nilai_dasar").val($("#nilai_dasar").autoNumeric('get'));
+                $("#fee_jasa").val($("#fee_jasa").autoNumeric('get'));
+				form.submit();
+			}
+        });		
+    });
+
+    $('#nilai_dasar').focus(function() {
+      $('#nilai_dasar').val($('#nilai_kontrak').val());
+    });
+</script>
+    <form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_PPPMAS);?>" method="POST" id="resume" name="resume" accept-charset="UTF-8">
+	    <article class="module width_full">
+    		<header><h3>Input Ringkasan MOU Layanan Masyarakat</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+	
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_mou\" id=\"id_mou\" value=\"$isi_mou->id_mou\" />";
+        } ?>
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No SK</td>
+                        <td><input type="text" name="no_sk" placeholder="Nomor SK"
+                         size="40"
+                         <?php if(isset($isi_mou->no_mou)) echo "value=\"$isi_mou->no_mou\""; ?>
+                         /></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal SK</td>
+                        <td><input type="text" id="tgl_sk" name="tgl_sk" 
+                        placeholder="Tanggal SK" size="40"
+                        <?php if(isset($isi_mou->tgl_mou)) echo "value=\"$isi_mou->tgl_mou\""; ?>
+                        /></td>
+                    </tr>
+                    <?php
+                        if(isset($isi_mou->jenis)){
+                            $jnsla=$isi_mou->jenis;
+                        }else
+                            $jnsla='';
+                    ?>
+                    <tr>
+                        <td>Jenis Kerjasama</td>
+                        <td><?php echo form_dropdown("jenis_kerjasama",$jenis_layan,$jnsla,"id='jenis_kerjasama'"); ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Tempat Tugas</td>
+                        <td><input type="text" id="tempat_tugas" name="tempat_tugas"
+                         placeholder="Tempat Tugas" size="40"
+                         <?php if(isset($isi_mou->tempat)) echo "value=\"$isi_mou->tempat\""; ?>
+                         /></td>
+                    </tr>
+                    <tr>
+                        <td>Uraian Pekerjaan</td>
+                        <td><textarea name="uraian_pekerjaan" id="uraian_pekerjaan"
+                        cols="35" rows="3" placeholder="Uraian Pekerjaan"/><?php if(isset($isi_mou->uraian)) echo $isi_mou->uraian; ?></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jangka Waktu</td>
+                        <td><input type="text" id="jangka_waktu" name="jangka_waktu"
+                         placeholder="Jangka Waktu Kerjasama" size="40"
+                         <?php if(isset($isi_mou->jangka_waktu)) echo "value=\"$isi_mou->jangka_waktu\""; ?>
+                         />*)hari</td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Kontrak</td>
+                        <td><input type="text" class="uang" id="nilai_kontrak" name="nilai_kontrak" 
+                        placeholder="Nilai dari Kontrak Kerjasama" size="40"
+                        <?php if(isset($isi_mou->nilai)) echo "value=\"$isi_mou->nilai\""; ?>
+                        /></td>
+                    </tr>
+                    <?php
+                        if(isset($isi_mou->skema_bayar)){
+                            $skp=$isi_mou->skema_bayar;
+                        }else
+                            $skp='';
+                    ?>
+                    <tr>
+                        <td>Skema Pembayaran</td>
+                        <td><?php echo form_dropdown("skema_bayar",$skema_bayar,$skp,"id='skema_bayar'"); ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Pendapatan bagi Universitas Udayana</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Fee Jasa</td>
+                        <td><input type="text" class="persen" id="fee_jasa" name="fee_jasa" 
+                        placeholder="Persentase dari Nilai Dasar Kerjasama" size="40"
+                        <?php if(isset($isi_mou->persentase)) echo "value=\"$isi_mou->persentase\""; ?>
+                        /> *) persentase</td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Dasar</td>
+                        <td><input type="text" id="nilai_dasar" class="uang" name="nilai_dasar" 
+                        placeholder="Nilai Dasar Kerjasama" size="40"
+                        <?php if(isset($isi_mou->nila_dasar)) echo "value=\"$isi_mou->nila_dasar\""; ?>
+                        /></td>
+                    </tr>
+                </table>
+                <br /><h3>Pihak Dalam Universitas Udayana</h3>
+                <table style="width: 99%;" id='dalam' class="table-common" >
+                    <tr>
+                        <th style="width: 45%;">Nama</th>
+                        <th style="width: 45%;">Unit<?php echo form_dropdown("unit[0]",$pilih_unit,"","id='unit' style='display:none'"); ?></th>
+                        <!--<th>Fee</th>-->
+                        <th style="width: 10%;">Aksi</th>
+                    </tr>
+                    
+            		<tr>
+            			<th></th>
+            			<th></th>
+            			<!--<td><input type="text" name="fee[0]" /> </td>-->
+            			<th><input type="button" value="   +   " onclick="addRow('dalam')" /></th>
+            		</tr>
+                </table>
+                
+                <script language="javascript">
+                var counter=0;
+            		function addRow(tableID, data) {
+            		  
+                      data = typeof(data) !== 'undefined' ? data : '';
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount-1);
+            
+            			var nama = row.insertCell(0);
+                        
+                        if (data!=''){
+                            var hd_id_det = document.createElement("input");
+                            hd_id_det.type="hidden";
+                            hd_id_det.name= "id_det_mou["+counter+"]";
+                            hd_id_det.value=data.id_det_mou;
+                            nama.appendChild(hd_id_det);
+                        }
+                        
+            			var inp_nama = document.createElement("input");
+            			inp_nama.type="text";
+                        inp_nama.name= "nama["+counter+"]";
+                        inp_nama.style.width="100%";
+            			if (data!=''){
+                           inp_nama.value=data.nama;
+                        }
+                        nama.appendChild(inp_nama);
+                        
+                        var unit = row.insertCell(1);
+            			var inp_unit = '<select name="unit['+counter+']" id="unit'+counter+'" class="kombocari">'+$('#unit').html()+'</select>';
+                        
+            			unit.innerHTML=inp_unit;
+                        
+                        if (data!=''){
+                           document.getElementById('unit'+counter).value = data.id_unit;
+                        }
+                        
+                       /** var fee = row.insertCell(2);
+            			var inp_fee = document.createElement("input");
+            			inp_fee.type="text";
+                        inp_fee.name= "fee["+counter+"]";
+            			fee.appendChild(inp_fee);
+                       **/ 
+            			var cell4 = row.insertCell(2);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_nama.focus();
+                        kombocari();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+                    
+                    $(function() {
+        				$( "#tgl_sk" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+                    
+                    <?php if (isset($nama_mou)){?> 
+                    var data= <?php echo json_encode($nama_mou ); ?>; //detail bkm untuk yg edit
+                    if (data.length>0){
+                        for(var i=0;i<data.length;i++){
+                            addRow('dalam',data[i]);
+                        }
+                    }else{
+                        //var counter=0;
+                    }
+                    <?php } ?>
+            
+            	</script>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   
+        </article>
+    </form>
+        <!-- end of styles article --> 

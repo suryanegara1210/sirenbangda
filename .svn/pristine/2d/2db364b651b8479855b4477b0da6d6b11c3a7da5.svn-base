@@ -1,0 +1,108 @@
+<article class="module width_full">
+<header>
+	<h3>Buku Besar</h3>
+</header>
+
+<div class="module_content">
+                   
+<form method="post" name='form_bb' action="<?php echo base_url();?>report/simpan_bb" onSubmit='return validasi(this)'> 
+<table cellspacing="0" >
+    <tr>
+        <td>Periode Awal</td>
+        <td>Periode Akhir</td>
+        <td>Tahun</td>
+        <td>Akun</td>
+    </tr>
+	<tr>    	
+        <td><select name="bulan" id="bulan">
+        		<option value="0">-- Bulan --</option>
+                <option value="01">Januari</option>
+                <option value="02">Pebruari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </td>
+        <td><select name="bulan2" id="bulan2">
+                <option value="0">-- Bulan --</option>
+                <option value="01">Januari</option>
+                <option value="02">Pebruari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </td>
+        <td><select name="tahun" id="tahun">
+        		<option value="<?php echo $ta; ?>"><?php echo $ta; ?></option>
+        	</select>
+        </td>
+        <td>
+        	<?php echo form_dropdown("akun_kode",$akun_kode,"","id='akun_kode' style='width:300px'"); ?>
+        </td>
+        <td>
+        	<input  type="button" value="tampil" name="tampil" id="tampil" onClick="viewsAll()">
+        </td>
+    </tr>  
+</table> 
+
+
+<table><div id='tabel'></div> </table>
+</div>
+</article> 
+
+<script>
+
+function viewsAll(){
+	var bulan= $("#bulan").val();
+    var bulan2= $("#bulan2").val();
+	var tahun= $("#tahun").val();
+	var akun_kode = $("#akun_kode").val();
+	
+	$.ajax({
+		type: "POST",
+		url : "<?php echo site_url('report/select_tahun_')?>",
+		data: { bulan: bulan, bulan2: bulan2, tahun: tahun, akun_kode: akun_kode},
+		success: function(msg){
+			$('#tabel').html(msg);
+		}
+	});
+ }
+
+function simpanlah(){
+        if (confirm('Apakah Anda Yakin untuk Memposting ke Buku Besar ?')){
+            var bulan= $("#bulan").val();
+            var bulan2= $("#bulan2").val();
+            var tahun= $("#tahun").val();
+            var akun_kode = $("#akun_kode").val();
+            var saldo = $("#saldo").val();
+
+            var idVar = {bulan :bulan, bulan2: bulan2, tahun: tahun, akun_kode:akun_kode, saldo:saldo};
+            $.ajax({
+                    type: "POST",
+                    url : "<?php echo site_url('report/posting_bb')?>",
+                    data: idVar,
+                    success: function(msg){
+                       alert ('Buku Besar Berhasil Di Posting');
+                       viewsAll();
+                    }
+              });
+            
+        }  
+    }
+
+</script>
+

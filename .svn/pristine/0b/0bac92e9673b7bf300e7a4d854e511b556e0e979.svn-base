@@ -1,0 +1,192 @@
+	    <article class="module width_full">
+    		<header><h3>Input Surat Setor</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+<?php if ((isset ($isi_mou) && count($isi_mou)>0)|| (isset($isNoRef) && $isNoRef) || (isset($isEdit) && $isEdit)){?>
+	<form action="<?php echo site_url('surat_setor/simpan');?>" method="POST" name="resume" accept-charset="UTF-8">
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_setor\" id=\"id_setor\" value=\"$isi_ss->id_setor\" />";
+        } ?>
+                <table id="mouinput" >
+                <input type="hidden" value="<?php if(isset($isi_mou->id_mou)) echo $isi_mou->id_mou;?>" name="id_mou" />
+                <input type="hidden" value="<?php if(isset($jenis_mou)) echo $jenis_mou; ?>" name="jenis_mou" />
+                <input type="hidden" value="<?php if(isset($tipe_ss)) echo $tipe_ss; ?>" name="tipe_ss" />
+                    <tr>
+                        <td>Tanggal</td>
+                        <td><input type="text" class="tanggal" name="tgl_setor" 
+                        placeholder="Tanggal Surat Setor" size="40"
+                        <?php if(isset($isi_ss->tgl_setor)) echo "value=\"$isi_ss->tgl_setor\""; ?>
+                        /></td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Nomor Rekening</td>
+                        <td><input type="text" name="nomor_rekening" 
+                        placeholder="Nomor Rekening" size="40"
+                        <?php if(isset($isi_ss->no_suratsetor)) echo "value=\"$isi_ss->no_suratsetor\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Nomor SK</td>
+                        <td><input readonly="readonly" type="text" name="nomor_kontrak" value="<?php if(isset($isi_mou->no_mou)){echo $isi_mou->no_mou;}else{echo $isi_mou->no_sk;}  ?>"/></td>
+                    </tr>
+                    <!-- <tr>
+                        <td>Unit</td>
+                        <td><?php //echo form_dropdown("id_unit",$unit,"","id='id_unit'"); ?></td>
+                    </tr> -->
+                    <tr>
+                        <td>Nama</td>
+                        <!--<td><?php //echo form_dropdown("nama",$nama_mou,"","id='nama'"); ?></td> -->
+                        <td><input type="text" name="nama" placeholder="Nama Pihak"
+                        size="40" <?php if(isset($isi_ss->nama)) echo "value=\"$isi_ss->nama\""; ?>/></td>
+                    </tr>
+                    <tr>
+                        <td>NPWP</td>
+                        <td><input type="text" name="npwp" placeholder="Nomor NPWP"
+                        size="40" <?php if(isset($isi_ss->npwp)) echo "value=\"$isi_ss->npwp\""; ?>/></td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Alamat</td>
+                        <td><textarea name="alamat" id="alamat" cols="35" rows="3"
+                        placeholder="Alamat"/><?php if(isset($isi_ss->alamat)) echo $isi_ss->alamat; ?></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>Akun</td>
+                        <td><input type="text" name="akun" id="akun"
+                        placeholder="Nomor Akun" size="40"
+                        <?php if(isset($isi_ss->akun)) echo "value=\"$isi_ss->akun\""; ?>
+                        />
+                        <div id="nama_akun"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jumlah Setor</td>
+                        <td><input type="text" name="jumlah_setor"
+                        placeholder="Jumlah Setoran" size="40" 
+                        <?php if(isset($isi_ss->jumlah_setor)) echo "value=\"$isi_ss->jumlah_setor\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Keperluan</td>
+                        <td><textarea name="keperluan" id="keperluan" cols="35" rows="3"
+                        placeholder="Keperluan"/><?php if(isset($isi_ss->keperluan)) echo $isi_ss->keperluan; ?></textarea></td>
+                    </tr>
+                    <?php if(isset($tipe_ss) && $tipe_ss===constant::SS_SSPB){ ?>
+                    <tr>
+                        <td>Tanggal DIPA</td>
+                        <td><input type="text" class="tanggal" name="tgl_dipa" 
+                        placeholder="Tanggal DIPA" size="40"
+                        <?php if(isset($isi_ss->dipa_tgl)) echo "value=\"$isi_ss->dipa_tgl\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Nomor DIPA</td>
+                        <td><input type="text" name="no_dipa" 
+                        placeholder="Nomor DIPA" size="40"
+                        <?php if(isset($isi_ss->dipa_nomor)) echo "value=\"$isi_ss->dipa_nomor\""; ?>
+                        /></td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Tanggal SP2D</td>
+                        <td><input type="text" class="tanggal" name="tgl_sp2d"
+                        placeholder="Tanggal SP2D" size="40"
+                        <?php if(isset($isi_ss->sp2d_tgl)) echo "value=\"$isi_ss->sp2d_tgl\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Nomor SP2D</td>
+                        <td><input type="text" name="no_sp2d"
+                        placeholder="Nomor SP2D" size="40"
+                        <?php if(isset($isi_ss->sp2d_nomor)) echo "value=\"$isi_ss->sp2d_nomor\""; ?>
+                        /></td>
+                    </tr>
+                    <?php }
+                     if(isset($tipe_ss) && $tipe_ss===constant::SS_SSBP){ ?>
+                    <tr>
+                        <td rowspan="4" >Surat Penagihan(SPN)<br/>
+                        Atau Surat Pemindahan<br/>
+                        Penagihan Piutang Negara(SP3N)
+                        </td>
+                    <tr>
+                        <td><input type="text" name="no_spn"
+                        placeholder="Nomer" size="40"
+                        <?php if(isset($isi_ss->spn_nomor)) echo "value=\"$isi_ss->spn_nomor\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="tgl_spn" class="tanggal"
+                        placeholder="Tanggal" size="40"
+                        <?php if(isset($isi_ss->spn_tgl)) echo "value=\"$isi_ss->spn_tgl\""; ?>
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="kppn"
+                        placeholder="Kode KPPN" size="40"
+                        <?php if(isset($isi_ss->kppn)) echo "value=\"$isi_ss->kppn\""; ?>
+                        /></td>
+                    </tr>
+                    <?php } ?>
+
+                </table>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   </form>
+   <?php } else{
+    echo "<h1>Resume MOU Tidak ditemukan...!!!</h1><h2>Tidak diijinkan memasukkan surat setor untuk MOU yang tidak ada.</h2>";
+   } ?>
+        </article>
+        <!-- end of styles article --> 
+    <script>
+    $(function() {
+        $( ".tanggal" ).datepicker({
+            dateFormat:"yy-mm-dd",
+            changeMonth: true,
+            changeYear: true,
+        });
+    });
+    
+   $(document).on("focus keyup","input#akun",function(event){
+        var noResult="Tidak Ada Data...";
+        var noResultArr= new Array(noResult);
+        
+        noResultArr[0]=noResult
+        $(this).autocomplete({
+            minLength: 1,
+            source: 
+            function(req, add){
+                $.ajax({
+                    url: "<?php echo site_url(); ?>surat_setor/cariAkun",
+                    dataType: 'json',
+                    type: 'POST',
+                    data:{ term: req.term},
+                    success:    
+                    function(data){
+                        if(data.response =="true"){
+                            add(data.message);
+                        }else{
+                            add(noResultArr);
+                        }
+                    },
+                });
+            },
+            select: 
+                function(event, ui) {
+                    event.preventDefault();
+                    if(ui.item.label!=noResult){
+                        this.value = ui.item.id;
+                        $('#nama_akun').text( ui.item.label );
+                    }
+                    
+                },
+        });
+    });
+    
+    </script>

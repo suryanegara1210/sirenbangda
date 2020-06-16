@@ -1,0 +1,745 @@
+<?php
+
+class M_spj extends CI_Model {
+
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+
+    //get_spp_table($tahun, $id_unit, $kode_unit, Constant::JB_LS, $spp_id);
+    function get_spp_table($ta, $idu, $type, $cur_spp_id) {
+
+        $sql = "
+            SELECT kdgiat, kdoutput, kdakun, SUM(pok) as pok, SUM(spp_lalu) AS spp_lalu, SUM(spp_ini) AS spp_ini
+            FROM (
+
+            SELECT kdgiat, kdoutput, kdakun, SUM(jumlah) AS pok,0 AS spp_lalu, 0 AS spp_ini
+            FROM t_rkakl a INNER JOIN m_subunit b ON a.kode_unit=b.kode_subunit
+            WHERE id_unit = '$idu'
+            AND tahun=$ta
+            GROUP BY kdgiat, kdoutput, kdakun
+
+            UNION
+
+            SELECT kdgiat, kdoutput, kdakun, 0 AS pok, SUM(nominal) AS spp_lalu, 0 AS spp_ini
+            FROM t_kwitansi
+            WHERE id_unit = '$idu'
+                AND id_spp < '$cur_spp_id'
+                AND t_kwitansi.tahun_anggaran = $ta
+            GROUP BY kdgiat, kdoutput, kdakun
+
+            UNION
+
+            SELECT kdgiat, kdoutput, kdakun, 0 AS pok, 0 AS spp_lalu, SUM(nominal) AS spp_ini
+            FROM t_kwitansi
+            WHERE id_unit = '$idu'
+                AND id_spp = '$cur_spp_id'
+                AND t_kwitansi.tahun_anggaran = $ta
+            GROUP BY kdgiat, kdoutput, kdakun
+
+            ) AS temp
+            GROUP BY kdgiat, kdoutput, kdakun
+        ";
+
+        if($sql !== "") {
+            $result = $this->db->query($sql);
+            if ($result) {
+                return $result;
+            }
+        }
+
+        return NULL;
+    }
+
+
+    function get_mp_table($ta, $idu, $cur_spp_id) {
+
+        $sql = "
+            SELECT id_unit, SUM(spp_gup) AS spp_gup, SUM(spp_tup) AS spp_tup, SUM(spp_ls) AS spp_ls, SUM(spp_ini) AS spp_ini
+            FROM (
+                SELECT id_unit, SUM(nominal) AS spp_gup, 0 AS spp_tup, 0 AS spp_ls, 0 AS spp_ini
+                FROM t_kwitansi
+                WHERE id_unit = '{$idu}'  AND id_spp < '{$cur_spp_id}'
+                    AND t_kwitansi.tahun_anggaran=$ta
+                    AND sifat_bayar='". Constant::JB_GUP ."'
+                GROUP BY id_unit
+
+                UNION
+
+                SELECT id_unit, 0 AS spp_gup, SUM(nominal) AS spp_tup, 0 AS spp_ls, 0 AS spp_ini
+                FROM t_kwitansi
+                WHERE id_unit = '{$idu}'  AND id_spp < '{$cur_spp_id}'
+                    AND t_kwitansi.tahun_anggaran=$ta
+                    AND sifat_bayar='".Constant::JB_TUP."'
+                GROUP BY id_unit
+
+                UNION
+
+                SELECT id_unit, 0 AS spp_gup, 0 AS spp_tup, SUM(nominal) AS spp_ls, 0 AS spp_ini
+                FROM t_kwitansi
+                WHERE id_unit = '{$idu}'  AND id_spp < '{$cur_spp_id}'
+                    AND t_kwitansi.tahun_anggaran=$ta
+                    AND sifat_bayar='".Constant::JB_LS."'
+                GROUP BY id_unit
+
+                UNION
+
+                SELECT id_unit, 0 AS spp_gup, 0 AS spp_tup, 0 AS spp_ls, SUM(nominal) AS spp_ini
+                FROM t_kwitansi
+                WHERE id_unit = '{$idu}'  AND id_spp = '{$cur_spp_id}'
+                    AND t_kwitansi.tahun_anggaran=$ta
+                GROUP BY id_unit
+
+            ) AS temp
+            GROUP BY id_unit
+        ";
+
+        if($sql !== "") {
+            $result = $this->db->query($sql);
+            if ($result) {
+                return $result->row();
+            }
+        }
+
+        return NULL;
+    }
+
+
+    function create_mp_unit($ta, $idu, $cur_spp_id) {
+
+        //prepare data
+        $sql = "
+            SELECT nomor_dipa,tgl_dipa,id_spp
+            FROM t_spp,m_dipa
+            where t_spp.id_dipa=m_dipa.id_dipa and id_spp=$cur_spp_id
+            group by id_spp
+        ";
+
+        $result = $this->db->query($sql);
+        if(!$result){
+            //error statement
+            //throw something
+            return false;
+        }
+
+        $row = $result->row();
+
+        $nomor_dipa     = $row->nomor_dipa;
+        $tanggal_dipa   = $row->tgl_dipa;
+        $id_spp         = $row->id_spp;
+
+
+        //cari data pagu POK Unit
+        $pok = $this->m_logic->get_pok_unit($ta, $idu);
+
+        //cari data alokasi PNBP
+        $pnbp = $this->m_logic->get_pagu_real_unit($ta, $idu);
+        //echo $this->db->last_query();
+        //echo "$pnbp";
+        $tambahan_pnbp = 0;
+
+        //cari nilai UP per unit
+        $spp_up = $this->m_logic->get_nilai_up_unit($ta, $idu);
+
+
+        $createby = "engine";
+
+
+        //get mp view per unit
+        $mp_table = $this->get_mp_table($ta, $idu, $cur_spp_id);
+        //$nobar = sprintf("%04d", $no_spp);
+        if ($mp_table){
+
+            $sql = "
+                INSERT INTO t_mp(`tgl_mp`,`id_unit`,`id_spp`,`no_dipa`,`tgl_dipa`,`pagu_pengeluaran`,
+                    `alokasi_pnbp`,`tmb_alokasi_pnbp`, `spp_up`,`spp_tup`,`spp_gu`,`spp_ls`,`spp_ini`,
+                    `created_by`,`created_date`)
+                VALUES(
+                    now(), $mp_table->id_unit, '$id_spp', '$nomor_dipa', '$tanggal_dipa', $pok, $pnbp,
+                    $tambahan_pnbp, $spp_up, $mp_table->spp_tup, $mp_table->spp_gup, $mp_table->spp_ls,
+                    $mp_table->spp_ini,  '$createby', now()
+                    )
+            ";
+
+            /*$this->db->trans_strict(FALSE);
+            $this->db->trans_start();  */
+
+            //execute insert
+            $this->db->query($sql);
+            $id_mp = $this->db->insert_id();
+
+            //create MP per subunit
+            $this->create_mp_sunit($ta, $idu, $cur_spp_id, $id_mp);
+
+
+           /* $this->db->trans_complete();
+
+            if($this->db->trans_status() == TRUE) {
+                return true;
+            }  */
+        }
+
+        return false;
+    } //end create_mp_unit
+
+   function create_mp_sunit($ta, $idu, $cur_spp_id, $id_mp){
+        //TODO: yakinkan tiap pembuatan SPP selalu mengupdate id spp di kwitansi
+
+        //cari list subunit yang termasuk berkaitan dengan spp yang dibuat
+        //echo "$ta";
+        //echo "$idu";
+        //echo "$cur_spp_id";
+       // echo "$id_mp";
+
+        $sql = "
+            SELECT *
+            FROM (
+                SELECT id_unit, id_subunit, SUM(spp_gup) AS spp_gup, SUM(spp_tup) AS spp_tup, SUM(spp_ls) AS spp_ls,
+                        SUM(spp_ini) AS spp_ini
+                FROM (
+                    SELECT id_unit, id_subunit, SUM(nominal) AS spp_gup, 0 AS spp_tup, 0 AS spp_ls, 0 AS spp_ini
+                    FROM t_kwitansi
+                    WHERE id_unit = '{$idu}'  AND id_spp < '{$cur_spp_id}'
+                        AND t_kwitansi.tahun_anggaran=$ta
+                        AND sifat_bayar='".Constant::JB_GUP."'
+                    GROUP BY id_unit, id_subunit
+
+                    UNION
+
+                    SELECT id_unit, id_subunit, 0 AS spp_gup, SUM(nominal) AS spp_tup, 0 AS spp_ls, 0 AS spp_ini
+                    FROM t_kwitansi
+                    WHERE id_unit = '{$idu}'  AND id_spp < '{$cur_spp_id}'
+                        AND t_kwitansi.tahun_anggaran=$ta
+                        AND sifat_bayar='".Constant::JB_TUP."'
+                    GROUP BY id_unit, id_subunit
+
+                    UNION
+
+                    SELECT id_unit, id_subunit, 0 AS spp_gup, 0 AS spp_tup, SUM(nominal) AS spp_ls, 0 AS spp_ini
+                    FROM t_kwitansi
+                    WHERE id_unit = '{$idu}'  AND id_spp < '{$cur_spp_id}'
+                        AND t_kwitansi.tahun_anggaran=$ta
+                        AND sifat_bayar='".Constant::JB_LS."'
+                    GROUP BY id_unit, id_subunit
+
+                    UNION
+
+                    SELECT id_unit, id_subunit, 0 AS spp_gup, 0 AS spp_tup, 0 AS spp_ls, SUM(nominal) AS spp_ini
+                    FROM t_kwitansi
+                    WHERE id_unit = '{$idu}'  AND id_spp = '{$cur_spp_id}'
+                        AND t_kwitansi.tahun_anggaran=$ta
+                    GROUP BY id_unit, id_subunit
+
+                ) AS temp
+                GROUP BY id_unit, id_subunit
+            ) AS temp2
+            WHERE spp_ini <> 0
+        ";
+        //echo "wakaakakkaak";
+        $result = $this->db->query($sql);
+        //return $result;
+        if(!$result){
+            die('create_mp_sunit error');
+        }
+        //print_r($result);
+        //echo $result;
+        //iterasi setiap subunit yang terkait dengan spp ini
+        foreach($result->result_array() as $row) {
+            $idsu = $row['id_subunit'];
+            $tup = $row['spp_tup'];
+            $gup = $row['spp_gup'];
+            $ls = $row['spp_ls'];
+            $ini = $row['spp_ini'];
+            //echo"$idsu";
+            //cari nilai pok sub unit
+            $pok = $this->m_logic->get_pok_sunit($ta, $idsu);
+
+            //cari nilai pagu real
+            $pnbp = $this->m_logic->get_pagu_real($ta, $idsu);
+            $tambahan_pnbp = 0;
+
+            //cari nilai up sub unit
+            $spp_up = $this->m_logic->get_nilai_up($ta, $idsu);
+
+             $createby = "engine";
+
+            $sql = "
+                INSERT INTO t_mp_det (`id_mp`, `id_sunit`, `pagu_pengeluaran`,
+                    `alokasi_pnbp`,`tmb_alokasi_pnbp`, `spp_up`,`spp_tup`,
+                    `spp_gu`,`spp_ls`,`spp_ini`, `created_by`,`created_date`)
+                VALUES (
+                    $id_mp, $idsu, $pok, $pnbp, $tambahan_pnbp, $spp_up,
+                    $tup, $gup, $ls, $ini,
+                    '$createby', now()
+                )
+            ";
+            
+            $this->db->query($sql);
+            //print_r($tes);
+            //echo $this->db->last_query();
+        }
+
+        //commit transaction dilakukan di create_mp_unit
+
+    } // end create_mp_sunit
+
+//================================================================================
+ function simpan_spj_su($idSu, $idu, $status_spj, $sifat_bayar)
+        {
+		$isi->id_subunit=$idSu;
+		$isi->id_unit=$idu;
+		$isi->status_spj_su=$status_spj;
+		$isi->sifat_bayar=$sifat_bayar;
+		$isi->create_name=$this->session->userdata('username');;
+		$isi->create_date=date('Y-m-d');
+		$this->db->insert('t_spj_su',$isi);
+		return $this->db->insert_id();
+        }
+
+function get_spj($idu,$sifat_bayar,$where="") {
+
+        $this->db->select('*');
+        $this->db->from('t_spj');
+		$this->db->join("m_status_spj",'t_spj.status=m_status_spj.id_status_spj','inner');
+		$this->db->where('id_unit',$idu);
+		if($where!="")
+		{$this->db->where($where);}
+		$this->db->where('sifat_bayar',$sifat_bayar);
+		$query = $this->db->get();
+		if($query->num_rows > 0)
+			return $query;
+
+		return FALSE;
+    }
+
+    function get_spm_tambahspj($ta, $jenis_belanja,$where)  {
+		$qf=$this->db->query("
+					SELECT t_spm.id_spm, t_spm.tgl_spm,t_spm.no_spm, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						t_spm.`id_status_spm`,t_spm.uraian_spm, SUM(t_kwitansi.nominal) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_kwitansi
+					ON t_kwitansi.id_spm=t_spm.id_spm
+					INNER JOIN m_subunit
+					ON t_kwitansi.id_subunit=m_subunit.id_subunit
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_kwitansi.sifat_bayar='$jenis_belanja' AND
+					t_spm.`id_status_spm`='$where' AND
+					t_spm.`id_spj` IS NULL
+					GROUP BY t_kwitansi.id_spm
+					UNION
+					SELECT t_spm.id_spm, t_spm.tgl_spm,t_spm.no_spm, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						t_spm.`id_status_spm`,t_spm.uraian_spm, SUM(t_usulan.total_usulan) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_usulan ON t_usulan.ref_id_spm =t_spm.id_spm
+					INNER JOIN m_subunit ON t_usulan.id_subunit=m_subunit.id_subunit
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_usulan.sifat_bayar='$jenis_belanja' AND
+					t_spm.`id_status_spm`='$where' AND
+					t_spm.`id_spj`IS NULL
+					GROUP BY t_usulan.ref_id_spm
+				");
+		return $qf->result();
+    }
+	function get_sptb_tambahspj($ta, $idu, $sifat_bayar ,$where){
+		$qf=$this->db->query("
+					SELECT *, SUM(t_kwitansi.nominal) AS jumlah, GROUP_CONCAT(distinct nama_subunit) as nama_subunit
+					FROM t_sptb
+					LEFT JOIN t_kwitansi
+					ON t_kwitansi.id_sptb=t_sptb.id_sptb
+					INNER JOIN m_subunit
+					ON t_kwitansi.id_subunit=m_subunit.id_subunit
+					INNER JOIN m_status_sptb
+					ON t_sptb.id_status_sptb=m_status_sptb.id_status_sptb
+					WHERE
+					t_sptb.tahun_anggaran='$ta' AND
+					t_kwitansi.sifat_bayar='$sifat_bayar' AND
+					t_sptb.`id_status_sptb`='$where' AND
+					t_sptb.`id_unit` = '$idu' AND
+					t_sptb.`id_spj` IS NULL
+					GROUP BY t_kwitansi.id_sptb
+				");
+		return $qf->result();
+	}
+
+    function get_view_spm_spj($ta,$sifat_bayar,$idu,$where) {
+
+		$qf=$this->db->query("
+					SELECT t_spm.id_spm, t_spm.tgl_spm,t_spm.no_spm,
+						m_subunit.`nama_subunit`,t_spm.`id_status_spm`,t_spj.status,t_spj.id_spj,
+ 						t_spm.sifat_bayar, t_spm.uraian_spm, SUM(t_kwitansi.nominal) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_kwitansi
+					ON t_kwitansi.id_spm=t_spm.id_spm
+					INNER JOIN m_subunit
+					ON t_kwitansi.id_subunit=m_subunit.id_subunit
+					LEFT JOIN t_spj
+					ON t_spm.`id_spj` =t_spj.`id_spj`
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_kwitansi.sifat_bayar='$sifat_bayar' AND
+					t_spj.`id_unit`='$idu' AND
+					$where
+					GROUP BY t_kwitansi.id_spm
+					UNION
+					SELECT t_spm.id_spm, t_spm.tgl_spm,t_spm.no_spm, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						t_spm.`id_status_spm`,t_spj.status,t_spj.id_spj,
+						t_spm.uraian_spm, SUM(t_usulan.total_usulan) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_usulan ON t_usulan.ref_id_spm =t_spm.id_spm
+					INNER JOIN m_subunit ON t_usulan.id_subunit=m_subunit.id_subunit
+					LEFT JOIN t_spj
+					ON t_spm.`id_spj` =t_spj.`id_spj`
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_usulan.sifat_bayar='$sifat_bayar' AND
+					t_spj.`id_unit`='$idu' AND
+					$where
+					GROUP BY t_usulan.ref_id_spm
+				");
+		return $qf->result();
+    }
+	
+function get_view_sptb_spj($ta,$sifat_bayar,$idu,$where) {
+
+		$qf=$this->db->query("
+					SELECT b.status_sptb, c.status_spp, d.status_spm, e.status_sp2d, b.id_status_sptb, b.tgl_sptb,
+						a. id_sptb, a.no_sptb, z.id_subunit, z.id_unit, z.sifat_bayar, x.id_spj, x.status,
+						SUM(z.nominal) AS jumlah, GROUP_CONCAT(distinct nama_subunit) as nama_subunit,
+						IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+						IF(NOT ISNULL(d.id_status_spm),d.id_status_spm,
+						IF(NOT ISNULL(c.id_status_spp),c.id_status_spp,
+						IF(NOT ISNULL(b.id_status_sptb),b.id_status_sptb,''))))
+					AS status_id,
+						IF(NOT ISNULL(e.id_status_sp2d),e.status_sp2d,
+						IF(NOT ISNULL(d.id_status_spm),d.status_spm,
+						IF(NOT ISNULL(c.id_status_spp),c.status_spp,
+						IF(NOT ISNULL(b.id_status_sptb),b.status_sptb,
+							(SELECT status_sptb FROM m_status_sptb n WHERE n.id_status_sptb=a.id_status_sptb)))))
+					AS nama_status
+					FROM t_sptb a 
+					INNER JOIN t_kwitansi z ON z.id_sptb=a.id_sptb
+					INNER JOIN m_subunit y ON z.id_subunit=y.id_subunit
+					INNER JOIN t_spj x ON x.id_spj=a.id_spj
+					LEFT JOIN (SELECT f.*, g.status_sptb FROM t_sptb f 
+							   INNER JOIN m_status_sptb g ON f.id_status_sptb=g.id_status_sptb) b ON a.id_sptb=b.id_sptb
+					LEFT JOIN (SELECT h.*, i.status_spp FROM t_spp h 
+							   INNER JOIN m_status_spp i ON h.id_status_spp=i.id_status_spp) c ON z.id_spp=c.id_spp
+					LEFT JOIN (SELECT j.*, k.status_spm FROM t_spm j 
+							   INNER JOIN m_status_spm k ON j.id_status_spm=k.id_status_spm) d ON z.id_spm=d.id_spm
+					LEFT JOIN (SELECT l.*, m.status_sp2d FROM t_sp2d l 
+					           INNER JOIN m_status_sp2d m ON l.id_status_sp2d=m.id_status_sp2d) e ON z.id_sp2d=e.id_sp2d
+					WHERE
+					a.tahun_anggaran='$ta' AND
+					z.sifat_bayar='$sifat_bayar' AND
+					x.`id_unit`='$idu' AND
+					a.`id_spj` IS NOT NULL AND
+					x.status < '8'
+					GROUP BY z.id_sptb
+				");
+		return $qf->result();
+    }	
+
+	function get_list_subunit($idu) {
+
+        $sql = "
+            SELECT id_subunit, nama_subunit
+            FROM m_subunit
+            WHERE id_unit={$idu}
+        ";
+
+        $result = $this->db->query($sql);
+        if($result) {
+            return $result->result();
+        }
+
+        return NULL;
+    }
+
+
+ function up_spm($status, $id_spm, $st_kwitansi,$id_spj)
+     {
+		$this->db->set('id_spj',$id_spj);
+		$this->db->where('id_spm', $id_spm);
+		$this->db->update('t_spm');
+	 }
+	 
+ function up_sptb($status, $id_sptb, $st_kwitansi,$id_spj)
+     {
+		$this->db->set('id_spj',$id_spj);
+		$this->db->where('id_sptb', $id_sptb);
+		$this->db->update('t_sptb');
+	 }
+
+
+ function create_spj($created_date, $jenis_belanja, $idu, $created_by)
+     {
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+        $id=$this->nomer->gen_no_spj($created_date, $idu, $jenis_belanja);
+
+		$this->db->set('id_unit',$idu);
+		$this->db->set('status','1');
+		$this->db->set('created_by',$created_by);
+		$this->db->where('id_spj', $id);
+		$this->db->update('t_spj');
+
+		$this->db->trans_complete();
+	 }
+
+ function set_status_spm($id_spj,$id_status_spm)
+     {
+		$this->db->set('id_status_spm',$id_status_spm);
+		$this->db->where('id_spj', $id_spj);
+		$result=$this->db->update('t_spm');
+		return $result;
+	 }
+
+
+ function set_status_spj($id_spj, $status)
+     {
+		$this->db->set('status',$status);
+		$this->db->where('id_spj', $id_spj);
+		$result=$this->db->update('t_spj');
+		return $result;
+	 }
+
+ function kirim_spj($id_spj)
+     {
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		//update status SPJ
+		$this->set_status_spj($id_spj,'2');
+		$this->set_status_spm($id_spj,'53');
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	 }
+
+	 function spj_daftar_ambil($ta,$jenis_belanja){
+		$qf=$this->db->query("
+					SELECT t_spm.id_spj, t_spj.no_spj, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						m_status_spj.`status_spj`, SUM(t_kwitansi.nominal) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_kwitansi
+					ON t_kwitansi.id_spm=t_spm.id_spm
+					INNER JOIN m_subunit
+					ON t_kwitansi.id_subunit=m_subunit.id_subunit
+					INNER JOIN t_spj
+					ON t_spj.`id_spj`= t_spm.`id_spj`
+					INNER JOIN m_status_spj ON m_status_spj.id_status_spj= t_spj.`status`
+					WHERE YEAR(t_spm.tgl_spm)='$ta'
+					AND t_kwitansi.sifat_bayar='$jenis_belanja'
+					GROUP BY  t_spm.id_spj
+					UNION
+					SELECT t_spm.id_spj, t_spj.no_spj, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						m_status_spj.`status_spj`, SUM(t_usulan.total_usulan) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_usulan ON t_usulan.ref_id_spm =t_spm.id_spm
+					INNER JOIN m_subunit ON t_usulan.id_subunit=m_subunit.id_subunit
+					INNER JOIN t_spj
+					ON t_spj.`id_spj`= t_spm.`id_spj`
+					INNER JOIN m_status_spj ON m_status_spj.id_status_spj= t_spj.`status`
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_usulan.sifat_bayar='$jenis_belanja'
+					GROUP BY t_spm.id_spj
+				");
+		return $qf->result();
+	}
+
+	function view_list_spj($ta,$id_spj, $jenis_belanja) {
+            $qf=$this->db->query("
+				SELECT t_spm.id_spm, t_spm.tgl_spm,t_spm.no_spm, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						m_status_spm.status_spm, t_spm.uraian_spm, SUM(t_kwitansi.nominal) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_kwitansi
+					ON t_kwitansi.id_spm=t_spm.id_spm
+					INNER JOIN m_subunit
+					ON t_kwitansi.id_subunit=m_subunit.id_subunit
+					INNER JOIN m_status_spm ON m_status_spm.id_status_spm= t_spm.`id_status_spm`
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_kwitansi.sifat_bayar='$jenis_belanja' AND
+					t_spm.id_spj LIKE '%$id_spj'
+					GROUP BY t_kwitansi.id_spm
+					UNION
+					SELECT t_spm.id_spm, t_spm.tgl_spm,t_spm.no_spm, m_subunit.`nama_subunit`, t_spm.sifat_bayar,
+						m_status_spm.status_spm, t_spm.uraian_spm, SUM(t_usulan.total_usulan) AS jumlah
+					FROM t_spm
+					LEFT JOIN t_usulan ON t_usulan.ref_id_spm =t_spm.id_spm
+					INNER JOIN m_subunit ON t_usulan.id_subunit=m_subunit.id_subunit
+					INNER JOIN m_status_spm ON m_status_spm.id_status_spm= t_spm.`id_status_spm`
+					WHERE
+					YEAR(t_spm.tgl_spm)='$ta' AND
+					t_usulan.sifat_bayar='$jenis_belanja' AND
+					t_spm.id_spj LIKE '%$id_spj'
+					GROUP BY t_usulan.ref_id_spm
+			");
+            return $qf->result();
+	}
+	
+	function cek_semua_SPTBSPMSPJ($id_spj){
+        //jumlah sptb,spp,spm sesuai id spj
+        $this->db->select('*');
+        $this->db->from('t_sptb');
+		$this->db->join("t_spj",'t_spj.id_spj=t_sptb.id_spj','inner');
+		$this->db->join("t_spm",'t_spm.id_spj=t_spj.id_spj','inner');
+        $this->db->where('t_sptb.id_spj',$id_spj);
+		$this->db->group_by('t_sptb.id_sptb');
+        $query = $this->db->get();
+        $jum = $query->num_rows;
+		
+        //jumlah spm yang berstatus "x"v, id spj tertentu
+        $this->db->select('*');
+        $this->db->from('t_sptb');
+		$this->db->join("t_spj",'t_spj.id_spj=t_sptb.id_spj','inner');
+		$this->db->join("t_spm",'t_spm.id_spj=t_spj.id_spj','inner');
+        $this->db->where('t_spm.id_spj',$id_spj);
+		$this->db->where('t_spm.id_status_spm','52');
+		$this->db->group_by('t_spm.id_spm');
+        $query2 = $this->db->get();
+        $jum2 = $query2->num_rows;
+		//echo "jum: ".$jum;
+		//echo "jum2: ".$jum2;
+        if($jum==$jum2 && $jum!=0){
+            return TRUE;
+        }
+            return FALSE;
+
+    }
+	
+	//Fungsi untuk mengambil SPJ yang ada di Unit
+	function list_view_spj($jb,$id_unit){
+		$query = $this->db->query("
+		SELECT GROUP_CONCAT(DISTINCT a.`id_sptb`) AS id_sptb,a.`id_unit`,d.`nama_unit`,
+				GROUP_CONCAT(DISTINCT a.`id_subunit`) AS id_subunit, GROUP_CONCAT(DISTINCT c.`nama_subunit`) AS nama_subunit, 	
+				a.`sifat_bayar`,b.`id_spj`,f.`status`, e.`status_spj`, SUM(a.`nominal`) AS jumlah
+		FROM t_kwitansi a
+		INNER JOIN t_sptb b ON a.`id_sptb`=b.`id_sptb`
+		LEFT JOIN t_spj f ON b.`id_spj`= f.`id_spj`
+		INNER JOIN m_subunit c ON a.`id_subunit`= c.`id_subunit`
+		INNER JOIN m_unit d ON a.`id_unit`=d.`id_unit`
+		INNER JOIN m_status_spj e ON f.`status`=e.`id_status_spj`
+		WHERE a.`id_unit`='$id_unit'
+		AND a.sifat_bayar='$jb'
+		GROUP BY b.`id_spj`
+		");
+		return $query; 
+
+	}
+	
+	function view_list_sptb($id_spj) {
+		$qf=$this->db->query("
+		SELECT GROUP_CONCAT(DISTINCT a.id_subunit) AS id_subunit, a.id_unit, b.status_sptb, c.status_spp, d.status_spm, 
+				e.status_sp2d, a.id_status_kwitansi, a.kdgiat,a.kdoutput,a.kdakun, z.no_sptb, z.jenis_sptjm, z.`tgl_sptb`, 
+				GROUP_CONCAT(DISTINCT y.nama_subunit) AS nama_subunit,
+			SUM(a.nominal) AS jumlah, x.status, x.id_spj,
+			IF(NOT ISNULL(e.id_status_sp2d),e.id_status_sp2d,
+			IF(NOT ISNULL(d.id_status_spm),d.id_status_spm,
+			IF(NOT ISNULL(c.id_status_spp),c.id_status_spp,
+			IF(NOT ISNULL(b.id_status_sptb),b.id_status_sptb,
+			IF(NOT ISNULL(a.id_status_kwitansi),a.id_status_kwitansi,'')))))
+		AS status_id,
+			IF(NOT ISNULL(e.id_status_sp2d),e.status_sp2d,
+			IF(NOT ISNULL(d.id_status_spm),d.status_spm,
+			IF(NOT ISNULL(c.id_status_spp),c.status_spp,
+			IF(NOT ISNULL(b.id_status_sptb),b.status_sptb,(SELECT status_kwitansi FROM m_status_kwitansi n 
+					WHERE n.id_status_kwitansi=a.id_status_kwitansi)))))
+		AS status_kwitansi
+		FROM t_kwitansi a 
+		INNER JOIN m_subunit y ON a.id_subunit=y.id_subunit
+		INNER JOIN t_sptb z ON a.id_sptb=z.id_sptb
+		INNER JOIN t_spj x ON x.id_spj=z.id_spj
+		LEFT JOIN (SELECT f.*, g.status_sptb FROM t_sptb f INNER JOIN m_status_sptb g 
+					ON f.id_status_sptb=g.id_status_sptb) b ON a.id_sptb=b.id_sptb
+		LEFT JOIN (SELECT h.*, i.status_spp FROM t_spp h INNER JOIN m_status_spp i 
+					ON h.id_status_spp=i.id_status_spp) c ON a.id_spp=c.id_spp
+		LEFT JOIN (SELECT j.*, k.status_spm FROM t_spm j INNER JOIN m_status_spm k 
+					ON j.id_status_spm=k.id_status_spm) d ON a.id_spm=d.id_spm
+		LEFT JOIN (SELECT l.*, m.status_sp2d FROM t_sp2d l INNER JOIN m_status_sp2d m 
+					ON l.id_status_sp2d=m.id_status_sp2d) e ON a.id_sp2d=e.id_sp2d
+		WHERE x.id_spj='$id_spj'
+		GROUP BY z.id_sptb
+		");
+		return $qf->result();
+	}
+	
+	function view_list_pusat() {
+		$qf=$this->db->query("
+		SELECT a.id_unit, c.nama_unit, SUM(a.nominal_spm) AS nom_spm, SUM(b.nominal_sp2d) AS nom_sp2d 
+		FROM t_spm a
+		INNER JOIN t_sp2d b ON a.id_spm=b.id_spm
+		LEFT JOIN m_unit c ON a.id_unit=c.id_unit
+		WHERE a.sifat_bayar IN ('GUP','LS')
+		GROUP BY c.id_unit
+		");
+		return $qf->result();
+	}
+	
+	function view_list_data_pusat($id_unit) {
+		$qf=$this->db->query("
+		SELECT d.id_unit AS id_spj,'-' AS no_spj ,d.sifat_bayar,d.tgl_usulan AS created_date ,
+			   e.status_usulan AS status_spj,SUM(d.total_usulan) AS jumlah
+		FROM t_usulan d
+		INNER JOIN m_status_usulan e ON d.id_status_usulan=e.id_status_usulan
+		WHERE d.id_unit='$id_unit'
+		GROUP BY d.id_unit
+		UNION
+		SELECT a.id_spj,a.no_spj,a.sifat_bayar,a.created_date,c.status_spj,SUM(b.nominal_sptb) AS jumlah
+		FROM t_spj a
+		INNER JOIN t_sptb b ON a.id_spj=b.id_spj
+		INNER JOIN m_status_spj c ON a.status=c.id_status_spj
+		WHERE a.id_unit='$id_unit'
+		GROUP BY a.id_spj
+
+		");
+		return $qf->result();
+	}
+	
+	function view_list_sp2d() {
+		$qf=$this->db->query("
+		SELECT	b.id_unit,c.nama_unit,a.sifat_bayar,
+				SUM(a.nominal_sp2d) AS nominal_sp2d
+		FROM t_sp2d a
+		INNER JOIN t_spm b ON a.id_spm=b.id_spm
+		INNER JOIN m_unit c ON b.id_unit=c.id_unit
+		WHERE a.sifat_bayar IN ('GUP','LS')
+		GROUP BY c.id_unit
+		");
+		return $qf->result();
+	}
+
+function view_list_sp2d_pusat($id_unit) {
+		$qf=$this->db->query("
+		SELECT m_unit.`nama_unit`,t_sp2d.`no_sp2d`,t_sp2d.`id_sp2d`, t_sp2d.`id_spm`,t_sp2d.`sifat_bayar`,t_kwitansi.id_unit,
+				t_kwitansi.`kdoutput`,t_kwitansi.`kdakun`,t_kwitansi.`kdgiat`,t_kwitansi.`kdkomponen`,t_sp2d.`tgl_sp2d`,
+				YEAR(t_sp2d.tgl_sp2d) AS thn, SUM(nominal) AS jumlah 
+		FROM t_kwitansi 
+		INNER JOIN t_sp2d ON t_sp2d.id_sp2d = t_kwitansi.id_sp2d
+		INNER JOIN m_unit ON m_unit.`id_unit` = t_kwitansi.`id_unit` 
+		WHERE t_kwitansi.id_unit='$id_unit'
+		GROUP BY t_sp2d.id_sp2d 
+		UNION 
+		SELECT m_unit.`nama_unit`,t_sp2d.`no_sp2d`,t_sp2d.`id_sp2d`, t_sp2d.`id_spm`,t_sp2d.`sifat_bayar`,t_usulan.id_unit,
+			'','113891','',t_usulan.`akun_kode` as kdakun, t_sp2d.`tgl_sp2d`, YEAR(t_sp2d.`tgl_sp2d`) AS thn,
+			SUM(total_usulan) AS jumlah 
+		FROM t_usulan 
+		INNER JOIN t_sp2d ON t_sp2d.`id_spm` = t_usulan.`ref_id_spm`
+		INNER JOIN m_unit ON m_unit.`id_unit` = t_usulan.`id_unit`
+		WHERE t_usulan.id_unit='$id_unit'
+		GROUP BY t_sp2d.id_sp2d 
+		");
+		return $qf->result();
+	}
+
+
+}
+
+?>

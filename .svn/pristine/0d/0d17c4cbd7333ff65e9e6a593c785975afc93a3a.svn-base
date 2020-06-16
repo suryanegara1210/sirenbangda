@@ -1,0 +1,22 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-20 05:45:24 --> 404 Page Not Found --> spm/index
+ERROR - 2013-05-20 06:24:36 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 06:24:36 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 06:24:36 --> Unable to connect to the database
+ERROR - 2013-05-20 06:35:58 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 06:35:58 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 06:35:58 --> Unable to connect to the database
+ERROR - 2013-05-20 06:41:42 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 06:41:42 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 06:41:42 --> Unable to connect to the database
+ERROR - 2013-05-20 09:29:23 --> Severity: Notice  --> Undefined property: stdClass::$id_spj_su C:\xampp\htdocs\siaku\application\controllers\spm.php 834
+ERROR - 2013-05-20 11:22:03 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): A connection attempt failed because the connected party did not properly respond after a period of time or established connection failed because connected host has failed to respond.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-20 11:22:03 --> Unable to connect to the database
+ERROR - 2013-05-20 11:48:20 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-20 11:48:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-20 11:48:20 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-20 11:48:20 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-20 11:50:01 --> Severity: Notice  --> Undefined variable: isi_tender C:\xampp\htdocs\siaku\application\views\dpt\view_dpt.php 79
+ERROR - 2013-05-20 11:50:01 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\dpt\view_dpt.php 79

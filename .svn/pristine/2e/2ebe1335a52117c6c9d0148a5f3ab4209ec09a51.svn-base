@@ -1,0 +1,46 @@
+<article class="module width_full">
+<header>
+<h3>Daftar SPP</h3>
+</header>             
+ <div class="module_content">      
+
+<table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>  
+                <th>Nomor SPP</th>  
+                <th>Jumlah Rp.</th>
+                <th>Status SPP</th>
+                <th colspan="4">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no = 1; 
+            foreach($hasil->result() as $row)
+            {  
+            $id_spp=$row->id_spp;   
+                
+            ?>                                         
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo $row->nama_unit;?></td> 
+                <td align="center"><?php echo $row->no_spp;?></td> 
+                <td align="center"><?php echo $this->uang->angka($row->jumlah_spp);?></td> 
+                <td align="center"><?php echo $row->status_spp;?></td> 
+                <td align="center"> <a href='<?php echo base_url()."spp/preview_spp/".$id_spp;?>' title='Preview SPP' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"> <a href='<?php echo base_url()."spp/print_spp/".$id_spp;?>' title='Cetak SPP' ><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"> <a href='<?php echo base_url()."spp/preview_mp/".$id_spp;?>' title='Preview MP' >MP</a></td>
+                <td align="center"><a href='<?php echo base_url()."spp/otorisasi_spp/".$id_spp;?>' title='Otorisasi SPP' ><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                
+            </tr>
+              
+            <?php $no++ ;}    
+            ?>         
+            
+ </table>
+
+</article>      
+
+

@@ -1,0 +1,99 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Model Class berkaitan pembuatan surat setor penerimaan 
+ * 
+ * Model Class berkaitan pembuatan surat setor untuk masing masing jenis
+ * penerimaan (Layanan Pendidikan Lain, Layanan Masyarakat, Hibah, Penyewaan Aset)
+ * 
+ * @author Putu Praba Santika
+ */
+    class M_surat_setor extends CI_Model {
+	   function simpan($objek,$idmaster=false){
+            if ($idmaster===false){
+                $baru=$this->nomer->gen_no_surat_setor($objek->tgl_setor);
+                $idmaster=$baru['id_setor'];
+            }
+            
+            $this->db->where('id_setor', $idmaster);
+            if($this->db->update('t_surat_setor', $objek)){
+                $hasil=$idmaster;
+            }else{
+                $hasil= false;
+            }
+            return $hasil;
+        }
+        /**
+         * Mengambil semua surat setor untuk salah satu jenis MOU
+         * @param jenis_mou kode jenis MOU yang ingin dilambil surat setornya
+         * @return daftar objek surat setor
+         */
+        function semua(){
+            //$this->db->select('t_surat_setor.*,m_unit.nama_unit');
+            $this->db->select('t_surat_setor.*');
+            $this->db->from('t_surat_setor');
+            //$this->db->where('jenis_mou',$jenis_mou);
+            //$this->db->join('m_unit','m_unit.id_unit=t_surat_setor.id_unit');
+            $query=$this->db->get();
+            return $query->result();
+        }
+        /**
+         * Ambil detail surat setor
+         * @param id id mou yang mau dilihat
+         * @param th dua digit tahun dibuatnya mou
+         * @return object detail surat setor
+         */
+        function detail($id){
+            $this->db->select('t_surat_setor.*');
+            $this->db->join('m_unit','m_unit.id_unit=t_surat_setor.id_unit','left');
+            /*
+            switch ($jenis_mou) {
+                case 1:
+                    $this->db->join('t_resume_mou','t_resume_mou.id_mou=t_surat_setor.id_mou and t_resume_mou.th_mou=t_surat_setor.th_setor');
+                    break;
+                case 2:
+                    $this->db->join('t_resume_mou_lamas','t_resume_mou_lamas.id_mou=t_surat_setor.id_mou and t_resume_mou_lamas.th_mou=t_surat_setor.th_setor');
+                    break;
+                case 3:
+                    $this->db->join('t_resume_mou_hibah','t_resume_mou_hibah.id_mou=t_surat_setor.id_mou and t_resume_mou_hibah.th_mou=t_surat_setor.th_setor');
+                    break;
+                case 4:
+                    $this->db->join('t_resume_mou_aset','t_resume_mou_aset.id_mou=t_surat_setor.id_mou and t_resume_mou_aset.th_mou=t_surat_setor.th_setor');
+                    break;
+            }
+            */
+            $this->db->where('id_setor',$id);
+            $this->db->from('t_surat_setor');
+            $query = $this->db->get();
+            return $query->row();
+        }
+        
+        function detail_by_kode($tipe_ss,$jenis_ref,$id_ref){
+            $this->db->select('t_surat_setor.*');
+            $this->db->join('m_unit','m_unit.id_unit=t_surat_setor.id_unit','left');
+            $this->db->where('jenis_ref',$jenis_ref);
+            $this->db->where('id_ref',$id_ref);
+            $this->db->where('tipe_ss',$tipe_ss);
+            $this->db->from('t_surat_setor');
+            $query = $this->db->get();
+            return $query->row();
+        }
+        
+        /**
+         * ambil jenis nomer surat setor untuk sebuah mou
+         * @param $idMou id mou yang akan dicarikan nomor surat setor
+         * @param $thMou tahun mou yang akan dicarikan nomor surat setor
+         * @param $jenisMou tahun mou yang akan dicarikan nomor surat setor
+         * @return object surat setor
+         */
+        function ambilNoSs($jenisMou, $idMou, $thMou)
+        {
+            $this->db->select('id_setor, th_setor');
+            $this->db->from('t_surat_setor');
+            $this->db->where('id_mou',$idMou);
+            $this->db->where('th_mou',$thMou);
+            $this->db->where('jenis_mou',$jenisMou);
+            $query = $this->db->get();
+            return $query->row();
+        }
+	}
+?>

@@ -1,0 +1,30 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 03:26:11 --> Severity: Notice  --> Undefined variable: nbsp C:\xampp\htdocs\siaku\application\views\report\aruskas_isi.php 54
+ERROR - 2013-06-04 04:05:49 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-06-04 04:05:51 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-06-04 04:05:55 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-06-04 06:58:04 --> Query error: The user specified as a definer ('siaku'@'%') does not exist
+ERROR - 2013-06-04 06:58:14 --> Query error: The user specified as a definer ('siaku'@'%') does not exist

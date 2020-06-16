@@ -1,0 +1,23 @@
+<article class="module width_full">
+    <header><h3>Input Ringkasan MOU</h3></header>
+        <div class="module_content">
+            <h3>Jenis Penerimaan <?php echo form_dropdown("jen_pen",$jen_pen,"","id='jen_pen'"); ?></h3>
+            
+        </div>
+</article>
+
+<div id="input_form"></div>
+
+<script type="text/javascript">
+    $("#jen_pen").change(function(){
+        var jenis= $("#jen_pen").val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('pen_lain/view')?>",
+                data: { jen_pen: jenis},
+                success: function(msg){
+                        $('#input_form').html(msg);
+                }
+        });
+    });
+</script>

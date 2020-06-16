@@ -1,0 +1,241 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Cik extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));        
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_cik','m_urusan', 'm_bidang', 'm_program', 'm_kegiatan'));
+	}
+
+	function index()
+	{
+		$this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+		$data['url_delete_data'] = site_url('cik/delete_cik');
+		$this->template->load('template','cik/cik_view',$data);
+	}
+
+	function cru_cik()
+	{
+		$kd_urusan_edit = NULL;
+		$kd_bidang_edit = NULL;
+		$kd_program_edit = NULL;
+		$kd_kegiatan_edit = NULL;
+
+		$kd_urusan = array("" => "");
+		foreach ($this->m_urusan->get_urusan() as $row) {
+			$kd_urusan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_bidang = array("" => "");
+		foreach ($this->m_bidang->get_bidang() as $row) {
+			$kd_bidang[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_program = array("" => "");
+		foreach ($this->m_program->get_prog() as $row) {
+			$kd_program[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_kegiatan = array("" => "");
+		foreach ($this->m_kegiatan->get_keg() as $row) {
+			$kd_kegiatan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$data['kd_urusan'] = form_dropdown('kd_urusan', $kd_urusan, $kd_urusan_edit, 'data-placeholder="Pilih Urusan" class="common chosen-select" id="kd_urusan"');
+		$data['kd_bidang'] = form_dropdown('kd_bidang', $kd_bidang, $kd_bidang_edit, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+		$data['kd_program'] = form_dropdown('kd_program', $kd_program, $kd_program_edit, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+		$data['kd_kegiatan'] = form_dropdown('kd_kegiatan', $kd_kegiatan, $kd_kegiatan_edit, 'data-placeholder="Pilih Kegiatan" class="common chosen-select" id="kd_kegiatan"');
+
+		$this->template->load('template','cik/cru_cik', $data);
+	}
+
+	function save_cik()
+	{
+		$id_cik		 	= $this->input->post('id_cik');
+		$call_from		= $this->input->post('call_from');
+		$kd_urusan		= $this->input->post('kd_urusan');
+		$kd_bidang	 	= $this->input->post('kd_bidang');
+		$kd_program	 	= $this->input->post('kd_program');
+		$kd_kegiatan	= $this->input->post('kd_kegiatan');
+		$anggaran_rencana	= $this->input->post('anggaran_rencana');
+		$anggaran_realisasi	= $this->input->post('anggaran_realisasi');
+		$capaian_ik		= $this->input->post('capaian_ik');
+		$indikator	 	= $this->input->post('indikator');
+		$indikator_rencana	= $this->input->post('indikator_rencana');
+		$indikator_realisasi	= $this->input->post('indikator_realisasi');
+		$ind_capaian_ik	= $this->input->post('ind_capaian_ik');
+		$keterangan		= $this->input->post('keterangan');
+
+		if(strpos($call_from, 'cik/cru_cik') != FALSE) {
+			$call_from = '';
+		}
+
+		$data_cik = $this->m_cik->get_cik_by_id($id_cik);
+		if(empty($data_cik)) {
+			//cek bank baru
+			$data_cik = new stdClass();
+			$id_cik = '';
+		}
+
+		$data_cik->id_cik				= $id_cik;
+		$data_cik->kd_urusan			= $kd_urusan;
+		$data_cik->kd_bidang	 		= $kd_bidang;
+		$data_cik->kd_program	 		= $kd_program;
+		$data_cik->kd_kegiatan			= $kd_kegiatan;
+		$data_cik->anggaran_rencana		= $anggaran_rencana;
+		$data_cik->anggaran_realisasi	= $anggaran_realisasi;
+		$data_cik->capaian_ik			= $capaian_ik;
+		$data_cik->indikator			= $indikator;
+		$data_cik->indikator_rencana	= $indikator_rencana;
+		$data_cik->indikator_realisasi	= $indikator_realisasi;
+		$data_cik->ind_capaian_ik		= $ind_capaian_ik;
+		$data_cik->keterangan			= $keterangan;
+
+		$ret = TRUE;
+		if(empty($id_cik)) {
+			//insert
+			$ret = $this->m_cik->simpan_cik($data_cik);
+			//echo $this->db->last_query();
+		} else {
+			//update
+			$ret = $this->m_cik->update_cik($data_cik, $id_cik, 'table_cik', 'primary_cik');
+			//echo $this->db->last_query();
+		}
+		if ($ret === FALSE){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Data CIK gagal disimpan');						  
+		} else {
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Data CIK Berhasil disimpan');
+		}
+
+		if(!empty($call_from))
+			redirect($call_from);
+
+        redirect('cik');
+	}
+
+	function load_cik()
+	{
+		$search = $this->input->post("search");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+		$order = $this->input->post("order");
+		
+		$cik = $this->m_cik->get_data_table($search, $start, $length, $order["0"]);		
+		$alldata = $this->m_cik->count_data_table($search, $start, $length, $order["0"]);
+
+		$data = array();
+		$no=0;
+
+
+		foreach ($cik as $row) {
+			$no++;
+			$data[] = array(
+							$no, 
+							$row->kd_urusan.".".
+							$row->kd_bidang.".".
+                            $row->kd_program.".".
+                            $row->kd_kegiatan,
+                            $row->anggaran_rencana,
+                            $row->anggaran_realisasi,
+                            $row->capaian_ik,
+                            $row->indikator,
+                            $row->indikator_rencana,
+                            $row->indikator_realisasi,
+                            $row->ind_capaian_ik,
+                            $row->keterangan,
+							'<a href="javascript:void(0)" onclick="edit_cik('. $row->id_cik .')" class="icon2-page_white_edit" title="Edit CIK"/>
+							<a href="javascript:void(0)" onclick="delete_cik('. $row->id_cik .')" class="icon2-delete" title="Hapus CIK"/>'
+							);
+		}
+		$json = array("recordsTotal"=> $alldata, "recordsFiltered"=> $alldata, 'data' => $data);
+		
+        echo json_encode($json);
+	}
+
+	function edit_cik($id_cik)
+	{
+		//$this->output->enable_profiler(TRUE);
+        $this->auth->restrict();
+        //$data['url_save_data'] = site_url('cik/save_cik');
+
+        $data['isEdit'] = FALSE;
+        if (!empty($id_cik)) {
+            $data_ = array('id_cik'=>$id_cik);
+            $result = $this->m_cik->get_data_with_rincian($id_cik,'table_cik');
+			if (empty($result)) {
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data musrenbang tidak ditemukan.');
+				redirect('cik');
+			}
+			
+            $data['id_cik']				= $result->id_cik;
+    		$data['anggaran_rencana'] 	= $result->anggaran_rencana;
+    		$data['anggaran_realisasi'] = $result->anggaran_realisasi;
+    		$data['capaian_ik'] 		= $result->capaian_ik;
+    		$data['indikator'] 			= $result->indikator;
+    		$data['indikator_rencana'] 	= $result->indikator_rencana;
+    		$data['indikator_realisasi'] = $result->indikator_realisasi;
+    		$data['ind_capaian_ik'] 	= $result->ind_capaian_ik;
+    		$data['keterangan'] 		= $result->keterangan;
+
+            $data['isEdit']				= TRUE;         
+            
+            $kd_urusan_edit = $result->kd_urusan;
+    		$kd_bidang_edit = $result->kd_bidang;
+    		$kd_program_edit = $result->kd_program;
+    		$kd_kegiatan_edit = $result->kd_kegiatan;
+    
+            //prepare combobox
+    		$kd_urusan = array("" => "");
+    		foreach ($this->m_urusan->get_urusan() as $row) {
+    			$kd_urusan[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$kd_bidang = array("" => "");
+    		foreach ($this->m_bidang->get_bidang() as $row) {
+    			$kd_bidang[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$kd_program = array("" => "");
+    		foreach ($this->m_program->get_prog() as $row) {
+    			$kd_program[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$kd_kegiatan = array("" => "");
+    		foreach ($this->m_kegiatan->get_keg() as $row) {
+    			$kd_kegiatan[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$data['kd_urusan'] = form_dropdown('kd_urusan', $kd_urusan, $kd_urusan_edit, 'data-placeholder="Pilih Urusan" class="common chosen-select" id="kd_urusan"');
+    		$data['kd_bidang'] = form_dropdown('kd_bidang', $kd_bidang, $kd_bidang_edit, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+    		$data['kd_program'] = form_dropdown('kd_program', $kd_program, $kd_program_edit, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+    		$data['kd_kegiatan'] = form_dropdown('kd_kegiatan', $kd_kegiatan, $kd_kegiatan_edit, 'data-placeholder="Pilih Kegiatan" class="common chosen-select" id="kd_kegiatan"');
+    
+		}
+        $this->template->load('template','cik/cru_cik',$data);
+        
+	}
+
+	function delete_cik() 
+	{  
+        $id = $this->input->post('id');
+        
+        $result = $this->m_cik->delete_cik($id);
+        if ($result) {
+			$msg = array('success' => '1', 'msg' => 'CIK berhasil dihapus.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! CIK gagal dihapus, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+}

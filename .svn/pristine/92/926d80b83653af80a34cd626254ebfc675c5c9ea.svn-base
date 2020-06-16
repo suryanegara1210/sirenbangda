@@ -1,0 +1,4 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-12-01 12:49:08 --> Severity: Warning  --> Division by zero C:\xampp\htdocs\siaku\application\views\view\grafik_1.php 146
+ERROR - 2014-12-01 12:49:08 --> Severity: Warning  --> Division by zero C:\xampp\htdocs\siaku\application\views\view\grafik_1.php 147

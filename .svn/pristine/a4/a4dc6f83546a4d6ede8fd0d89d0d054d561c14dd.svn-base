@@ -1,0 +1,24 @@
+<?php
+		$i=0;
+		foreach($hasil->result() as $row) : $i++;
+		$status=$row->status;
+	if($row->no_kwitansi ==""){
+	    echo "<tr><td colspan='9' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	}else{
+		?>
+        <?php echo "$row->kdkomponen.$row->kdakun"; ?>
+		<tr>
+			<td align="center"><?php echo $i;?></td>
+			<td align="center"><?php echo "$row->kdkomponen.$row->kdakun"; ?> </td>
+			<td align="center"><?php echo $row->sifat_bayar; ?> </td>
+			<td align="center"><?php echo $row->no_spp ;?> </td>
+            <td align="center"><?php echo $row->nama_subunit ;?> </td>
+            <td align="center"><?php echo $row->tgl_spp; ?> </td>
+            <td align="center"><?php echo $row->status_spp; ?> </td>
+            <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>
+            <td align="center">
+            	<a href="<?php echo base_url();?>spp/preview_spp/<?php echo $row->id_spp;?>" title="Show SPP" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a><a href="<?php echo base_url();?>spp/preview_mp/<?php echo $row->id_spp;?>" title="Show MP" >MP</a>            	
+            </td>
+		</tr>
+        <input type="hidden" id="validasi2" value="ada">
+ <?php } endforeach; ?>

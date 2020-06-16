@@ -1,0 +1,206 @@
+<script type="text/javascript">
+    prepare_form();
+
+    var pajak_pph = $.parseJSON(<?php echo json_encode($pajak_pph) ?>);
+
+    //handle kalkulasi jumlah bruto
+    function hitung_subtotal(ob1, ob2, ob3, ob4, keypajak, ob5) {
+        
+        var n1 = ob1 != null ? parseFloat($(ob1).autoNumeric('get')) : null;
+        var n2 = ob2 != null ? parseFloat($(ob2).autoNumeric('get')) : null;
+        var n3 = ob3 != null ? parseFloat($(ob3).autoNumeric('get')) : null;
+
+        if(ob2 == null && ob3 == null) {
+            //model 1 nilai
+            var n4 = n1;            
+        } else if(ob3 == null) {
+            //model 2 nilai
+            var n4 = n1 * n2;            
+        } else {
+            //model 3 nilai
+            n3 = isNaN(n3) ? 0 : n3;
+            var n4 = n1 * n2 * n3;
+        }
+
+        $(ob4).autoNumeric('set', n4);
+
+        //pajak
+        var n5 = 0;
+        keypajak = keypajak.toUpperCase();
+        if(pajak_pph[keypajak] !== undefined) {
+            n5 = parseFloat(pajak_pph[keypajak].pph_honor) * n4/100;
+            $(ob5).autoNumeric('set', n5); 
+        } else {
+            $(ob5).val('');
+        }            
+    }
+
+    $(function () {
+        $('input#nama_pegawai').on('focus keyup', function (event) {
+            $(this).autocomplete({
+                    minLength: 2,
+                    source: function(request, response){
+                            $.ajax({
+                                url: "<?php echo site_url(); ?>services/pegawai/"+request.term,
+                                dataType: 'json',
+                                type: 'GET',
+                                success:    
+                                function(data){
+                                    response(data);
+                                },
+                            });
+                        },
+                    select: function(event, ui) {
+                            event.preventDefault();
+                            this.value = ui.item.label;
+                            $('#golongan').val(ui.item.value);
+                        },      
+                    focus: function( event, ui ) {
+                            event.preventDefault();
+                            this.value = ui.item.id + '-' + ui.item.label;
+                            $('#golongan').val(ui.item.value);
+                        }
+                    });                             
+        });
+
+        $('#form-cache').validate({
+            //onkeyup: false,
+            invalidHandler: function(e, validator) {
+                var errors = validator.numberOfInvalids();
+                if (errors) {
+                    var message = errors == 1
+                        ? 'Terdapat 1 field yang belum diisi. Mohon dicek kembali'
+                        : 'Terdapat ' + errors + ' fields yang belum diisi.  Mohon dicek kembali';
+                    $("div.error span").html(message);
+                    $("div.error").show();
+                } else {
+                    $("div.error").hide();
+                }
+            },
+            errorPlacement: function(error, element) {
+                //error.appendTo($("div.error span"));
+            },   
+            submitHandler: function(form) {
+                $("div.error").hide();
+                $('#volume').val($('#volume').autoNumeric('get'));
+                $('#satuan').val($('#satuan').autoNumeric('get'));
+                $('#subtotal').val($('#subtotal').autoNumeric('get'));
+                $('#pph').val($('#pph').autoNumeric('get'));            
+                
+                if( typeof callback_before_submit_form == "function")
+                    callback_before_submit_form();
+
+                //serialize form dan tambahan extra data
+                var form_data = $(form).serializeArray(); 
+                form_data.push({name: 'jns_honor', value: $('#jns_honor').val()});
+                
+                $.post ($(form).attr('action'), form_data, function(data) {
+                    data = parseJSON(data);
+             
+                    if(data.errno == 0) {
+                        $('#jns_honor').trigger('change');
+                    } else {
+                        $('#volume').autoNumeric('set', $('#volume').val());
+                        $('#satuan').autoNumeric('set', $('#satuan').val());
+                        $('#subtotal').autoNumeric('set', $('#subtotal').val());
+                        $('#pph').autoNumeric('set', $('#pph').val());
+                    }
+                    
+                    if( typeof callback_after_submit_form == "function")
+                        callback_after_submit_form(data);                        
+                });
+            },            
+        });
+
+        $('#volume').change(function() {
+            hitung_subtotal($('#volume'), $('#satuan'), null, $('#subtotal'), $('#golongan').val(), $('#pph'));
+        });
+
+        $('#satuan').change(function() {
+            $('#volume').trigger('change');
+        });
+
+        $('#btnReset').click(function() {            
+            $('#form-cache').trigger('reset');
+            $('#oper').val('add');
+            $('#idh').val('');            
+            $('#nama_pegawai').focus();
+            hitung_grand_total();        
+        }); 
+
+        hitung_grand_total();        
+    });
+
+    function hitung_grand_total() {
+        var grand_total = 0;
+        var pph_total = 0;
+        $('td[name^="subtotal"]').each( function() {
+            grand_total += parseFloat($(this).autoNumeric('get'));
+        });
+
+        $('td[name^="pph"]').each( function() {
+            pph_total += parseFloat($(this).autoNumeric('get'));
+        });
+        
+        $('#grand_total').autoNumeric('set', grand_total);        
+        $('#nominal').autoNumeric('set', grand_total);
+        $('#pph_total').autoNumeric('set', pph_total);
+        $('#nilai_pph').autoNumeric('set', pph_total);
+    }
+
+    function edit_honor(idh) {
+          $.post("<?php echo site_url('kwitansi/cache_honor')?>", 
+            {
+                oper: 'get',
+                id: idh,
+                jns_honor: $('#jns_honor').val()
+            })
+          .success(function(data) {
+            var response = parseJSON(data);
+
+            if(response.label) {
+                $('#oper').val('edit');
+                $('#idh').val(idh);
+                $('#nama_pegawai').val(response.nama);
+                $('#golongan').val(response.golongan);
+                $('#volume').autoNumeric('set', response.volume);
+                $('#satuan').autoNumeric('set', response.satuan);                    
+                $('#subtotal').autoNumeric('set', response.subtotal);                    
+                $('#pph').autoNumeric('set', response.pph);                    
+
+                if( typeof callback_before_edit == "function")
+                    callback_before_edit(response);
+
+                $('#nama_pegawai').focus();
+            }           
+          });
+    }
+
+    function delete_honor(element, idh) {
+        console.log('delete',idh);
+
+        $(element).hide();
+        $('#loadDel'+idh).show();
+        
+        $.post("<?php echo site_url('kwitansi/cache_honor')?>", 
+        {
+            oper: 'del',
+            id: idh,
+            jns_honor: $('#jns_honor').val()
+        })
+        .success(function(data) {
+            var result = parseJSON(data);
+            
+            if(!result.message) {
+                result.message = 'Terjadi kesalahan sistem, mohon diulang kembali';  
+                $(element).show();
+                $('#loadDel'+idh).hide();
+
+            } else {
+                //remove row
+                $(element).parents('tr').remove();
+                hitung_grand_total();
+            }
+        });
+    }
+</script>

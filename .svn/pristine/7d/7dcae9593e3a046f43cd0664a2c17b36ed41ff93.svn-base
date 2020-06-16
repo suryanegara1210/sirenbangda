@@ -1,0 +1,61 @@
+<article class="module width_full">
+            <header><h3>Daftar SPM GUP (Ganti Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="3">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th=$row['th_spm'];
+            //$nomor=$row['nomor_spp']; 
+            $nama_unit=$row['nama_unit'];   
+            $status_spm=$row['status_spm'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");    
+            ?>
+                 
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$th";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <?php if($status_spm =="verifikator blu"){?>
+                <td align="center"><a href='<?php echo base_url()."index.php/gup/detail_spm/".$th."/".$id;?>' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/icn_edit_article.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' ><img src='<?php echo base_url();?>asset/images/icn_jump_back.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."index.php/gup/setuju_spm_veri/".$th."/".$id;?>' title='Kirim ke Kasubag Dana Masyarakat' ><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }else {?>
+                <td align="center"><a href='<?php echo base_url()."index.php/gup/detail_spm/".$th."/".$id;?>' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/icn_edit_article.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' ><img src='<?php echo base_url();?>asset/images/icn_jump_back.png'></a></td>
+                <td align="center"><a href='#' title='Kirim ke Kasubag Dana Masyarakat' onclick="return alert('Maaf SPM ini sudah dikirim ke Kepala Sub Bagian Dana Masyarakat')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+               
+                <?php }?>
+              </tr>
+              
+            <?php $no++;}    
+            ?>         
+            
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer> 
+</article>

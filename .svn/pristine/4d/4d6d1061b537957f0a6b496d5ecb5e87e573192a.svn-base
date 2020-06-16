@@ -1,0 +1,97 @@
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   }  
+?>
+<article class="module width_full">
+<header>
+  <h3>Daftar SPTB <?php echo $this->session->userdata('nama_unit'); ?></h3></header>
+  <div class="module_content">
+<fieldset>
+<table>
+   <tr>
+    <td width="41">Bulan :</td>
+    <td width="101">
+        <?php echo form_dropdown("bulan",$bulan,"$bln","id='bulan'"); ?>
+     </td>
+    <td width="13"></td>
+    <td width="43">Tahun :</td> 
+    <td width="90">
+        <?php echo form_dropdown("tahun",$tahun,"$thn","id='tahun'"); ?>
+     </td>
+     <td width="10"></td>
+   	 <td width="229"><input type="button" id="tampil" value="Tampilkan"/></td>
+   </tr>
+</table>
+</fieldset>
+  <form method="post" name='formName4' id="nominatif" > 
+
+    <table  class="table-common" id="hasil" style="width: 898px;" >  
+       <thead> 
+       
+            <tr>
+            	<th>No.</th>
+                <th>Kode MAK</th>
+                <th>Sifat Pembayaran</th>
+                <th>Nama Subunit</th>
+              <th>No. SPTB</th>
+                <th>Tanggal</th>
+                <th>Status SPTB</th>
+                <th>Jumlah</th> 
+                <th colspan="2">Aksi</th> 
+            </tr>
+            
+      </thead>
+           <tbody id="daftar_sptb">		
+                <?php $this->load->view('sptb/tampil_sptb')?>
+           </tbody>
+ </table>
+ </div>
+ <br />
+ <footer style="width:99.9%">
+   <div class="submit_link"> 
+        <input type="button" value="Kembali" onclick=self.history.back() > 
+   </div>
+ </footer>
+</form>
+</article>
+<script type="text/javascript">
+/*
+          $('#simpan').attr("disabled",true);
+		  $("#tampil").click(function(){
+			  	var tahun = $("#tahun").val();
+				var bulan = $("#bulan").val();
+				if(tahun == ''){
+					alert('Pilih tahun terlebih');	
+				}else if(bulan == '-1'){
+					alert('Pilih bulan terlebih');
+				}else{
+					var data  = {tahun:$("#tahun").val(),bulan:$("#bulan").val()};
+						$.ajax({
+								type: "POST",
+								url : "<?php //echo site_url('sptb/tampil_sptb')?>",
+								data: data,
+								success: function(msg){
+									$('#daftar_sptb').html(msg);
+								}
+						  });
+				}
+        });
+*/	
+
+		  $("#tampil").click(function(){
+			  	var tahun = $("#tahun").val();
+				var bulan = $("#bulan").val();
+				if(tahun == ''){
+					alert('Pilih tahun terlebih');	
+				}else if(bulan == '-1'){
+					alert('Pilih bulan terlebih');
+				}else{
+				window.location = "<?php echo site_url('sptb/daftar_sptb_filter')?>/"+bulan+"/"+tahun;
+				}
+        });
+	
+</script>
+
+       

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <style>
+            #tabel_pdf, #tabel_pdf tr, #tabel_pdf th, #tabel_pdf td{
+                border:black thin solid;
+                border-collapse:collapse;
+                width: 100%;   
+            }
+        </style>
+    </head>
+    <body>
+
+<?php foreach($penerimaan as $pen){
+?>
+<table id="tabel_pdf">
+    <tr>
+        <td colspan="2" align="center">BUKTI KAS MASUK<br /><?php echo $pen['nama'];?></td>
+    </tr>
+    <tr>
+        <td>Diterima dari</td>
+        <td>: Mahasiswa Udayana</td>
+    </tr>
+    <tr>
+        <td>Banyaknya Uang</td>
+        <td>: <?php echo $this->uang->terbilang($pen['total']) ?></td>
+    </tr>
+    <tr>
+        <td>Untuk</td>
+        <td>: Pembayaran Mahasiswa</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <table>
+                <tr>
+                    <td width="100px">&nbsp;</td>
+                    <td> Jumlah: <?php echo $this->uang->angka($pen['total']) ?></td>
+                    <td width="100px">&nbsp;</td>
+                    <td>Denpasar, <?php echo date("d-m-Y"); ?>
+                    <br />
+                    <br />
+                    <br />
+                    ttd 
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<p style="page-break-before: always">&nbsp;</p> 
+<?php }
+?>
+</body>
+</html>

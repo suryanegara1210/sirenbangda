@@ -1,0 +1,41 @@
+<script type="text/javascript">
+    function ganti_file(var_file, var_id_element){
+    	input_file={};
+    	input_file['bast']='\
+    					<input type="file" id="file_bast" name="file_bast" accept="application/pdf" />\
+    					<BR>\
+    					<i>\
+    						*Format lampiran Berita Acara Serah Terima harus pdf, Ukuran Maksimum file = 1Mb.\
+    					</i>';
+    	
+    	input_file['bap']='\
+    					<input type="file" id="file_bap" name="file_bap" accept="application/pdf" />\
+    					<BR>\
+    					<i>\
+    						*Format lampiran Berita Acara Pembayaran harus pdf, Ukuran Maksimum file = 1Mb.\
+    					</i>';
+
+        input_file['daftar_honor']='\
+                        <input type="file" id="daftar_honor" name="daftar_honor" accept="application/pdf" />\
+                        <BR>\
+                        <i>\
+                            *Format lampiran Daftar Honor harus pdf, Ukuran Maksimum file = 1Mb.\
+                        </i>';
+
+        input_file['sk']='\
+                        <input type="file" id="sk" name="sk" accept="application/pdf" />\
+                        <BR>\
+                        <i>\
+                            *Format lampiran SK harus pdf, Ukuran Maksimum file = 1Mb.\
+                        </i>';
+
+        input_file['daftar_nominatif']='\
+                        <input type="file" id="daftar_nominatif" name="daftar_nominatif" accept="application/pdf" />\
+                        <BR>\
+                        <i>\
+                            *Format lampiran Daftar Nominatif harus pdf, Ukuran Maksimum file = 1Mb.\
+                        </i>';                        
+
+    	$('#'+var_id_element).html(input_file[var_file]);			
+    }
+</script>

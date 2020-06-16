@@ -1,0 +1,44 @@
+<article class="module width_full">
+            <header><h3>Distribusi Proporsi</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>unit/verifikasi" > 
+            <table class="tablesorter" cellspacing="0" >
+    <!-- page content -->
+     
+    <tr><div id="propinsi"><td>Unit</td><td>:</td><td> <?php echo form_dropdown("id_unit",$unit,"","id='id_unit'") ?></td></div></tr>  
+    <tr><td>Subunit</td><td>:</td><td><div id="subunit"><?php echo form_dropdown("subunit",array('Pilih Subunit'=>'Pilih Unit Dahulu'),'','disabled');?></div></td></tr>
+   
+     
+   </table> 
+               
+</table> 
+ 
+</div>
+ <div id="tabel"></div> 
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+
+</article>
+
+<script type="text/javascript">
+          $("#id_unit").change(function(){
+              //$('#jenis_honor').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+                var selectValues = $("#id_unit").val();
+                    var id_unit = {id_unit:$("#id_unit").val()};
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('dpt/get_subunit')?>",
+                            data: id_unit,   
+                            success: function(msg){
+                                        $('#subunit').html(msg);  
+                                    }
+                      });
+        });
+       </script>
+

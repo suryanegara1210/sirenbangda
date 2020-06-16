@@ -1,0 +1,15 @@
+<?php $status_user = $this->session->userdata('level');
+    if($status_user == '2')
+                { 
+                
+                    ?>
+                    <h3>Menu Referensi</h3>
+                    <ul class="toggle">  
+                    <li class="icn_new_article"><a href='<?php echo base_url()."index.php/unit/detpengumuman/".$row['id_pengumuman'];?>'>Draft Kwitansi ()</a></li> 
+                    <li class="icn_new_article"><a href='<?php echo base_url()."index.php/unit/detpengumuman/".$row['id_pengumuman'];?>'>Revisi Kwitansi () </a></li> 
+         
+                    </ul> 
+               <?php }
+?>  
+  
+  

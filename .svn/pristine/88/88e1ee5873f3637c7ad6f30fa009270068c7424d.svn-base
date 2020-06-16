@@ -1,0 +1,147 @@
+<article class="module width_full">
+    <header><h3>Laporan Aktivitas</h3></header>
+        <div class="module_content">
+            <div id="dsatker" style="margin-right: 10px; float:left; ">
+                Satuan Kerja<br/>
+                <select name="satker" id="satker">
+                    <option value="xxxx">Universitas Udayana</option>
+                </select>
+            </div>
+            
+            <div id="dstandar" style="margin-right: 10px; float:left; ">
+                Standar<br/>
+                <select name="standar" id="standar">
+                    <option value="0">Default</option>
+                    <option value="1">SAK</option>
+                </select>
+            </div>
+
+            <div id="dbanding" style="margin-right: 10px; float:left; ">
+                Pembanding<br/>
+                <select name="banding" id="banding">
+                    <option value="sbm">Sebelumnya</option>
+                    <option value="thn">Per-tahun</option>
+                </select>
+            </div>
+
+            <div id="djenis_periode" style="margin-right: 10px; float:left; ">
+                Jenis<br/>
+                <?php echo form_dropdown("jenis_periode",$jenis_periode,"","id='jenis_periode' onchange='jenis_periode_changed()'"); ?>
+            </div>
+
+            <div id="dbulan" style="margin-right: 10px; float:left; ">
+                Bulan<br/>
+                <div id="cmb_bulan">
+                <?php echo form_dropdown("bulan",$bulan,"","id='bulan'"); ?>
+                </div>
+            </div>
+            
+            <div id="dtahun" style="margin-right: 10px; float:left; ">
+                Tahun<br/>
+                <select name="tahun" id="tahun">
+                    <option value="<?php echo $ta; ?>"><?php echo $ta; ?></option>
+                </select>
+            </div>
+
+            <div id="dmin" style="margin-right: 10px; float:left; ">
+                Level<br/>
+                <?php
+                    $level=array();
+                    for($i=1;$i<=8;$i++){
+                        $level[$i]=$i;
+                    }
+                 echo form_dropdown("maxlev",$level,"","id='maxlev'"); ?>
+            </div>
+            
+            <div id="dtampil" style="margin-right: 10px;float:left;">
+                Tampilkan:<br/>
+                <input type="button" id="tampil" value="Tampilkan" onclick="tampil()" />
+            </div>
+            <div id="dtampil" style="margin-right: 10px;float:left;">
+                Cetak:<br/>
+                <input disabled="true" type="button" id="cetak" value="Cetak" onclick="ambildata('CTK')" />
+            </div>
+            <div id="dtampil">
+                Ulangi:<br/>
+                <input disabled="true" type="button" id="ulangi" value="Ulangi" onClick="location.reload();" />
+            </div>
+            <div id="laporan"></div>
+        </div>
+</article>
+
+
+
+<script type="text/javascript">
+    function tampil(){
+        ambildata();
+    }
+
+    function cetak(jenis, msg_var){        
+        var info="";                        
+        $.ajax({
+            type: "POST",
+            timeout: 0, 
+            url : "<?php echo site_url('report/get_info_file_download'); ?>",
+            data: {jenis:jenis},
+            async: false,
+            success: function(msg){
+                info=msg;                                
+            }
+        });
+        $('#cetak').prop("disabled",true);
+        $('#ulangi').prop("disabled",false);
+        $('#laporan').html('<center><BR><a href="#" onclick="window.open(\''+ msg_var +'\');"><img src="<?php echo base_url();?>asset/images/download.png" width="50px"/></a><BR><i>Link Download Laporan (pdf)</i><BR><BR><div style="color: red; font-weight: bold;" id="info">'+ info +'</div></center>');
+    }
+    
+    function ambildata(ctk){
+        var jenis= "aktivitas";
+        var satker= $("#satker").val();
+        var standar= $("#standar").val();
+        var banding= $("#banding").val();
+        var jenis_periode= $("#jenis_periode").val();
+        var tahun= $("#tahun").val();
+        var bulan= $("#bulan").val();
+        var maxlev= $("#maxlev").val();
+        var link_base_url = '<?php echo base_url("file_upload/temp_file_pdf/"); ?>'+'/'+jenis+'.pdf';
+
+        $('#laporan').html('<center><img src="<?php echo base_url();?>asset/images/loader.gif" width="64px" height="64px" /></center>');
+        $.ajax({
+                type: "POST",
+                timeout: 0, 
+                url : "<?php echo site_url('report/detail'); ?>",
+                data: {banding:banding, jenis:jenis, satker: satker,tahun:tahun,bulan:bulan,maxlev:maxlev,jenis_periode:jenis_periode,standar:standar,cetak:ctk},
+                success: function(msg){
+                    if (ctk != 'CTK') {
+                        $("#satker").prop("disabled",true);
+                        $("#standar").prop("disabled",true);
+                        $("#banding").prop("disabled",true);
+                        $("#jenis_periode").prop("disabled",true);
+                        $("#tahun").prop("disabled",true);
+                        $("#bulan").prop("disabled",true);
+                        $("#maxlev").prop("disabled",true);
+                        $('#tampil').prop("disabled",true);
+                        $('#cetak').prop("disabled",false);
+                        $('#ulangi').prop("disabled",false);
+                        $('#laporan').html(msg);
+                    }else{                        
+                        cetak(jenis, msg);
+                    }; 
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    cetak(jenis, link_base_url);
+                }
+        });
+    }
+
+    function jenis_periode_changed(){         
+        var_id = $('#jenis_periode').val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('report/get_bulan_periode'); ?>",
+                data: {jenis_periode:var_id},
+                success: function(msg){                    
+                    $('#cmb_bulan').html(msg);
+                }
+        });
+    }
+</script>

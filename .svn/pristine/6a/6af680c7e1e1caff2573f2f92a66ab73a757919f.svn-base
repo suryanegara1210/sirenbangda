@@ -1,0 +1,15 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-10-28 10:54:33 --> Query error: Table 'siaku_db_model.under_construction' doesn't exist
+ERROR - 2014-10-28 10:55:34 --> Query error: Table 'siaku_db_model.under_construction' doesn't exist
+ERROR - 2014-10-28 15:21:18 --> 404 Page Not Found --> sf_sastra
+ERROR - 2014-10-28 15:46:00 --> 404 Page Not Found --> file_upload
+ERROR - 2014-10-28 15:54:35 --> Severity: Notice  --> Undefined index: jenpen C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 606
+ERROR - 2014-10-28 15:54:35 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 647
+ERROR - 2014-10-28 16:00:45 --> Severity: Notice  --> Undefined index: jenpen C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 606
+ERROR - 2014-10-28 16:00:45 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 647
+ERROR - 2014-10-28 16:16:01 --> Severity: Notice  --> Undefined variable: link_buat_baru C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\detail.php 35
+ERROR - 2014-10-28 16:16:08 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 1051
+ERROR - 2014-10-28 16:20:57 --> Severity: Notice  --> Undefined index: jenpen C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 606
+ERROR - 2014-10-28 16:21:16 --> Severity: Notice  --> Undefined variable: link_buat_baru C:\xampp\htdocs\siaku\application\views\bukti_akuntansi\detail.php 35
+ERROR - 2014-10-28 16:21:21 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 1051

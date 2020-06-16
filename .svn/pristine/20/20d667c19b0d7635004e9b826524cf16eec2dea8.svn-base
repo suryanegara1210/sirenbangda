@@ -1,0 +1,120 @@
+<?php include('honor_js.php') ?>
+<script type="text/javascript">
+
+function callback_before_edit(response) {
+    $('#jabatan').val(response.jabatan);
+    $('#nim_mhs').val(response.nim_mhs);
+    $('#nama_mhs').val(response.nama_mhs);
+}
+
+</script>
+<div><strong><?php echo $honor_title ?></strong><br />
+  <br/>
+<?php include('form_import_honor.php') ?>
+</div>
+<style type="text/css">
+.input-row th {
+    margin: 0px;
+    padding: 1px;
+    height: 20px;
+}
+
+.input-row th input,
+.input-row th select {
+    width: inherit;
+    height: inherit;
+}
+
+#form-cache input[type=submit] {
+    border: 1px solid #18597E;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+    width: 16px; height: 16px; 
+}
+
+#form-cache input.error, 
+#form-cache select.error, 
+#form-cache textarea.error {
+    border: 0px;
+    background-color: #FF2288;
+}
+
+</style>    
+<div class="error" style="display:none; width: auto; margin-top: 5px">
+  <i class='icon2-error' style='margin-top: -2px'/>  <span style="display: inline-block; color: red"></span>
+</div>
+<form id="form-cache" name="form-cache" method="post" action="<?php echo site_url('kwitansi/cache_honor') ?>">            
+<table class="table-common" id="nama_honor" style="width: 99.9%;" name="nama_honor" >  
+        <tr>
+            <th>No</th>
+            <th>Nama Pembimbing</th>
+            <th>Gol</th>
+            <th>Jabatan</th>
+            <th>NIM Mhs</th>
+            <th>Nama Mhs</th>
+            <th>Jml</th>
+            <th>Honor Bruto</th>
+            <th>Sub Total</th>
+            <th>PPh</th>
+            <th>Action</th>       
+        </tr>
+        <tr class="input-row">
+            <input type="hidden" name="oper" id="oper" value="add">
+            <input type="hidden" name="id" id="idh" value="">
+            <th align='center'>#</th>
+            <th style='width: 100%'><input required name="nama" type="text" id="nama_pegawai" autocomplete="off" placeholder="Nama Dosen" title="Masukan Nama Dosen"/></th>
+            <th style='width: 35px'><input required class='txt-center' name="golongan" type="text" id="golongan" readonly placeholder="Gol" title="Pilih nama untuk mengisi golongan dosen"/></th>
+            <th style='width: 100px'>
+                <input required name="jabatan" type="text" id="jabatan" placeholder="Jabatan" title="Masukan Jabatan"/>
+            </th>
+            <th style='width: 80px'><input required name="nim_mhs" type="text" id="nim_mhs" placeholder="NIM" title="Masukan NIM Mahasiswa"/></th>
+            <th style='width: 150px'><input required name="nama_mhs" type="text" id="nama_mhs" placeholder="Nama Mahasiswa" title="Masukan Nama Mahasiswa"/></th>
+            <th style='width: 40px'><input class='number txt-center' required name="volume" type="text" id="volume" class='number txt-center' title="Masukkan Jumlah Ujian"/></th>
+            <th style='width: 80px'><input class="currency" required name="satuan" type="text" id="satuan" placeholder="Nilai Honor" title="Masukkan Nilai Honor per Ujian"/></th>
+            <th style='width: 80px'><input name="subtotal" type="text" id="subtotal" required class="currency" readonly/></th>
+            <th style='width: 70px'><input name="pph" type="text" id="pph" class="currency" required readonly/></th>
+            <th >
+                <input type="submit" id="btnCache" value=" " class="icon2-disk"/>
+                <a href="javascript:void(0)" id="btnReset" class='icon2-cancel'></a>
+            </th>
+        </tr>
+
+<?php 
+$grand_total = 0;
+$pph_total = 0;
+if(isset($honors)) {
+    foreach ($honors as $idh=>$row) { ?>
+        <tr >
+            <td class='txt-center'><?php echo $row['label']; ?></td>
+            <td class='txt-fix'><?php echo $row['nama']; ?></td>
+            <td class='txt-center'><?php echo $row['golongan']; ?></td>
+            <td ><?php echo $row['jabatan']; ?></td>
+            <td ><?php echo $row['nim_mhs']; ?></td>
+            <td ><?php echo $row['nama_mhs']; ?></td>
+            <td class='txt-center'><?php echo $row['volume']; ?></td>
+            <td class='currency'><?php echo $row['satuan']; ?></td>
+            <td class='currency' name='subtotal<?php echo $idh?>'><?php echo $row['subtotal']; ?></td>
+            <td class='currency' name='pph<?php echo $idh?>'><?php echo $row['pph']; ?></td>
+            <td class='txt-center'>
+                <a href="javascript:void(0)" class='icon2-delete' onclick="delete_honor(this, '<?php echo $idh?>')"></a>
+                <i class='loading' id='loadDel<?php echo $idh?>' style='display: none'/>
+                <a href="javascript:void(0)" class='icon2-page_white_edit' onclick="edit_honor('<?php echo $idh?>')"></a>
+            </td>
+        </tr>        
+<?php    
+        $grand_total += doubleval($row['subtotal']);
+        $pph_total   += doubleval($row['pph']);
+    }
+} ?>       
+
+        <tr class='input-row'>
+            <th colspan="8" style="text-align: right">Grand Total</th>
+            <th style="text-align: right">
+                <span name="grand_total" id="grand_total" class="currency" style='font-size: 12px; margin-right: 2px'> 
+                <?php echo $grand_total ?></span></th>
+            <th style="text-align: right">
+                <span name="pph_total" id="pph_total" class="currency" style='font-size: 12px; margin-right: 2px'> 
+                <?php echo $pph_total ?></span></th>
+            <th ></th>
+        </tr>       
+  </table>
+</form>

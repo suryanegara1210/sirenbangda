@@ -1,0 +1,146 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+    class Setting extends CI_Controller{
+        //setting tahun aktif
+    
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_spm',
+                                 'm_lov', 'm_pok', 'm_settings', 'm_bas'));
+        
+        
+    }
+    //maks up pindah ke controller usulan
+    function input_maks(){
+            $this->auth->restrict();
+            
+            $ta  = $this->m_settings->get_tahun_anggaran();
+            $id_unit = $this->session->userdata('id_unit');
+            
+            $data['subunit'] = $this->m_settings->getUnitList($id_unit);
+            $maks = $this->m_settings->cari_jumlah($ta,$id_unit);
+            
+            $maks34=array();
+            foreach($maks as $uraian2){
+                $maks34[$uraian2->id_subunit] = $uraian2->nilai_max;
+            } 
+
+            $data['spp2']=$maks34;                
+            $tes = $this->m_settings->cari_pagu_real($ta,$id_unit); 
+            $makstes=array();
+            
+            foreach($tes as $uraian){
+                $makstes[$uraian->id_subunit] = $uraian->pagu_real;
+            } 
+ 
+            $data['spp3_1']=$makstes;
+
+            $this->template->load('template','usulan/input_maks',$data);
+    }
+        
+    function tambah_maks(){
+            $this->auth->restrict();
+            
+            $ta  = $this->m_settings->get_tahun_anggaran();
+            $id_subunit = $this->uri->segment(3);    
+            
+            $data['subunit'] = $this->m_settings->detailgetSubUnitList($id_subunit);        
+            $data['maks_up'] = $this->m_settings->banyak_mp_max($ta,$id_subunit);         
+            $this->template->load('template','usulan/tambah_maks',$data);
+    }
+    
+    function simpan_maks(){
+            $this->auth->restrict();
+            $max_up = $this->input->post('maksimum');   
+            $this->m_settings->simpan_maks($max_up); 
+            //$id_subunit = $this->session->userdata('id_subunit');  
+            redirect('setting/input_maks'); 
+    }
+    function bas_unit(){
+        $data['bas_unit']=$this->m_settings->get_akun_bas();
+        $this->template->load('template','setting/bas_unit',$data);
+    }
+    
+    function bas_unit_add(){
+        $data['subunit']=$this->m_umum->subunit_semua('',constant::WITHOUT_ALL);
+        $this->template->load('template','setting/bas_unit_kpl_add',$data);
+    }
+    
+    function bas_unit_add_ambil(){
+        $subunit=$this->input->post('subunit');
+        $level=$this->input->post('level');
+        $kelompok=$this->input->post('kelompok');
+        
+        $bas=$this->m_settings->get_bas($subunit,$level,$kelompok);
+        //$bas_unit=$this->m_settings->
+        //echo $this->db->last_query();
+        
+        echo "<center><form name=\"form_rekomendasi\" action=\"".site_url('setting/bas_unit_add_sim')."\" method=\"POST\">";
+        echo "<table border=\"1\" class=\"table-common\">";
+        echo "<tr><th>Kode Akun</th><th>Pilih</th><th>Nama Akun</th></tr>";
+        foreach($bas as $bs){
+            if(isset($bs->akun_bas) && $bs->akun_bas!=='' ){}
+            else{
+                echo "<tr>";
+                echo "<td>$bs->akun_kode</td>";
+                if($bs->level==8){
+                    echo "<td><input type=\"checkbox\" name=\"bas[$bs->akun_kode]\" value=\"$subunit\" ></td>";
+                }else{
+                    echo "<td></td>";
+                }
+                echo "<td>$bs->akun_nama</td>";
+                
+                echo "</tr>";
+            }
+        }
+        echo "<tr><td colspan=\"3\" align=\"right\"><input type=\"submit\" value=\"Simpan\" class=\"alt_btn\"></td></tr>";
+        echo "</table>";
+        echo "</form></center>";
+    }
+    
+    function bas_unit_add_sim(){
+        $bas=$this->input->post('bas');
+        //var_dump($bas);
+        if (!$bas){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Tidak ada data yang disimpan.');
+            redirect('setting/bas_unit');
+            return false;
+        }
+        $hasil = $this->m_settings->bas_unit_add_sim($bas);
+        if($hasil){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil Disimpan....');
+            redirect('setting/bas_unit');
+        }
+    }
+    
+    function bas_unit_del_sim(){
+        $bas=$this->input->post('bas');
+        //var_dump($bas);
+        if (!$bas){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Tidak ada data yang dihapus.');
+            redirect('setting/bas_unit');
+            return false;
+        }
+        $hasil = $this->m_settings->bas_unit_del_sim($bas);
+        if($hasil){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil Dihapus....');
+            redirect('setting/bas_unit');
+        }
+    }
+
+    function change_ta(){
+        $ta=$this->input->post('ta');
+        $this->session->set_userdata('t_anggaran_aktif', $ta);        
+        echo "success";
+    }
+    
+}?>

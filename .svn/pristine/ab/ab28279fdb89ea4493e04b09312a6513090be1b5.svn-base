@@ -1,0 +1,80 @@
+<script type="text/javascript">  
+  function load_view(){          
+    var jenisblj      = $("#jenis_belanja").val();
+    var fak           = $("#fak").val();
+
+    $.ajax({
+      type: "POST",
+      url : "<?php echo site_url('spm/view_list_spm_penerima')?>",
+      data: { 
+              jenisblj: jenisblj,
+              fak: fak
+            },
+      success: function(msg){
+        $('#tabel').html(msg);
+      }
+    });
+  }            
+</script>
+<input type="hidden" id="jb" value="<?php echo $this->uri->segment(3); ?>">
+
+
+<style>
+label.error {
+    margin-left: 2px;
+    width: auto;
+    display: block;
+    color:#F00;
+}
+</style>
+
+<article class="module width_full">
+<header>
+<h3>Daftar SPM</h3>
+</header>             
+ <div class="module_content">      
+
+<table border='0' width='100%' >
+  
+  <tr>
+    <td width="260px;">Sifat Pembayaran</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <select name="jenis_belanja" id="jenis_belanja"  >        
+        <?php
+            foreach($sifat_bayar as $row){
+                echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+            }
+        ?>
+      </select></td>
+  </tr>
+  <tr>
+    <td >Unit</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">      
+    <?php
+      echo form_dropdown("fak",$unit,"","id='fak'");      
+    ?>
+      </select>
+    </select></td>
+  </tr>
+<tr>
+    <td >&nbsp;</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <input type="submit" name="cari" id="cari" value="Tampilkan" onclick="load_view()" />
+</td>
+</table>
+   <div id="tabel">
+  </div>
+
+</article>
+
+
+
+<style type="text/css">
+.col_akhir {    width:50px;    
+}
+</style>
+
+

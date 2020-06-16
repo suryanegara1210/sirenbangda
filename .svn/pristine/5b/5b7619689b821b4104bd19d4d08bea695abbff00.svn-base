@@ -1,0 +1,665 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class belanja dari Tambahan Uang Persediaan (TUP)
+ * 
+ * Controller Class belanja dari Tambahan Uang Persediaan (TUP) yang merupakan bagian dari
+ * Bisnis Belanja
+ * 
+ * @author Putu Ari Arjana
+ */
+class notifikasi extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+        {                                
+            $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->library('konversi');
+			$this->load->model('munit'); 
+            $this->load->model('m_tup'); 
+			$this->load->model('m_gup'); 
+			$this->load->model('m_ls');
+        }
+
+// Sub unit	
+
+	function countUpSubunit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_subunit = $this->session->userdata('id_subunit');
+			$rekap= $this->munit->jumlahUp($id_subunit);
+			$trans=$this->munit->jumlahTransUp($id_subunit);
+			
+			if($rekap!= 0)
+			{	$jum=$rekap;
+				echo "<li><a href='". base_url()."unit/list_up'>UP [ ".$jum." ]</a></li>";
+			}
+			else if($rekap==0)
+			{
+				if($trans != 0)
+				{	$jum=$trans;
+				echo "<li><a href='". base_url()."unit/list_up'>UP [ ".$jum." ]</a></li>";
+				}	
+			}
+			
+		}
+	}
+	
+	function countTupSubunit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_subunit = $this->session->userdata('id_subunit');
+			$rekap= $this->m_tup->jumlahTup($id_subunit);
+			$trans=$this->m_tup->jumlahTransTup($id_subunit);
+			
+			if($rekap!= 0)
+			{	$jum=$rekap;
+				echo "<li><a href='". base_url()."tup/list_up'>TUP [ ".$jum." ]</a></li>";
+			}
+			else if($rekap==0)
+			{
+				if($trans != 0)
+				{	$jum=$trans;
+				echo "<li><a href='". base_url()."tup/list_up'>TUP [ ".$jum." ]</a></li>";
+				}	
+			}
+			
+		}
+	}
+	
+		function countGupSubunit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_subunit = $this->session->userdata('id_subunit');
+			$jum_revisi_gu = $this->m_gup->jumlahGup_revisi($id_subunit);
+			$jum_cetak_gu  = $this->m_gup->jumlahGup_cetak($id_subunit);
+			$jum_total  = $jum_cetak_gu + $jum_revisi_gu;
+			//echo $this->db->last_query();
+			if($jum_total!= 0){
+?>					
+                <li>
+                    <a href='#'>GUP [ <?php echo $jum_total ?> ]</a>
+                        <ul>
+                          <?php if($jum_revisi_gu == 0){ }else if($jum_revisi_gu != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>gup/rev_ver_kwitansi'>Revisi Kwitansi [ <?php echo $jum_revisi_gu ?> ]</a>
+                                </li>
+                           <?php }; if($jum_cetak_gu == 0){}else if($jum_cetak_gu != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>gup/daftar_siap_cetak'>Cetak Kwitansi [ <?php echo $jum_cetak_gu ?> ]</a>
+                                </li>
+                            <?php }?>
+                        </ul>
+                </li>
+<?php
+
+			}
+		}
+	}
+	
+	function countLsSubunit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_subunit = $this->session->userdata('id_subunit');
+			$jum_revisi_ls = $this->m_ls->jumlahLs_revisi($id_subunit);
+			//echo $this->db->last_query();
+			$jum_cetak_ls  = $this->m_ls->jumlahLs_cetak($id_subunit);
+			$jum_total  = $jum_cetak_ls + $jum_revisi_ls;
+			//echo $this->db->last_query();
+			if($jum_total!= 0){
+?>					
+                <li>
+                    <a href='#'>LS[ <?php echo $jum_total ?> ]</a>
+                        <ul>
+                          <?php if($jum_revisi_ls == 0){ }else if($jum_revisi_ls != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>ls/rev_ver_kwitansi'>Revisi Kwitansi [ <?php echo $jum_revisi_ls ?> ]</a>
+                                </li>
+                           <?php }; if($jum_cetak_ls == 0){}else if($jum_cetak_ls != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>ls/daftar_siap_cetak'>Cetak Kwitansi [ <?php echo $jum_cetak_ls ?> ]</a>
+                                </li>
+                            <?php }?>
+                        </ul>
+                </li>
+<?php
+
+			}
+		}
+	}
+
+
+		function countTotalSubunit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_subunit = $this->session->userdata('id_subunit');
+			$rekap= $this->munit->jumlahUp($id_subunit);
+			$trans=$this->munit->jumlahTransUp($id_subunit);
+			if($rekap!= 0)
+			{	$jum=$rekap;}
+			else if($rekap==0)
+			{
+				if($trans != 0)
+				{	$jum=$trans;}
+				else
+				{	$jum=0;}
+			}
+			//---------------------------------------
+			$rekapTup= $this->m_tup->jumlahTup($id_subunit);
+			$transTup=$this->m_tup->jumlahTransTup($id_subunit);
+			if($rekapTup!= 0)
+			{	$jumTup=$rekapTup;}
+			else if($rekapTup==0)
+			{
+				if($transTup != 0)
+				{	$jumTup=$transTup;}
+				else
+				{	$jumTup=0;}
+			}
+			//---------------------------------------
+			$data['hitung_up'] = $jum;
+			$data['hitung_tup'] = $jumTup;
+			$jum_revisi_gu = $this->m_gup->jumlahGup_revisi($id_subunit);
+			$jum_cetak_gu  = $this->m_gup->jumlahGup_cetak($id_subunit);
+			$jum_revisi_ls = $this->m_ls->jumlahLs_revisi($id_subunit);
+			$jum_cetak_ls  = $this->m_ls->jumlahLs_cetak($id_subunit);
+			echo "[".($data['hitung_up'] + $data['hitung_tup'] + $jum_revisi_gu + $jum_cetak_gu + $jum_revisi_ls + $jum_cetak_ls )."]";
+		}
+	}
+
+
+// verifikator Unit
+
+	function countUpVer(){
+			if($this->auth->is_logged_in() == true){
+				$arr=array();
+				$id_unit = $this->session->userdata('id_unit');
+				$trans=$this->munit->jumlahUpVer($id_unit);
+				//echo $this->db->last_query();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."unit/verifikasi_up'>UP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+
+	function countTupVer(){
+			if($this->auth->is_logged_in() == true){
+				$arr=array();
+				$id_unit = $this->session->userdata('id_unit');
+				$rekap=$this->m_tup->jumlahTupVer($id_unit);
+				$rekap2=$this->m_tup->jumlahTupVerKaprodi($id_unit);
+				$rekap3=$this->m_tup->jumlahTupVerSpp($id_unit);
+				$rekap4 = $rekap + $rekap2 + $rekap3;
+				//echo $this->db->last_query();
+				if($rekap4 != 0){
+					$jum  = $rekap;
+					$jum2 = $rekap2;
+					$jum3 = $rekap3;
+					$jum4 = $rekap4;
+?>					
+					<li>
+                        <a href='#'>TUP [ <?php echo $jum4; ?> ]</a>
+                            <ul>
+                              <?php if($jum == 0){ }else if($jum != 0){ ?>
+                                    <li>
+                                        <a href='<?php echo base_url()?>tup/verifikasi_up'>Verifikasi TUP [ <?php echo $jum ?> ]</a>
+                                    </li>
+                               <?php }; if($jum2 == 0){}else if($jum2 != 0){ ?>
+                                    <li>
+                                        <a href='<?php echo base_url()?>tup/up_terotorisasi'>TUP Terotorisasi [ <?php echo $jum2 ?> ]</a>
+                                    </li>
+                                 <?php }; if($jum3 == 0){}else if($jum3 != 0){ ?>
+                                    <li>
+                                        <a href='<?php echo base_url()?>tup/list_spp_up'>List SPP TUP [ <?php echo $jum3 ?> ]</a>
+                                    </li>
+                                <?php }?>
+                            </ul>
+					</li>
+<?php
+				
+			}
+		}
+	}
+
+		function countGupVeriUnit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_unit = $this->session->userdata('id_unit');
+			$data['hitung_gup'] = $this->m_gup->jumlahGupVeri($id_unit);
+			if($data['hitung_gup']!= 0){
+			echo "
+                        <li>
+                        	<a href='". base_url()."gup/ver_kwitansi'>GUP [ ".$data['hitung_gup']." ]</a>
+                        </li>
+						
+				";
+			}
+		}
+	}
+	
+		function countLsVeriUnit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_unit = $this->session->userdata('id_unit');
+			$data['hitung_ls'] = $this->m_ls->jumlahLsVeri($id_unit);
+			//echo $this->db->last_query();
+			if($data['hitung_ls']!= 0){
+			echo "
+                        <li>
+                        	<a href='". base_url()."ls/ver_kwitansi_ls'>LS [ ".$data['hitung_ls']." ]</a>
+                        </li>
+						
+				";
+			}
+		}
+	}
+	
+
+	function countTotalVeriUnit(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_unit = $this->session->userdata('id_unit');
+			$data['hitung_tup1']=$this->m_tup->jumlahTupVer($id_unit);
+			$data['hitung_tup2']=$this->m_tup->jumlahTupVerKaprodi($id_unit);
+			$data['hitung_tup3']=$this->m_tup->jumlahTupVerSpp($id_unit);
+			//---------------------------------------
+			$data['hitung_up']=$this->munit->jumlahUpVer($id_unit);
+			$data['hitung_gup'] = $this->m_gup->jumlahGupVeri($id_unit);
+			$data['hitung_ls'] = $this->m_ls->jumlahLsVeri($id_unit);
+			echo "[".($data['hitung_gup'] + $data['hitung_ls']+ $data['hitung_tup1']+ $data['hitung_tup2']+ $data['hitung_tup3']+ $data['hitung_up'])."]";
+		}
+	}
+
+	
+	function countUpBk(){
+			if($this->auth->is_logged_in() == true){
+				$arr=array();
+				$id_unit = $this->session->userdata('id_unit');
+				$rekap=  $this->munit->jumlahUpBk($id_unit);
+				$rekap2= $this->munit->jumlahSpmUpBk($id_unit);
+				$rekap3= $rekap + $rekap2;
+				//echo $this->db->last_query();
+				if($rekap3 != 0){
+					$jum  = $rekap;
+					$jum2 = $rekap2;
+					$jum3 = $rekap3;
+?>					
+					<li>
+                        <a href='#'>UP [ <?php echo $jum3 ?> ]</a>
+                            <ul>
+                              <?php if($jum == 0){ }else if($jum != 0){ ?>
+                                    <li>
+                                        <a href='<?php echo base_url()?>unit/up_terotorisasi'>UP terotorisasi [ <?php echo $jum ?> ]</a>
+                                    </li>
+                               <?php }; if($jum2 == 0){}else if($jum2 != 0){ ?>
+                                    <li>
+                                        <a href='<?php echo base_url()?>unit/list_spm_up'>List SPM UP [ <?php echo $jum2 ?> ]</a>
+                                    </li>
+                                <?php }?>
+                            </ul>
+					</li>
+<?php
+				}
+				
+			}
+		}
+	function countTupBk(){
+			if($this->auth->is_logged_in() == true){
+				$arr=array();
+				$id_unit = $this->session->userdata('id_unit');
+				$rekap  = $this->m_tup->jumlahSppTupBk($id_unit);
+				$rekap2 = $this->m_tup->jumlahSpmTupBk($id_unit);
+				$rekap3 = $rekap + $rekap2;
+				if($rekap3 != 0){
+					$jum  = $rekap;
+					$jum2 = $rekap2;
+					$jum3 = $rekap3;
+?>					
+					<li>
+                        <a href='#'>TUP [ <?php echo $jum3 ?> ]</a>
+                            <ul>
+                              <?php if($jum == 0){ }else if($jum != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>tup/list_spp_up_keu'>List SPP [ <?php echo $jum ?> ]</a>
+                                </li>
+                               <?php }; if($jum2 == 0){}else if($jum2 != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>tup/list_spm_up'>List SPM [ <?php echo $jum2 ?> ]</a>
+                                </li>
+                                <?php }?>
+                            </ul>
+					</li>
+<?php
+				}
+				
+			}
+	}
+	
+	function countGupBk(){
+			if($this->auth->is_logged_in() == true){
+				$arr=array();
+				$id_unit = $this->session->userdata('id_unit');
+				$rekap  = $this->m_gup->jumlahSppGupBk($id_unit);
+				$rekap2 = $this->m_gup->jumlahSpmGupBk($id_unit);
+				$rekap3 = $rekap + $rekap2;
+				if($rekap3 != 0){
+					$jum  = $rekap;
+					$jum2 = $rekap2;
+					$jum3 = $rekap3;
+?>					
+					<li>
+                        <a href='#'>GUP [ <?php echo $jum3 ?> ]</a>
+                            <ul>
+                              <?php if($jum == 0){ }else if($jum != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>gup/list_spp_gu_keu'>List SPP GU[ <?php echo $jum ?> ]</a>
+                                </li>
+                               <?php }; if($jum2 == 0){}else if($jum2 != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>gup/list_spm_gu'>List SPM GU[ <?php echo $jum2 ?> ]</a>
+                                </li>
+                                <?php }?>
+                            </ul>
+					</li>
+<?php
+				}
+				
+			}
+	}	
+	function countLsBk(){
+			if($this->auth->is_logged_in() == true){
+				$arr=array();
+				$id_unit = $this->session->userdata('id_unit');
+				$rekap  = $this->m_ls->jumlahSppLsBk($id_unit);
+				$rekap2 = $this->m_ls->jumlahSpmLsBk($id_unit);
+				$rekap3 = $rekap + $rekap2;
+				if($rekap3 != 0){
+					$jum  = $rekap;
+					$jum2 = $rekap2;
+					$jum3 = $rekap3;
+?>					
+					<li>
+                        <a href='#'>LS [ <?php echo $jum3 ?> ]</a>
+                            <ul>
+                              <?php if($jum == 0){ }else if($jum != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>ls/list_spp_ls_keu'>List SPP LS [ <?php echo $jum ?> ]</a>
+                                </li>
+                               <?php }; if($jum2 == 0){}else if($jum2 != 0){ ?>
+                                <li>
+                                    <a href='<?php echo base_url()?>ls/list_spm_ls'>List SPM LS [ <?php echo $jum2 ?> ]</a>
+                                </li>
+                                <?php }?>
+                            </ul>
+					</li>
+<?php
+				}
+			
+		}
+	}
+	
+	function countTotalBk(){
+		if($this->auth->is_logged_in() == true){
+			$arr=array();
+			$id_unit = $this->session->userdata('id_unit');
+			//---------------------------------------
+			$data['hitung_up1']  = $this->munit->jumlahUpBk($id_unit);
+			$data['hitung_up2']  = $this->munit->jumlahSpmUpBk($id_unit);
+			$data['hitung_tup1'] = $this->m_tup->jumlahSppTupBk($id_unit);
+			$data['hitung_tup2'] = $this->m_tup->jumlahSpmTupBk($id_unit);
+			$data['hitung_gup1'] = $this->m_gup->jumlahSppGupBk($id_unit);
+			$data['hitung_gup2'] = $this->m_gup->jumlahSpmGupBk($id_unit);
+			$data['hitung_ls1'] = $this->m_ls->jumlahSppLsBk($id_unit);
+			$data['hitung_ls2'] = $this->m_ls->jumlahSpmLsBk($id_unit);
+			echo "[".($data['hitung_gup1'] + $data['hitung_gup2'] + $data['hitung_ls1'] + $data['hitung_ls2']+ $data['hitung_tup1']+ $data['hitung_tup2']+ 	
+			$data['hitung_up1'] + $data['hitung_up2'])."]";
+		}
+	}	
+	
+	function countUpPenerima(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->munit->jumlahSpmUpPenerima();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."unit/list_spm_up_pen'>List SPM UP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countTupPenerima(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_tup->jumlahSpmTupPenerima();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."tup/list_spm_up_pen'>List SPM TUP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countGupPenerima(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_gup->jumlahSpmGupPenerima();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."gup/list_spm_gu_pen'>List SPM GUP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countLsPenerima(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_ls->jumlahSpmLsPenerima();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."ls/list_spm_up_pen'>List SPM LS [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}					
+	function countTotalPenerima(){
+		if($this->auth->is_logged_in() == true){
+			$up  = $this->munit->jumlahSpmUpPenerima();
+			$tup = $this->m_tup->jumlahSpmTupPenerima();
+			$gup = $this->m_gup->jumlahSpmGupPenerima();
+			$ls = $this->m_ls->jumlahSpmLsPenerima();
+			echo "[".($up+$tup+$gup+$ls)."]";
+		}
+	}
+	function countUpVeri(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->munit->jumlahSpmUpVeri();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."unit/list_spm_up_veri'>List SPM UP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countTupVeri(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_tup->jumlahSpmTupVeri();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."tup/list_spm_up_veri'>List SPM TUP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countGupVeri(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_gup->jumlahSpmGupVeri();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."gup/list_spm_up_veri'>List SPM GUP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countLsVeri(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_ls->jumlahSpmLsVeri();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."ls/list_spm_ls_veri'>List SPM LS [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}		
+	function countTotalVeri(){
+		if($this->auth->is_logged_in() == true){
+			$id_unit = $this->session->userdata('id_unit');
+			$up = $this->munit->jumlahSpmUpVeri();
+			$tup = $this->m_tup->jumlahSpmTupVeri();
+			$gup = $this->m_gup->jumlahSpmGupVeri();
+			$ls = $this->m_ls->jumlahSpmLsVeri();
+			echo "[".($up+$tup+$gup+$ls)."]";
+		}
+	}
+	function countUpSubag(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->munit->jumlahSpmUpSubag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."unit/list_spm_up_dm'>List SPM UP [ ".$jum." ]</a></li>";
+				}
+			}
+		}
+	function countTupSubag(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_tup->jumlahSpmTupSubag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."tup/list_spm_up_dm'>List SPM TUP [ ".$jum." ]</a></li>";
+				}
+			}
+		}
+	function countGupSubag(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_gup->jumlahSpmGupSubag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."gup/list_spm_up_dm'>List SPM GUP [ ".$jum." ]</a></li>";
+				}
+			}
+		}
+	function countLsSubag(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_ls->jumlahSpmLsSubag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."ls/list_spm_ls_dm'>List SPM LS [ ".$jum." ]</a></li>";
+				}
+			}
+		}				
+	function countTotalSubag(){
+		if($this->auth->is_logged_in() == true){
+			$up=$this->munit->jumlahSpmUpSubag();
+			$tup=$this->m_tup->jumlahSpmTupSubag();
+			$gup=$this->m_gup->jumlahSpmGupSubag();
+			$ls=$this->m_ls->jumlahSpmLsSubag();
+			echo "[".($up+$tup+$gup+$ls)."]";
+		}
+	}
+	function countUpKabag(){
+			if($this->auth->is_logged_in() == true){
+				$id_unit = $this->session->userdata('id_unit');
+				$trans=$this->munit->jumlahSpmUpKabag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."unit/list_spm_up_kabag'>List SPM UP [ ".$jum." ]</a></li>";
+				}
+			}
+		}	
+	function countTupKabag(){
+			if($this->auth->is_logged_in() == true){
+				$id_unit = $this->session->userdata('id_unit');
+				$trans=$this->m_tup->jumlahSpmTupKabag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."tup/list_spm_up_kabag'>List SPM TUP [ ".$jum." ]</a></li>";
+				}
+			}
+		}	
+	function countGupKabag(){
+			if($this->auth->is_logged_in() == true){
+				$id_unit = $this->session->userdata('id_unit');
+				$trans=$this->m_gup->jumlahSpmGupKabag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."gup/list_spm_up_kabag'>List SPM GUP [ ".$jum." ]</a></li>";
+				}
+			}
+		}
+	function countLsKabag(){
+			if($this->auth->is_logged_in() == true){
+				$id_unit = $this->session->userdata('id_unit');
+				$trans=$this->m_ls->jumlahSpmLsKabag();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."ls/list_spm_ls_kabag'>List SPM LS [ ".$jum." ]</a></li>";
+				}
+			}
+		}		
+	function countTotalKabag(){
+		if($this->auth->is_logged_in() == true){
+			$up = $this->munit->jumlahSpmUpKabag();
+			$tup = $this->m_tup->jumlahSpmTupKabag();
+			$gup = $this->m_gup->jumlahSpmGupKabag();
+			$ls = $this->m_ls->jumlahSpmLsKabag();
+			echo"[".($up+$tup+$gup+$ls)."]";
+		}
+	}
+	function countUpPpsp2d(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->munit->jumlahSpmUpPpsp2d();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."unit/list_spm_up_sp2d'>List SPM UP [ ".$jum." ]</a></li>";
+				}	
+			}
+		}	
+	function countTupPpsp2d(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_tup->jumlahSpmTupPpsp2d();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."tup/list_spm_up_sp2d'>List SPM TUP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countGupPpsp2d(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_gup->jumlahSpmGupPpsp2d();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."gup/list_spm_up_sp2d'>List SPM GUP [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}
+	function countLsPpsp2d(){
+			if($this->auth->is_logged_in() == true){
+				$trans=$this->m_ls->jumlahSpmLsPpsp2d();
+				if($trans!= 0)
+				{	$jum=$trans;
+					echo "<li><a href='". base_url()."ls/list_spm_ls_sp2d'>List SPM LS [ ".$jum." ]</a></li>";
+				}
+				
+			}
+		}		
+	function countTotalPpsp2d(){
+		if($this->auth->is_logged_in() == true){
+			$up = $this->munit->jumlahSpmUpPpsp2d();
+			$tup = $this->m_tup->jumlahSpmTupPpsp2d();
+			$gup = $this->m_gup->jumlahSpmGupPpsp2d();
+			$ls = $this->m_ls->jumlahSpmLsPpsp2d();
+			echo "[".($up+$tup+$gup+$ls)."]";
+		}
+	}
+}

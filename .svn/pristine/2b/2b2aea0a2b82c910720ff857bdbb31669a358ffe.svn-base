@@ -1,0 +1,160 @@
+<?php foreach($detail_spm->result_array() as $row){
+                   $id = $row['id_spm'];  
+                   $nomor_sp2d = $row['no_sp2d'];
+                   $nama_fak = $row['nama_unit'];
+                   $tgl_spm = $row['tgl_spm'];
+                   //$jum_huruf = $row['jum_huruf'];
+                   $jum_angka = $row['jumlah'];
+                   $jumlah = $this->uang->angka ($jum_angka) ;
+                   $terbilang = $this->konversi->terbilang ($jum_angka) ;
+                   $id_kegiatan = $row['kdkeg'];
+                   $kode_digit = $row['kode_digit'];   
+                   $kepada = $row['kepada'];
+                   $npwp = $row['npwp'];
+                   $cb = $row['carabayar'];
+                   $norek = $row['nomor_rekening'];
+                   $bank = $row['bank'];
+                   $uraian = $row['uraian_spm'];   
+                   $status_spm = $row['status_spm'];
+                   $tgl_sp2d = $row['tgl_buat']; 
+                   $nmakun = $row['nmakun']; 
+                   } ?>
+<?php foreach($setting->result_array() as $row){
+                   $nm_bp = $row['nm_bp'];  
+                   $nip_bp = $row['nip_bp'];  
+                   $nmpr2 = $row['nm_pr2'];  
+                   $nippr2 = $row['nip_pr2'];  
+                   } ?>
+                   <?php $tgl_skrg = date("Y-m-d");?>
+<article class="module width_full">
+<header><h3>Preview SP2D</h3></header>         
+<table border="1" width="100%">
+                    <tr>
+                        <td align="center" width="55%"><strong>KEMENTERIAN PENDIDIKAN DAN KEBUDAYAAN<br />BADAN LAYANAN UMUM<br />UNIVERSITAS UDAYANA</td>
+                        <td rowspan="2" width="45%">
+                            <center>
+                                <strong>SURAT PERINTAH PENCAIRAN DANA (SP2D)</strong>
+                            </center>
+                            <br>
+                            <table width="100%">
+                                <tr>
+                                    <td width="50px">Dari</td><td>: Pembantu Rektor II</td>
+                                </tr>
+                                <tr>
+                                    <td>Tanggal</td><td>: <?php $date = date_create($tgl_sp2d); echo date_format($date, 'd/m/Y');?> </td>
+                                </tr>
+                                <tr>
+                                    <td>Nomor</td><td>: <?php echo  $nomor_sp2d?> </td>
+                                </tr>
+                                <tr>
+                                    <td>T.A.</td><td>: <?php echo  $tahun?> </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td>Nomor SPM</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$nomor/$singkat/$kode_digit/$th";?> </td>
+                                </tr>
+                                <tr>
+                                    <td>Tanggal</td>
+                                    <td>:</td>
+                                    <td> <?php $date = date_create($tgl_spm); echo date_format($date, 'd/m/Y');?> </td>
+                                </tr>
+                                <tr>
+                                    <td>Kode UK/Fak.</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$kode_digit";?>  </td>
+                                </tr>
+                                <tr>
+                                    <td>Unit Kerja/Fak.</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$nama_fak";?> </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Klasifikasi Belanja : <?php echo "$nmakun";?> </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            Bank/Pos : <?php echo "$bank";?><br />
+                            Hendaklah mencairkan/memindahbukukan dari bank rekening nomor <?php echo "$norek";?> sesuai dengan
+                            <?php echo "$cb";?>, uang sebesar <?php echo "$jumlah";?> <br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><center>**<?php echo "$terbilang";?> rupiah**</center></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <table>
+                                <tr>
+                                    <td>Kepada</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$kepada";?> </td>
+                                </tr>
+                                <tr>
+                                    <td>NPWP</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$npwp";?> </td>
+                                </tr>
+                                <tr>
+                                    <td>Nomor Rek.</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$norek";?> </td>
+                                </tr>
+                                <tr>
+                                    <td>Bank/Pos</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$bank";?> </td>
+                                </tr>
+                                <tr>
+                                    <td>Uraian</td>
+                                    <td>:</td>
+                                    <td> <?php echo "$uraian";?> </td>
+                                </tr>
+                            </table>
+                            <br />
+                            <center> Pejabat Pengelola Keuangan Badan Layanan Umum Universitas Udayana </center>
+                            <br /><br />
+                            <table width="100%">
+                                <tr>
+                                    <td width="10%"></td>
+                                    <td width="35%"><br />
+                                    a.n. Kuasa Pengguna Anggaran <br />
+                                    Pemimpin BLU <br />  
+                                    Pembantu Rektor II,
+                                    </td>
+                                    <td width="20%"></td>
+                                    <td width="35%">Denpasar, <?php $tgl = date_create($tgl_skrg); echo date_format($tgl, 'd/m/Y');?> <br />
+                                    Bendahara Pengeluaran,
+                                    </td>
+                                </tr> 
+                                <tr><td width="10%"></td><td height="70px"></td></tr>
+                                <tr>
+                                    <td width="10%">  </td>
+                                    <td> <?php echo "$nmpr2";?> <br />
+                                    NIP. <?php echo "$nippr2";?></td>
+                                    <td></td>
+                                    <td> <?php echo "$nm_bp";?> <br />
+                                    NIP. <?php echo "$nip_bp";?> </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+           <br><br><br>
+            <footer>
+                <div class="submit_link">
+                    <input type="button" value="Kembali" onclick=self.history.back() >
+                </div>
+            </footer>
+        </article>    
+    </section>
+

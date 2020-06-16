@@ -1,0 +1,28 @@
+<?php echo form_dropdown("kdakun",$option_akun,'',"id='kdakun' style='width:450px;'"); ?> 
+
+
+<script type="text/javascript">
+          $("#kdakun").change(function(){
+                var selectValues = $("#kdakun").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_akun\" disabled><option value=\"Pilih Komponen\">Pilih Komponen Dahulu</option></select>";
+                    $('#heder').html(msg);
+                }else{
+                    var kdoutput = $("#kdoutput").val();
+                    var jns_kwitansi = $("#jns_kwitansi").val();
+                    var kdkomponen = $("#kdkomponen").val();
+                    var kdakun = $("#kdakun").val();
+					
+					var dataString  = 'kdoutput='+ kdoutput + '&jns_kwitansi=' + jns_kwitansi + '&kdkomponen=' + kdkomponen + '&kdakun=' + kdakun;	
+                    $('#id_header').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('ls/select_header')?>",
+                            data: dataString,
+                            success: function(msg){
+                                $('#heder').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>  

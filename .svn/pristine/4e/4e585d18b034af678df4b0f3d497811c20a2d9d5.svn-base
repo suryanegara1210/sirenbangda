@@ -1,0 +1,213 @@
+<script type="text/javascript">
+	var btn_batal = null;
+
+	function post_populate() {
+		$('#tabel').html(btn_batal);
+	}
+
+	function batal_uraian() {
+		show_list();
+	}
+
+	$(function() {
+		//start combo relasi
+		//inisialisasi array combo
+		var arCombo = new Array (
+			$("#kd_giat"), $("#kd_output"), $("#kd_komponen"),
+			$("#kd_akun"), $("#kd_hdr")
+		);
+
+		btn_batal = $('#tabel').html();
+
+		function show_tabel() {
+		  var postData = { jns_kwitansi:'%',
+						   kdgiat: $("#kd_giat").val(),
+						   kdoutput: $("#kd_output").val(),
+						   kdkomponen: $("#kd_komponen").val(),
+						   kdakun: $("#kd_akun").val(),
+						   kdhdr: $("#kd_hdr").val(),
+						   jns_usulan: $("#usulan").val(),
+						   id_usulan: $('#id_usulan').val()
+						   };
+
+		   $.ajax({
+					  type: "POST",
+					  url : "<?php echo site_url('usulan/get_tabel_uraian')?>",
+					  data: postData,
+					  success: function(data){
+					  	try {
+							var response = $.parseJSON(data);
+
+							catch_expired_session(response);
+
+					  	} catch (e) {
+
+							if ($("#kd_hdr").val() == '') {
+								post_populate();
+							} else {
+								$('#tabel').html(data);
+							}
+					  	}
+					  }
+				});
+		}
+
+		<?php if($oper === "edit") { ?>
+
+		var init_postData = {
+					jns_kwitansi: '%',
+					kdgiat: '<?php echo $kdgiat?>',
+					kdoutput: '<?php echo $kdoutput?>',
+					kdkomponen: '<?php echo $kdkomponen?>',
+					kdakun: '<?php echo $kdakun?>',
+					kdhdr: '<?php echo $hdr?>'
+		};
+
+		//disable combo
+		$.each(arCombo, function() {
+			$(this).attr('disabled','disabled');
+		});
+
+		//init combo, defered method jquery
+		$.when (
+			$.post('<?php echo site_url('common/get_list_kegiatan')?>', init_postData)
+			.done( function(data) {
+				arCombo[0].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_output')?>', init_postData)
+			.done( function(data) {
+				arCombo[1].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_komponen')?>', init_postData)
+			.done( function(data) {
+				arCombo[2].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_akun')?>', init_postData)
+			.done( function(data) {
+				arCombo[3].html(data);
+			}),
+			$.post('<?php echo site_url('common/get_list_header')?>', init_postData)
+			.done( function(data) {
+				arCombo[4].html(data);
+
+			})
+		).done (function() {
+			show_tabel();
+		});
+
+		<?php } else { ?>
+
+		//set event change
+		$("#kd_giat").change( function() {
+			var postData = { jns_kwitansi: '%',
+							 kdgiat: $("#kd_giat").val() };
+
+			populate_combo(arCombo, 0, "<?php echo site_url('common/get_list_output')?>", postData);
+			post_populate();
+		});
+
+		$("#kd_output").change( function() {
+			var postData = { jns_kwitansi: '%',
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val()
+							 };
+
+			populate_combo(arCombo, 1, "<?php echo site_url('common/get_list_komponen')?>", postData);
+			post_populate();
+		});
+
+		$("#kd_komponen").change( function() {
+			var postData = { jns_kwitansi: '%',
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val(),
+							 kdkomponen: $("#kd_komponen").val()
+							 };
+
+			populate_combo(arCombo, 2, "<?php echo site_url('common/get_list_akun')?>", postData);
+			post_populate();
+		});
+
+		$("#kd_akun").change( function() {
+			var postData = { jns_kwitansi: '%',
+							 kdgiat: $("#kd_giat").val(),
+							 kdoutput: $("#kd_output").val(),
+							 kdkomponen: $("#kd_komponen").val(),
+							 kdakun: $("#kd_akun").val()
+							 };
+
+			populate_combo(arCombo, 3, "<?php echo site_url('common/get_list_header')?>", postData);
+			post_populate();
+		});
+
+		$("#kd_hdr").change( function() {
+			show_tabel();
+		});
+
+		<?php } ?>
+
+
+	});
+</script>
+
+		<table  id="tbl_form_uraian" cellspacing="0" style='margin-top: 5px;'>
+			<tr>
+				<td width="150px">Kegiatan</td><td >:</td>
+				<td >
+					<select name="kd_giat" id="kd_giat">
+						<option value="">Pilih Kegiatan</option>
+						<?php
+						  foreach($kegiatans as $giat){
+							echo "<option value='{$giat->kdgiat}'>{$giat->nmgiat}</option>";
+						  }
+						?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<div id="propinsi">
+					<td>Output</td><td>:</td>
+					<td>
+						<select name="kd_output" id="kd_output">
+							 <option value="">Pilih...</option>
+						</select>
+					</td>
+				</div>
+			</tr>
+			<tr>
+				<td>Komponen</td><td>:</td>
+				<td>
+					<div>
+					   <select name="kd_komponen" id="kd_komponen">
+							 <option value="">Pilih...</option>
+						</select>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Akun</td><td>:</td>
+				<td>
+					<div>
+					   <select name="kd_akun" id="kd_akun">
+							 <option value="">Pilih...</option>
+						</select>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Header</td><td>:</td>
+				<td>
+					 <select name="kd_hdr" id="kd_hdr">
+							 <option value="">Pilih...</option>
+					 </select>
+				</td>
+			</tr>
+		</table>
+		<div id='tabel' style="margin: 10px 0px">
+			<table  id='bar_simpan' width="100%" cellspacing="0" style='background-color: yellow'>
+				<tr>
+					<td style="text-align: right">
+					<input type="button" id='batal' value="Kembali" onclick="batal_uraian()">
+					</td>
+				</tr>
+			</table>
+		</div>

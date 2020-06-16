@@ -1,0 +1,307 @@
+<script type="text/javascript">
+	prepare_chosen();
+	$('input[name=nominal_1]').autoNumeric(numOptions);
+	$('input[name=nominal_2]').autoNumeric(numOptions);
+	$('input[name=nominal_3]').autoNumeric(numOptions);
+	$('input[name=nominal_4]').autoNumeric(numOptions);
+	$('input[name=nominal_5]').autoNumeric(numOptions);
+
+	//agar validation tetap aktif untuk chosen dropdown
+	$.validator.setDefaults({ ignore: ":hidden:not(select)" });
+	$('form#kegiatan').validate({
+		rules: {				
+			kd_kegiatan : "required",
+			indikator_kinerja : "required",
+			satuan_target : "required",
+			target_1 : {
+						required:true,
+						digits:true
+			},
+			target_2 : {
+						required:true,
+						digits:true
+			},
+			target_3 : {
+						required:true,
+						digits:true
+			},
+			target_4 : {
+						required:true,
+						digits:true
+			},
+			target_5 : {
+						required:true,
+						digits:true
+			},
+			kondisi_awal : {
+						required:true,
+						digits:true
+			},
+			target_kondisi_akhir : {
+						required:true,
+						digits:true
+			},
+			nominal_1 : {
+				required : true
+			},
+			nominal_2 : {
+				required : true
+			},
+			nominal_3 : {
+				required : true
+			},
+			nominal_4 : {
+				required : true
+			},
+			nominal_5 : {
+				required : true
+			},
+			uraian_kegiatan_1 : {
+				required : true
+			},
+			uraian_kegiatan_2 : {
+				required : true
+			},
+			uraian_kegiatan_3 : {
+				required : true
+			},
+			uraian_kegiatan_4 : {
+				required : true
+			},
+			uraian_kegiatan_5 : {
+				required : true
+			}
+		}			
+	});
+	
+	$(document).on("change", "#kd_kegiatan", function () {		
+		var str = $(this).find('option:selected').text();		
+		var nama_kegiatan = str.substring(str.indexOf(".")+1);
+		$("#nama_kegiatan").html(nama_kegiatan);
+		$("#nama_prog_or_keg").val(nama_kegiatan);		
+	});
+
+	$("#simpan").click(function(){
+	    var valid = $("form#kegiatan").valid();
+	    if (valid) {
+	    	$('input[name=nominal_1]').val($('input[name=nominal_1]').autoNumeric('get'));
+			$('input[name=nominal_2]').val($('input[name=nominal_2]').autoNumeric('get'));
+			$('input[name=nominal_3]').val($('input[name=nominal_3]').autoNumeric('get'));
+			$('input[name=nominal_4]').val($('input[name=nominal_4]').autoNumeric('get'));
+			$('input[name=nominal_5]').val($('input[name=nominal_5]').autoNumeric('get'));
+			
+	    	$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+	    	
+	    	$.ajax({
+				type: "POST",
+				url: $("form#kegiatan").attr("action"),
+				data: $("form#kegiatan").serialize(),
+				dataType: "json",
+				success: function(msg){
+					if (msg.success==1) {
+						$.blockUI({
+							message: msg.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+						$.facebox.close();
+						element_program.trigger( "click" );
+					};
+				}
+			});
+	    };
+	});
+</script>
+
+<div style="width: 900px">
+	<header>
+		<h3>
+	<?php
+		if (!empty($kegiatan)){
+		    echo "Edit Data Kegiatan";
+		} else{
+		    echo "Input Data Kegiatan";
+		}
+	?>
+	</h3>
+	</header>
+	<div class="module_content">
+		<form action="<?php echo site_url('renstra/save_kegiatan');?>" method="POST" name="kegiatan" id="kegiatan" accept-charset="UTF-8" enctype="multipart/form-data" >
+			<input type="hidden" name="id_kegiatan" value="<?php if(!empty($kegiatan->id)){echo $kegiatan->id;} ?>" />
+			<input type="hidden" name="id_renstra" value="<?php echo $id_renstra; ?>" />
+			<input type="hidden" name="id_sasaran" value="<?php echo $id_sasaran; ?>" />
+			<input type="hidden" name="id_program" value="<?php echo $id_program; ?>" />
+
+			<input type="hidden" name="kd_urusan" value="<?php echo $tujuan_sasaran_n_program->kd_urusan; ?>" />
+			<input type="hidden" name="kd_bidang" value="<?php echo $tujuan_sasaran_n_program->kd_bidang; ?>" />
+			<input type="hidden" name="kd_program" value="<?php echo $tujuan_sasaran_n_program->kd_program; ?>" />
+			<input type="hidden" id="nama_prog_or_keg" name="nama_prog_or_keg" value="<?php echo (!empty($kegiatan->nama_prog_or_keg))?$kegiatan->nama_prog_or_keg:''; ?>" />
+			
+			<table class="fcari" width="100%">
+				<tbody>
+					<tr>
+						<td width="20%">SKPD</td>
+						<td width="80%"><?php echo $skpd->nama_skpd; ?></td>
+					</tr>
+					<tr>
+						<td>Tujuan</td>
+						<td><?php echo $tujuan_sasaran_n_program->tujuan; ?></td>
+					</tr>
+					<tr>
+						<td>Sasaran</td>
+						<td><?php echo $tujuan_sasaran_n_program->sasaran; ?></td>
+					</tr>					
+					<tr>
+						<td>Kode & Nama Program</td>
+						<td><?php echo $tujuan_sasaran_n_program->kd_urusan.". ".$tujuan_sasaran_n_program->kd_bidang.". ".$tujuan_sasaran_n_program->kd_program." - ".$tujuan_sasaran_n_program->nama_prog_or_keg; ?></td>
+					</tr>
+					<tr>
+						<td>Kegiatan</td>
+						<td>
+							<?php echo $kd_kegiatan; ?>
+		    			</td>
+					</tr>
+					<tr>
+						<td>Nama Kegiatan</td>
+						<td id="nama_kegiatan">
+							<?php echo (!empty($kegiatan->nama_prog_or_keg))?$kegiatan->nama_prog_or_keg:''; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Indikator Kerja</td>
+						<td>
+							<textarea class="common" name="indikator_kinerja"><?php echo (!empty($kegiatan->indikator_kinerja))?$kegiatan->indikator_kinerja:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>Satuan</td>
+						<td><?php echo $satuan; ?></td>
+					</tr>
+					<tr>
+						<td>Kondisi Awal</td>
+						<td><input class="common" name="kondisi_awal" value="<?php echo (!empty($kegiatan->kondisi_awal))?$kegiatan->kondisi_awal:''; ?>"></td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Target Tahun 1</td>
+						<td><input class="common" type="text" name="target_1" value="<?php if(!empty($kegiatan->target_1)){echo $kegiatan->target_1;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Tahun 1</td>
+						<td>Rp. <input type="text" name="nominal_1" value="<?php if(!empty($kegiatan->nominal_1)){echo $kegiatan->nominal_1;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Tahun 1</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_1"><?php echo (!empty($kegiatan->uraian_kegiatan_1))?$kegiatan->uraian_kegiatan_1:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Target Tahun 2</td>
+						<td><input class="common" type="text" name="target_2" value="<?php if(!empty($kegiatan->target_2)){echo $kegiatan->target_2;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Tahun 2</td>
+						<td>Rp. <input type="text" name="nominal_2" value="<?php if(!empty($kegiatan->nominal_2)){echo $kegiatan->nominal_2;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Tahun 2</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_2"><?php echo (!empty($kegiatan->uraian_kegiatan_2))?$kegiatan->uraian_kegiatan_2:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>					
+					<tr>
+						<td>&nbsp;&nbsp;Target Tahun 3</td>
+						<td><input class="common" type="text" name="target_3" value="<?php if(!empty($kegiatan->target_3)){echo $kegiatan->target_3;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Tahun 3</td>
+						<td>Rp. <input type="text" name="nominal_3" value="<?php if(!empty($kegiatan->nominal_3)){echo $kegiatan->nominal_3;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Tahun 3</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_3"><?php echo (!empty($kegiatan->uraian_kegiatan_3))?$kegiatan->uraian_kegiatan_3:''; ?></textarea>
+						</td>
+					</tr>					
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>					
+					<tr>
+						<td>&nbsp;&nbsp;Target Tahun 4</td>
+						<td><input class="common" type="text" name="target_4" value="<?php if(!empty($kegiatan->target_4)){echo $kegiatan->target_4;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Tahun 4</td>
+						<td>Rp. <input type="text" name="nominal_4" value="<?php if(!empty($kegiatan->nominal_4)){echo $kegiatan->nominal_4;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Tahun 4</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_4"><?php echo (!empty($kegiatan->uraian_kegiatan_4))?$kegiatan->uraian_kegiatan_4:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Target Tahun 5</td>
+						<td><input class="common" type="text" name="target_5" value="<?php if(!empty($kegiatan->target_5)){echo $kegiatan->target_5;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Nominal Tahun 5</td>
+						<td>Rp. <input type="text" name="nominal_5" value="<?php if(!empty($kegiatan->nominal_5)){echo $kegiatan->nominal_5;} ?>"/></td>
+					</tr>
+					<tr>
+						<td>&nbsp;&nbsp;Uraian Kegiatan Tahun 5</td>
+						<td>
+							<textarea class="common" name="uraian_kegiatan_5"><?php echo (!empty($kegiatan->uraian_kegiatan_5))?$kegiatan->uraian_kegiatan_5:''; ?></textarea>
+						</td>
+					</tr>
+					<tr style="background-color: white;">
+						<td></td>
+						<td><hr></td>
+					</tr>
+					<tr>
+						<td>Target Kondisi Akhir</td>
+						<td><input class="common" name="target_kondisi_akhir" value="<?php echo (!empty($kegiatan->target_kondisi_akhir))?$kegiatan->target_kondisi_akhir:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Penanggung Jawab</td>
+						<td><input class="common" name="penanggung_jawab" value="<?php echo (!empty($kegiatan->penanggung_jawab))?$kegiatan->penanggung_jawab:''; ?>"></td>
+					</tr>
+					<tr>
+						<td>Lokasi</td>
+						<td><input class="common" name="lokasi" value="<?php echo (!empty($kegiatan->lokasi))?$kegiatan->lokasi:''; ?>"></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<footer>
+		<div class="submit_link">    			
+  			<input id="simpan" type="button" value="Simpan">
+		</div> 
+	</footer>
+</div>

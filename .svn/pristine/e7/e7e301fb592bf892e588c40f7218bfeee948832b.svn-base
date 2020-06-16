@@ -1,0 +1,91 @@
+<script>
+    function buatsp2d(sifatbayar,id_spm,id_spj){
+        var lanjut = confirm('Apakah Anda Yakin untuk Membuat SP2D ?');
+        if (lanjut){
+            
+            $.blockUI({
+                    message: 'Membuat SP2D, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+            });
+            
+            $.post(
+                "<?php echo  base_url().'sp2d/buat_sp2d';?>",
+                {sifatbayar:sifatbayar, id_spm:id_spm, id_spj:id_spj},
+                function(data){
+                        console.log(data);
+                        $("#jenis_belanja").change();
+                        try {
+							var response = $.parseJSON(data);
+							
+							if(response.errno != 0){
+								$.blockUI({
+									message: response.message,
+									timeout: 3000,
+									css: window._csserr,
+									overlayCSS: window._ovcsserr
+								});								
+							} else {							
+								$.blockUI({
+									message: response.message,
+									timeout: 1500,
+									css: window._css,
+									overlayCSS: window._ovcss
+								});
+							}
+						} catch(e) {
+							//log error, misal format json salah
+							console.log('System error : "' + e + '"');
+							$.unblockUI();
+						}
+                        
+                });
+        }else{
+            ambilspm();
+        }
+        
+    }
+
+</script>
+<table><br></table>  
+    <table  class="table-common" id="hasil" style= "width: 870px"; >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Nama Unit</th>
+                <th>Kode MAK</th>
+                <th>No.SPM</th>
+                <th>Tanggal</th>
+                <th>Jumlah</th>
+                <th colspan="1">Action</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil ==""){
+                 echo "<tr><td colspan='7' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;   
+                ?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="left"><?php echo $row->nama_unit?></td>
+                    <?php if($row->sifat_bayar == Constant::JB_UP  || $row->sifat_bayar == Constant::JB_TUP ){?>
+                        <td align="center"><?php echo $row->kdakun;?></td>
+                    <?php }else{?>
+                        <td align="center"><?php echo $row->kdgiat;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <?php }?>
+                    <td align="center"><?php echo $row->no_spm ?> </td>
+                    <td align="center"><?php echo $row->tgl_spm; ?> </td>
+                    <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>    
+                    <?php if( $row->id_status_spm == 58){?>  
+                    <td align="center">
+                        <img title="Buat SP2D" onclick="buatsp2d(<?php echo "'".$row->sifat_bayar."','".$row->id_spm."','".$row->id_spj."'"; ?>)" src="<?php echo base_url(); ?>asset/images/add.png"/>
+                    </td>
+                    <?php }else {?>
+                    <td align="center"><a href='#' title='Buatkan SP2D' onclick="return alert('SPM ini sudah dibuatkan SP2D')"><img src='<?php echo base_url();?>asset/images/like.png'></a></td>
+                    <?php } ?>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+</table>

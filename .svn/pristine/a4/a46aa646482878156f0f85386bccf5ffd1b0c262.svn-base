@@ -1,0 +1,55 @@
+<script type="text/javascript">
+
+  	function import_honor() {
+  		import_honor_from_file(document.getElementById('filenya'), $('#batas').val(), 
+  			'<?php echo Constant::CSV_SEPARATOR ?>', function(rows) {
+
+  				//send all rows to server
+                var form_data = {};
+                form_data['oper'] 	= 'add';
+                form_data['id']		= '';
+                form_data['jns_honor'] = $('#jns_honor').val();
+
+                var gagal_import = [];
+                var done = 0;
+                for(var i=0;i < rows.length; i++) {
+                	form_data['row'] = rows[i]; 
+                	$.post ($('#form-cache').attr('action'), form_data,
+                        function(data) {
+                        	done++;
+                            data = parseJSON(data);     
+
+                            if(data.errno != 0) {
+                            	alert('data #' + done + ' error: ' + data.message);
+                            	//console.log(done + '-' + data.message);
+                            	//gagal_import.push(done + '-' + data.message);
+                            }
+                        });
+                }
+
+                //if(gagal_import.length != 0) {
+                //	$('div.error span').text('Terdapat ' + gagal_import.length + ' gagal di import. ' +
+                //		'Mohon cek kembali format data file.<br>' + gagal_import.join('<br>')); 
+                //	$('div.error').show();               	                	 
+                //}
+
+                $('#jns_honor').trigger('change');
+  			});
+  	}
+
+  	function delete_all() {
+  		if(confirm('Anda akan menghapus SEMUA daftar honor yang ada. Lanjutkan?')) {
+  			$('a.icon2-delete').each(function(){
+  				$(this).trigger('click');
+  			}); 
+  		}
+  	}
+
+  </script>
+  <a href="javascript:toggle('import-form')">Import data dari file  (*.txt) (Tab Delimeted)</a><br>
+  <div id="import-form" style="display: none">
+      <input type="file" id="filenya" />
+      Data pertama pada baris #: <input type="text" name="batas" id="batas" size="3" value="1" class="txt-center"/>
+      <INPUT TYPE=BUTTON OnClick="javascript:import_honor()" VALUE="Import">
+      <INPUT TYPE=BUTTON OnClick="javascript:delete_all();" VALUE="Delete All"><br/>
+  </div>

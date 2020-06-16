@@ -1,0 +1,155 @@
+<table><br></table>  
+    <table  class="table-common" id="spm-cair" style= "width:99.5%"; >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Kode MAK</th>
+                <th>Sifat Pembayaran</th>
+                <th>No.SPM</th>
+                <th>Tanggal</th>
+                <th>Status SPJ</th>
+                <th>Jumlah</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if ( COUNT ($hasil)<=0){
+                        echo "<tr><td colspan=\"7\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;   
+                ?>
+                <tr class='accordion'>
+                    <td align="center"><?php echo $i;?></td>
+                    <?php if($row->sifat_bayar == Constant::JB_UP  || $row->sifat_bayar == Constant::JB_TUP ){?>
+                        <td align="center"><?php echo $row->kdakun;?></td>
+                    <?php }else{?>
+                        <td align="center"><?php echo $row->kdgiat;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <?php }?>
+                    <td align="center"><?php echo $row->sifat_bayar; ?></td>
+                    <td align="center"><?php echo $row->no_spm; ?> </td>
+                    <td align="center"><?php echo $row->tgl_spm; ?> </td>
+                    <td align="center"><?php echo $row->status_spj; ?></td>
+                    <td align="right"><?php echo $this->uang->angka($row->jumlah); ?> </td>    
+                </tr>
+                <tr class='detail' id="<?php echo $row->id_spm?>">
+                	<td></td>
+                	<td colspan="7" style="padding: 0px; margin: 0px;"></td> 
+                </tr>
+             <?php endforeach; }?>
+             
+        </tbody>
+</table>
+<script type="text/javascript">
+	$(function () {
+		var table = $('#spm-cair');
+		table.find('tr.detail').hide();
+		
+		table.find('tr.accordion').click( function() {
+			$(this).next().toggle();
+            if($(this).next().is(':visible')){
+                $(this).css({ 'background-color': 'lightgrey', 'font-weight' : 'bold'}); 
+				//ambil kwitansinya
+				var jenis_belanja = $("#jenis_belanja").val();
+				var td = $(this).next().find("td").next();
+				td.html('<center> Loading data ... </center>');
+				$.ajax({
+					type: 	"POST",
+					url:	"<?php echo site_url('spm/ajax_get_kwitansi')?>",
+					data:	{id_spm: $(this).next().attr("id"), jenis_belanja: jenis_belanja},
+					success: function (msg) {
+						td.html(msg);									
+					}
+				});               
+            } else {
+                $(this).css({ 'background-color': 'white', 'font-weight' : 'normal'});
+            }
+		});
+		
+	});
+	
+	function cairkan(id,id_spj_su,src){
+		$.blockUI({
+			message: 'Mencairkan Kwitansi ...',			
+			css: window._css,
+			overlayCSS: window._ovcss
+		});
+		//var posisi=$(src).closest('table').parent().closest('tr.detail').prev();
+		//posisi.click();		
+		$.ajax({
+			type: 	"POST",
+			url:	"<?php echo site_url('spm/cairkan')?>",
+			data:	{id: id, id_spj_su: id_spj_su},
+			success: function (msg) {
+				//posisi.click();
+				try {
+					var response = $.parseJSON(msg);
+					
+					if(response.errno != 0){						
+						$.blockUI({
+							message: response.message,
+							timeout: 3000,
+							css: window._csserr,
+							overlayCSS: window._ovcsserr
+						});
+					} else {						
+						var halo = $(src).closest('#aksi');						
+						halo.html('<img src="<?php echo base_url(); ?>asset/images/like.png"/>');
+						$.blockUI({
+							message: response.message,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					}					
+				} catch(e) {
+					//log error, misal format json salah
+					console.log('System error : "' + e + '"');
+					$.unblockUI();
+				}						
+			}
+		});
+		
+	}
+
+	function cairkan_semua(id_spm){
+		$.blockUI({
+			message: 'Mencairkan Semua Kwitansi ...',
+			css: window._css,
+			overlayCSS: window._ovcss
+		});
+
+		$.ajax({
+			type: 	"POST",
+			url:	"<?php echo site_url('spm/cairkan_semua')?>",
+			data:	{id_spm: id_spm},
+			success: function (msg) {				
+				try {
+					var response = $.parseJSON(msg);
+					
+					if(response.errno != 0){						
+						$.blockUI({
+							message: response.message,
+							timeout: 3000,
+							css: window._csserr,
+							overlayCSS: window._ovcsserr
+						});
+					} else {
+						$('tr#'+id_spm).hide()
+						$('tr#'+id_spm).prev().click();
+						$.blockUI({
+							message: response.message,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					}					
+				} catch(e) {
+					//log error, misal format json salah
+					console.log('System error : "' + e + '"');
+					$.unblockUI();
+				}		
+			}
+		});
+	}
+</script>
+

@@ -1,0 +1,77 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-08 05:51:58 --> Query error: Unknown column 'nominal' in 'field list'
+ERROR - 2013-05-08 05:51:59 --> Query error: Unknown column 'nominal' in 'field list'
+ERROR - 2013-05-08 06:07:17 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE MONTH(t_sp2d.`tgl_sp2d`) LIKE  '%'
+				AND YEAR(t_sp2d.`tgl_sp2d`) = '201' at line 12
+ERROR - 2013-05-08 06:07:19 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE MONTH(t_sp2d.`tgl_sp2d`) LIKE  '%'
+				AND YEAR(t_sp2d.`tgl_sp2d`) = '201' at line 12
+ERROR - 2013-05-08 06:07:29 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'WHERE MONTH(t_sp2d.`tgl_sp2d`) LIKE  '%'
+				AND YEAR(t_sp2d.`tgl_sp2d`) = '201' at line 12
+ERROR - 2013-05-08 06:08:00 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:01 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:01 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:01 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:01 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:02 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:02 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:02 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:02 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:02 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:03 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:03 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:48 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:08:55 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 06:45:46 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\sp2d\tampil_sp2d.php 5
+ERROR - 2013-05-08 06:45:46 --> Severity: Notice  --> Undefined property: stdClass::$kdkomponen C:\xampp\htdocs\siaku\application\views\sp2d\tampil_sp2d.php 14
+ERROR - 2013-05-08 06:45:46 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\sp2d\tampil_sp2d.php 5
+ERROR - 2013-05-08 06:45:46 --> Severity: Notice  --> Undefined property: stdClass::$kdkomponen C:\xampp\htdocs\siaku\application\views\sp2d\tampil_sp2d.php 14
+ERROR - 2013-05-08 06:48:54 --> Severity: Notice  --> Undefined property: stdClass::$kdkomponen C:\xampp\htdocs\siaku\application\views\sp2d\tampil_sp2d.php 14
+ERROR - 2013-05-08 06:48:54 --> Severity: Notice  --> Undefined property: stdClass::$kdkomponen C:\xampp\htdocs\siaku\application\views\sp2d\tampil_sp2d.php 14
+ERROR - 2013-05-08 06:54:07 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '(t_sp2d.tgl_sp2d) AS thn, SUM(nominal) AS jumlah 
+				FROM t_kwitansi 
+				INN' at line 3
+ERROR - 2013-05-08 06:55:57 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '(t_sp2d.tgl_sp2d) AS thn, SUM(nominal) AS jumlah 
+				FROM t_kwitansi 
+				INN' at line 3
+ERROR - 2013-05-08 06:56:01 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '(t_sp2d.tgl_sp2d) AS thn, SUM(nominal) AS jumlah 
+				FROM t_kwitansi 
+				INN' at line 3
+ERROR - 2013-05-08 06:56:37 --> Query error: The used SELECT statements have a different number of columns
+ERROR - 2013-05-08 08:41:35 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-08 08:41:38 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-08 08:43:35 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-08 08:43:38 --> Query error: Unknown column 'icon_warning.gif' in 'where clause'
+ERROR - 2013-05-08 08:43:43 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-05-08 08:47:11 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): A connection attempt failed because the connected party did not properly respond after a period of time or established connection failed because connected host has failed to respond.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-08 08:47:11 --> Unable to connect to the database
+ERROR - 2013-05-08 09:15:10 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-05-08 09:31:42 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 44
+ERROR - 2013-05-08 09:31:42 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 45
+ERROR - 2013-05-08 09:32:04 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 751
+ERROR - 2013-05-08 09:32:04 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 752
+ERROR - 2013-05-08 09:32:04 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 868
+ERROR - 2013-05-08 09:32:04 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 869
+ERROR - 2013-05-08 09:48:29 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 44
+ERROR - 2013-05-08 09:48:29 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 45
+ERROR - 2013-05-08 10:14:28 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 44
+ERROR - 2013-05-08 10:14:28 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 45
+ERROR - 2013-05-08 13:05:42 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-08 13:05:42 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-08 13:05:58 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-08 13:05:58 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-08 13:14:42 --> Severity: Notice  --> Undefined variable: nmoutput C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 252
+ERROR - 2013-05-08 13:14:42 --> Severity: Notice  --> Undefined variable: nmkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 253
+ERROR - 2013-05-08 13:14:42 --> Severity: Notice  --> Undefined variable: nmsubkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 254
+ERROR - 2013-05-08 13:14:42 --> Severity: Notice  --> Undefined variable: nmakun C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 255
+ERROR - 2013-05-08 13:17:30 --> Severity: Notice  --> Undefined index: jum_hadir C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 266
+ERROR - 2013-05-08 13:17:30 --> Severity: Notice  --> Undefined index: jum_hadir C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 266
+ERROR - 2013-05-08 13:23:33 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-08 13:23:33 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-08 13:54:47 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')
+AND `t_spj_su`.`status_spj_su` < '8'
+AND `status_spj_su` < '8'
+AND  `t_spj_su`' at line 8
+ERROR - 2013-05-08 14:14:16 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 44
+ERROR - 2013-05-08 14:14:16 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 45

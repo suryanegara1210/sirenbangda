@@ -1,0 +1,154 @@
+<script>
+$(document).on("focus keyup","input#nama_peg",function(event){
+
+    $(this).autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>gup/lookup",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+		          		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+					event.preventDefault();
+            		this.value = ui.item.label;
+            		//$(this).next().val(ui.item.value);
+					//$("#golongan0" ).val( ui.item.value );
+					//=========
+					var nama_baris=this.name;
+					var id_baris=nama_baris.split('[');
+					id_baris=id_baris[1].split(']');
+					id_baris=id_baris[0];
+					var nama_field= '#golongan'+id_baris;
+					$( nama_field ).val( ui.item.value );
+					//===========
+					
+         		},		
+    		});
+    
+});
+</script>
+    <div style="float:left; padding-top:20px;"><strong>RINCIAN HONOR PENGAWAS</strong></div>
+<table width="100%" class="table-common" id="nama_honor" style="width: 780px;" name="nama_honor" >  
+            <tr>
+                <th>Nama Dosen</th>
+                <th>Jabatan</th>
+                <th>Gol</th>
+                <th>Jumlah Hari</th>
+                <th>Tarif / Hari</th>
+                <th>Total Semua</th>
+                <th>Action</th>       
+            </tr>
+        <tr>
+            <td><input name="nama[0]" type="text" id="nama_peg" autocomplete="on" value=""/></td>
+            <td><input name="jabatan[0]" type="text" id="bruto3" size="15"/></td>
+            <td><input name="golongan[0]" type="text" id="golongan0" size="3" readonly /></td>
+            <td><input name="jml_hari[0]" type="text" id="jml_hari0" size="2" onkeyup="myFunction6()"/></td>
+            <td><input name="bruto[0]" type="text" id="bruto0" size="15" onkeyup="myFunction6()"/></td>
+            <td><input name="jumlah0" type="text" id="jumlah" onkeyup="myFunction6()" /></td>
+            <td><input type="button" value="   +   " onclick="addRow('nama_honor')" /></td>
+        </tr>
+  </table>
+  
+ 
+  <script language="javascript">
+                var counter=0;
+			
+            		function addRow(tableID) {
+						
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount);
+            
+            			var nama = row.insertCell(0);
+            			var inp_nama = document.createElement("input");
+            			inp_nama.type="text";
+            			inp_nama.id="nama_peg";
+            			inp_nama.autocomplete="on";
+            			inp_nama.value="";
+                        inp_nama.name= "nama["+counter+"]";
+            			nama.appendChild(inp_nama);
+                        
+                        var jabatan = row.insertCell(1);
+            			var inp_jabatan = document.createElement("input");
+            			inp_jabatan.type="text";
+            			inp_jabatan.size="15";
+                        inp_jabatan.name= "jabatan["+counter+"]";
+            			jabatan.appendChild(inp_jabatan);
+						
+						 var golongan = row.insertCell(2);
+            			var inp_gol = document.createElement("input");
+            			inp_gol.type="text";
+            			inp_gol.size="3";
+                        inp_gol.name= "golongan["+counter+"]";
+						inp_gol.id= "golongan"+counter;
+						inp_gol.readOnly = "readonly" ;
+            			golongan.appendChild(inp_gol);
+
+						var jml_h = row.insertCell(3);
+            			var j_h = document.createElement("input");
+            			j_h.type="text";
+            			j_h.size="2";
+                        j_h.name= "jml_hari["+counter+"]";
+                        j_h.id= "jml_hari"+counter;
+						j_h.setAttribute('onkeyup','myFunction6(this)');
+            			jml_h.appendChild(j_h);
+
+						
+                        var bruto = row.insertCell(4);
+            			var inp_bruto = document.createElement("input");
+            			inp_bruto.type="text";
+            			inp_bruto.size="15";
+                        inp_bruto.name= "bruto["+counter+"]";
+                        inp_bruto.id= "bruto"+counter;
+						inp_bruto.setAttribute('onkeyup','myFunction6(this)');
+            			bruto.appendChild(inp_bruto);
+						
+                        var bruto = row.insertCell(5);
+            			var inp_bruto = document.createElement("input");
+            			inp_bruto.type="text";
+                        //inp_bruto.name= "jumlah["+counter+"]";
+                        inp_bruto.name= "jumlah"+counter;
+                        inp_bruto.id= "jumlah";
+                        //inp_bruto.setAttribute('readonly','true');
+						inp_bruto.setAttribute('onkeyup','myFunction6(this)');
+            			bruto.appendChild(inp_bruto);
+
+            			var cell4 = row.insertCell(6);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_nama.focus();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+					
+function myFunction6()
+{
+        var x = document.getElementById("jml_hari"+counter).value;
+		var y = document.getElementById("bruto"+counter).value;
+		var z=(x*y);
+		var name="jumlah"+counter;
+		$("input[name="+name+"]").val(z);
+}		
+</script>
+ 

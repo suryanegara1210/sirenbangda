@@ -1,0 +1,183 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_rkpd extends CI_Model 
+{
+	var $table_musrenbang = 't_musrenbang';
+    var $primary_musrenbang = 'id_musrenbang';
+    
+    var $table_renstra = 't_renstra';
+    
+    var $table_skpd = 'm_skpd';
+    var $primary_skpd = 'id_skpd';
+    
+    var $table_rkpd = 't_rkpd';
+    var $primary_rkpd = 'id_rkpd';
+    
+    var $table_history_rkpd = 't_history_rkpd';
+    var $primary_history_rkpd = 'id_history_rkpd';
+    
+    var $table_status_rkpd = 'm_status_rkpd';
+    var $primary_status_rkpd = 'id_status_rkpd';
+ 
+    
+    public function __construct()
+    {
+        parent::__construct();           
+    }
+    
+    function insert($data,$table) {
+        $this->db->insert($this->$table,$data);
+        return $this->db->insert_id();
+    }
+    function update($id,$data,$table,$primary) {
+        $this->db->where($this->$primary,$id);
+        return $this->db->update($this->$table,$data);
+    }
+    function delete($id,$data,$table,$primary) {
+        $this->db->where($this->$primary,$id);
+        return $this->db->update($this->$table,$data);
+    }
+
+    function get_data($data,$table){
+        $this->db->where($data);
+        $query = $this->db->get($this->$table);
+        return $query->row();
+    }
+    
+    function get_data_with_rincian($id,$table){
+        $sql = "
+					SELECT a.*, nm_urusan,  nm_bidang, ket_program, ket_kegiatan
+					FROM ".$this->$table." as a
+					INNER JOIN t_renstra AS r
+                    ON a.kd_urusan=r.kd_urusan AND a.kd_bidang=r.kd_bidang AND a.kd_program=r.kd_program AND a.kd_kegiatan=r.kd_kegiatan 
+					WHERE id_musrenbang = ?
+				";
+
+			$query = $this->db->query($sql, array($id));
+            /*INNER JOIN m_urusan ON a.kd_urusan=m_urusan.Kd_Urusan
+                    INNER JOIN m_bidang ON a.kd_urusan=m_bidang.Kd_Urusan AND a.kd_bidang=m_bidang.Kd_Bidang
+                    INNER JOIN m_program ON a.kd_urusan=m_program.Kd_Urusan AND a.kd_bidang=m_program.Kd_Bidang AND a.kd_program=m_program.Kd_Prog
+                    INNER JOIN m_kegiatan ON a.kd_urusan=m_kegiatan.Kd_Urusan AND a.kd_bidang=m_kegiatan.Kd_Bidang AND a.kd_program=m_kegiatan.Kd_Prog AND a.kd_kegiatan=m_kegiatan.Kd_Keg*/
+			if($query) {
+				if($query->num_rows() > 0) {
+					return $query->row();
+				}
+			}
+
+			return NULL;
+    }
+    
+    function get_data_rkpd_detail($id){
+        $sql = "
+            SELECT r.*,s.nama_skpd,b.nama_koor as nama_bid_koor,st.status_rkpd
+            FROM t_rkpd as r
+            LEFT JOIN m_skpd as s
+            ON r.id_skpd = s.id_skpd
+            LEFT JOIN m_bidkoordinasi as b
+            ON r.id_bid_koor=b.id_bidkoor
+            LEFT JOIN m_status_rkpd as st
+            on r.id_status_verifikasi = st.id_status_rkpd
+            WHERE id_rkpd = ?
+        ";
+        $query = $this->db->query($sql, array($id));
+
+			if($query) {
+				if($query->num_rows() > 0) {
+					return $query->row();
+				}
+			}
+
+			return NULL;
+        
+    }    
+	
+    //get data musrenbang
+    //flag_used = '0'
+	function get_data_table_musrenbang($search, $start, $length, $order){
+		$order_arr = array('id_musrenbang','kd_urusan','kd_bidang','kd_program','kd_kegiatan','jenis_kegiatan');
+        $sql = "
+            SELECT DISTINCT *, ket_program, ket_kegiatan
+            FROM $this->table_musrenbang AS m
+            LEFT JOIN t_renstra AS r
+            ON m.kd_urusan=r.kd_urusan AND m.kd_bidang=r.kd_bidang AND m.kd_program=r.kd_program AND m.kd_kegiatan=r.kd_kegiatan
+            WHERE (
+                m.kd_urusan like '%".$search['value']."%' or
+                m.kd_bidang like '%".$search['value']."%' or
+                m.kd_program like '%".$search['value']."%' or
+                m.kd_kegiatan like '%".$search['value']."%' or
+                m.jenis_pekerjaan like '%".$search['value']."%'
+            )
+            AND id_status_usulan='0'
+            AND flag_delete='0'
+            ORDER BY ".$order_arr[$order["column"]]." ".$order["dir"]."
+            LIMIT ".$start.",".$length."";
+        return $this->db->query($sql)->result();
+	}
+
+	function count_data_table_musrenbang($search, $start, $length, $order){		
+         $sql = "
+            SELECT * 
+            FROM $this->table_musrenbang
+            WHERE (
+                kd_urusan like '%".$search['value']."%' or
+                kd_bidang like '%".$search['value']."%' or
+                kd_program like '%".$search['value']."%' or
+                kd_kegiatan like '%".$search['value']."%' or
+                jenis_pekerjaan like '%".$search['value']."%'
+            )
+            AND id_status_usulan='0'
+            AND flag_delete='0'";
+        return $this->db->query($sql)->num_rows();    
+    }
+    
+    //get data table from rkpd
+    function get_data_table_rkpd($search, $start, $length, $order){
+		$order_arr = array('id_rkpd','kode_kegiatan','ket_kegiatan','nama_skpd','nama_bid_koor');
+        $sql = "
+            SELECT * 
+            FROM (
+                select r.*,CONCAT(kd_urusan,'.',kd_bidang,'.',kd_program,'.',kd_kegiatan) as kode_kegiatan,s.nama_skpd,b.nama_koor as nama_bid_koor,st.status_rkpd,p.nama as prioritas from t_rkpd as r
+                left join m_skpd as s
+                on r.id_skpd = s.id_skpd
+                left join m_bidkoordinasi as b
+                on r.id_bid_koor=b.id_bidkoor
+                left join m_status_rkpd as st
+                on r.id_status_verifikasi = st.id_status_rkpd
+                left join m_prioritas as p
+                on r.id_prioritas=p.id_prioritas
+            ) as a
+            WHERE (
+                kode_kegiatan like '%".$search['value']."%' or
+                ket_kegiatan like '%".$search['value']."%' or
+                nama_skpd like '%".$search['value']."%' or
+                nama_bid_koor like '%".$search['value']."%'
+            )
+            ORDER BY ".$order_arr[$order["column"]]." ".$order["dir"]."
+            LIMIT ".$start.",".$length."";
+        return $this->db->query($sql)->result();
+	}
+
+	function count_data_table_rkpd($search, $start, $length, $order){		
+         $sql = "
+           SELECT * 
+            FROM (
+                select r.*,CONCAT(kd_urusan,'.',kd_bidang,'.',kd_program,'.',kd_kegiatan) as kode_kegiatan,s.nama_skpd,b.nama_koor as nama_bid_koor,st.status_rkpd from t_rkpd as r
+                left join m_skpd as s
+                on r.id_skpd = s.id_skpd
+                left join m_bidkoordinasi as b
+                on r.id_bid_koor=b.id_bidkoor
+                left join m_status_rkpd as st
+                on r.id_status_verifikasi = st.id_status_rkpd
+            ) as a
+            WHERE (
+                kode_kegiatan like '%".$search['value']."%' or
+                ket_kegiatan like '%".$search['value']."%' or
+                nama_skpd like '%".$search['value']."%' or
+                nama_bid_koor like '%".$search['value']."%'
+            )";
+        return $this->db->query($sql)->num_rows();    
+    }
+
+    
+}
+?>

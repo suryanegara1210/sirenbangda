@@ -1,0 +1,169 @@
+<?php $pagu = number_format($jumlah,0,",",".");
+                $kdkomponen = $kdkomponen;     
+                $kdoutput = $kdoutput;     
+                $kdakun = $kdakun;
+                $kdheader = $kdhdr;     
+                $id_subunit = $this->session->userdata('id_subunit');    
+                
+                foreach ($nama->result_array() as $nm){
+                    $nmgiat = $nm['nmgiat'];
+                    $nmoutput = $nm['nmoutput'];
+                    $nmkomponen = $nm['nmkomponen'];
+					$nmskomponen = $nm['nmskomponen'];
+                    $nmakun = $nm['nmakun'];
+                    $nmheader = $nm['hdr'];
+                    $id_rkakl = $nm['id_rkakl'];
+                }
+
+?>                 
+            <?php if($jum_uraian==0){?>
+            <input type="hidden" name="hdr" value="<?php echo"$kdhdr" ?>">
+            <br> 
+            <table class="table-list" >
+                       <tr >
+                          <th width='200px'>TOTAL PAGU UNTUK KEGIATAN INI</th><td>Rp.</td><td align="right"> <?php echo "$pagu";?></td>
+                          <input type="hidden" name="total_pagu" value="<?php echo"$jumlah";?>">
+                          
+                       </tr> 
+                       <tr >
+                          <th width='200px'>TOTAL UP YANG DIAJUKAN</th><td>Rp.</td><td align="right"><span id="tot_usulan"></span></td>
+                          
+                       </tr> 
+                       <tr >
+                          <th width='200px'>SISA PAGU</th><td>Rp.</td><td align="right"><span id="sisa_pagu"></span></td>
+                          
+                       </tr> 
+            </table>   
+            
+                    
+<script type="text/javascript">
+            jQuery().ready(function (){
+				var lastcell; 
+                jQuery("#daftaruser").jqGrid({	
+					gridComplete: function(){
+						var tot_jumlah=accounting.formatMoney(calc_total());
+						$("#tot_usulan").text(tot_jumlah);
+						$("#sisa_pagu").text(sisa());
+					},
+                    url:'<?php echo base_url().'index.php/jq_uraian/tampil_datauser/'.$id_subunit."/".$kdoutput."/".$kdkomponen."/".$kdakun."/".$kdheader."/".$id; ?>',
+                    mtype : "POST",
+                    datatype: "json",
+                    colNames:['','Uraian','Volume','Satuan','Harga Satuan','Jumlah','Aksi'],
+                    colModel:[
+                        {width:4, align:"center", sortable:false},
+                        {name:'uraian',index:'uraian', width:29, align:"left",editable:true,editrules:{required:true}},
+                        {name:'volume',index:'volume', width:4, align:"center",editable:true,editrules:{required:true,number:true}},
+                        {name:'satuan',index:'satuan',  width:8, align:"center",editable:true,editrules:{required:true}, edittype:'select', editoptions:{value:{<?php echo "$satuan";?>}}},
+                        {name:'harga_satuan',index:'harga_satuan', width:14, align:"right",editable:true,editrules:{required:true,number:true, custom:true, custom_func:checkpagu},formatter:'currency',
+                     formatoptions:{prefix:'Rp',suffix:'',thousandsSeparator:',',decimalPlaces:''}},
+                        {name:'jumlah',index:'jumlah', width:14, align:"right",editable:false, formatter:'currency',
+                     formatoptions:{prefix:'Rp',suffix:'',thousandsSeparator:',',decimalPlaces:''} },
+                        {name: 'myac', width:60, fixed:true, sortable:false, search:false, align:'center', resizable: false, resize:false, formatter:'actions',
+                        formatoptions:{
+                        keys:true,editbutton: false, delbutton: true,
+						//Key True disini adalah untuk Shorcut Tombol Enter dan Esc, Enter untuk Save, dan
+						//Escape Untuk Batal, anda juga Membuatnya jadi False jika anda tidak ingin seperti itu
+                        //Saya menghapus baris di bawah ini
+                                                        onSuccess:function(jqXHR) {
+                                                          $("#daftaruser").trigger("reloadGrid"); 
+                                                            return true;
+                                                        }
+                                                                                                            
+                        }}
+                    ],
+                    rowNum:20,
+                    width: 900,
+                    height: 150,
+                    rowList:[10,20,30,40,50,60,70],
+                    pager: '#pager',
+                    sortname: 'id_uraian',
+                    viewrecords: true,
+                    sortorder: "asc",
+                    editurl: "<?php echo base_url().'index.php/jq_uraian/crud'?>",
+                    multiselect: false,
+                    caption:"Daftar Uraian"
+					
+                }).navGrid('#pager',{edit:true,add:true,del:true},
+                    {
+                        closeAfterEdit:true,
+                            onclickSubmit: function(re, postdata){
+								closeAfterEdit : true;
+                                return {"id_subunit": "<?php echo $id_subunit?>","kdoutput": "<?php echo $kdoutput?>","kdkomponen": "<?php echo 	
+								$kdkomponen?>","kdakun": "<?php echo $kdakun?>", "hdr": "<?php echo $kdheader?>" }; 
+								
+                            } 
+                    },
+                    {
+                            closeAfterAdd:true,
+                            onclickSubmit: function(re, postdata){ 
+								return {"id_subunit": "<?php echo $id_subunit?>","kdoutput": "<?php echo $kdoutput?>","kdkomponen": "<?php echo 
+								$kdkomponen?>","kdakun": <?php echo $kdakun?>,"hdr": "<?php echo $kdheader?>","kdgiat": "<?php echo $kdgiat?>","nmgiat": "<?php echo $nmgiat?>",  
+								"nmoutput": "<?php echo $nmoutput?>", "nmkomponen": "<?php echo $nmkomponen?>","nmakun": "<?php echo $nmakun?>",
+                                "header": "<?php echo $nmheader?>","id": "<?php echo $id?>","id_rkakl": "<?php echo $id_rkakl?>" };
+                           }
+						   
+                    }
+
+                );
+				
+            });
+		
+            
+            
+			function checkpagu(value, colname)
+			{   
+				var vol = $("#volume").val();
+				var hrg = $("#harga_satuan").val(); 
+				var val_up = parseFloat($("#validasi_up").val());
+				var pagu = <?php echo $jumlah;?>;
+				var jum_db =calc_total();
+				var jum = vol*hrg;
+				var nilai_max=<?php echo $nilai_max?>;
+				//var jum_db = parseFloat($("#usulan").text());
+				var total_rencana_usulan = jum  + jum_db;
+				var total_rencana_usulan2 = val_up + jum + jum_db;
+				
+					if(total_rencana_usulan2 > nilai_max){
+						 return [false,"Maaf sisa pagu anda tidak mencukupi"];
+					}
+					if (total_rencana_usulan > pagu){
+					   	return [false,"Maaf Jumlah total rincian melebihi sisa pagu yang dimiliki"];    
+					}else{
+                        if (total_rencana_usulan > nilai_max){
+                            return [false,"Maaf Jumlah total rincian melebihi sisa pagu realisasi"];
+                        }else{
+                            return [true,""];
+                        }
+						return [true,""];
+					}
+			}  
+			
+			function calc_total() {
+				var rows= jQuery("#daftaruser").jqGrid('getRowData');
+    			var tot_jum = 0;
+                for(var i=0;i<rows.length;i++){
+                     var row=rows[i];
+					 tot_jum += parseFloat(row['jumlah']);					 
+                }
+				//var tot_jumlah=accounting.formatMoney(tot_jum);
+				return tot_jum;
+			}
+
+			function sisa() {
+				var pagu = <?php echo $jumlah;?>;
+				var total = calc_total();
+				var sisa_pagu = accounting.formatMoney(parseFloat(pagu) - parseFloat(total));
+				return sisa_pagu
+			}
+
+            </script> 
+ 
+            <table id="daftaruser" ></table>   
+            <div id="pager"></div>  
+<span id="jum_db"></span>
+            <?php } else {
+                echo"<h4 class='alert_warning'> Kegiatan ini sudah di-UP-kan </h4> ";   
+            }?>
+                 
+
+ 

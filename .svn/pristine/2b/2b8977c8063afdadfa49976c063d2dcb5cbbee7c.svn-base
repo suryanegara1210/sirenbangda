@@ -1,0 +1,15 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$created_date C:\xampp\htdocs\siaku\application\controllers\spj.php 386
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$no_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 387
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 389
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$created_date C:\xampp\htdocs\siaku\application\controllers\spj.php 386
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$no_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 387
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 389
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$created_date C:\xampp\htdocs\siaku\application\controllers\spj.php 386
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$no_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 387
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 389
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$created_date C:\xampp\htdocs\siaku\application\controllers\spj.php 386
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$no_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 387
+ERROR - 2014-09-18 06:42:42 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\controllers\spj.php 389
+ERROR - 2014-09-18 07:21:56 --> Query error: Column 'sifat_bayar' in where clause is ambiguous

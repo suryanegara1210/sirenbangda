@@ -1,0 +1,252 @@
+<style type="text/css">
+	form{
+		color: black;
+	}
+	.radio-btn{
+		width: 97%; 
+		padding: 10px;		
+	}
+	.radio-btn textarea, .radio-btn .error{
+		margin-left: 25px;		
+		width: 500px; 
+		height: 100px;
+		float: left;		
+	}
+</style>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("form#veri_renstra").validate({
+			rules: {			  
+			  ket : "required"
+			}
+	    });
+
+		$("#simpan").click(function(){
+		    var valid = $("form#veri_renstra").valid();
+		    if (valid) {
+		    	$.blockUI({
+					css: window._css,
+					overlayCSS: window._ovcss
+				});
+		    	
+		    	$.ajax({
+					type: "POST",
+					url: $("form#veri_renstra").attr("action"),
+					data: $("form#veri_renstra").serialize(),
+					dataType: "json",
+					success: function(msg){
+						if (msg.success==1) {														
+							$.blockUI({
+								message: msg.msg,
+								timeout: 2000,
+								css: window._css,
+								overlayCSS: window._ovcss
+							});				
+							location.reload();			
+							$.facebox.close();							
+						};						
+					}
+				});
+		    };
+		});
+
+		$("#keluar").click(function(){
+			$.facebox.close();
+		});
+
+		$("input[name=veri]").click(function(){
+			$("#simpan").attr("disabled", false);
+			if($(this).val()=="tdk_setuju"){
+				$("#ket").attr("disabled", false);
+			}else{
+				$("#ket").val("");
+				$("#ket").attr("disabled", true);				
+			}
+		});
+	});
+</script>
+<div style="width: 800px;">
+	<header>
+ 		<h3>
+			Verifikasi Data Renstra
+		</h3>
+ 	</header>
+	<div class="module_content">
+		<table class="fcari" width="100%">
+			<tbody>
+				<tr>
+					<td width="20%">SKPD</td>
+					<td width="77%"><?php echo $renstra->nama_skpd; ?></td>
+				</tr>		
+				<tr>
+					<td>Tujuan</td>
+					<td><?php echo $renstra->tujuan; ?></td>
+				</tr>
+				<tr>
+					<td>Sasaran</td>
+					<td><?php echo $renstra->sasaran; ?></td>
+				</tr>
+				<tr>
+					<td>Indikator Sasaran</td>
+					<td>
+						<?php  
+							$i=0;
+							foreach ($indikator_sasaran as $row1) {
+								$i++;
+								echo $i .". ". $row1->indikator ."<BR>";
+							}
+						?>
+					</td>
+				</tr>		
+				<tr style="background-color: white;">			
+					<td colspan="2"><hr></td>
+				</tr>
+				<tr>
+					<td>Urusan</td>
+					<td><?php echo $renstra->kd_urusan.". ".$renstra->Nm_Urusan; ?></td>
+				</tr>		
+				<tr>
+					<td>Bidang Urusan</td>
+					<td style="padding-left: 20px;"><?php echo $renstra->kd_bidang.". ".$renstra->Nm_Bidang; ?></td>
+				</tr>
+				<tr>
+					<td>Program</td>
+					<td style="padding-left: 43px;"><?php echo $renstra->kd_program.". ".$renstra->Ket_Program; ?></td>
+				</tr>
+			<?php
+				if (empty($program) && !$program) {
+			?>
+				<tr>
+					<td>Kegiatan</td>
+					<td style="padding-left: 65px;"><?php echo $renstra->kd_kegiatan.". ".$renstra->nama_prog_or_keg; ?></td>
+				</tr>
+			<?php
+				}
+			?>				
+				<tr>
+					<td>Indikator Kinerja</td>
+					<td>
+						<?php
+							$i=0;
+							foreach ($indikator as $row_indikator) {
+								$i++;
+								echo $i .". ". $row_indikator->indikator ."<BR>";
+						?>
+						<table class="table-common" width="100%">
+							<tr>
+								<th width="14%">Kondisi Awal</th>
+								<th width="14%">Target 1</th>
+								<th width="14%">Target 2</th>
+								<th width="14%">Target 3</th>
+								<th width="14%">Target 4</th>
+								<th width="14%">Target 5</th>
+								<th width="14%">Kondisi Akhir</th>
+							</tr>
+							<tr>
+								<td align="center"><?php echo $row_indikator->kondisi_awal." ".$row_indikator->nama_value; ?></td>
+								<td align="center"><?php echo $row_indikator->target_1." ".$row_indikator->nama_value; ?></td>
+								<td align="center"><?php echo $row_indikator->target_2." ".$row_indikator->nama_value; ?></td>
+								<td align="center"><?php echo $row_indikator->target_3." ".$row_indikator->nama_value; ?></td>
+								<td align="center"><?php echo $row_indikator->target_4." ".$row_indikator->nama_value; ?></td>
+								<td align="center"><?php echo $row_indikator->target_5." ".$row_indikator->nama_value; ?></td>
+								<td align="center"><?php echo $row_indikator->target_kondisi_akhir." ".$row_indikator->nama_value; ?></td>
+							</tr>
+						</table>
+						<hr>
+						<?php
+							}
+						?>
+					</td>
+				</tr>	
+			<?php
+				if (empty($program) && !$program) {
+			?>
+				<tr>
+					<td>Penanggung Jawab</td>
+					<td><?php echo $renstra->penanggung_jawab; ?></td>
+				</tr>
+				<tr>
+					<td>Lokasi</td>
+					<td><?php echo $renstra->lokasi; ?></td>
+				</tr>
+				<tr style="background-color: white;">			
+					<td colspan="2"><hr></td>
+				</tr>
+			<?php
+				}
+			?>	
+			</tbody>
+		</table>
+		<?php
+			if (empty($program) && !$program) {
+		?>
+		<table class="fcari" width="100%">
+			<tbody>				
+				<tr>
+					<th>Nominal 1</th>
+					<th>Nominal 2</th>
+					<th>Nominal 3</th>
+					<th>Nominal 4</th>
+					<th>Nominal 5</th>			
+				</tr>
+				<tr>
+					<td align="right">Rp. <?php echo Formatting::currency($renstra->nominal_1); ?></td>
+					<td align="right">Rp. <?php echo Formatting::currency($renstra->nominal_2); ?></td>
+					<td align="right">Rp. <?php echo Formatting::currency($renstra->nominal_3); ?></td>
+					<td align="right">Rp. <?php echo Formatting::currency($renstra->nominal_4); ?></td>
+					<td align="right">Rp. <?php echo Formatting::currency($renstra->nominal_5); ?></td>
+				</tr>
+				<tr>
+					<th>Lokasi 1</th>
+					<th>Lokasi 2</th>
+					<th>Lokasi 3</th>
+					<th>Lokasi 4</th>
+					<th>Lokasi 5</th>
+				</tr>
+				<tr>
+					<td align="left"><?php echo $renstra->lokasi_1; ?></td>
+					<td align="left"><?php echo $renstra->lokasi_2; ?></td>
+					<td align="left"><?php echo $renstra->lokasi_3; ?></td>
+					<td align="left"><?php echo $renstra->lokasi_4; ?></td>
+					<td align="left"><?php echo $renstra->lokasi_5; ?></td>
+				</tr>
+				<tr>
+					<th>Uraian Kegiatan 1</th>
+					<th>Uraian Kegiatan 2</th>
+					<th>Uraian Kegiatan 3</th>
+					<th>Uraian Kegiatan 4</th>
+					<th>Uraian Kegiatan 5</th>
+				</tr>
+				<tr>
+					<td align="left"><?php echo $renstra->uraian_kegiatan_1; ?></td>
+					<td align="left"><?php echo $renstra->uraian_kegiatan_2; ?></td>
+					<td align="left"><?php echo $renstra->uraian_kegiatan_3; ?></td>
+					<td align="left"><?php echo $renstra->uraian_kegiatan_4; ?></td>
+					<td align="left"><?php echo $renstra->uraian_kegiatan_5; ?></td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+			}
+		?>	
+		<form id="veri_renstra" name="veri_renstra" method="POST" accept-charset="UTF-8" action="<?php echo site_url('renstra/save_veri'); ?>">
+			<input type="hidden" name="id" value="<?php echo $renstra->id; ?>">
+			<input type="hidden" name="id_renstra" value="<?php echo $renstra->id_renstra; ?>">
+			<div class="radio-btn">
+				<input type="radio" name="veri" value="setuju"> Disetujui
+			</div>
+			<div class="radio-btn">
+				<input type="radio" name="veri" value="tdk_setuju"> Tidak Disetujui				
+			</div>
+			<div class="radio-btn">
+				<textarea disabled id="ket" name="ket"></textarea>
+			</div>
+		</form>
+	</div>
+	<footer>
+		<div class="submit_link">  
+			<input disabled type='button' id="simpan" name="simpan" value='Simpan' />
+  			<input type='button' id="keluar" name="keluar" value='Keluar' />
+		</div> 
+	</footer>
+</div>

@@ -1,0 +1,66 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Evaluasi_renja extends CI_controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();        
+        $this->load->database();        
+        $this->load->model(array('m_urusan', 'm_bidang', 'm_program', 'm_kegiatan','m_evaluasi_renja','m_skpd'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();		
+
+		$this->template->load('template','evaluasi/renja/evaluasi_renja_view');
+	}
+	
+	function cru_evaluasi_renja(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$id_renja = $this->input->post("idr");
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+		$data['tahun'] = $tahun;
+		$data['data'] = $this->m_evaluasi_renja->get_one_renja($id_renja);
+
+		$html = $this->load->view("evaluasi/renja/cru_evaluasi_renja", $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+	
+	private function cetak_evaluasi_renja_func($id_skpd){
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data['evaluasi_type'] = "EVALUASI RENJA";		
+		$data['ta'] = $tahun;
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+
+		$data['evaluasi'] = $this->load->view('evaluasi/renja/cetak/isi_evaluasi_renja', $data, TRUE);
+		return $data;
+	}
+
+	function preview_evaluasi_renja(){
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+		
+		$data = $this->cetak_evaluasi_renja_func($id_skpd);
+		$this->template->load('template', 'evaluasi/renja/preview_evaluasi_renja',$data);
+	}
+
+	function get_table_data(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data['renja'] = $this->m_evaluasi_renja->get_renja_all($tahun, $id_skpd);
+
+		$html = $this->load->view('evaluasi/renja/table_renja', $data, TRUE);	
+		echo json_encode(array("html" => $html));
+	}
+}

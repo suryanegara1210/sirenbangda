@@ -1,0 +1,61 @@
+<article class="module width_full">
+    <header><h3><?php echo $judul; ?></h3></header>
+        <div class="module_content">
+            <a href="<?php echo $link_rm;?>"><input type="button" id="cari" value="Input Bukti Transaksi" /></a>
+        </div>        
+        <div class="module_content">
+            <div id="jbkt" style="margin-right: 10px; float:left; max-width: 250px;">
+                Jenis Bukti<br/>
+                <?php echo form_dropdown("jen_bkt",$jen_bkt,"","id='jen_bkt'"); ?>
+            </div>
+            <div id="jpen" style="margin-right: 10px; float:left; ">
+                Jenis Penerimaan<br/>
+                <?php echo form_dropdown("jen_pen",$jen_pen,"","id='jen_pen'"); ?>
+            </div>
+            <div id="cr" style="margin-right: 10px;float:left;">
+                Tampilkan:<br/>
+                <input type="button" id="cari" value="Tampilkan" onclick="ambildata()" />
+            </div>
+        </div>
+</article>
+
+<div id="input_form"></div>
+
+<script type="text/javascript">
+    var jen_pen_all=<?php echo json_encode($jen_pen) ?>;
+    $('#jen_bkt').change(function() {
+        $('#input_form').html('');
+        $('#jen_pen').empty();
+        if ($('#jen_bkt').val()=='BKK'){
+            var myOptions = {
+                ''      : '~~~ Referensi Jenis Penerimaan ~~~',
+                NOREF   : 'Tanpa Referensi'
+            };
+            $.each(myOptions, function(val, text) {
+                $('#jen_pen').append( new Option(text,val) );
+            });
+        }else{
+            $.each(jen_pen_all, function(val, text) {
+                $('#jen_pen').append( new Option(text,val) );
+            });
+        }
+    });
+    $('#jen_pen').change(function() {
+        $('#input_form').html('');
+    });
+    
+    function ambildata(){
+        var jen_pen= $("#jen_pen").val();
+        var jen_bkt= $("#jen_bkt").val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo $link;?>",
+                data: { jen_pen: jen_pen,jen_bkt:jen_bkt },
+                success: function(msg){                    
+                        $('#input_form').html('');
+                        $('#input_form').html(msg);
+                        kombocari();
+                }
+        });
+    }
+</script>

@@ -1,0 +1,2 @@
+<?php echo form_dropdown("kode_bas2",$kode_bas2,'',"id='kode_bas' style='width:450px;'"); ?>
+

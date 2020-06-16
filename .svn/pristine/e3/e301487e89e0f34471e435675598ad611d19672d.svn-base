@@ -1,0 +1,94 @@
+                <table id="jenis" class="table-common" style="width: 95%;" >
+                    <tr>
+                        <th>Jenis Arus Kas</th>
+                        <th>Aksi</th>
+                    </tr>
+                    <?php
+                        foreach ($jenis as $jn){
+                            echo "<tr id=\"baris_jenis{$jn->id_arus_kas}\" class=\"baris_jenis\" onclick=\"item_ambil($jn->id_arus_kas)\">
+                                    <td>
+                                    <input type=\"hidden\" id=\"id_jenis{$jn->id_arus_kas}\" name=\"id_jenis{$jn->id_arus_kas}\" value=\"{$jn->id_arus_kas}\"/>                                    
+                                    <input type=\"hidden\" id=\"deskripsi_jenis{$jn->id_arus_kas}\" name=\"deskripsi_jenis{$jn->id_arus_kas}\" value=\"{$jn->deskripsi}\" />
+                                    <font style=\"cursor: pointer;\">{$jn->deskripsi}</font></td>
+                                    <td align=\"center\">
+                                        <img src=\"".base_url()."asset/images/detail.png\" onclick=\"item_ambil($jn->id_arus_kas)\"/></a>
+                                        <img id=\"editjenis\" src=\"".base_url()."asset/images/edit.png\" onclick=\"edit_jenis({$jn->id_arus_kas})\" /></a>
+                                        <img src=\"".base_url()."asset/images/delete.png\" onclick=\"del_jenis({$jn->id_arus_kas})\" /></a>
+                                    </td>
+                                </tr>";
+                        }
+                    ?>
+                    <tr>
+                        <th>
+                            <input type="hidden" type="text" id="id_jenis" name="id_jenis" />                            
+                            <input type="text" id="deskripsi_jenis" name="deskripsi_jenis" style="width:95%" placeholder="Deskripsi Arus Kas" />
+                        </th>
+                        <th>
+                            <input type="button" value="Simpan" name="submit" onclick="save_jenis()" >
+                            <input type="button" value="Batal" name="submit" onclick="reset_jenis()" >
+                        </th>
+                    </tr>
+                </table>
+                
+                <div id="item"></div>
+                
+                <div id="hasil"></div>
+ 
+<script>
+function edit_jenis(id){
+    $('#id_jenis').val($('#id_jenis'+id).val());    
+    $('#deskripsi_jenis').val($('#deskripsi_jenis'+id).val());
+}
+
+function save_jenis(){
+    if ($("#deskripsi_jenis").val() != "") {
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/aruskas_jenis_simpan')?>",
+            data: {id_jenis:$("#id_jenis").val(),deskripsi_jenis:$("#deskripsi_jenis").val()},
+            success: function(msg){
+                $('#hasil').html(msg);
+                jenis_ambil();
+            }
+        });    
+    }else{
+        alert('Mohon isi deskripsi terlebih dahulu.');
+    }
+}
+
+function del_jenis(id){
+    var jalan=confirm("Yakin akan menghapus \""+$('#deskripsi_jenis'+id).val()+"\"");
+    if (jalan){
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/aruskas_jenis_del')?>",
+            data: {id_aruskas:id},
+            success: function(msg){
+                $('#hasil').html(msg);
+                jenis_ambil();
+            }
+        });        
+    }
+}
+
+function reset_jenis(){
+    $('#id_jenis').val('');    
+    $('#deskripsi_jenis').val('');
+}
+
+
+function item_ambil(id){
+    var data = {id_jenis:id};
+    $.ajax({
+        type: "POST",
+        url : "<?php echo site_url('report/aruskas_rincian_ambil')?>",
+        data: data,
+        success: function(msg){
+            $('#item').html(msg);
+            $('.baris_jenis').css('background-color', '');
+            $('#baris_jenis'+id).css('background-color', '#B2E28E');
+        }
+    });
+    
+}
+</script>

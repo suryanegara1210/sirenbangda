@@ -1,0 +1,76 @@
+<?php foreach($daftar_up->result_array() as $row)
+            { $nama_subunit= $row['nama_subunit']; }?>
+<article class="module width_full">
+            <header><h3>Detail rincian TUP Subunit <?php echo"$nama_subunit"; ?> </h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' onSubmit='return validasi(this)'> 
+            <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>Kode Output / Kode Komponen <br> / Kode Akun </th>
+                <th>Output / Komponen / Nama Akun / Header</th>
+                <th>Jumlah (Rp.)</th>
+                
+            </tr>
+            </thead>
+             <?php foreach($daftar_up->result_array() as $row)
+            {  
+            $id_subunit=$row['id_subunit']; 
+            $kode_subunit=$row['kode_subunit']; 
+            $id=$row['id_transaksi']; 
+            $kd_output= $row['kdoutput'];
+            $kd_komponen= $row['kdkomponen'];
+            $nama_output= $row['nmoutput'];
+            $nama_komponen= $row['nmkomponen'];
+            $kd_akun= $row['kdakun'];
+            $nmakun= $row['nmakun'];   
+            $header= $row['nmheader'];    
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",",".");    
+            ?>   
+              <tr>
+                <td align='left'><?php echo "$kd_output";?></td>
+                <td><?php echo "$nama_output";?></td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kd_komponen";?></td>
+                <td><?php echo "$nama_komponen";?></td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kd_komponen.$kd_akun";?></td>
+                <td><?php echo "$nmakun";?></td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'>Header</td>
+                <td><?php echo "$header";?></td>
+                <td align="right"><?php echo "$jumlah";?></td>
+              </tr>
+           
+              <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              
+            <?php }?>
+            </table>   
+             <table style="padding-left: 20px; " >
+             <tr><td style="font-size: 16px; color: black; " ><a href="javascript:Start('<?php echo base_url();?>tup/tampil_pagu_persubunit_dilihat_unit/<?php echo"$kode_subunit" ?>/<?php echo"$id_subunit" ?>')">Pagu</a></td></tr></table>
+             
+   
+                 </div>    
+            </form>
+            <footer>
+            
+                
+                <div class="submit_link">  
+                    <input type=button value=Kembali onclick=self.history.back()>
+                </div>
+
+            </footer>
+</article>

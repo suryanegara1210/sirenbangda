@@ -1,0 +1,116 @@
+<script type="text/javascript">
+	$(function() {
+		//var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+    
+	    $("#nilai_up").autoNumeric(window.numOptions);    
+	    $("#limit_spjup").autoNumeric(window.numOptions);
+	});
+</script>
+<script type="text/javascript">
+	$( function () {
+	    //proses disable jns kwitansi berdasarkan GUP, TUP, LS
+		var arCombo_create = new Array (
+			$("#jenis_belanja"), $("#jns_kwitansi")
+		);    	
+	
+		//set event change
+		$("#jenis_belanja").change( function() {
+			var postData = { jns_belanja: $("#jenis_belanja").val() };
+			populate_combo(arCombo_create, 0, "<?php echo site_url('common/get_jns_kwitansi_view')?>", postData);
+			$("#jenis_kwitansi").empty();
+		});
+		
+		$("#jenis_belanja").trigger("change");
+		load_view();	
+		
+	});	
+	
+	function load_view(){
+		  var jeniskw 			= $("#jns_kwitansi").val();
+		  var jenisblj 			= $("#jenis_belanja").val();
+		  var fak 				= $("#fak").val();
+		  var status_kwitansi	= $("#status_kwitansi").val();
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('kwitansi_view/get_view_kwitansi_pusat')?>",
+			  data: { jns_kwitansi: jeniskw,
+					  jns_belanja: jenisblj,
+					  fak: fak
+					},
+			  success: function(msg){
+				  $('#view_kwitansi').html(msg);
+			  }
+		  });
+		}
+	function hapus(value){
+		  $.ajax({
+			  type: "POST",
+			  url : "hapus",
+			  data: { id: value },
+		  });
+		  load_view();
+}
+	
+</script> 
+
+<style>
+label.error {
+	margin-left: 2px;
+	width: auto;
+	display: block;
+	color:#F00;
+}
+</style>
+
+<article class="module width_full">
+<header>
+<h3>View Kwitansi Verifikasi Pusat</h3>
+</header>             
+ <div class="module_content">      
+
+<table border='0' width='100%' >
+
+  <tr>
+    <td width="260">Sifat Pembayaran</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <select name="jenis_belanja" id="jenis_belanja"  >
+        <option value="">Semua</option>
+		<?php
+			foreach($sifat_bayar as $row){
+				echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+			}
+		?>
+      </select></td>
+  </tr>
+<tr>
+    <td >Jenis Kwitansi</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <select name="jns_kwitansi" id="jns_kwitansi">
+    </select></td>
+  </tr>
+<tr>
+<tr>
+    <td >Unit</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">      
+		<?php
+			echo form_dropdown("fak",$unit,"","id='fak'");			
+		?>
+      </select>
+    </select></td>
+  </tr>
+<tr>
+    <td >&nbsp;</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <input type="submit" name="cari" id="cari" value="Tampilkan" onclick="load_view()" />
+</td>
+</tr>
+</table>
+   <div id="view_kwitansi">
+  </div>
+
+
+

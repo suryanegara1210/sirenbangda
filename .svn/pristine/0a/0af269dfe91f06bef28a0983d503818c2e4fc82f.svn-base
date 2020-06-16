@@ -1,0 +1,93 @@
+ <article class="module width_full">
+ <?php foreach($nama_unit->result_array() as $row){ $nama_unit = $row['nama_subunit'];$kd = $row['id_subunit'];}?>  
+            <header><h3>Rincian TUP(Tambahan Uang Persediaan) <?php echo "$nama_unit"; ?> </h3></header>
+                     
+            <div class="module_content">
+            <form method="post" name='formName4' action="<?php echo base_url();?>tup/setuju_semua_rincian" onSubmit='return validasi(this)'> 
+           
+            <?php if($banyak_up == 0 ){?> 
+            <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+                <thead> 
+                <tr >
+                    <th>No </th>
+                    <th>Kode Output / Kode Komponen / Kode Akun</th>
+                    <th>Jumlah (Rp.)</th>
+                    <th>Aksi</th> 
+                </tr>
+                </thead>
+                <tr>
+                    <td style='height:50px; padding-top: 15px; text-align:center; font-size:12px;' colspan='4'>
+                    <strong>Data Kosong</strong>    </td>
+                </tr>
+            </table>
+            <?php }else{ ?> 
+            <table  class="table-common" style="margin-left: 20px; width: 580px;" >  
+            <thead> 
+            <tr >
+                <th>No </th>
+                <th>Kode Output / Kode Komponen / Kode Akun</th>
+                <th>Status</th>
+                <th>Jumlah (Rp.)</th>
+                <th>Aksi</th>
+                
+            </tr>
+            </thead>
+            
+            <?php $no = 1;       
+            foreach($daftar_up->result_array() as $row)
+            {  
+            $id_subunit=$row['id_subunit'];
+            $id_rekap=$row['id_rekap'];  
+            $th_rekap=$row['th_rekap'];  
+            $id=$row['id_transaksi']; 
+            $th=$row['th_transaksi']; 
+            $kd_output= $row['kdoutput'];
+            $kd_komponen= $row['kdkomponen'];
+            $nama_output= $row['nmoutput'];
+            $nama_komponen= $row['nmkomponen'];
+            $kd_akun= $row['kdakun'];
+            $nmakun= $row['nmakun'];   
+            $status_transaksi= $row['status_transaksi'];   
+            $id_status_transaksi= $row['id_status_transaksi'];   
+            $header= $row['nmheader'];    
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",","."); 
+            //echo"$th_rekap";   
+            ?>  
+            <input type="hidden" name="id_rekap" value="<?php echo "$id_rekap"; ?>"> 
+            <input type="hidden" name="kode_unit" value="<?php echo "$id_subunit"; ?>">   
+            <input type="hidden" name="th_rekap" value="<?php echo "$th_rekap"; ?>">   
+            <input type="hidden" name="th_transaksi" value="<?php echo "$th"; ?>"> 
+              
+              <tr>
+                <td align="center"><?php echo "$no";?></td>
+                <td align='center'><?php echo "$kd_output / $kd_komponen / $kd_akun ";?></td>    
+                
+                <?php if($id_status_transaksi ==2){?>
+                    <td align='center'><?php echo "$status_transaksi ";?></td>
+                
+                <?php }elseif($id_status_transaksi ==4){?>
+                    <td align='center' style="background-color:#F75D59"><?php echo "$status_transaksi ";?></td>
+                <?php }elseif($id_status_transaksi ==3){?>
+                    <td align='center' style="background-color:#99ff33"><?php echo "$status_transaksi ";?></td>
+                <?php }?>
+                
+                <td align="right"><?php echo "$jumlah";?></td>
+                <?php if($status_transaksi =='cek verifikator unit'){?>
+                    <td align="center"><a href='<?php echo base_url()."tup/cek_up/".$th."/".$id;?>' title='Cek Detail TUP' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <?php }else{?>
+                    <td align="center"><a href='#' title='Cek Detail TUP' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <?php }?>
+                
+              </tr>
+            <?php $no++ ;  }}  ?> 
+             </table>   
+             </div> 
+             <footer> 
+                    <div class="submit_link">
+                        <input type="submit" value="Validasi Verifikator Unit"  onclick="return confirm('Apakah anda yakin menyetujui semua rincian TUP ?')">  
+                        <input type="button" value="Kembali" onclick=self.history.back() > 
+                    </div>  
+            </footer>
+            </form>
+ </article>

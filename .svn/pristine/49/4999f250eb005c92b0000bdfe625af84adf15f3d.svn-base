@@ -1,0 +1,344 @@
+<script language="javascript">
+function validasi(form){
+	var pembanding=<?php echo $pembanding;?>;
+	var nama_pembanding='<?php echo $nama_pembanding;?>';	
+    var totalJum=0;
+	var inp = document.getElementsByTagName('input');
+        for(var i in inp){
+            if(inp[i].type == "text"){
+                if (inp[i].value!=''){
+                    if(inp[i].id=='jumlah'){
+                        totalJum=totalJum + parseFloat(inp[i].value);
+                    }
+                } 
+            }
+         }
+  if (form.tgl_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian tanggal Kwitansi.");
+    form.tgl_kwitansi.focus();
+    return (false);
+  }
+  if (form.tpt_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian Tempat Kwitansi.");
+    form.tpt_kwitansi.focus();
+    return (false);
+  }
+    if (form.kdoutput.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Output.");
+    form.kdoutput.focus();
+    return (false);
+  }
+    if (form.kdkomponen.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Komponen.");
+    form.kdkomponen.focus();
+    return (false);
+  }
+    if (form.kdakun.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Akun.");
+    form.kdakun.focus();
+    return (false);
+  }
+    if (form.id_header.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Header.");
+    form.id_header.focus();
+    return (false);
+  }  
+    if (form.ket_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian Keterangan Kwitansi.");
+    form.ket_kwitansi.focus();
+    return (false);
+  }
+    if (form.ket_sptb.value == "")
+  {
+    alert("Anda belum mengisikan Isian Keterangan SPTB.");
+    form.ket_sptb.focus();
+    return (false);
+  }
+  if (form.pengambil.value == "")
+  {
+    alert("Anda belum mengisikan Pelaksana Kegiatan.");
+    form.pengambil.focus();
+    return (false);
+  }
+  if (form.nip_pengambil.value == "")
+  {
+    alert("Anda belum mengisikan NIP Pelaksana Kegiatan.");
+    form.nip_pengambil.focus();
+    return (false);
+  }
+  if (form.penerima.value == "")
+  {
+    alert("Anda belum mengisikan Isian Penerima.");
+    form.penerima.focus();
+    return (false);
+  }
+    if (form.nip_penerima.value == "")
+  {
+    alert("Anda belum mengisikan Isian NIP Penerima.");
+    form.nip_penerima.focus();
+    return (false);
+  }
+  if (form.no_sk.value == "")
+  {
+    alert("Anda belum mengisikan Isian Nomer SK.");
+    form.no_sk.focus();
+    return (false);
+  }
+  if (form.kop_honor.value == "")
+  {
+    alert("Anda belum mengisikan Isian Kop Rincian Honor.");
+    form.kop_honor.focus();
+    return (false);
+  }
+  if (form.jns_honor.value == "0")
+  {
+    alert("Anda belum memilih jenis honor.");
+    form.jns_honor.focus();
+    return (false);
+  }
+  if (totalJum > pembanding)
+  {
+    alert("Jumlah Nominal melebihi " + nama_pembanding + totalJum);
+    form.jns_honor.focus();
+    return (false);
+  }
+  return (true);
+}
+
+</script>
+
+<script>
+			$(function() {
+				$( "#tgl_kwitansi" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+</script>
+<script>
+			$(function() {
+				$( "#tgl_sk" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+</script>   
+<form method="post" name='form' id='form' action="<?php echo base_url();?>ls/simpan_kwitansi" onSubmit='return validasi(this)'>
+  <div id="div_barang_gu" class="box">
+  <table border="0" width="80%" style="margin-left:20px">
+    <tr>
+      <td>&nbsp;</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td width="380"></td>
+      <td width="110"><?php echo $nama_pembanding;?></td>
+      <td>:</td>
+      <td><input name='input' type='' value='<?php echo $this->uang->angka($pembanding);?>' id="input" style="width:135px;" disabled="disabled" /></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+  <table border="0" width="80%" style="margin-left:20px">
+        <tr>
+          <td class="nm_col_hide" >Kwitansi</td>
+          <td >:</td>
+          <td><input name='jns_kwitansi' type='text' value="Kwitansi Belanja Honor" disabled="disabled" id="jns_kwitansi" size="50" style="width:450px;" ></td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide" >Tanggal</td>
+          <td >:</td>
+          <td><input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="18" style="width:450px;" readonly="readonly" placeholder="Tanggal Pembuatan Kwitansi"/></td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+          <td >:</td>
+          <td><input name='tpt_kwitansi' type='text' value='' id="tpt_kwitansi" style="width:450px;" placeholder="Tempat Kwitansi dibuat" ></td>
+        </tr>
+                 
+    <tr>
+    	<td>Kegiatan</td><td>:</td>
+        <td> 
+          <input name="kegiatan" type="text" disabled="disabled" style="width:450px;" value="Layanan Tridharma di Perguruan Tinggi" size="100px" >
+        </td>
+   </tr>  
+   <input type="hidden" name="darne" id="val" value=""/>
+    <tr>
+    	<div id="propinsi">
+            <td>Output</td>
+            <td>:</td>
+            <td><?php echo form_dropdown("kdoutput",$output,"","id='kdoutput' style='width:450px;'") ?>
+            </td>
+        </div>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="komponen">
+				<?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Output Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+    	<td>Sub Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="subkomponen">
+				<?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Komponen Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>	
+    <tr>
+        <td>Akun</td>
+        <td>:</td>
+        <td>
+            <div id="akun">
+                <?php echo form_dropdown("akun",array('Pilih Akun'=>'Pilih Komponen Dahulu'),'',' style= "width:450px;" disabled');?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+        <td>
+            <div id="heder">
+                <?php echo form_dropdown("hdr",array('Pilih Header'=>'Pilih Header Dahulu'),'',' style="width:450px;" disabled');?>
+<!--                <input name='id_header' type='text' id="id_header" style="width:450px;" placeholder="Header dari kegiatan yang dibuat"/>
+-->            </div>
+            
+        </td>
+    </tr>
+    <tr>
+        <td>Kode BAS</td>
+        <td>:</td>
+        <td>
+          <div id="kode_bas"> <?php echo form_dropdown("kode_bas",array('Pilih Bas'=>'Pilih Bas Dahulu'),'',' style="width:450px;" disabled');?>
+          </div>
+</td>
+    </tr>
+    <tr>
+        <td>Jenis Biaya</td>
+        <td>:</td>
+        <td>
+          <div id="jn_biaya"></div>
+</td>
+    </tr>
+        <tr>       
+          <td>Keterangan Kwitansi</td>
+          <td >:</td><td><textarea name="ket_kwitansi" id="ket_kwitansi" class="input1" style="width:450px;" placeholder="Keterangan Mengenai Detail Kwitansi"></textarea></td>
+        </tr>
+        <tr>       
+          <td>Keterangan SPTB</td>
+          <td >:</td><td><textarea name="ket_sptb" id="ket_sptb" class="input1" style="width:450px;" placeholder="Keterangan SPTB"></textarea></td>
+        </tr>
+        <tr>
+          <td>Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='pengambil' type='' value='' size="65" id="pengambil" style="width:450px;" placeholder="Nama Pelaksana Kegiatan"/></td>
+        </tr>
+         <tr>
+          <td>NIP Pelaksana Kegiatan</td>
+          <td >:</td><td><input name='nip_pengambil' type='' value='' size="65" id="nip_pengambil" style="width:450px;" placeholder="NIP dari Pelaksana Kegiatan"/></td>
+        </tr>
+        <tr>
+          <td>Penerima</td>
+          <td >:</td><td><input name='penerima' type='' value='' size="65" id="penerima" style="width:450px;" placeholder="Nama dari Penerima Uang"/></td>
+        </tr>
+        <tr>
+          <td>Nip Penerima</td>
+          <td >:</td><td><input name='nip_penerima' type='' value='' size="65" id="nip_penerima" style="width:450px;" placeholder="NIP dari Penerima Uang"/></td>
+        </tr>
+        <tr>
+          <td>No SK</td>
+          <td >:</td><td><input name='no_sk' type='' value='' size="65" id="no_sk" style="width:450px;" placeholder="No SK Kegiatan"/></td>
+        </tr>
+        <tr>
+          <td>Tanggal SK</td>
+          <td >:</td>
+		  <td><input name="tgl_sk" type="text" size="65" id="tgl_sk" style="width:450px;" placeholder="Tanggal SK Kegiatan"/></td>         
+        </tr>
+        <tr>
+          <td>KOP HONOR</td>
+          <td >:</td><td><textarea name="kop_honor" id="kop_honor" class="input1" style="width:450px;" placeholder="Isian Nama KOP dari Rincian Honor"></textarea></td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td >&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>
+          <select name="jns_honor" id="jns_honor" style="width:160px"  >
+            <option value="0">-PILIH JENIS HONOR-</option>
+            <option value="1">HONOR PANITIA TETAP</option>
+            <option value="2">HONOR MENGAJAR</option>
+            <option value="3">HONOR NASKAH DAN KOREKSI UJIAN</option>
+            <option value="4">HONOR DOSEN PEMBIMBING</option>
+            <option value="5">HONOR PENGUJI</option>
+            <option value="6">HONOR PENGAWAS</option>
+            <option value="7">HONOR PANITIA ADHOC</option>
+            <option value="8">HONOR PA</option>
+          </select></td>
+          <td>&nbsp;</td>
+          <td><a href="javascript:Start3('<?php echo site_url();?>ls/rincian_tarif')" title='Pedoman Tarif DIPA BLU Universitas Udayana'>DAFTAR TARIF</a></td>
+        </tr>             
+    </table> 
+<script type="text/javascript">
+          $("#kdoutput").change(function(){
+                var selectValues = $("#kdoutput").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen').html(msg);
+                }else{
+                    var kdoutput = {kdoutput:$("#kdoutput").val(),jenis_kwitansi:'<?php echo $jns_kwitansi;?>'};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('ls/select_komponen')?>",
+                            data: kdoutput,
+                            success: function(msg){
+                                $('#komponen').html(msg);
+                            }
+                      });
+                }
+        });
+</script>
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK JENIS HONOR===*/
+				  $("#jns_honor").change(function(){
+							var jns_honor=$("#jns_honor").val();							
+								$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('ls/jenis_honor')?>",
+									data: {
+												jns_honor: $("#jns_honor").val()
+											},
+									success: function(msg){
+										$('#jenis_honor').html(msg);
+									}
+							  });
+				});
+</script>  
+     <div id="jenis_honor" style="padding:25px">
+  	 </div>
+<div class="submit_link">
+	  <input name='jenis_kwitansi' value='HONOR' type="hidden"/>  
+      <input name="simpan" type='submit' id="simpan" value='Simpan'>
+      <input type=button value=Batal onclick=self.history.back()>
+</div>
+</form>

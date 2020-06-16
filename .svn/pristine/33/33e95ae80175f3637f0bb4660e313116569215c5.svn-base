@@ -1,0 +1,42 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief proporsi pusat
+ * 
+ * @author Putu Praba Santika
+ */
+class Pro_pusat extends CI_Controller {
+    
+    public function __construct(){                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        
+        $this->load->model(array('m_pro_pusat'));
+    }
+    function input(){
+        $subunit_pusat='152';
+        $unit_pusat='18';
+        //TODO: pastiin bagian yang dikurangi masih mencukupi
+        $data['bagian']=$this->m_pro_pusat->get_bagian($subunit_pusat,
+                                    $this->m_settings->get_tahun_anggaran());
+        $data['subunit']=$this->m_pro_pusat->get_subunit($unit_pusat);
+        $data['sudah_terpakai']=$this->m_pro_pusat->get_sudah_terpakai($subunit_pusat,
+                                    $this->m_settings->get_tahun_anggaran());
+        $data['pro_pusat']=$this->session->userdata('pro_pusat');
+        $this->template->load('template','pro_pusat/input_bagian',$data);
+    }
+    function nitip_sesi(){
+        $id_subunit=$this->input->post('id_subunit');
+        $nilai=$this->input->post('nilai');
+        
+        $pro_pusat= $this->session->userdata('pro_pusat');
+        
+        $pro_pusat[$id_subunit]=$nilai;
+        
+        $this->session->set_userdata('pro_pusat',$pro_pusat) ;
+    }
+    function simpan(){
+        $subunit_pusat='152';
+        $this->m_pro_pusat->simpan($_POST['subunit'],$subunit_pusat);
+    }
+}
+    

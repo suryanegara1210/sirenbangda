@@ -1,0 +1,82 @@
+<?php
+
+class Report extends CI_Controller {
+
+    public function __construct()
+	{
+		$this->CI =& get_instance();
+		parent::__construct();
+		$this->load->helper('url');
+		$this->load->model(array('guest/m_report', 'm_skpd', 'm_renstra_trx', 'm_rpjmd_trx'));
+	}
+
+	function index()
+	{
+		$report=$this->input->get("report");
+
+		$data['active_menu'] = "report";
+		$jumlah = $this->m_report->get_jumlah_kegiatan_per_skpd();
+		$skpd_array=array();
+		$jum_array=array();
+		foreach ($jumlah as $row) {
+			$skpd_array[] = $row->nama;
+			$jum_array[] = $row->jumlah;
+		}
+		$data['jumlah'] = json_encode($jum_array);
+		$data['skpd'] = json_encode($skpd_array);
+
+		
+			
+
+		switch ($report) {
+			case 'rpjmd':
+				$data['title'] = 'RPJMD';
+				$data['konten'] = $this->get_rpjmd();
+				break;
+
+			case 'renstra':							
+			default:
+				$data['title'] = 'Renstra';
+				$data['konten'] = $this->get_renstra();
+				break;
+		}
+		$this->template->load('guest/template', 'guest/report', $data);
+	}	
+
+	private function get_renstra(){
+		$all_skpd = $this->m_skpd->get_data_dropdown_skpd(NULL);
+		$data['dd_skpd'] = form_dropdown('dd_skpd', $all_skpd, NULL, 'class="span6 m-wrap" id="appendedInputButton" style="margin: 0;"');
+		return $this->load->view('guest/report/renstra_frm', $data, TRUE);
+	}
+
+	function get_data_renstra(){
+		$id_skpd = $this->input->post("skpd");
+		$proses = $this->m_renstra_trx->count_jendela_kontrol($id_skpd);
+		
+		if (empty($proses->veri2)) {
+			echo '
+				<div class="row">
+					<div class="span11">
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>PERINGATAN!</strong> Data renstra akhir belum tersedia.
+						</div>
+					</div>
+				</div>
+			';
+		}else{
+			$data['program'] = $this->m_renstra_trx->get_program_skpd_4_cetak($id_skpd);
+			$data2['renstra'] = $this->load->view('renstra/cetak/program_kegiatan', $data, TRUE);
+			$this->load->view('guest/report/renstra_view', $data2);
+		}		
+	}
+
+	private function get_rpjmd(){		
+		$temp['class_table']='class="table-common"';		
+		$temp['misi'] = $this->m_rpjmd_trx->get_misi_rpjmd_4_cetak_final();
+		$temp['bidang_urusans'] = $this->m_rpjmd_trx->get_all_bidang_urusan_4_cetak_final();
+		$data['rpjmd'] = $this->load->view("rpjmd/cetak/cetak_bidang_urusan", $temp, TRUE);
+		return $this->load->view('guest/report/rpjmd_view', $data, TRUE);
+	}
+}
+?>

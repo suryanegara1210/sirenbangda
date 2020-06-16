@@ -1,0 +1,17 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+    class Setting extends CI_Controller{
+        //setting tahun aktif
+    
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));    
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_spm', 'm_lov', 'm_pok', 'm_settings', 'm_bas'));
+        
+        
+    }
+    
+}
+?>

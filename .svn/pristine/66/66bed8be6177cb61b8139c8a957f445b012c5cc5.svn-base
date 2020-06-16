@@ -1,0 +1,506 @@
+<?php 
+    $biaya[1]="";
+    $biaya[2]="";
+    $biaya[3]="";
+    $jumlah_biaya[1][1]=0;
+    $jumlah_biaya[2][1]=0;
+    $jumlah_biaya[3][1]=0;
+    $jumlah_biaya[1][2]=0;
+    $jumlah_biaya[2][2]=0;
+    $jumlah_biaya[3][2]=0;
+
+    $pendapatan[1]="";
+    $pendapatan[2]="";
+    $jumlah_pendapatan[1][1]=0;
+    $jumlah_pendapatan[2][1]=0;
+    $jumlah_pendapatan[1][2]=0;
+    $jumlah_pendapatan[2][2]=0;
+
+    $surplus1="";
+    $jumlah_surplus[1]=0;
+    $jumlah_surplus[2]=0;
+
+    $surplus2="";
+    $jumlah_surplus2[1]=0;
+    $jumlah_surplus2[2]=0;
+
+    foreach($laporan as $lap){
+        $perubahan_rp=$lap->nominal_skrg - $lap->nominal_tahun_lalu;
+        
+        if($lap->nominal_tahun_lalu!=0){
+            $perubahan_prsen=round((abs(($lap->nominal_skrg - $lap->nominal_tahun_lalu)/$lap->nominal_tahun_lalu))*100, 2);
+        }else{
+            $perubahan_prsen='-';
+        }
+
+        if (substr($lap->akun_kode,0,1)=='4') {
+            if ($lap->akun_kode=='40') {
+                $jumlah_pendapatan[1][1]=$lap->nominal_tahun_lalu;
+                $jumlah_pendapatan[1][2]=$lap->nominal_skrg;
+            }
+            if ($lap->akun_kode=='42') {
+                $jumlah_pendapatan[2][1]=$lap->nominal_tahun_lalu;
+                $jumlah_pendapatan[2][2]=$lap->nominal_skrg;
+            }
+
+            if (substr($lap->akun_kode,0,2)=='40') {
+                $i=1;
+            }elseif (substr($lap->akun_kode,0,2)=='42') {
+                $i=2;
+            }else{
+                $i=0;
+            }
+            $tab=$lap->level;
+        
+            $pendapatan[$i]=$pendapatan[$i].
+            "<tr>
+                <td style=\"width:20%;\" id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td style=\"width:39%;\">". $lap->akun_nama ."</td>                
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($perubahan_rp) ."</td>
+                <td style=\"width:5%;\">". $perubahan_prsen ."</td>
+            </tr>";
+        }elseif (substr($lap->akun_kode,0,1)=='5') {
+            if ($lap->digit78=='51') {
+                $i=1;
+                if ($lap->level=='1') {
+                    $jumlah_biaya[$i][1]=$jumlah_biaya[$i][1]+$lap->nominal_tahun_lalu;
+                    $jumlah_biaya[$i][2]=$jumlah_biaya[$i][2]+$lap->nominal_skrg;                    
+                }
+            }elseif ($lap->digit78=='55') {
+                $i=2;            
+                if ($lap->level=='1') {
+                    $jumlah_biaya[$i][1]=$jumlah_biaya[$i][1]+$lap->nominal_tahun_lalu;
+                    $jumlah_biaya[$i][2]=$jumlah_biaya[$i][2]+$lap->nominal_skrg;                    
+                }
+            }else{
+                $i=3;
+                if ($lap->level=='1') {
+                    $jumlah_biaya[$i][1]=$jumlah_biaya[$i][1]+$lap->nominal_tahun_lalu;
+                    $jumlah_biaya[$i][2]=$jumlah_biaya[$i][2]+$lap->nominal_skrg;                    
+                }
+            }
+            $tab=$lap->level;
+            
+            $biaya[$i]=$biaya[$i].
+            "<tr>
+                <td style=\"width:20%;\" id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td style=\"width:39%;\">". $lap->akun_nama ."</td>                
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($perubahan_rp) ."</td>
+                <td style=\"width:5%;\">". $perubahan_prsen ."</td>
+            </tr>";
+        }elseif (substr($lap->akun_kode,0,1)=='6') {
+            if ($lap->akun_kode=='60') {
+                $jumlah_surplus[1]=$lap->nominal_tahun_lalu;
+                $jumlah_surplus[2]=$lap->nominal_skrg;
+            }
+            $tab=$lap->level;
+            
+            $surplus1=$surplus1.
+            "<tr>
+                <td style=\"width:20%;\" id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td style=\"width:39%;\">". $lap->akun_nama ."</td>                
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($perubahan_rp) ."</td>
+                <td style=\"width:5%;\">". $perubahan_prsen ."</td>
+            </tr>";
+        }elseif (substr($lap->akun_kode,0,1)=='7') {
+            if ($lap->akun_kode=='70') {
+                $jumlah_surplus2[1]=$lap->nominal_tahun_lalu;
+                $jumlah_surplus2[2]=$lap->nominal_skrg;
+            }
+            $tab=$lap->level;
+            
+            $surplus2=$surplus2.
+            "<tr>
+                <td style=\"width:20%;\" id=\"tab". $tab ."\">". $lap->akun_kode ."</td>
+                <td style=\"width:39%;\">". $lap->akun_nama ."</td>                
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_skrg) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($lap->nominal_tahun_lalu) ."</td>
+                <td style=\"width:11%;\">". Formatting::currency($perubahan_rp) ."</td>
+                <td style=\"width:5%;\">". $perubahan_prsen ."</td>
+            </tr>";
+        }      
+    }     
+?>
+
+<style type="text/css">
+    #tab0{
+        text-indent: 1px;
+    }
+
+    #tab1{
+        text-indent: 8px;
+    }
+
+    #tab2{
+        text-indent: 15px;
+    }
+
+    #tab3{
+        text-indent: 22px;
+    }
+
+    #tab4{
+        text-indent: 29px;
+    }
+
+    #tab5{
+        text-indent: 36px;
+    }
+
+    #tab6{
+        text-indent: 43px;
+    }
+
+    #tab7{
+        text-indent: 50px;
+    }
+
+    #tab8{
+        text-indent: 57px;
+    }
+
+    #tab9{
+        text-indent: 64px;
+    }
+</style>
+<html>
+<head>    
+</head>
+<body>
+<h4>    
+    <div style="text-align:center">
+        Universitas Udayana<br />
+        Laporan Aktivitas
+        <br/>Bulan <?php echo $nama_bulan1; ?> - <?php echo $nama_bulan2; ?> Tahun <?php echo $thn_skrg; ?> <br />
+    </div>
+</h4>
+<div style="font-size: 10;">
+<table width="100%" style="font-size: 6; border-collapse:collapse; padding:5px;" border="1" align="center">
+    <tr>
+        <th rowspan="2" colspan="2">Uraian</th>        
+        <th rowspan="2">Laporan Bulan <BR><?php echo $nama_bulan1; ?>-<?php echo $nama_bulan2; ?> <BR>Tahun <?php echo $thn_skrg; ?></th>
+        <th rowspan="2">Laporan Bulan <BR><?php echo $nama_bulan1_sblm; ?>-<?php echo $nama_bulan2_sblm; ?> <BR>Tahun <?php echo $thn_sblm; ?></th>
+        <th colspan="2">Perubahan</th>
+    </tr>
+    <tr>
+        <th>Rupiah</th>
+        <th>%</th>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">PENDAPATAN</td>
+    </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Pendapatan APBN</td>
+        </tr>
+        <?php
+            echo $pendapatan[1];
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Pendapatan APBN</td>            
+            <td><?php echo Formatting::currency($jumlah_pendapatan[1][2]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_pendapatan[1][1]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_pendapatan[1][2]-$jumlah_pendapatan[1][1]); ?></td>
+            <td><?php if($jumlah_pendapatan[1][1]!=0){echo Formatting::currency(($jumlah_pendapatan[1][2]-$jumlah_pendapatan[1][1])/$jumlah_pendapatan[1][1]);}else{echo "-";}; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Penerimaan Negara Bukan Pajak</td>
+        </tr>
+        <?php
+            echo $pendapatan[2];
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Penerimaan Negara Bukan Pajak</td>            
+            <td><?php echo Formatting::currency($jumlah_pendapatan[2][2]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_pendapatan[2][1]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_pendapatan[2][2]-$jumlah_pendapatan[2][1]); ?></td>
+            <td><?php if($jumlah_pendapatan[2][1]!=0){echo Formatting::currency(($jumlah_pendapatan[2][2]-$jumlah_pendapatan[2][1])/$jumlah_pendapatan[2][1]);}else{echo "-";}; ?></td>
+        </tr>
+
+    <?php
+    $tot_jumlah_dapat[1]=$jumlah_pendapatan[1][1]+$jumlah_pendapatan[2][1];
+    $tot_jumlah_dapat[2]=$jumlah_pendapatan[1][2]+$jumlah_pendapatan[2][2];
+    $perubahan_tot_dapat=$tot_jumlah_dapat[2]-$tot_jumlah_dapat[1];
+    if ($tot_jumlah_dapat[1]!=0) {
+        $persen_perubahan_tot_dapat=($perubahan_tot_dapat/$tot_jumlah_dapat[1])*100;
+    }else{
+        $persen_perubahan_tot_dapat="-";
+    }
+    ?>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Pendapatan</td>        
+        <td><?php echo Formatting::currency($tot_jumlah_dapat[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_jumlah_dapat[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_dapat); ?></td>
+        <td><?php echo $persen_perubahan_tot_dapat; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">BIAYA</td>
+    </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Biaya Layanan</td>
+        </tr>
+        <?php
+            echo $biaya[1];
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Biaya Layanan</td>            
+            <td><?php echo Formatting::currency($jumlah_biaya[1][2]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_biaya[1][1]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_biaya[1][2]-$jumlah_biaya[1][1]); ?></td>
+            <td><?php if($jumlah_biaya[1][1]!=0){echo Formatting::currency(($jumlah_biaya[1][2]-$jumlah_biaya[1][1])/$jumlah_biaya[1][1]);}else{echo "-";}; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Biaya Umum dan Administrasi</td>
+        </tr>
+        <?php
+            echo $biaya[2];
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Biaya Layanan</td>            
+            <td><?php echo Formatting::currency($jumlah_biaya[2][2]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_biaya[2][1]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_biaya[2][2]-$jumlah_biaya[2][1]); ?></td>
+            <td><?php if($jumlah_biaya[2][1]!=0){echo Formatting::currency(($jumlah_biaya[2][2]-$jumlah_biaya[2][1])/$jumlah_biaya[2][1]);}else{echo "-";}; ?></td>
+        </tr>
+
+        <tr id="tab0" style="background-color: #fff; font-weight: bold;">
+            <td colspan="6">Biaya Lainnya</td>
+        </tr>
+        <?php
+            echo $biaya[3];
+        ?>
+        <tr style="background-color: #fff; font-weight: bold;">
+            <td style="text-align: center;" colspan="2">Jumlah Biaya Lainnya</td>            
+            <td><?php echo Formatting::currency($jumlah_biaya[3][2]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_biaya[3][1]); ?></td>
+            <td><?php echo Formatting::currency($jumlah_biaya[3][2]-$jumlah_biaya[3][1]); ?></td>
+            <td><?php if($jumlah_biaya[3][1]!=0){echo Formatting::currency(($jumlah_biaya[3][2]-$jumlah_biaya[3][1])/$jumlah_biaya[3][1]);}else{echo "-";}; ?></td>
+        </tr>
+    
+    <?php
+    $tot_jumlah_biaya[1]=$jumlah_biaya[1][1]+$jumlah_biaya[2][1]+$jumlah_biaya[3][1];
+    $tot_jumlah_biaya[2]=$jumlah_biaya[1][2]+$jumlah_biaya[2][2]+$jumlah_biaya[3][2];
+    $perubahan_tot_biaya=$tot_jumlah_biaya[2]-$tot_jumlah_biaya[1];
+    if ($tot_jumlah_biaya[1]!=0) {
+        $persen_perubahan_tot_biaya=($perubahan_tot_biaya/$tot_jumlah_biaya[1])*100;
+    }else{
+        $persen_perubahan_tot_biaya="-";
+    }
+    ?>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Biaya</td>        
+        <td><?php echo Formatting::currency($tot_jumlah_biaya[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_jumlah_biaya[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_biaya); ?></td>
+        <td><?php echo $persen_perubahan_tot_biaya; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Pendapatan</td>        
+        <td><?php echo Formatting::currency($tot_jumlah_dapat[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_jumlah_dapat[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_dapat); ?></td>
+        <td><?php echo $persen_perubahan_tot_dapat; ?></td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Biaya</td>        
+        <td><?php echo Formatting::currency($tot_jumlah_biaya[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_jumlah_biaya[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_biaya); ?></td>
+        <td><?php echo $persen_perubahan_tot_biaya; ?></td>
+    </tr>
+    <?php
+    $tot_surplus1[1] = $tot_jumlah_dapat[1]-$tot_jumlah_biaya[1];
+    $tot_surplus1[2] = $tot_jumlah_dapat[2]-$tot_jumlah_biaya[2];
+    $perubahan_tot_surplus1=$tot_surplus1[2]-$tot_surplus1[1];
+    if ($tot_surplus1[1]!=0) {
+        $persen_perubahan_tot_surplus1=($perubahan_tot_surplus1/$tot_surplus1[1])*100;
+    }else{
+        $persen_perubahan_tot_surplus1="-";
+    }
+    ?>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Sebelum Pos Keuntungan/Kerugian</td>        
+        <td><?php echo Formatting::currency($tot_surplus1[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_surplus1[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus1); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus1; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">KEUNTUNGAN / KERUGIAN</td>
+    </tr>
+    <?php
+        echo $surplus1;
+    ?>
+
+    <?php    
+    $perubahan_tot_surplus2=$jumlah_surplus[2]-$jumlah_surplus[1];
+    if ($jumlah_surplus[1]!=0) {
+        $persen_perubahan_tot_surplus2=($perubahan_tot_surplus2/$jumlah_surplus[1])*100;
+    }else{
+        $persen_perubahan_tot_surplus2="-";
+    }
+    ?>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Keuntungan / Kerugian</td>        
+        <td><?php echo Formatting::currency($jumlah_surplus[2]); ?></td>
+        <td><?php echo Formatting::currency($jumlah_surplus[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus2); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus2; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Sebelum Pos Keuntungan/Kerugian</td>        
+        <td><?php echo Formatting::currency($tot_surplus1[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_surplus1[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus1); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus1; ?></td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Keuntungan / Kerugian</td>        
+        <td><?php echo Formatting::currency($jumlah_surplus[2]); ?></td>
+        <td><?php echo Formatting::currency($jumlah_surplus[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus2); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus2; ?></td>
+    </tr>
+    <?php
+    $tot_surplus3[1] = $tot_surplus1[1]-$jumlah_surplus[1];
+    $tot_surplus3[2] = $tot_surplus1[2]-$jumlah_surplus[2];
+    $perubahan_tot_surplus3=$tot_surplus3[2]-$tot_surplus3[1];
+    if ($tot_surplus3[1]!=0) {
+        $persen_perubahan_tot_surplus3=($perubahan_tot_surplus3/$tot_surplus3[1])*100;
+    }else{
+        $persen_perubahan_tot_surplus3="-";
+    }
+    ?>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Sebelum Pos-Pos Luar Biasa</td>        
+        <td><?php echo Formatting::currency($tot_surplus3[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_surplus3[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus3); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus3; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">POS-POS LUAR BIASA</td>
+    </tr>
+    <?php
+        echo $surplus2;
+    ?>
+
+    <?php    
+    $perubahan_tot_surplus4=$jumlah_surplus2[2]-$jumlah_surplus2[1];
+    if ($jumlah_surplus2[1]!=0) {
+        $persen_perubahan_tot_surplus4=($perubahan_tot_surplus4/$jumlah_surplus2[1])*100;
+    }else{
+        $persen_perubahan_tot_surplus4="-";
+    }
+    ?>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Pos-Pos Luar Biasa</td>        
+        <td><?php echo Formatting::currency($jumlah_surplus2[2]); ?></td>
+        <td><?php echo Formatting::currency($jumlah_surplus2[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus4); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus4; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Sebelum Pos-Pos Luar Biasa</td>        
+        <td><?php echo Formatting::currency($tot_surplus3[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_surplus3[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus3); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus3; ?></td>
+    </tr>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Jumlah Pos-Pos Luar Biasa</td>        
+        <td><?php echo Formatting::currency($jumlah_surplus2[2]); ?></td>
+        <td><?php echo Formatting::currency($jumlah_surplus2[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus4); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus4; ?></td>
+    </tr>
+    <?php
+    $tot_surplus5[1] = $tot_surplus3[1]-$jumlah_surplus2[1];
+    $tot_surplus5[2] = $tot_surplus3[2]-$jumlah_surplus2[2];
+    $perubahan_tot_surplus5=$tot_surplus5[2]-$tot_surplus5[1];
+    if ($tot_surplus5[1]!=0) {
+        $persen_perubahan_tot_surplus5=($perubahan_tot_surplus5/$tot_surplus5[1])*100;
+    }else{
+        $persen_perubahan_tot_surplus5="-";
+    }
+    ?>
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Tahun Berjalan Bersih</td>        
+        <td><?php echo Formatting::currency($tot_surplus5[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_surplus5[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus5); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus5; ?></td>
+    </tr>
+
+    <tr style="background-color: #fff; font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+    <tr style="background-color: #dedede; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Tahun Berjalan Bersih</td>        
+        <td><?php echo Formatting::currency($tot_surplus5[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_surplus5[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_surplus5); ?></td>
+        <td><?php echo $persen_perubahan_tot_surplus5; ?></td>
+    </tr>
+    <?php    
+    $tot_diluar_apbn1[1] = $tot_surplus5[1]-$jumlah_pendapatan[1][1];
+    $tot_diluar_apbn1[2] = $tot_surplus5[2]-$jumlah_pendapatan[1][2];
+
+    $perubahan_tot_diluar_apbn1 = $tot_diluar_apbn1[2]-$tot_diluar_apbn1[1];
+    if ($tot_diluar_apbn1[1]!=0) {
+        $persen_perubahan_tot_diluar_apbn1=($perubahan_tot_diluar_apbn1/$tot_diluar_apbn1[1])*100;
+    }else{
+        $persen_perubahan_tot_diluar_apbn1="-";
+    }
+    ?>
+    <tr style="background-color: #dedede; font-weight: bold;">
+        <td style="text-align: center;" colspan="2">Surplus/Defisit Tahun Berjalan Diluar Pendapatan APBN</td>        
+        <td><?php echo Formatting::currency($tot_diluar_apbn1[2]); ?></td>
+        <td><?php echo Formatting::currency($tot_diluar_apbn1[1]); ?></td>
+        <td><?php echo Formatting::currency($perubahan_tot_diluar_apbn1); ?></td>
+        <td><?php echo $persen_perubahan_tot_diluar_apbn1; ?></td>
+    </tr>
+</table>
+</div>
+</body>
+</html>

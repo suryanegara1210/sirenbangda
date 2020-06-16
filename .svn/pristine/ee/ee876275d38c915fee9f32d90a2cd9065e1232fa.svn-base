@@ -1,0 +1,210 @@
+<?php
+
+class Spp extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_spp','m_spj',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas'));
+        
+        date_default_timezone_set('Etc/GMT-8');
+    }
+    
+    function create(){
+        $this->auth->restrict();
+        $idu = $this->session->userdata('id_unit');
+        $su  = $this->session->userdata('id_subunit');
+        $ta  = $this->m_settings->get_tahun_anggaran();         
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su); 
+        
+        $non_kw = array('UP','TUP','SAH');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }
+ 
+        $this->template->load('template','spp/buat_spp',$data);    
+    }
+    
+    function get_view_list_sptb(){          
+         $this->auth->restrict();
+         $jb = $this->input->post('jenisblj');
+         $id_unit = $this->session->userdata('id_unit');
+         
+         $bulan = date('m');
+         $ta = $this->m_settings->get_tahun_anggaran();
+         $data['hasil']= $this->m_spp->get_view_list_sptb($ta,$bulan,$jb,$id_unit); 
+		      //echo $this->db->last_query();
+         $this->load->view('spp/view_sptb',$data);
+            
+        /*switch($sifat_belanja){
+            case Constant::JB_GUP:
+                echo "ini output list sptb gu siap spp";
+                break;
+            case Constant::JB_LS:
+                echo "ini output list sptb ls siap spp";
+                break;
+            case Constant::JB_NHL:
+                echo "ini output list sptb nihil siap spp";
+                break;
+        } */    //echo "testing $sifat_belanja";    
+    }
+    
+     function simpan_spp(){
+        $this->auth->restrict();           
+          $id_unit = $this->session->userdata('id_unit');
+          $ta  = $this->m_settings->get_tahun_anggaran();
+          
+          $jb = $this->uri->segment(3);
+          $id = $this->uri->segment(4);
+          $sptb = $this->m_spp->cek_sptb($id,$id_unit,$ta);  
+          
+          $success = $this->m_spp->sptb_diajukan($id,$id_unit,$ta);
+		   
+           if($success){
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'SPTB ini udah dibuatkan SPP');
+              redirect('spp/create/'.$jb);                 
+          }else{
+              
+              $this->m_spp->simpan_spp($ta,$id,$id_unit,$sptb,$jb);
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'SPP berhasil disimpan');
+              redirect('spp/create/'.$jb);                 
+          }
+   }
+   function daftar_spp_filter(){
+        $this->template->load('template','spp/daftar_spp_filter'); 
+    }
+    function tampil_spp(){
+       $this->auth->restrict();
+        $id_unit = $this->session->userdata('id_unit');
+        $bulan = $this->input->post('bulan');
+        $tahun = $this->input->post('tahun');
+        $data['hasil']= $this->m_spp->get_spp_filter($tahun,$bulan,$id_unit);
+        $this->load->view('spp/tampil_spp',$data); 
+    } 
+    function otorisasi_spp(){   
+        $this->auth->restrict();         
+          $id = $this->uri->segment(3);
+          $ta  = $this->m_settings->get_tahun_anggaran();
+          $recek_kel = $this->m_spp->check_jum_print($ta,$id);  
+          if($recek_kel>0){
+                 $this->session->set_userdata('msg_typ','err');
+                 $this->session->set_userdata('msg', 'Anda Belum Mengunduh SPP');
+                 redirect('spp/siap_terotorisasi'); 
+              
+          }else{        
+          $this->m_spp->otorisasi_spp_up($id,$ta);
+          $trans = $this->m_spp->selek_kwitansi($id,$ta);
+            foreach($trans->result_array() as $row){
+                $id_sptb = $row['id_sptb'];
+                $id_kwitansi = $row['id_kwitansi'];
+                //$this->m_spp->otorisasi_sptb_ppk($id_sptb,$ta);
+                $this->m_spp->otorisasi_kwitansi_ppk($id_kwitansi,$ta);
+                    /*$get_id = $this->m_spp->ambil_level_tertinggi($id_kwitansi,$ta);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->m_spp->masuk_waktu_otorisasi_ppk($id_kwitansi,$level_terkini,$ta);  */
+            }
+                 
+          $this->session->set_userdata('msg_typ','ok');
+          $this->session->set_userdata('msg', 'SPP berhasil diotorisasi');
+          redirect('spp/siap_terotorisasi');
+          } 
+    }
+    function preview_spp(){
+        $this->auth->restrict();         
+            $id_unit = $this->session->userdata('id_unit');
+            $kode_unit = $this->session->userdata('kode_unit');
+            $id_spp = $this->uri->segment(3);  
+            $tgl_skrg = date("Y-m-d");
+            $jam_skrg = date("H:i:s");
+            $ta  = $this->m_settings->get_tahun_anggaran();
+            $data['tgl'] = $tgl_skrg;
+            $data['jam'] = $jam_skrg;                              
+            $detail_spp = $this->m_spp->detail_spp($id_unit,$id_spp,$ta);    
+            $data['detail_spp'] = $this->m_spp->detail_spp($id_unit,$id_spp,$ta);
+            
+            //tabel bawah
+            $data['tabel_spp']= $this->m_spj->get_spp_table($ta, $id_unit, Constant::JB_GUP, $id_spp);
+            $data['setting'] =  $this->m_spp->select_setting();
+            
+            $data['pagu_rkakl_unit']=$this->m_spp->pagu_rkakl_unit($id_unit,$ta);
+            
+            
+            $data['spp_terbayar_lalu_unit']=$this->m_spp->spp_terbayar_lalu_unit($id_spp,$id_unit,$ta);
+            
+            
+            $data['spp_ini_unit']=$this->m_spp->spp_ini_unit($id_spp,$id_unit,$ta);     
+            
+           
+            $this->template->load('template','spp/preview_spp2',$data);  
+        } 
+    function print_spp($download_pdf = ''){
+        $this->auth->restrict();
+             $id_unit = $this->session->userdata('id_unit');
+             $id_spp = $this->uri->segment(3); 
+             $ta  = $this->m_settings->get_tahun_anggaran();
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i:s");
+             $data['tgl'] = $tgl_skrg;
+             $data['jam'] = $jam_skrg;
+             $ret = ''; 
+             $pdf_filename='SPP_GU_'.$id_unit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'unit/print_spp/true/','Download Pdf');
+             
+             $this->m_spp->update_print_spp($id_spp,$ta);                      
+            $data['detail_spp'] = $this->m_spp->detail_spp($id_unit,$id_spp,$ta);  
+            
+            
+            //tabel bawah
+            $data['tabel_spp']= $this->m_spj->get_spp_table($ta, $id_unit, Constant::JB_GUP, $id_spp);
+            $data['setting'] =  $this->m_spp->select_setting();
+            
+            $data['pagu_rkakl_unit']=$this->m_spp->pagu_rkakl_unit($id_unit,$ta);
+            
+            
+            $data['spp_terbayar_lalu_unit']=$this->m_spp->spp_terbayar_lalu_unit($id_spp,$id_unit,$ta);
+            
+            
+            $data['spp_ini_unit']=$this->m_spp->spp_ini_unit($id_spp,$id_unit,$ta);  
+             
+             $data['link'] = $link_download ;     
+             $output = $this->load->view('spp/print_spp', $data,  true);
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);  
+             else
+                echo $output;
+    }
+    function siap_terotorisasi(){
+        $this->auth->restrict();
+        $id_unit = $this->session->userdata('id_unit');  
+        $data['hasil']= $this->m_spp->siap_terotorisasi($id_unit);
+        echo $this->db->last_query();
+        $this->template->load('template','spp/siap_terotorisasi',$data);
+    } 
+    function preview_mp(){ 
+        $this->auth->restrict();                               
+            $id_unit = $this->session->userdata('id_unit'); 
+            $id_spp = $this->uri->segment(3); 
+            
+            $data['fakultas'] = $this->m_spp->getDetailUnit($id_unit); 
+            $data['detail_mp'] = $this->m_spp->getMpUnit($id_spp); 
+
+            $this->template->load('template','spp/preview_mp',$data);    
+   }       
+}
+?>

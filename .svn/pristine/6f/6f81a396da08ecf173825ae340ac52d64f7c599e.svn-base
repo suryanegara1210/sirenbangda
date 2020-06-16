@@ -1,0 +1,52 @@
+<thead>
+	<tr>
+		<th>Kode Kegiatan</th>
+		<th>Nama Program | Nama Kegiatan</th>
+		<th>Jenis Pekerjaan</th>
+		<th>Satuan Volume</th>
+		<th>Dana Kegiatan Disetujui</th>
+		<th>Lokasi</th>
+		<th>Nama Desa - Kecamatan</th>
+		<th>Asal Usulan</th>
+		<th>Status Usulan</th>
+		<th>Keputusan</th>
+	</tr>
+</thead>
+<tbody>
+	<?php
+		foreach ($data_forum as $row) {
+			$forum_detail = $this->m_musrenbang->get_data_forum_detail($row->kode_kegiatan,$row->id_skpd);
+			$counter = $this->m_musrenbang->get_total_kegiatan($row->kode_kegiatan,$row->id_skpd)->total;
+	?>
+			<tr>
+				<td rowspan="<?php echo ($counter+1); ?>"align="center"><?php echo $row->kode_kegiatan; ?></td>
+				<td rowspan="<?php echo ($counter+1); ?>"align="center"><?php echo $row->nama_program_kegiatan; ?></td>
+				<td ></td>
+				<td ></td>
+				<td align="right"><?php echo "Rp ".Formatting::currency($row->total_jumlah_dana); ?></td>
+				<td ></td>
+				<td ></td>
+				<td ></td>
+				<td ></td>
+				<td ></td>
+				<?php
+					foreach ($forum_detail as $row) {
+				?>
+					<tr>
+						<td align="center"><?php echo $row->jenis_pekerjaan; ?></td>
+						<td align="center"><?php echo $row->volume." ".$row->satuan; ?></td>
+						<td align="right"><?php echo "Rp ".Formatting::currency($row->jumlah_dana); ?></td>
+						<td align="center"><?php echo $row->lokasi; ?></td>
+						<td align="center"><?php echo $row->nama_desa." - ".$row->nama_kec; ?></td>
+						<td align="center"><?php echo $row->asal_usulan; ?></td>
+						<td align="center"><?php echo $row->status_usulan; ?></td>
+						<td align="center"><?php echo $row->status_keputusan; ?></td>
+					</tr>
+				<?php
+					}
+				?>
+			</tr>
+	<?php
+		}
+	?>
+</tbody>

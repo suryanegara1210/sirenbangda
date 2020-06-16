@@ -1,0 +1,621 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class penerimaan dari layanan pendidikan
+ * 
+ * Controller Class penerimaan dari layanan pendidikan yang merupakan bagian 
+ * dari Bisnis Proses Penerimaan
+ * 
+ * @author Putu Praba Santika
+ * @author I Wayan Shandyasa
+ */
+    class Ladik extends CI_Controller {
+        public function __construct(){
+            $this->CI =& get_instance(); 
+            parent::__construct();
+            $this->load->model(array('m_ladik','m_umum'));
+        }
+       
+       /**
+        * Yang pertama ditampilkan
+        */
+        function index(){
+    	   redirect(base_url());
+	    }
+        /**
+         * ambil nama unit dari db
+         *
+         */
+        function select_unit(){
+            $sub_unit = $this->unitAmbil->subunit_semua($fakultas,constant::WITH_ALL);
+            $select='';
+            foreach($sub_unit as $key=>$val){
+                $select.="<option value=\"$key\">$val</option>"; //set value
+            }
+            //$select.="</select>";
+            echo $select;
+    	}
+         
+        /**
+         * Ambil semua subunit dibawah unit tertentu.
+         */
+        function select_sub_unit(){
+            $fakultas = $this->input->post('fakultas');
+            $sub_unit = $this->m_umum->subunit_semua($fakultas,constant::WITH_ALL);
+            $select='';
+            foreach($sub_unit as $key=>$val){
+                $select.="<option value=\"$key\">$val</option>"; //set value
+            }
+            //$select.="</select>";
+            echo $select;
+    	}
+        
+        /**
+         * Ambil tahun yang ada di database
+         */
+        function select_tahun(){
+            $unit = $this->input->post('unit');
+            $subunit = $this->input->post('subunit');
+            if ($this->input->post('tipe')!==''){
+                $tipe=$this->input->post('tipe');
+            }else{
+                $tipe='1';
+            }
+            echo $tipe;
+            //echo $unit; echo $subunit;
+                if($subunit!=-1){
+                    $subunitDet=$this->m_umum->subunit_detail($subunit,Constant::JR_ID);
+                    if(isset($subunitDet->kode_sim_reg)){
+                        $tahun = $this->m_ladik->tahunAmbil($unit,$subunitDet->kode_sim_reg,$tipe);
+                    }   
+                }else{
+                    $tahun = $this->m_ladik->tahunAmbil($unit,$subunit,$tipe);
+                }
+                if (isset($tahun) && count($tahun)>0){
+                    $select="<option value=\"0\">~~~ Pilih Tahun ~~~</option>";
+                    foreach($tahun as $th){
+                        $select.="<option value=\"".str_replace ( "/", "-" , $th['th_ajar'] )."\">$th[th_ajar]</option>"; //set value
+                    }
+                    echo $select;
+                }else{
+                    echo "<option value=\"0\">~~~ Tidak Ada Data ~~~</option>";
+                }
+                
+    	}
+        
+        /**
+         * Verifikasi daftar penerimaan -y-
+         */
+        function veriPen(){
+            
+            $this->auth->has_privileges('verify_pen_ladik');
+            
+            $data['option_unit'] = $this->m_ladik->unitAmbil();
+            $data['title']="Verifikasi Penerimaan Layanan Pendidikan";
+            $this->template->load('template','ladik/realisasi_veri',$data);
+        }
+        
+		/**
+         * Generate html daftar penerimaan yang mau diverifikasi
+         */
+        
+        function realisasi_veri(){
+            
+            $this->auth->has_privileges('verify_pen_ladik');
+            
+            $unit=$this->input->post('unit');
+            $sub_unit=$this->input->post('sub_unit');
+            if ($sub_unit!='-1'){
+                $det_subunit=$this->m_umum->subunit_detail($sub_unit,$tipe=Constant::JR_ID);
+                if(isset($det_subunit->kode_sim_reg)){
+                    $sub_unit=$det_subunit->kode_sim_reg;
+                }else{
+                    $sub_unit=-1;
+                }
+            }
+            
+            $tahun=str_replace("-", "/", $this->input->post('tahun'));;
+            $semester=$this->input->post('semester'); 
+            
+            $tahun=str_replace("-", "/", $this->input->post('tahun'));;
+            $semester=$this->input->post('semester');
+            
+            
+            echo "<h2>Pendapatan layanan Pendidikan:</h2>";
+            
+            if($semester=='GENAP'){
+                $thn_anggaran=substr($tahun, 4, 4);
+            }else{
+                $thn_anggaran=substr($tahun, 0, 4);
+            }
+            if($unit!=='0' && $sub_unit!=='0'){
+                $banyak_bayar=$this->m_ladik->penNonVeri($unit,$sub_unit, $tahun, $semester,2);
+				//echo $this->db->last_query();
+            } else{
+                $banyak_bayar=0;
+            }
+			if($banyak_bayar>0){
+			     $total_bayar=$this->m_ladik->penNonVeri($unit,$sub_unit, $tahun, $semester,3);
+                echo "<h4>Sudah menerima pembayaran: ".$banyak_bayar." transaksi sebesar ".$this->uang->angka($total_bayar)." ( ".$this->uang->terbilang($total_bayar)." ) dengan rincian sebagai berikut:</h4> <input type=\"button\" onclick=\"javascript:checkAll('form_rekomendasi', true);\" value=\"Setujui Semua\" class=\"alt_btn\">";
+                //echo $this->db->last_query();
+				
+			$add_data=$this->m_ladik->penNonVeri($unit,$sub_unit, $tahun, $semester);
+            
+                echo "  <table id=\"tbl_display\">
+						<tr>
+                        	<th width=\"25\">No</th>
+                        	<th width=\"70\">Nim</th>
+							<th width=\"240\">Nama</th>
+                        	<th width=\"110\">Tanggal</th>
+                        	<th width=\"90\">Th. Ajaran</th>
+                            <th width=\"90\">Jenis Penerimaan</th>
+							<th width=\"100\">Jumlah</th>
+							<th width=\"70\">Verifikasi</th>
+                    	</tr>";
+			$no=1;
+			foreach($add_data as $row){
+                       echo "
+                           <tr>
+                                <td>$no</td>
+                                <td>".$row->nim."</td>
+								<td>".$row->nama."</td>
+								<td align=\"center\">".$row->tgl_bayar."</td>
+								<td align=\"center\">".$row->th_ajar." ".$row->semester."</td>
+                                <td>".$row->jenis_pen."</td>
+								<td align=\"right\">".$this->uang->angka($row->nilai)."</td>
+								<td align=\"center\"><input type=\"checkbox\" name=\"veri[$row->nim-_-$row->th_ajar-_-$row->semester-_-$row->jenis_pen]\" value=\"1\" /></td>
+                            </tr>
+                        "; 
+                        $no++;
+            }
+            }else {
+                echo "<h4>Tidak ada daftar pembayaran...</h4>";
+            }
+            //echo $this->db->last_query();   
+        }
+        
+        /**
+        * Fungsi untuk menyimpan status verivikasi penerimaan
+        */
+		function simpanVeriPen(){
+            
+            $this->auth->has_privileges('verify_pen_ladik');
+            
+            $id_pem_mhs=$this->input->post('veri');
+            if (!$id_pem_mhs){
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Tidak ada data yang diverifikasi.');
+                redirect('ladik/veriPen');
+                return false;
+            }
+            
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+            
+			foreach($id_pem_mhs as $key=>$value) {
+        		$objek=new stdClass();
+                //$row->nim-$row->th_ajar-$row->semester-$row->jenis_pen
+                $hasil=explode("-_-", $key);
+                
+				$objek->nim=$hasil[0];
+                $objek->th_ajar=$hasil[1];
+                $objek->semester=$hasil[2];
+                $objek->jenis_pen=$hasil[3];
+                
+				$objek->veri_pen=$value;
+				$this->m_ladik->saveVeriPen($objek);
+ 			}
+            
+            $this->db->trans_complete();
+            if($this->db->trans_status() === true){
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'Berhasil memverifikasi.');
+                redirect('ladik/veriPen');
+            } else {
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'GAGAL memverifikasi.');
+                redirect('ladik/veriPen');
+            }
+		}
+        
+        /**
+         * Ambil nama dari sub unit terpilih sesuai yg login
+         **/
+        function sub_unit_pilih(){
+                $id_sub_unit = $this->input->post('sub_unit');
+        		$sub_unit = $this->m_umum->nama_subunit($id_sub_unit);
+                    $select="<option selected=\"selected\" value=\"$id_sub_unit\">$sub_unit</option>"; //set value
+                echo $select;
+    	}
+        /**
+         * Menampilkan realisai penerimaan dan tunggakan
+         */
+        public function realisasi(){
+            $data['option_unit'] = $this->m_ladik->unitAmbil();
+            $data['title']="Daftar Penerimaan Layanan Pendidikan";
+            $this->template->load('template','ladik/realisasi',$data);
+	    }
+        /**
+         * Generate ringkasan pembayaran dan proporsinya jika ada.
+         */
+        function realisasi_bayar_ringkas(){
+            
+            $unit=$this->input->post('unit');
+            $det_subunit=$this->m_umum->subunit_detail($this->input->post('sub_unit'),$tipe=Constant::JR_ID);
+            if(isset($det_subunit->kode_sim_reg)){
+                $sub_unit=$det_subunit->kode_sim_reg;
+            }else{
+                $sub_unit=-1;
+            }
+            
+            $tahun=str_replace("-", "/", $this->input->post('tahun'));;
+            $semester=$this->input->post('semester');            
+            
+            echo "<h2>Pendapatan layanan Pendidikan:</h2>";            
+            
+            $banyak_bayar=$this->m_ladik->realisai_bayar_ambil('','','','','',$unit,$sub_unit, $tahun, $semester,'2');
+            if($banyak_bayar>0){
+                echo "<h4>Penerimaan sebanyak ".$banyak_bayar." transaksi sebesar ".$this->uang->angka($this->m_ladik->realisai_bayar_ambil('','','','','',$unit,$sub_unit, $tahun, $semester,'3'))."</h4>";
+                echo "<div><input type=\"button\" onclick=\"$('#bayar').toggle(400);\" value=\"Detail\"/></div>";
+            }else {
+                echo "<h4>Tidak ada daftar pembayaran...</h4>";
+            }
+            
+        }
+        /**
+         * Ambil data yang bayar untuk dimasukan grid
+         */
+        function realisasi_bayar_ambil(){
+            
+            $unit=$this->uri->segment(3);
+            $det_subunit=$this->m_umum->subunit_detail($this->uri->segment(4),$tipe=Constant::JR_ID);
+            if($det_subunit){
+               $sub_unit=$det_subunit->kode_sim_reg;
+            }else{
+               $sub_unit=-1;
+            }
+            
+            $tahun=str_replace("-", "/", $this->uri->segment(5));;
+            $semester=urldecode($this->uri->segment(6));
+                
+    		$page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+            $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+            $sidx = isset($_POST['sidx'])?$_POST['sidx']:'t_pen_mhs.nim'; // get index row - i.e. user click to sort
+            $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+     
+            $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+            $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+     
+            $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+            $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+            $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+            $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+            
+            $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+    
+    		if ($ssearch == 'true'){
+                $ops = array(
+                'eq'=>'=', //equal
+                'ne'=>'<>',//not equal
+                'lt'=>'<', //less than
+                'le'=>'<=',//less than or equal
+                'gt'=>'>', //greater than
+                'ge'=>'>=',//greater than or equal
+                'bw'=>'LIKE', //begins with
+                'bn'=>'NOT LIKE', //doesn't begin with
+                'in'=>'LIKE', //is in
+                'ni'=>'NOT LIKE', //is not in
+                'ew'=>'LIKE', //ends with
+                'en'=>'NOT LIKE', //doesn't end with
+                'cn'=>'LIKE', // contains
+                'nc'=>'NOT LIKE'  //doesn't contain
+                );
+     
+                foreach ($ops as $key=>$value){
+                    if ($searchOper==$key) {
+                        $ops = $value;
+                    }
+                }
+                if($searchOper == 'eq' ) $searchString = $searchString;
+                if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+                if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+                if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+     
+                $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+            }
+     
+            if(!$sidx) $sidx =1;
+            $count = $this->m_ladik->realisai_bayar_ambil($start,$limit,$sidx,$sord,$where,$unit,$sub_unit, $tahun, $semester,'2'); //get total rows from table daily
+    
+            if( $count > 0 ) {
+                $total_pages = ceil($count/$limit);    //calculating total number of pages
+            } else {
+                $total_pages = 0;
+            }
+     
+            if ($page > $total_pages) $page=$total_pages;
+            $query = $this->m_ladik->realisai_bayar_ambil($start,$limit,$sidx,$sord,$where,$unit,$sub_unit, $tahun, $semester,'1'); //add parameter to model
+            
+            $responce= new stdClass();
+            $responce->page = $page;
+            $responce->total = $total_pages;
+            $responce->records = $count;
+            $i=0;
+            foreach($query as $row) {
+                $responce->rows[$i]['id']=$row->nim."-".$row->th_ajar."-".$row->th_ajar.$row->semester."-".$row->jenis_pen;
+                $responce->rows[$i]['cell']=array($row->nim,$row->nama,$row->tgl_bayar,$row->th_ajar." ".$row->semester, $row->jenis_pen, $row->nilai);
+                $i++;
+            }
+            echo json_encode($responce);
+    	}
+
+        /**
+         * Generate ringkasan tunggakan
+         */
+        function realisasi_tunggakan_ringkas(){
+            $unit=$this->input->post('unit');
+            
+            $det_subunit=$this->m_umum->subunit_detail($this->input->post('sub_unit'),$tipe=Constant::JR_ID);
+            if(isset($det_subunit->kode_sim_reg)){
+                $sub_unit=$det_subunit->kode_sim_reg;
+            }else{
+                $sub_unit=-1;
+            }
+            
+            $tahun=str_replace("-", "/", $this->input->post('tahun'));;
+            $semester=$this->input->post('semester');
+            
+            $banyak_nunggak=$this->m_ladik->realisai_tunggakan_ambil('','','','','',$unit,$sub_unit, $tahun, $semester,'2');
+            
+            echo "<h2>Tunggakan Pembayaran dari Mahasiswa:</h2>";
+            if($banyak_nunggak>0){
+                echo "<h4>Tunggakan sebanyak ".$banyak_nunggak." sebesar ".$this->uang->angka($this->m_ladik->realisai_tunggakan_ambil('','','','','',$unit,$sub_unit, $tahun, $semester,'3'))."</h4>";
+                echo "<div><input type=\"button\" onclick=\"$('#tunggakan').toggle(400);\" value=\"Detail\"/></div>";  
+            }else{
+                echo("<h4>Tidak ada daftar tunggakan...</h4>");
+            }
+            
+        }
+        
+        /**
+         * Ambil data yang belum membayar untuk grid
+         */
+        function tunggakan_tampil_data(){
+            
+            $unit=$this->uri->segment(3);
+            $det_subunit=$this->m_umum->subunit_detail($this->uri->segment(4),$tipe=Constant::JR_ID);
+            if($det_subunit){
+               $sub_unit=$det_subunit->kode_sim_reg;
+            }else{
+               $sub_unit=-1;
+            }
+            
+            $tahun=str_replace("-", "/", $this->uri->segment(5));;
+            $semester=$this->uri->segment(6);
+            
+        	$page = isset($_POST['page'])?$_POST['page']:1; // get the requested page
+            $limit = isset($_POST['rows'])?$_POST['rows']:10; // get how many rows we want to have into the grid
+            $sidx = isset($_POST['sidx'])?$_POST['sidx']:'t_pen_mhs.nim'; // get index row - i.e. user click to sort
+            $sord = isset($_POST['sord'])?$_POST['sord']:''; // get the direction
+        
+            $start = $limit*$page-$limit; // do not put $limit*($page - 1)
+            $start = ($start<0)?0:$start;  // make sure that $start is not a negative value
+        
+            $where = ""; //if there is no search request sent by jqgrid, $where should be empty
+            $searchField = isset($_POST['searchField']) ? $_POST['searchField'] : false;
+            $searchOper = isset($_POST['searchOper']) ? $_POST['searchOper']: false;
+            $searchString = isset($_POST['searchString']) ? $_POST['searchString'] : false;
+            
+            $ssearch=isset($_POST['_search'])?$_POST['_search']:false;
+        
+        	if ($ssearch == 'true') {
+                $ops = array(
+                'eq'=>'=', //equal
+                'ne'=>'<>',//not equal
+                'lt'=>'<', //less than
+                'le'=>'<=',//less than or equal
+                'gt'=>'>', //greater than
+                'ge'=>'>=',//greater than or equal
+                'bw'=>'LIKE', //begins with
+                'bn'=>'NOT LIKE', //doesn't begin with
+                'in'=>'LIKE', //is in
+                'ni'=>'NOT LIKE', //is not in
+                'ew'=>'LIKE', //ends with
+                'en'=>'NOT LIKE', //doesn't end with
+                'cn'=>'LIKE', // contains
+                'nc'=>'NOT LIKE'  //doesn't contain
+                );
+        
+                foreach ($ops as $key=>$value){
+                    if ($searchOper==$key) {
+                        $ops = $value;
+                    }
+                }
+                if($searchOper == 'eq' ) $searchString = $searchString;
+                if($searchOper == 'bw' || $searchOper == 'bn') $searchString .= '%';
+                if($searchOper == 'ew' || $searchOper == 'en' ) $searchString = '%'.$searchString;
+                if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') $searchString = '%'.$searchString.'%';
+        
+                $where = "$searchField $ops '$searchString' "; //create where parameter for search data
+            }
+        
+            if(!$sidx) $sidx =1;
+            $count = $this->m_ladik->realisai_tunggakan_ambil($start,$limit,$sidx,$sord,$where,$unit,$sub_unit,$tahun, $semester,'2'); //get total rows from table daily
+        
+            if( $count > 0 ) {
+                $total_pages = ceil($count/$limit);    //calculating total number of pages
+            } else {
+                $total_pages = 0;
+            }
+        
+            if ($page > $total_pages) $page=$total_pages;
+            $query = $this->m_ladik->realisai_tunggakan_ambil($start,$limit,$sidx,$sord,$where,$unit,$sub_unit,$tahun, $semester,'1'); //add parameter to model
+            
+            $responce= new stdClass();
+            $responce->page = $page;
+            $responce->total = $total_pages;
+            $responce->records = $count;
+            $i=0;
+            foreach($query as $row) {
+                $responce->rows[$i]['id']=$row->nim.'-'.$row->th_ajar.$row->semester.'-'.$row->jenis_pen;
+                $responce->rows[$i]['cell']=array($row->nim,$row->nama, $row->th_ajar." ".$row->semester, $row->jenis_pen, $row->nilai);
+                $i++;
+            }
+            echo json_encode($responce);
+            
+             
+        }
+        /**
+         * Cetak realisai penerimaan dan tunggakan --BELUM--
+         */
+        function realisasi_cetak(){
+            
+            $unit=$this->uri->segment(3);
+            $det_subunit=$this->m_umum->subunit_detail($this->uri->segment(4),$tipe=Constant::JR_ID);
+            if(isset($det_subunit->kode_sim_reg)){
+                $sub_unit=$det_subunit->kode_sim_reg;
+            }else{
+                $sub_unit=-1;
+            }
+            
+            $tahun=str_replace("-", "/", $this->uri->segment(5));;
+            $semester=$this->uri->segment(6);
+            
+            $data['bayar_banyak']=$this->m_ladik->realisai_bayar_ambil('','','t_pen_mhs.nim','asc','',$unit,$sub_unit, $tahun, $semester,'2');
+            //echo $this->db->last_query();
+            $data['bayar_jumlah']=$this->m_ladik->realisai_bayar_ambil('','','t_pen_mhs.nim','asc','',$unit,$sub_unit, $tahun, $semester,'3');
+            $data['bayar']=$this->m_ladik->realisai_bayar_ambil('','','t_pen_mhs.nim','asc','',$unit,$sub_unit, $tahun, $semester,'1');
+            $data['tunggakan_banyak']=$this->m_ladik->realisai_tunggakan_ambil('','','t_pen_mhs.nim','asc','',$unit,$sub_unit,$tahun, $semester,'2');
+            $data['tunggakan_jumlah']=$this->m_ladik->realisai_tunggakan_ambil('','','t_pen_mhs.nim','asc','',$unit,$sub_unit,$tahun, $semester,'3');
+            $data['tunggakan']=$this->m_ladik->realisai_tunggakan_ambil('','','t_pen_mhs.nim','asc','',$unit,$sub_unit,$tahun, $semester,'1');
+            
+            //var_dump($data);
+            if (isset ($unit)&&$unit!=''){
+                $nama_fakultas=$unit;
+            }else{
+                $nama_fakultas=-1;
+            }
+            
+            if (isset ($sub_unit)){
+                $nama_jurusan=$sub_unit;
+            }else{
+                $nama_jurusan=-1;
+            }
+            
+            $data['nama_fakultas']=$nama_fakultas;
+            $data['nama_jurusan']=$nama_jurusan;
+            
+  
+            $data['tahun'] =$tahun;
+            $data['semester']=$semester;
+            
+            $this->load->library('3rd/pdf2');
+            $html = $this->load->view('ladik/realisasi_cetak_isi', $data, true);
+            $this->pdf2->pdf_create($html, 'Pen_'.$nama_fakultas.'_'.$nama_jurusan.'_'.$tahun.'_'.$semester,'P','A4');
+        }
+         
+        function inputBKM()
+        {
+            $this->auth->has_privileges('create_bukti_akuntansi');
+            
+            $data['penerima']=$this->m_ladik->ambilUnitBKM();
+            $data['isBKM']=true;
+            $data['title']="Input Bukti Kas Masuk";
+            $this->template->load('template','ladik/daftar',$data);
+        }
+        
+        function inputBM(){
+            
+            $this->auth->has_privileges('create_bukti_akuntansi');
+            
+            $data['penerima']=$this->m_ladik->ambilUnitBM();
+            $data['isBM']=true;
+            $data['title']="Input Bukti Memorial";
+            $this->template->load('template','ladik/daftar',$data);
+        }
+         
+        
+        function dispro(){
+            $this->auth->has_privileges('distribusi_proporsi');
+            
+			$data['unit'] = $this->m_ladik->getunitList();
+            //echo $this->db->last_query();
+            $data['title']="Distribusi Proporsi Penerimaan";
+			$this->template->load('template','ladik/distribusi_proporsi', $data);
+        }
+		function daftar_distribusi(){
+            
+            $this->auth->has_privileges('distribusi_proporsi');
+            
+            //$this->output->enable_profiler(true);
+			$id_unit = $this->input->post('id_unit');
+			$data['id_unit_bro'] = $this->input->post('id_unit');
+			
+            $data['data_proporsi'] = $this->m_ladik->proporsi($id_unit);
+			//echo $this->db->last_query();
+            $data['banyak_pro'] = $this->m_ladik->cek_proporsi($id_unit);
+            //FIXME: banyak pro dihitung dari tabel proporsi sesuai subunit asal, jika sudah pernah di proporsi, tidak akan bisa masuk lagi walaupun ada bkm baru
+			$this->load->view('ladik/list_disribusi', $data);
+        }
+		function simpan_proporsi(){
+            
+            $this->auth->has_privileges('distribusi_proporsi');
+            
+			$id_unit = $this->input->post('id_unit');
+			
+			$month = date('m');
+			$tahun = date('Y');
+			if($month <7){
+				$semester = 1;
+			}else{
+				$semester = 2;
+			}
+			$hasil = $this->m_ladik->simpan_proporsi($tahun,$semester,$id_unit);
+            //$this->output->enable_profiler(true);
+            
+            if ($hasil){
+                $this->session->set_userdata('msg_typ','ok');
+                $this->session->set_userdata('msg', 'Berhasil menyimpan Proporsi.');
+                redirect('ladik/dispro');
+            }else{
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'GAGAL menyimpan Proporsi.');
+                redirect('ladik/dispro');
+            }
+            
+        }
+		function rekap_pagu(){
+			$this->auth->has_privileges('rekap_pagu');
+			$month = date('m');
+			if($month <7){
+				$semester = 1;
+			}else{
+				$semester = 2;
+			}
+			$data['pagu_real'] = $this->m_ladik->preview_pagu_real($semester);
+			//echo $this->db->last_query();
+            $data['title']="Rekap Pagu";
+			$this->template->load('template','ladik/preview_pagu_real', $data);
+        }
+		function simpan_pagu_real(){
+            $this->auth->has_privileges('rekap_pagu');
+            $subunit = $this->m_ladik->ambil_id_sub();
+            //echo $this->db->last_query();
+            foreach($subunit->result_array() as $row){
+                $id_subunit = $row['id_subunit'];   
+                $this->m_ladik->delete_pagu_real($id_subunit);
+            }    
+			$this->m_ladik->rekap_pagu();
+			
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil menyimpan pagu.');
+            redirect('ladik/rekap_pagu');
+        }
+        
+        
+        function kampret(){
+            print_r($this->m_ladik->ambilBKMperUnit(8));
+            echo $this->db->last_query();
+         }
+         
+    }
+?>

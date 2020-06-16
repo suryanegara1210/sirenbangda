@@ -1,0 +1,80 @@
+<script type="text/javascript">
+	$( function () {
+	    //proses disable jns kwitansi berdasarkan GUP, TUP, LS
+		var arCombo_create = new Array (
+			$("#jenis_belanja"), $("#jns_kwitansi")
+		);
+
+		//set event change
+		$("#jenis_belanja").change( function() {
+			var postData = { jns_belanja: $("#jenis_belanja").val() };
+			populate_combo(arCombo_create, 0, "<?php echo site_url('common/get_jns_kwitansi')?>", postData);
+			$("#jenis_kwitansi").empty();
+		});
+
+		$("#jenis_belanja").trigger("change");
+
+		$("#jns_kwitansi").change(function(){
+		  var jeniskw = $("#jns_kwitansi").val();
+		  var jenisblj= $("#jenis_belanja").val();
+
+		  $('#jenis_kwitansi').html(loader());
+		  
+		  $.ajax({
+			  type: "POST",
+			  url : "<?php echo site_url('kwitansi/get_view_jenis_kwitansi')?>",
+			  data: { jns_kwitansi: jeniskw,
+					  jns_belanja: jenisblj 
+					},
+			  success: function(data){
+					catch_expired_session2(data);
+
+			  		$('#jenis_kwitansi').html(data);				  
+			  }
+		  });
+		});
+	});
+</script>
+
+
+
+<article class="module width_full">
+<header>
+<h3>Buat Kwitansi Baru</h3>
+</header>
+ <div class="module_content">
+
+<table border='0' width='100%' >
+  <tr>
+    <td width="197">Sifat Pembayaran</td>
+    <td width="7" >&nbsp;:</td>
+    <td width="702" colspan="4">
+      <select name="jenis_belanja" id="jenis_belanja"  >
+        <option value="">Pilih sifat bayar ...</option>
+		<?php
+			foreach($sifat_bayar as $row){
+				echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+			}
+		?>
+      </select></td>
+  </tr>
+<tr>
+    <td >Jenis Kwitansi</td>
+    <td >&nbsp;:</td>
+    <td colspan="4">
+      <select name="jns_kwitansi" id="jns_kwitansi">
+        <option value=""></option>
+    </select></td>
+  </tr>
+</table>
+   <div id="jenis_kwitansi">
+  </div>
+
+</article>
+
+
+
+<style type="text/css">
+.col_akhir {	width:50px;
+}
+</style>

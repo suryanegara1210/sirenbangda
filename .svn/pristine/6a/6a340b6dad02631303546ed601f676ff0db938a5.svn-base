@@ -1,0 +1,57 @@
+	    <article class="module width_full">
+    		<header><h3>
+            <?php
+                if(isset($is_add_ss) && $is_add_ss){
+                    echo "Input Surat Setoran MOU";
+                }
+                if(isset($is_add_bkm)&& $is_add_bkm){
+                    echo "Input Bukti kas Masuk";
+                }
+                if (!isset($is_add_bkm) && !isset($is_add_ss)){
+                    echo "Daftar Ringkasan MOU";
+                }
+            ?>
+            
+            </h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table class="table-common" style="width: 90%;">
+                    <tr>
+                        <th>No MOU</th>
+                        <th>Tanggal MOU</th>
+                        <th>Nama Unit Usaha</th>
+                        <th>Deskripsi Unit Usaha</th>
+                        <th>Nilai Unit Usaha</th>
+                        <th colspan="2" >Aksi</th>
+                    </tr>
+                    
+                    <?php
+                    if (!$resume_mou){
+                        echo "<tr><td colspan=\"8\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        foreach($resume_mou as $mou){
+                            echo "
+                                <tr>
+                                    <td>$mou->no_mou</td>
+									<td>$mou->tgl_mou</td>
+									<td>$mou->nm_unit_usaha</td>
+									<td>$mou->desk_unit_usaha</td>
+                                    <td>".$this->uang->angka($mou->nilai_unit_usaha)."</td>
+                            ";
+                            if(isset($is_add_ss) && $is_add_ss){
+                                echo "<td><a title=\"Input Surat Setor\" href=".site_url('surat_setor/input/'.$mou->th_mou."/".$mou->id_mou)."/6><img src=\"".base_url()."asset/images/add.png\"/></a></td>";
+                            }
+                            if(isset($is_add_bkm)&& $is_add_bkm){
+                                echo "<td><a title=\"Input Bukti Kas Masuk\" href=".site_url('bkm/input/'.$mou->th_mou."/".$mou->id_mou)."/6><img src=\"".base_url()."asset/images/add.png\"/></a></td>";
+                            }
+                            echo "<td><a title=\"Detail MOU\" href=".site_url('unit_usaha/mou_detail/'.$mou->th_mou."/".$mou->id_mou)."><img src=\"".base_url()."asset/images/detail.png\"/></a></td>";
+                            echo "</tr>";
+                        }
+                    }
+                    ?>
+                </table>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->

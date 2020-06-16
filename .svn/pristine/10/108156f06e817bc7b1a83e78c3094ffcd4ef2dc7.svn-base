@@ -1,0 +1,59 @@
+	    <article class="module width_full">
+    		<header><h3>Setting Tahun Aktif</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+
+                <table id="thn_aktif"></table>
+                <div id="pager_thn_aktif"></div>
+
+            </div>
+        </article>
+        <script>
+            var aktif="1:Aktif; 2:Tidak Aktif";
+                jQuery("#thn_aktif").jqGrid({
+                    url:'<?php echo site_url('setting/thn_aktif_ambil'); ?>',
+                    mtype : "POST",
+                    datatype: "json",
+                    colNames:['Tahun','Th Ajaran','Mulai Bayar', 'Terakhir Bayar','Aktif', 'Edit'],
+                    colModel:[
+                        {name:'tahun',index:'tahun', width:150,align:"left", editable:true,editrules:{required:true}, align:"center", searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'th_ajaran',index:'th_ajaran',  width:150,editable:true,editrules:{required:true}, align:"center", searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'mulai_bayar',index:'kode_pen', width:275, align:"left",editable:true, editoptions:{dataInit:function(el){ $(el).datepicker({dateFormat:'yy-mm-dd'}) } }, editrules:{required:true} , align:"center", searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'akhir_bayar',index:'biaya', width:275, editable:true, editrules:{required:true}, align:"center", editable:true, editoptions:{dataInit:function(el){ $(el).datepicker({dateFormat:'yy-mm-dd'}) } }, searchoptions: { sopt: ['eq', 'ne', 'cn']}},
+                        {name:'aktif',index:'aktif', width:320,align:"left", editable: true, formatter: 'select', edittype: 'select', editoptions: { value: aktif}, stype: 'select', searchoptions: { sopt: ['eq'], value: aktif}},
+                        {name: 'myac', width:60, fixed:true, sortable:false, search:false, align:'center', resizable: false, resize:false, formatter:'actions',
+						formatoptions:{
+						keys:true,editbutton: true, delbutton: true, //Key True disini adalah untuk Shorcut Tombol Enter dan Esc, Enter untuk Save, dan Escape Untuk Batal, anda juga Membuatnya jadi False jika anda tidak ingin seperti itu
+						//Saya menghapus baris di bawah ini
+														/*onSuccess:function(jqXHR) {
+															alert(jqXHR.responseText);
+															return true;
+														}*/
+						}}
+                    ], 
+                    rowNum:30,
+                    width: 900,
+                    height: 350,
+                    rowList:[10,20,30,40,50,60,70],
+                    autowidth: true,
+                    rownumbers: true,
+                    pager: '#pager_thn_aktif',
+                    sortname: 'tahun',
+                    viewrecords: true,
+					sortorder: "asc",
+					multiselect: false,
+                    editurl: "<?php echo site_url('setting/thn_aktif_crud'); ?>",
+                    caption:"",
+                    stringResult:true
+                }).navGrid('#pager_thn_aktif',{edit:true,add:true,del:true},
+                {closeAfterEdit:true},//edit
+                {closeAfterAdd:true},//add
+                {},//del
+                {closeAfterSearch:true, multipleSearch: true}//search
+                );
+                jQuery("#thn_aktif").jqGrid('filterToolbar', {stringResult: true, searchOnEnter: false, defaultSearch : "cn"});
+            
+            datePick = function(elem) {
+               jQuery(elem).datepicker({dateFormat: 'yy-mm-dd'});
+            }
+        </script>

@@ -1,0 +1,46 @@
+<script language="javascript">
+  function validasi(form){
+     
+  if (form.maksimum.value == ""){
+    alert("Anda belum mengisikan Nilai maksimum.");
+    form.maksimum.focus();
+    return (false);
+  }      
+  return (true);
+}
+</script>
+<article class="module width_full">
+    <header><h3>Form Pengisian Maksimum UP</h3></header>
+                    
+    <div class="module_content">     
+    <form method="post" name='form' action="<?php echo base_url();?>unit/simpan_maks" onSubmit='return validasi(this)'>
+    <table border='0' width='730' style="padding-left: 20px; padding-top: 20px;"> 
+    <?php foreach($subunit->result_array() as $row){
+           $nama_subunit = $row['nama_subunit'];
+           $id_subunit = $row['id_subunit'];
+    }?>
+    <?php foreach($maks_up->result_array() as $row2){
+           $nilai_max = $row2['nilai_max']; 
+    }
+      if(isset($nilai_max)){
+          $nilai_max = $nilai_max; 
+      }else{
+          $nilai_max = 0; 
+      } 
+    ?>
+                     
+    <input type='hidden' name='id_subunit' value='<?php echo"$id_subunit";?>'>          
+    <tr><td>Nama Subunit</td><td >:</td><td><input name='nama_subunit' type='text' value='<?php echo"$nama_subunit";?>' size=80 disabled></td></tr>
+    <tr><td>Maksimum UP (Rp.)</td><td >:</td><td><input name='maksimum' type='text' value='' size=80 placeholder="<?php echo"$nilai_max";?>"></td></tr>
+        
+    </table>      
+    </div>                                                                              
+    <footer>
+                
+    <div class="submit_link">  
+        <input type='submit' value='Simpan'> 
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+       </form>   
+</article>  

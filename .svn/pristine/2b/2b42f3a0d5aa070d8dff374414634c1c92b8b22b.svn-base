@@ -1,0 +1,26 @@
+<?php echo form_dropdown("id_header3",$option_header2,'',"id='id_header3' style='width:450px;'"); ?>
+
+<script type="text/javascript">
+          $("#id_header3").change(function(){
+                var selectValues = $("#id_header3").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_akun\" disabled><option value=\"Pilih Komponen\">Pilih Komponen Dahulu</option></select>";
+                    $('#kode_bas3').html(msg);
+                }else{
+                    var kdoutput = $("#kdoutput3").val();
+                    var kdakun = $("#kdakun3").val();
+					
+					var dataString  = 'kdoutput='+ kdoutput + '&kdakun=' + kdakun;	
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_bas3')?>",
+                            data: dataString,
+                            success: function(msg){
+                                $('#kode_bas3').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>  
+
+

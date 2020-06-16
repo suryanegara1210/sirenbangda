@@ -1,0 +1,13 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-02-18 13:50:18 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\pok\list_dipa.php 60
+ERROR - 2014-02-18 13:53:58 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\pok\list_dipa.php 60
+ERROR - 2014-02-18 14:43:46 --> 404 Page Not Found --> asset
+ERROR - 2014-02-18 14:43:48 --> 404 Page Not Found --> asset
+ERROR - 2014-02-18 14:44:30 --> 404 Page Not Found --> usulan/daftar_usulan
+ERROR - 2014-02-18 23:27:09 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): A connection attempt failed because the connected party did not properly respond after a period of time or established connection failed because connected host has failed to respond.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-02-18 23:27:09 --> Unable to connect to the database
+ERROR - 2014-02-18 23:27:49 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): A connection attempt failed because the connected party did not properly respond after a period of time or established connection failed because connected host has failed to respond.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2014-02-18 23:27:49 --> Unable to connect to the database

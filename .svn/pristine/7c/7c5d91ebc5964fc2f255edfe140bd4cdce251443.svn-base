@@ -1,0 +1,50 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 156
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 156
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:09:01 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 156
+ERROR - 2013-07-10 19:15:46 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '. id_sptb, a.no_sptb, z.id_subunit, z.id_unit, z.sifat_bayar,
+						SUM(z.nomin' at line 2
+ERROR - 2013-07-10 19:16:22 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '. id_sptb, a.no_sptb, z.id_subunit, z.id_unit, z.sifat_bayar,
+						SUM(z.nomin' at line 2
+ERROR - 2013-07-10 19:16:41 --> Query error: Column 'status_sptb' in field list is ambiguous
+ERROR - 2013-07-10 19:16:49 --> Query error: Column 'status_sptb' in field list is ambiguous
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 154
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 154
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:18:18 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 154
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$status_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 154
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 154
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$tgl_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 150
+ERROR - 2013-07-10 19:19:28 --> Severity: Notice  --> Undefined property: stdClass::$id_status_sptb C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 154
+ERROR - 2013-07-10 19:22:09 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:22:09 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:22:09 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:22:09 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63
+ERROR - 2013-07-10 19:22:09 --> Severity: Notice  --> Undefined property: stdClass::$status C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 62
+ERROR - 2013-07-10 19:22:09 --> Severity: Notice  --> Undefined property: stdClass::$id_spj C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 63

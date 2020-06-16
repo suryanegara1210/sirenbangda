@@ -1,0 +1,40 @@
+<article class="module width_full">
+            <header><h3>Daftar Rincian Tambahan Uang Persediaan (TUP) Unit</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/tup/verifikasi" onSubmit='return validasi(this)'> 
+            <table  class="table-common" style="margin-left: 20px; width: 280px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama Subunit</th> 
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+             
+              
+              
+            $no = 1; 
+            $kegu=0;
+              foreach($daftar_unit as $unit){
+                  $group_unit = $unit["group_unit"];
+                  $kode_unit = $unit["kode_unit"];
+            ?>
+             
+              <tr>
+                <td align='center'><?php echo "$no";?></td> 
+                <td align="left"> <?php echo "$group_unit";?> </td> 
+            </tr>
+              
+            <?php $no++; }    
+            ?>     
+</table>   
+</div>
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+

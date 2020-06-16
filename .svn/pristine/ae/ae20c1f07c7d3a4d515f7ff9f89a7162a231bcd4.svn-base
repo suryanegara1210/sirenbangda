@@ -1,0 +1,55 @@
+<?php echo form_dropdown("kdkomponen", $option_komponen,'',"id='kdkomponen' style='width:450px;' "); ?> 
+
+	<script type="text/javascript">
+		  
+          $("#kdkomponen").change(function(){
+                var selectValues = $("#kdkomponen").val();
+				var count = '';
+                if (selectValues == 0){
+                    var msg = "<select name=\"kdkomponen\" disabled><option value=\"Pilih Komponen\">Pilih komponen Dahulu</option></select>";
+                    $('#akun').html(msg);
+                }else{
+                    var kdoutput = $("#kdoutput").val();
+                    var jns_kwitansi = $("#jns_kwitansi").val();
+                    var kdkomponen = $("#kdkomponen").val();						
+					var dataString  = 'kdoutput='+ kdoutput + '&jns_kwitansi=' + jns_kwitansi + '&kdkomponen=' + kdkomponen;	
+                    $('#id_akun').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('ls/select_countsubkomponen_kontrak')?>",
+                            data: dataString,
+                            success: function(msg){
+                               count = msg;	
+							   var A = '';
+							   var B = '';
+							   //alert(count);
+							   if(count==0){ 
+							   $('#val').val(0);
+								   A = "<?php echo site_url('ls/select_akun_kontrak')?>";
+								   B = '#akun';
+								   $('#kdskomponen').val(0);  
+								   $('#kdskomponen').attr("disabled",true);
+								   //document.getElementById('#subkomponen').style.display="none";
+							   }else{
+								   $('#val').val(1);
+								   $('#kdakun').val(0);
+								   $('#id_header').val(0);    
+								   A = "<?php echo site_url('ls/select_subkomponen_kontrak')?>";
+								   B = '#subkomponen';
+							   }
+							   		$.ajax({
+										type: "POST",
+										url : A,
+										data: dataString,
+										success: function(msg){
+											$(B).html(msg);
+										}
+									});
+                            }
+                      });
+					
+                }
+				
+				
+        });
+       </script>

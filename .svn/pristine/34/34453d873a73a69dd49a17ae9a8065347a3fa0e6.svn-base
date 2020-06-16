@@ -1,0 +1,8 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-01-17 16:43:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 45
+ERROR - 2014-01-17 16:43:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 66
+ERROR - 2014-01-17 16:43:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 70
+ERROR - 2014-01-17 16:43:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 74
+ERROR - 2014-01-17 16:43:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 78
+ERROR - 2014-01-17 16:43:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 78

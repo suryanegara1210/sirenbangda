@@ -1,0 +1,58 @@
+<?php
+
+class rbac_permission extends CI_Controller {
+    
+    
+    function rbac_permission(){
+        parent::__construct();
+    }
+    
+    function index(){
+        $sql = "SELECT * FROM rbac_permissions";
+        $sql_query = $this->db->query($sql);
+        $data['results'] = $sql_query->result();
+        
+        $this->template->load('rbac/rbac_index', 'rbac/rbac_permission_home',$data);
+    }
+    
+    function edit($perm_id){
+        $sql = "SELECT * FROM rbac_permissions WHERE perm_id=".$perm_id;
+        $sql_result = $this->db->query($sql);
+        $data['results'] = $sql_result->result();
+        
+        $this->template->load('rbac/rbac_index', 'rbac/edit_permissions',$data);
+    }
+    
+    function saveEdit(){
+        $perm_id = $this->input->post('perm_id',false);
+        $perm_desc = $this->input->post('perm_desc',false);
+        $perm_detail = $this->input->post('perm_detail',false);
+        $id_menu = $this->input->post('id_menu',false);
+        $sql = "UPDATE rbac_permissions SET perm_desc='$perm_desc',perm_detail='$perm_detail',id_menu=NULLIF('$id_menu','') WHERE perm_id='".$perm_id."'";
+        $this->db->query($sql);
+        redirect('rbac/rbac_permission');
+    }
+    
+    function delete($perm_id){
+        $sql = "DELETE FROM rbac_permissions WHERE perm_id='$perm_id'";
+        $this->db->query($sql);
+        redirect('rbac/rbac_permission');
+    }
+    
+    function addPerms(){
+        $this->template->load('rbac/rbac_index', 'rbac/add_permissions');
+    }
+    
+    function addPermProcess(){
+        $perm_desc = $this->input->post('perm_desc',false);
+        $perm_detail = $this->input->post('perm_detail',false);
+        $id_menu = $this->input->post('id_menu',false);
+        //$sql = "INSERT INTO rbac_permissions (perm_desc,perm_detail,id_menu) VALUE ('$perm_desc','$perm_detail',NULLIF('$id_menu',''))";
+        $sql = "INSERT INTO rbac_permissions (perm_name,perm_desc,id_menu) VALUE ('$perm_desc','$perm_detail',NULLIF('$id_menu',''))";
+        $this->db->query($sql);
+        redirect('rbac/rbac_permission');
+    }
+}
+
+
+?>

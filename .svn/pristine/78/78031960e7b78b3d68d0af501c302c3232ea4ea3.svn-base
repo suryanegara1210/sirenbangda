@@ -1,0 +1,4 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-08-16 13:53:41 --> Query error: Unknown column 'active' in 'where clause'
+ERROR - 2013-08-16 13:55:13 --> Query error: Unknown column 'active' in 'where clause'

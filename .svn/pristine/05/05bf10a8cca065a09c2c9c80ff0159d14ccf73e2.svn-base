@@ -1,0 +1,102 @@
+<style>
+.drop_down
+{
+	width:500px;	
+}
+</style>
+<article class="module width_full">
+<header>
+
+<h3>buat sptb</h3>
+</header>
+
+<form method="post" name='form_spp' action="<?php echo site_url();?>c_sptb_gu/simpan_sptb" onSubmit='return validasi(this)'> 
+<table width="100" border="0"   id="hasil" style="margin-left: 40px; margin-top:20px; width: 780px;">
+  <tr>
+    <td width="19%">Kode Output</td>
+    <td width="1%">:</td>
+    <td width="71%"><?php echo form_dropdown("kdoutput",$output,"","id='kdoutput' style='width:450px;'") ?></td>
+    </tr>
+  <tr>
+    <td>Kode Akun</td>
+    <td>:</td>
+    <td><div id="akun"><?php echo form_dropdown("akun",array('Pilih Akun'=>'Pilih Output Dahulu'),'',' style= "width:450px;" disabled');?></div></td>
+  </tr>
+  <tr>
+    <td>Bulan</td>
+    <td>:</td>
+    <td><select name="bulan" id="bulan">
+      <option>- Pilih Bulan -</option>
+      <option value="01">Januari</option>
+      <option value="02">Februari</option>
+      <option value="03">Maret</option>
+      <option value="04">April</option>
+      <option value="05">Mei</option>
+      <option value="06">Juni</option>
+      <option value="07">Juli</option>
+      <option value="08">Agustus</option>
+      <option value="09">September</option>
+      <option value="10">Oktober</option>
+      <option value="11">November</option>
+      <option value="12">Desember</option>
+    </select></td>
+  </tr>
+<script type="text/javascript">
+		/*===DROPDOWN UNTUK KODE1===*/
+				  $("#bulan").change(function(){
+							var bulan = {bulan:$("#bulan").val()};
+							var kode1 = $("#kode1").val();
+							
+							
+							
+								$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('c_sptb_gu/view_buat_sptb_gu')?>",
+									data: {
+												kdoutput: $("#kdoutput").val(),
+												id_akun: $("#id_akun").val(),
+												bulan: $("#bulan").val()
+											},
+									success: function(msg){
+										$('#sptb').html(msg);
+									}
+							  });
+							
+							
+						
+				});
+		
+</script>
+<script type="text/javascript">
+          $("#kdoutput").change(function(){
+                var selectValues = $("#kdoutput").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen').html(msg);
+                }else{
+                    var kdoutput = {kdoutput:$("#kdoutput").val()};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('c_sptb_gu/select_akun')?>",
+                            data: kdoutput,
+                            success: function(msg){
+                                $('#akun').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>
+  
+  
+</table>
+
+<div class="module_content">
+  <div id="sub-content">
+  <div id="sptb">
+  </div>
+  </div>
+
+</div>
+</form>
+

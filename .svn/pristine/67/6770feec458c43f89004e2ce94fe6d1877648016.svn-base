@@ -1,0 +1,57 @@
+<article class="module width_full">
+    <header><h3>Setting Akun Unit</h3></header>
+        <div class="module_content">
+            <div id="dbulan" style="margin-right: 10px; float:left; ">
+                Sub Unit<br/>
+                <?php echo form_dropdown("subunit",$subunit,"","id='subunit'"); ?>
+            </div>
+            
+            <div id="dmax" style="margin-right: 10px; float:left; ">
+                Level<br/>
+                <?php
+                    $level=array();
+                    $level['']='Semua';
+                    for($i=0;$i<=8;$i++){
+                        $level[$i]=$i;
+                    }
+                 echo form_dropdown("level",$level,"","id='level'"); ?>
+            </div>
+            <div id="dkel" style="margin-right: 10px; float:left; ">
+                Kelompok<br/>
+                <?php
+                    $kel=array();
+                    $kel['']='Semua';
+                    for($i=1;$i<=9;$i++){
+                        $kel[$i]=$i;
+                    }
+                 echo form_dropdown("kelompok",$kel,"","id='kelompok'"); ?>
+            </div>
+            
+            <div id="dtampil">
+                Tampilkan:<br/>
+                <input type="button" id="tampil" value="Tampilkan" onclick="ambildata()" />
+            </div>
+            <br /><br />
+            <div id="daftar" style="display:block"></div>
+            
+        </div>
+</article>
+
+
+
+<script type="text/javascript">
+    function ambildata(){
+        var subunit= $("#subunit").val();
+        var level= $("#level").val();
+        var kelompok= $("#kelompok").val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo site_url('setting/bas_unit_add_ambil'); ?>",
+                data: { subunit: subunit, level:level, kelompok:kelompok },
+                success: function(msg){
+                        $('#daftar').html('');
+                        $('#daftar').html(msg);
+                }
+        });
+    }
+</script>

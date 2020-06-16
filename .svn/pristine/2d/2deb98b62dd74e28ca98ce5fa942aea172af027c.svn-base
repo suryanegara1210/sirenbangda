@@ -1,0 +1,76 @@
+  <script language="javascript">
+  function validasi(form){
+  
+  if (form.status.value == "setuju_verifikasi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  }
+  if (form.status.value == "terotorisasi_kaprodi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  } 
+  return (true);
+  }
+  </script>
+
+<article class="module width_full">
+            <header>
+              <h3>Daftar SPP GUP (Ganti Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>  
+                <th>Nomor SPP</th>  
+                <th>Jumlah Rp.</th>
+                <th>Status SPP</th>
+                <th colspan="2">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no = 1; 
+            foreach($daftar_spp->result_array() as $row)
+            {  
+            $id=$row['id_spp'];
+            $th=$row['th_spp'];
+            $no_spp=$row['no_spp'];
+            //$nomor=$row['nomor_spp']; 
+            $nama_unit=$row['nama_unit'];
+            $status=$row['status_spp'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");    
+            ?>
+              <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>"> 
+              <input type="hidden" name="status" value="<?php echo "$status"; ?>"> 
+              <tr>
+                <td align='center'><?php echo $no;?></td>
+                <td align="center"><?php echo "$nama_unit";?></td> 
+                <td align="center"><?php echo "$no_spp";?></td> 
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center"><?php echo"$status";?></td>
+                <?php if($status =="terotorisasi ppk"){?>
+                <td align="center"> <a href='<?php echo base_url()."gup/preview_spp/".$th."/".$id;?>' title='Preview SPP' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."gup/pengisian_spm/".$th."/".$id;?>' title='Buat SPM' onclick="return confirm('Apakah Anda Yakin untuk Membuat SPM ... ?')" ><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                <?php }else {?>
+                <td align="center"> <a href='<?php echo base_url()."gup/preview_spp/".$th."/".$id;?>' title='Preview SPP' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='#' title='Buat SPM' onclick="return alert('Maaf SPP ini belum terotorisasi PPK atau sudah dibuatkan SPM')"><img src='<?php echo base_url();?>asset/images/like.png'></a></td>
+                <?php }?>
+                </tr>
+              
+            <?php $no++ ;}    
+            ?>         
+            
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer>
+</article> 

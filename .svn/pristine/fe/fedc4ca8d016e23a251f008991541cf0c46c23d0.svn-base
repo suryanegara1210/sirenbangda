@@ -1,0 +1,26 @@
+<article class="module width_full">
+	<header><h3>Daftar Bukti Akuntansi</h3></header>
+    <div class="module_content">
+        <!-- page content -->
+        <center>
+            <div id="hasil"></div>
+            <div id="jenis"></div>
+        </center>
+    </div>
+</article>
+<!-- end of styles article -->
+
+<script>
+    
+function jenis_ambil(id_jenis){
+    $.ajax({
+        url : "<?php echo site_url('report/aruskas_jenis_ambil')?>",
+        success: function(msg){
+            $('#jenis').html(msg);
+        }
+    });
+}
+$(document).ready(function() {
+    jenis_ambil();
+});
+</script>

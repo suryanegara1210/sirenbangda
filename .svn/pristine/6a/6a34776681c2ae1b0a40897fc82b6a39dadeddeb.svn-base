@@ -1,0 +1,43 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+	class Usulan_tak_terakomodir extends CI_Controller {
+		
+		var $CI = NULL;
+		public function __construct(){
+			$this->CI =& get_instance();
+			parent::__construct();
+			$this->load->model(array('m_usulan_tak_terakomodir','m_skpd', 'm_template_cetak', 'm_lov', 'm_urusan', 'm_bidang',
+									 'm_program', 'm_kegiatan','m_settings'));
+		}
+		
+		function index(){
+			$this->auth->restrict();
+			$id_group = $this->session->userdata('id_group');
+			$ta = $this->session->userdata('t_anggaran_aktif');
+			if (empty($id_group)) {
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'User tidak memiliki akses untuk melihat Usulan Tidak Terakomodir, mohon menghubungi administrator.');
+				redirect('home');
+			}
+			$data = $this->get_urusan($ta);
+	
+			$this->template->load('template', 'usulan_tak_terakomodir/preview_usulan', $data);
+	
+		}
+		
+		private function get_urusan($ta){
+			//$proses = $this->m_renja_trx->count_jendela_kontrol($id_skpd);
+			$data['usulan_type'] = "Usulan Tidak Terakomodir";
+	
+			//$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+			//$header = $this->m_template_cetak->get_value("GAMBAR");
+			//$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+			//$data['header'] = $this->m_template_cetak->get_value("HEADER");
+	
+			$data2['urusan'] = $this->m_usulan_tak_terakomodir->get_urusan_usulan($ta);
+	
+			$data2['ta'] = $ta;
+			$data['usulan'] = $this->load->view('usulan_tak_terakomodir/cetak/usulan_tak_terakomodir_all', $data2, TRUE);
+			return $data;
+		}
+	}
+?>

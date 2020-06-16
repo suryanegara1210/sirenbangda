@@ -1,0 +1,13 @@
+<style type="text/css">
+	.title{		
+		font-weight: bold;
+	}
+	.new_page{
+		page-break-after: always;
+	}
+</style>
+<div>		
+	<?php
+		echo $cetak;
+	?>	
+</div>

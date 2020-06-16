@@ -1,0 +1,58 @@
+<article class="module width_full">
+    <header><h3>Daftar Rincian Usulan Subunit</h3></header>
+        <div class="module_content">
+           
+            <form method="post" name='formName4' action="<?php echo base_url();?>index.php/unit/verifikasi" onSubmit='return validasi(this)'> 
+            <table style="padding-left: 20px;">   
+			<tr>
+				<td align='right'>Jenis Usulan</td>
+				<td >:</td>
+				<td>
+					<select name="usulan" id="usulan">
+						<?php
+							foreach($sifat_bayar as $sb){
+								echo "<option value='{$sb->kode_value}'>{$sb->nama_value}</option>";
+							}
+						?>
+					</select>
+				</td>
+				<td><input type='button' id='pilih_sb' value='Set'/></td>
+			</tr>	
+		    </table> 
+            <table  class="table-common" style="margin-left: 20px; width: 300px;" >  
+                 <thead> 
+                    <tr >
+                        <th>No</th>
+                        <th>Nama SUbunit</th> 
+                    </tr>
+                </thead>
+                <tbody id="tampil">
+                    
+                </tbody>
+            </table>   
+        </div>
+<footer>         
+    <div class="submit_link">  
+        <input type="button" value="Kembali" onclick=self.history.back() > 
+    </div>
+</footer>
+
+<script type="text/javascript">
+    $("#pilih_sb").click( function() {
+            var usulan = $("#usulan").val();
+            if(usulan != ''){
+              var jeniskw = $("#usulan").val();
+              $.ajax({
+    			  type: "POST",
+    			  url : "<?php echo site_url('usulan/TampilListUsulan')?>",
+    			  data: { jns_usulan: usulan},
+    			  success: function(msg){
+						//jika bukan json object
+						$('#tampil').html(msg);	
+					}					
+              });
+            }
+                  
+      })
+</script>
+

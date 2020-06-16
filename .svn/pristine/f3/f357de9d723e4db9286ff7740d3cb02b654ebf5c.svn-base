@@ -1,0 +1,157 @@
+<?php $pagu = number_format($jumlah,0,",",".");
+                $kdkomponen = $kdkom;
+				$kdskomponen = $kdskomponen;
+                $kdoutput = $kdout;     
+                $kdakun = $kdak;
+                $id_header = $id_header;     
+                $id_subunit = $id_subunit;   
+                $id_jenisbelanja = 2;
+                
+                foreach ($nama->result_array() as $nm){
+                    $nmoutput = $nm['nmoutput'];
+                    $nmkomponen = $nm['nmkomponen'];
+					$nmskomponen = $nm['nmskomponen'];
+                    $nmakun = $nm['nmakun'];
+                    $nmheader = $nm['hdr'];
+                }
+				if($kdskomponen==""){
+					$kdskomponen=0;
+				}
+                
+            ?>                         
+            <?php if($jum_uraian==0){ ?>
+            <input type="hidden" name="hdr" value="<?php echo"$id_header" ?>">
+            <br> 
+            <table class="table-list" >
+                       <tr >
+                          <th width='200px'>TOTAL PAGU UNTUK KEGIATAN INI</th><td>Rp.</td><td align="right"> <?php echo "$pagu";?></td>
+                          <input type="hidden" name="total_pagu" value="<?php echo"$jumlah";?>">
+                       <tr >
+                          <th width='200px'>TOTAL TUP YANG DIAJUKAN</th><td>Rp.</td><td align="right"><span id="usulan"></span></td>
+                          
+                       </tr> 
+                       <tr >
+                          <th width='200px'>SISA PAGU</th><td>Rp.</td><td align="right"><span id="sisa_pagu"></span></td>
+                          
+                       </tr> 
+                       </tr> 
+                       
+            </table>   
+                     
+   <script type="text/javascript">
+
+            jQuery().ready(function (){
+                jQuery("#daftaruser").jqGrid({
+					gridComplete: function(){
+						var tot_jumlah=accounting.formatMoney(calc_total()); 
+						$("#usulan").text(tot_jumlah);
+						$("#sisa_pagu").text(sisa());
+					},
+                    url:'<?php echo base_url().'jq_uraian_tup/tampil_datauser/'.$id_subunit."/".$kdoutput."/".$kdkomponen."/".$kdskomponen."/".$kdakun."/".$id_header; ?>',
+                    mtype : "POST",
+                    datatype: "json",
+                    colNames:['Uraian','Volume','Satuan','Harga Satuan','Jumlah','Aksi'],
+                    colModel:[
+                         {name:'uraian',index:'uraian', width:29, align:"left",editable:true,editrules:{required:true}},
+                        {name:'volume',index:'volume', width:4, align:"center",editable:true,editrules:{required:true,number:true}},
+                        {name:'satuan',index:'satuan',  width:8, align:"center",editable:true,editrules:{required:true}, edittype:'select', editoptions:{value:{<?php echo "$satuan";?>}}},
+                        {name:'harga_satuan',index:'harga_satuan', width:16, align:"right",editable:true,editrules:{required:true,number:true, custom:true, custom_func:checkpagu},formatter:'currency',
+                     formatoptions:{prefix:'Rp',suffix:'',thousandsSeparator:',',decimalPlaces:''}},
+                        {name:'jumlah',index:'jumlah', width:16, align:"right",editable:false, formatter:'currency',
+                     formatoptions:{prefix:'Rp',suffix:'',thousandsSeparator:',',decimalPlaces:''} },
+                        {name: 'myac', width:60, fixed:true, sortable:false, search:false, align:'center', resizable: false, resize:false, formatter:'actions',
+                        formatoptions:{
+                        keys:true,editbutton: true, delbutton: true, //Key True disini adalah untuk Shorcut Tombol Enter dan Esc, Enter untuk Save, dan Escape Untuk Batal, anda juga Membuatnya jadi False jika anda tidak ingin seperti itu
+                        //Saya menghapus baris di bawah ini
+                                                        /*onSuccess:function(jqXHR) {
+                                                            alert(jqXHR.responseText);
+                                                            return true;
+                                                        }*/
+                        }}
+                    ],
+                    rowNum:20,
+                    width: 900,
+                    height: 150,
+                    rowList:[10,20,30,40,50,60,70],
+                    pager: '#pager',
+                    sortname: 'id_uraian',
+                    viewrecords: true,
+                    sortorder: "asc",
+                    editurl: "<?php echo base_url().'index.php/jq_uraian_tup/crud'?>",
+                    multiselect: false,
+                    caption:"Daftar Uraian"
+                }).navGrid('#pager',{edit:true,add:true,del:true},
+                    {
+                            onclickSubmit: function(re, postdata){
+                                return {"id_subunit": "<?php echo $id_subunit?>","kdoutput": "<?php echo $kdoutput?>","kdkomponen": "<?php echo 	
+								$kdkomponen?>","kdskomponen": "<?php echo $kdskomponen?>","kdakun": <?php echo $kdakun?>, "hdr": <?php echo $id_header?> }; 
+								
+                            } 
+                    },
+                    {
+                            onclickSubmit: function(re, postdata){ 
+								return {"id_subunit": "<?php echo $id_subunit?>","kdoutput": "<?php echo $kdoutput?>","kdkomponen": "<?php echo 
+								$kdkomponen?>","kdskomponen": "<?php echo $kdskomponen?>","kdakun": <?php echo $kdakun?>,"hdr": <?php echo $id_header?>, 
+								"nmoutput": "<?php echo $nmoutput?>", "nmkomponen": "<?php echo $nmkomponen?>","nmskomponen": "<?php echo $nmskomponen?>",
+								"nmakun": "<?php echo $nmakun?>","header": "<?php echo $nmheader?>","id_jenisbelanja": "<?php echo $id_jenisbelanja?>" };
+                           }
+						   
+                    }
+                );
+            });
+			function checkpagu(value, colname)
+			{   
+				var vol = $("#volume").val();
+				var hrg = $("#harga_satuan").val();
+				var pagu = <?php echo $jumlah;?>;
+				var jum_db =calc_total();
+				var jum = vol*hrg;
+				var sisa_pagu_realisasi=<?php echo $sisa_pagu_realisasi?>;
+				var pembanding=<?php echo $pembanding?>;
+				//var jum_db = parseFloat($("#usulan").text());
+				var total_rencana_usulan = jum + jum_db;
+					if (total_rencana_usulan > pagu ){
+					   return [false,"Maaf Jumlah total rincian melebihi sisa pagu kegiatan"];
+					   }
+					else{
+						if (total_rencana_usulan > sisa_pagu_realisasi){
+							return [false,"Maaf Jumlah total rincian melebihi sisa pagu realisasi"];
+							}
+							else
+							{
+								if (total_rencana_usulan > pembanding){
+								return [false,"Maaf Jumlah total rincian melebihi sisa pagu realisasi"];
+								}
+								else
+								{
+									return [true,""];
+								}
+							}
+						}
+			}  
+			
+			function calc_total() {
+				var rows= jQuery("#daftaruser").jqGrid('getRowData');
+    			var tot_jum = 0;
+                for(var i=0;i<rows.length;i++){
+                     var row=rows[i];
+					 tot_jum += parseFloat(row['jumlah']);					 
+                }
+				//var tot_jumlah=accounting.formatMoney(tot_jum);
+				return tot_jum;
+			}
+
+			function sisa() {
+				var pagu = <?php echo $jumlah;?>;
+				var total = calc_total();
+				var sisa_pagu = accounting.formatMoney(parseFloat(pagu) - parseFloat(total));
+				return sisa_pagu;
+			}
+
+            </script> 
+ 
+            <table id="daftaruser" ></table>  
+            <div id="pager"></div>  
+            <?php } else {
+                echo"<h4 class='alert_warning'> Kegiatan ini sudah di-TUP-kan sebelumnya</h4> ";   
+            }?>

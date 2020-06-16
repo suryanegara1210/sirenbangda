@@ -1,0 +1,136 @@
+<table width="100%" align="center">
+    <tr>
+    	<td>UNIVERSITAS UDAYANA</td>
+        <td width="25%" rowspan="2">&nbsp;</td>
+        <td width="7%">Nomor</td>
+        <td width="1%">:</td>
+        <td width="23%"><?php echo $isi_bkm->no_bukti;?></td>
+    </tr>
+    <tr>
+    	<td>Jalan Kampus Bukit Jimbaran </td>
+        <td>Tanggal</td>
+        <td>:</td>
+        <td><?php echo $this->uang->tanggal($isi_bkm->tgl_bukti);?></td>
+    </tr>
+    
+    <tr>
+        <td colspan="5" align="center">&nbsp;</td>
+    </tr>
+    <tr>
+    	<td colspan="5" align="center"><?php echo strtoupper($bukti_transaksi); ?></td>
+    </tr>
+    <tr>
+        <td colspan="5" align="center">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="5">
+            <table>
+            
+            <tr>
+                <td>Referensi</td>
+                <td>: <?php echo $isi_bkm->ref;?></td>
+            </tr>
+            <tr>
+                <td>Diterima dari </td>
+                <td>: <?php echo $isi_bkm->dari;?></td>
+            </tr>
+            <?php
+                $jum_kredit=0;
+                foreach($det_bkm as $dtbkm){
+                    $jum_kredit=$jum_kredit+$dtbkm['kredit'];
+                }
+            ?>
+            <tr>
+                <td>Jumlah</td>
+                <td>: <?php echo $this->uang->angka($jum_kredit); echo " ("; echo $this->uang->terbilang($jum_kredit); echo ")"; ?></td>
+            </tr>
+            <tr>
+                <td>Keterangan</td>
+                <td> : <?php echo $isi_bkm->keterangan;?></td>
+            </tr>
+            
+            </table>
+        </td>
+    </tr>
+    
+    <tr>
+        <td colspan="5" align="center">&nbsp;</td>
+    </tr>
+</table>
+
+<table width="100%" style="border-collapse:collapse; padding:5px;" border="1" align="center">
+	<tr>
+        <td width="10%" align="center">Kode Akun</td>
+        <td width="35%" align="center">Nama Akun</td>
+        <td width="15%" align="center">Debet</td>
+        <td width="15%" align="center">Kredit</td>
+	<td width="25%" align="center">Uraian</td>
+    </tr>
+    <?php 
+		$jum_deb=0;
+		$jum_kre=0;
+        foreach($det_bkm as $dtbkm){
+            if(isset($dtbkm['debet'])){
+                $debet=$this->uang->angka($dtbkm['debet']);
+                $jum_deb=$jum_deb+$dtbkm['debet'];
+            }else{
+                $debet=" - ";
+            }
+            if (isset($dtbkm['kredit'])){
+                $kredit=$this->uang->angka($dtbkm['kredit']);
+                $jum_kre=$jum_kre+$dtbkm['kredit'];
+            }else{
+                $kredit=" - ";
+            }
+            if(isset($dtbkm['uraian'])){
+                $urai=$dtbkm['uraian'];
+            }else{
+                $urai='';
+            }
+            echo "<tr>
+                    <td>".$dtbkm['akun_bas']."</td>
+                    <td>".$dtbkm['akun_nama']."</td>
+                    <td align=\"right\">".$debet."</td>
+                    <td align=\"right\">".$kredit."</td>
+		    <td>".$urai."</td>
+                </tr>";
+        }
+        echo "<tr>
+                    <td colspan=\"2\" align=\"center\">Jumlah</td>
+                    <td align=\"right\">".$this->uang->angka($jum_deb)."</td>
+                    <td align=\"right\">".$this->uang->angka($jum_kre)."</td>
+		    <td></td>
+                </tr>";
+    ?>
+</table>
+</br></br></br>
+<table width="100%" align="center">
+	<tr>
+    	<td align="center">Disetujui Oleh</td>
+        <td align="center">Diverifikasi Oleh</td>
+        <td align="center">Dibukukan Oleh</td>
+    </tr>
+    <tr><td height="50" colspan="3">&nbsp;</td></tr>
+    <tr>
+       	<td align="center">
+            <?php if (isset($isi_bkm->ttd1_nama)) echo $isi_bkm->ttd1_nama."<br>".$isi_bkm->ttd1_nip; ?>
+        </td>
+        <td align="center">
+            <?php if(isset($isi_bkm->ttd2_nama))  echo $isi_bkm->ttd2_nama."<br>".$isi_bkm->ttd2_nip; ?>
+        </td>
+        <td align="center">
+            <?php if (isset($isi_bkm->ttd3_nama)) echo $isi_bkm->ttd3_nama."<br>".$isi_bkm->ttd3_nip; ?>
+        </td>
+    </tr>
+</table>
+<br/>
+<br/>
+Cetakan Ke <?php 
+if(isset($isi_bkm->print_bukti)){
+    echo $isi_bkm->print_bukti;
+}?>
+<br/>Dicetak pada 
+<?php
+date_default_timezone_set('Etc/GMT-8');
+echo $this->uang->tanggal_jam(date('Y-m-d H:i:s')); ?>
+

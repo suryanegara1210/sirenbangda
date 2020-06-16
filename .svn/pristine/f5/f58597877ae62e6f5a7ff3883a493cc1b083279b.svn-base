@@ -1,0 +1,188 @@
+<script language="javascript">
+    $( function() {
+        $("#mohon_cair_up_frm").validate({
+            debug: true,
+            rules: {
+                permohonan: "required"
+            },
+            messages: {
+                permohonan: "Mohon input nilai permohonan pencairan"
+            },
+            submitHandler: function(form){
+                var sisa = parseFloat($("#sisa").val());
+                var permohonan = parseFloat($("#permohonan").autoNumeric('get'));
+                if (sisa<permohonan){
+                    return false;
+                }
+                $('#permohonan').val($('#permohonan').autoNumeric('get'));
+                form.submit();
+                try {
+                    form.submit();
+                } catch(e) {
+                    console.log(e);
+                    return false;
+                }
+            }
+        });
+    
+    });
+</script>
+
+<script language="javascript">
+    $( function() {
+        $('#permohonan').autoNumeric(window.numOptions);
+    });
+    
+</script>
+<?php
+    if (($ada_blm_oto)){
+        $blok_ada=true;
+        $msg='Ada Permohonan yang belum disetujui';
+    }else{
+		$blok_ada=false;
+	}
+	
+	if (($usulan->id_status_sp2d!=constant::SP2D_DICAIRKAN)){
+        $blok_stt=true;
+        $msg='SP2D untuk usulan ini belum cair';
+    }else{
+		$blok_stt=false;
+	}
+	
+	if ($blok_stt || $blok_ada){
+		$blok =true;
+	}else{
+		$blok =false;
+	}
+?>
+<article class="module width_full">
+<header><h3>Permohonan Pencairan UP</h3></header>
+
+<div class="module_content">
+<form id="mohon_cair_up_frm" action="<?php echo site_url('usulan/simpan_mohon_cair_up');?>" method="POST" name="mohon_cair_up_frm" accept-charset="UTF-8">
+    <table>
+    <tr>
+        <td>Subunit</td>
+        <td>: <?php echo $usulan->nama_subunit;?></td>
+    </tr>
+    <tr>
+        <td>Total Usulan</td>
+        <td>: <?php echo $this->uang->angka($usulan->total_usulan); ?></td>
+    </tr>
+    <tr>
+        <td>Usulan Sudah Cair</td>
+        <td>: <?php echo $this->uang->angka($usulan->sudah_cair); ?></td>
+    </tr>
+    <tr>
+        <td>Sisa Usulan</td>
+        <td>: <?php echo $this->uang->angka($usulan->total_usulan - $usulan->sudah_cair); ?></td>
+    </tr>
+    <?php if (!($blok)){ ?>
+    
+    <input name="sisa" id="sisa" type="hidden" value="<?php echo $usulan->total_usulan - $usulan->sudah_cair; ?>"/>
+    <input name="id_usulan" id="id_usulan" type="hidden" value="<?php echo $usulan->id_usulan; ?>"/>
+    <input name="id_subunit" id="id_subunit" type="hidden" value="<?php echo $usulan->id_subunit; ?>"/>
+    <tr>
+        <td>Up yg ingin dicairkan</td>
+        <td>: <input name="permohonan" id="permohonan" type="text" value="" onkeyup="cek_up()"/></td>
+    </tr>
+    </table>
+        <script>
+            function cek_up(){
+                var sisa = parseFloat($("#sisa").val());
+                var permohonan = parseFloat($("#permohonan").autoNumeric('get'));
+                if (sisa<permohonan){
+                    alert ('Sisa UP tidak mencukupi');
+                    $("#permohonan").autoNumeric('set',0);
+                    
+                    $('#simpan').attr('disabled','disabled');
+                }else{
+                    $("#simpan").removeAttr('disabled');
+                }
+            }
+        </script>
+    <?php } else{ ?>
+    </table>
+    <center>
+    <div style="background-color:red; color:white;font-size:20px;">
+        <br>
+        <?php echo $msg; ?>
+        <br><br>
+    </div>
+    </center>
+    <?php } ?>
+    
+    </div>
+    <footer>
+    <?php if (!($blok)){ ?>
+    <div class="submit_link">  
+        <input type="submit" value="Simpan" id="simpan" disabled="disabled" name="simpan">
+        <input type="button" value="Kembali" onclick="self.history.back()">
+    </div>
+    <?php } ?>
+    </footer>  
+</form>
+</article>
+
+<article class="module width_full">
+<header><h3>Permohonan Pencairan UP</h3></header>
+    <div class="module_content">
+        <center>
+        <table class="table-common" style="width:95%; align:center;">
+            <thead> 
+               <tr >
+                   <th>No</th>
+                   <th>Tanggal Pengajuan</th>
+                   <th>Saldo Normal</th>
+                   <th>Permohonan Pencairan</th>
+                   <th>Otorisasi Kaprodi</th>
+                   <th>Otorisasi Unit</th>
+                   <th>Aksi</th>
+               </tr>
+            </thead>
+        <?php
+            $no = 0;
+            foreach ($daftar_mohon_cair_up as $row) {
+                $no++;
+        ?>
+            <tr>
+                <td width="20px" align='center'><?php echo $no;?></td>
+                <td align="center"><?php echo is_null($row->created_date)?' - - ':$this->uang->tanggal_jam($row->created_date); ?></td>
+                <td align="center"><?php echo is_null($row->saldo_normal)?' - - ':$row->saldo_normal; ?></td>
+                <td align="right"><?php echo $this->uang->angka($row->nominal); ?></td>
+                <td align="center"><?php echo is_null($row->oto_kaprodi)?'Belum':$this->uang->tanggal_jam($row->oto_kaprodi); ?></td>
+                <td align="center"><?php echo is_null($row->oto_unit)?'Belum':$this->uang->tanggal_jam($row->oto_unit); ?></td>
+                <td align="center">
+                <?php if(is_null($row->oto_kaprodi) ){ ?>
+					<img src="<?php echo base_url()."asset/images/detail.png"; ?>" onclick="det(<?php echo $row->id_cair_up; ?>)" />
+					<script>
+						function det(id){
+							window.location = '<?php echo site_url('usulan/detail_mohon_cair_up'); ?>/'+id;  
+						}
+					</script>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+                <?php if ($row->print_cair_up >=1){ ?>
+                <img src="<?php echo base_url()."asset/images/cek.png"; ?>" onclick="stj(<?php echo $row->id_cair_up; ?>)" />
+				<script>
+					function stj(id){
+						var jwb=confirm('Yakin Menyetujui permohonan pencairan UP ini?');
+						if(jwb){
+							window.location = '<?php echo site_url($link_oto); ?>/'+id;
+						}
+					}
+				</script>
+                <?php } ?>
+                <?php } else {
+                       echo " - - "; 
+                        } ?>
+            </td>
+            </tr>
+        
+        <?php } ?>
+    </table>
+    </center>
+        
+    </div>
+    <footer>
+    </footer>
+</article>

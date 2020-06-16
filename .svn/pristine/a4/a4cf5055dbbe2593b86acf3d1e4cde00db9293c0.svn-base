@@ -1,0 +1,46 @@
+<?php
+		$i=0;
+		foreach($hasil->result() as $row) : $i++;
+		$status=$row->status;
+	if($row->no_kwitansi ==""){
+	    echo "<tr><td colspan='11' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	}else{
+		?>
+        
+		<tr>
+			<td align="center"><?php echo"<input type='checkbox' id='cek1' name='cek[]' value='".$row->no_kwitansi."'>"?></td>
+			<td align="center"><?php echo $i;?></td>
+			<td align="center"><?php echo "$row->kdkomponen.$row->kdakun"; ?> </td>
+			<td align="center"><?php echo $row->tgl_b; ?> </td>
+            <td align="center"><?php echo $row->tgl_k; ?> </td>
+			<td align="center"><?php echo $row->yg_bepergian; ?> </td>
+			<td align="center"><?php echo $row->dari." ke ".$row->tujuan; ?> </td>
+            <td align="center"><?php echo $row->lama; ?> </td>
+			<td><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+			<td align="center"><?php echo $row->nominal; ?> </td>
+		</tr>
+        <input type="hidden" id="validasi2" value="ada">
+ <?php } endforeach; ?>      
+ 
+ <script>
+// 	var acc = document.getElementById('validasi2').value;
+//	var cek = document.getElementById('cek1').value;
+// 	if(acc=='ada' || cek != ''){
+//		 $('#simpan').attr("disabled",false);
+//	}
+	
+	$("#simpan").attr("disabled",true);
+	
+	$(function () {
+		$('#nominatif :checkbox').change( function(){
+			var checked = false;
+			$('#nominatif :checkbox').each(function() {
+				if(this.checked) checked = true;
+			});
+			
+			if(checked) $("#simpan").attr("disabled",false);
+			else $("#simpan").attr("disabled",true);
+		});
+	});
+	
+ </script>

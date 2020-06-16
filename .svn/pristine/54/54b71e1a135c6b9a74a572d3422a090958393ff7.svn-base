@@ -1,0 +1,33 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_pendapatan extends CI_Model
+{
+	var $table_pendapatan = 't_pendapatan';
+	var $primary_pendapatan = 'id';
+
+	function get_data_table($search, $start, $length, $order)
+	{
+		$order_arr = array('id');
+		$sql="
+			SELECT * FROM ".$this->table_pendapatan."
+			WHERE jenis_pendapatan LIKE '%".$search['value']."%' 
+  
+		";
+		$this->db->limit($length, $start);
+		$this->db->order_by($order_arr[$order["column"]], $order["dir"]);
+
+		$result = $this->db->query($sql);
+		return $result->result();
+	}
+
+	function count_data_table($search, $start, $length, $order)
+	{
+		$this->db->from($this->table_pendapatan);
+		
+		$this->db->like("jenis_pendapatan", $search['value']);
+				
+		$result = $this->db->count_all_results();
+		return $result;
+	}
+
+}

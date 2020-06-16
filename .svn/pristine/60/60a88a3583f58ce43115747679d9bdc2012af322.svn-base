@@ -1,0 +1,57 @@
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   }  
+?>
+
+<article class="module width_full">
+<header>
+  <h3>Daftar Kwitansi (GUP) pada sub unit <?php echo $nama_subunit->nama_subunit; ?></h3></header>
+   
+<table><br></table>
+  <div id="sub-content"> 
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width: 900px;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+                <th>No. Kwitansi</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Status</th> 
+                <th>Action</th> 
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php if($hasil ==""){
+				 echo "<tr><td colspan='11' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+			 	$i=0;
+			 	foreach($hasil->result() as $row) : $i++;
+				$status=$row->status;
+				?>
+
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                    <td><?php echo $row->id_kwitansi; ?> </td>
+                    <td><?php echo $row->jenis_kwitansi; ?> </td>
+                    <td><?php echo $row->tgl_kwitansi; ?> </td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+                    <td><?php echo $row->nominal; ?> </td>
+                    <td><?php if($status==0){echo 'Belum diverifikasi';} else {echo 'Revisi Verifikasi';}  ?></td>
+                    <td align="center"><?php $id= $row->id_kwitansi; $th= $row->th_kwitansi;?>
+                     <a href="<?php echo base_url();?>gup/preview_kwitansi_veri/<?php echo $th;?>/<?php echo $id;?>" title="Show Kuitansi" ><img src="<?php echo base_url(); ?>asset/images/icn_search.png"/></a>
+                    </td><input name="id_kwitansi" id="id_kwitansi" type="hidden" value="<?php echo  $row->id_kwitansi ;?>" />
+                </tr>
+			 <?php endforeach; }?>
+        </tbody>
+ </table>
+ <br />
+ <footer style="width:99.9%">
+   <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+   </div>
+   </footer>
+ </article>

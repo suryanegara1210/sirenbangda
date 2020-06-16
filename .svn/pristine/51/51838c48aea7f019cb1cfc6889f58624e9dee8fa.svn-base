@@ -1,0 +1,106 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-07 10:48:13 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 279
+ERROR - 2013-05-07 10:48:13 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 280
+ERROR - 2013-05-07 10:48:13 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 279
+ERROR - 2013-05-07 10:48:13 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 280
+ERROR - 2013-05-07 10:52:26 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:26 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:26 --> Unable to connect to the database
+ERROR - 2013-05-07 10:52:32 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:32 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:32 --> Unable to connect to the database
+ERROR - 2013-05-07 10:52:34 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:34 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:34 --> Unable to connect to the database
+ERROR - 2013-05-07 10:52:36 --> Severity: Warning  --> mysqli_connect(): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:36 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): php_network_getaddresses: getaddrinfo failed: No such host is known.  C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-07 10:52:36 --> Unable to connect to the database
+ERROR - 2013-05-07 10:55:25 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\controllers\spm.php 647
+ERROR - 2013-05-07 10:56:09 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\controllers\spm.php 647
+ERROR - 2013-05-07 10:57:01 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 692 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 363
+ERROR - 2013-05-07 10:57:01 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:01 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:05 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 692 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 363
+ERROR - 2013-05-07 10:57:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:22 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 722 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 363
+ERROR - 2013-05-07 10:57:22 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:22 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:44 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 722 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 363
+ERROR - 2013-05-07 10:57:44 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:57:44 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:58:38 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 752 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 363
+ERROR - 2013-05-07 10:58:38 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:58:38 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:58:55 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 752 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 363
+ERROR - 2013-05-07 10:58:55 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 10:58:55 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 367
+ERROR - 2013-05-07 11:25:44 --> Severity: Notice  --> Undefined variable: id_usulan C:\xampp\htdocs\siaku\application\models\m_usulan.php 1417
+ERROR - 2013-05-07 11:25:44 --> Severity: Notice  --> Undefined variable: ket_veri C:\xampp\htdocs\siaku\application\models\m_usulan.php 1417
+ERROR - 2013-05-07 11:27:37 --> Severity: Notice  --> Undefined variable: id_usulan C:\xampp\htdocs\siaku\application\models\m_usulan.php 1417
+ERROR - 2013-05-07 11:27:37 --> Severity: Notice  --> Undefined variable: ket_veri C:\xampp\htdocs\siaku\application\models\m_usulan.php 1417
+ERROR - 2013-05-07 11:44:46 --> Severity: Notice  --> Undefined variable: tot_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 11:44:46 --> Severity: Notice  --> Undefined variable: tot_rkakl C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 11:56:43 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 751
+ERROR - 2013-05-07 11:56:43 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 752
+ERROR - 2013-05-07 11:56:43 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 868
+ERROR - 2013-05-07 11:56:43 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 869
+ERROR - 2013-05-07 11:57:21 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 751
+ERROR - 2013-05-07 11:57:21 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 752
+ERROR - 2013-05-07 11:57:21 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 868
+ERROR - 2013-05-07 11:57:21 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 869
+ERROR - 2013-05-07 12:03:01 --> Severity: Notice  --> Undefined variable: tot_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 12:03:01 --> Severity: Notice  --> Undefined variable: tot_rkakl C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 12:09:55 --> Severity: Notice  --> Undefined variable: tot_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 12:09:55 --> Severity: Notice  --> Undefined variable: tot_rkakl C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 12:12:16 --> Severity: Notice  --> Undefined variable: tot_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 12:12:16 --> Severity: Notice  --> Undefined variable: tot_rkakl C:\xampp\htdocs\siaku\application\controllers\usulan.php 820
+ERROR - 2013-05-07 12:15:35 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 751
+ERROR - 2013-05-07 12:15:35 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 752
+ERROR - 2013-05-07 12:15:35 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 868
+ERROR - 2013-05-07 12:15:35 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 869
+ERROR - 2013-05-07 12:16:06 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pernyataan_up.php 13
+ERROR - 2013-05-07 12:16:06 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pernyataan_up.php 14
+ERROR - 2013-05-07 12:16:06 --> Severity: Notice  --> Undefined index: id_jabatan C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pernyataan_up.php 15
+ERROR - 2013-05-07 12:16:19 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pernyataan_up.php 13
+ERROR - 2013-05-07 12:16:19 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pernyataan_up.php 14
+ERROR - 2013-05-07 12:16:19 --> Severity: Notice  --> Undefined index: id_jabatan C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pernyataan_up.php 15
+ERROR - 2013-05-07 12:16:28 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 44
+ERROR - 2013-05-07 12:16:28 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\print_surat_pengantar_sub.php 45
+ERROR - 2013-05-07 12:17:56 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 751
+ERROR - 2013-05-07 12:17:56 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 752
+ERROR - 2013-05-07 12:17:56 --> Severity: Notice  --> Undefined index: kajur_nama C:\xampp\htdocs\siaku\application\views\usulan\printx.php 868
+ERROR - 2013-05-07 12:17:56 --> Severity: Notice  --> Undefined index: kajur_nip C:\xampp\htdocs\siaku\application\views\usulan\printx.php 869
+ERROR - 2013-05-07 12:19:30 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-07 12:19:30 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-07 12:19:30 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-07 12:19:30 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 109
+ERROR - 2013-05-07 12:29:49 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-07 12:29:49 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-07 12:29:49 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-07 12:29:49 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 109
+ERROR - 2013-05-07 12:36:07 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 279
+ERROR - 2013-05-07 12:36:08 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 280
+ERROR - 2013-05-07 12:36:08 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 279
+ERROR - 2013-05-07 12:36:08 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 280
+ERROR - 2013-05-07 12:37:00 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\controllers\spm.php 648
+ERROR - 2013-05-07 12:37:37 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\controllers\spm.php 648
+ERROR - 2013-05-07 12:37:53 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 693 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 364
+ERROR - 2013-05-07 12:37:53 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:37:53 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:37:56 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 693 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 364
+ERROR - 2013-05-07 12:37:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:37:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:12 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 723 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 364
+ERROR - 2013-05-07 12:38:12 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:12 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:21 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 723 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 364
+ERROR - 2013-05-07 12:38:21 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:21 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:35 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 753 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 364
+ERROR - 2013-05-07 12:38:35 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:35 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:46 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 753 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 364
+ERROR - 2013-05-07 12:38:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368
+ERROR - 2013-05-07 12:38:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 368

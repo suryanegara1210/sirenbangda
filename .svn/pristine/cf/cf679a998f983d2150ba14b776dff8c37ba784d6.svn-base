@@ -1,0 +1,346 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief Controller Class untuk fungsi-fungsi menu admin
+ * 
+ * Controller Class admin berisi fungsi-fugsi untuk yang ada di menu admin
+ * 
+ * 
+ * @author Putu Praba Santika
+ */
+class Admin extends CI_Controller
+{  
+    public function __construct()
+        {                                
+            
+            parent::__construct();
+            $this->load->helper(array('form','url', 'text_helper','date'));       
+            $this->load->database();
+            $this->load->library(array('Pagination','image_lib'));
+            $this->load->model('madmin'); 
+        }
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MEMPEROLEH JENIS USER YANG LOGIN
+*/    
+    function adminuser()
+        {  
+            if($this->auth->is_logged_in() == true)
+            {
+                $data['jenis_user'] = $this->madmin->get_jenis_user();
+                
+            $this->template->load('cek_admin','admin/adminuser',$data); 
+            }
+        
+        }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGECEK LOGIN USER
+*/  
+    function adminunit()
+        {  
+            if($this->auth->is_logged_in() == true)
+            {       
+                // jika dia memang sudah login, destroy session
+                $this->template->load('cek_admin','admin/adminunit'); 
+            }
+        
+        }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGECEK CARA BAYAR YANG DILAKUKAN
+*/  
+    function carabayar()
+        {  
+            if($this->auth->is_logged_in() == true)
+            {
+                
+            $this->template->load('cek_admin','admin/carabayar'); 
+            }
+        
+        }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MEMPEROLEH SIFAT PEMBAYARAN OLEH USER
+*/  
+    function sifatpembayaran()
+        {  
+            if($this->auth->is_logged_in() == true)
+            {
+                
+            $this->template->load('cek_admin','admin/sifatpembayaran'); 
+            }
+        
+        }
+		
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MEMPEROLEH JENIS USER YANG LOGIN PADA TABEL MASTER USER
+*/  
+    function get_user_tabel()
+        {  
+            if($this->auth->is_logged_in() == true)
+            {
+            $jenis_user = $this->input->post('id_tes');
+            if($jenis_user ==4){
+                $this->load->view('admin/all_user');
+            }elseif($jenis_user ==1){
+                $subunit=$this->madmin->tampil_subunit();
+                //print_r($unit);
+                $varsubunit='';
+                foreach($subunit as $un){
+                    $id_subunit = $un->id_subunit;
+                    $nama_subunit = $un->nama_subunit;
+                    $varsubunit.= "$id_subunit:'$nama_subunit',";
+                }
+                $data['varsubunit']=$varsubunit ;
+                
+                $this->load->view('admin/user_subunit', $data);
+                               //$this->load->view('admin/coba');
+            }elseif($jenis_user ==2){
+                        $unit=$this->madmin->tampil_unit();
+                        //print_r($unit);
+                        $varunit='';
+                        foreach($unit as $un){
+                            $id_unit = $un->id_unit;
+                            $nama_unit = $un->nama_unit;
+                            $varunit.= "$id_unit:'$nama_unit',";
+                        }
+                        $data['varunit']=$varunit ;
+                        $group=$this->madmin->tampil_group_unit();
+                        //print_r($unit);
+                        $vargroup='';
+                        foreach($group as $un){
+                            $id_group = $un->id_group;
+                            $nama_group = $un->nama_group;
+                            $vargroup.= "$id_group:'$nama_group',";
+                        }
+                        $data['vargroup']=$vargroup ;
+                        $this->load->view('admin/user_unit',$data);
+                               //$this->load->view('admin/coba');
+            }elseif($jenis_user ==3){
+                $group=$this->madmin->tampil_group_pusat();
+                        //print_r($unit);
+                        $vargroup='';
+                        foreach($group as $un){
+                            $id_group = $un->id_group;
+                            $nama_group = $un->nama_group;
+                            $vargroup.= "$id_group:'$nama_group',";
+                        }
+                        $data['vargroup']=$vargroup ;
+                $this->load->view('admin/user_pusat',$data);
+            }
+                
+            //$this->template->load('cek_admin','admin/sifatpembayaran'); 
+            }
+        }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGAMBIL DATA SUBUNIT KETIKA LOGIN
+*/  
+    function subunit()
+        {  
+            if($this->auth->is_logged_in() == true)
+            {
+                $unit=$this->madmin->tampil_unit();
+                //print_r($unit);
+                $varunit='';
+                foreach($unit as $un){
+                    $id_unit = $un->id_unit;
+                    $nama_unit = $un->nama_unit;
+                    $varunit.= "$id_unit:'$nama_unit',";
+                }
+            $data['varunit']=$varunit ;
+                
+            $this->template->load('cek_admin','admin/subunit',$data); 
+            }
+        
+        }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENAMPILKAN DATA PENGUMUMAN YANG DIBUAT OLEH ADMIN
+*/  
+    function adminpengumuman()
+        {
+           if($this->auth->is_logged_in() == true)
+           {
+               $page=$this->uri->segment(3);
+               $limit=10;
+               if(!$page):
+               $offset = 0;
+               else:
+               $offset = $page;
+               endif;
+               $data = array();
+               $data["page"] = $page;
+               $data['scripttiny_mce'] = $this->scripttiny_mce();
+               
+               $total = $this->madmin->Total_Data("tb_pengumuman");
+               $config['base_url'] = base_url() . '/index.php/admin/adminpengumuman/';
+               $config['total_rows'] = $total->num_rows();
+               $config['per_page'] = $limit;
+               $config['uri_segment'] = 3;
+               $config['first_link'] = 'Awal';
+               $config['last_link'] = 'Akhir';
+               $config['next_link'] = 'Selanjutnya';
+               $config['prev_link'] = 'Sebelumnya';
+               $this->pagination->initialize($config);
+               $data['paginator'] = $this->pagination->create_links();
+               
+                  
+               $data['p']=$this->madmin->tampil_pengumuman($offset,$limit); 
+                          
+               $this->load->view('admin/pengumuman',$data);
+           } 
+        }
+		
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGEDIT PENGUMUMAN DARI ADMIN
+*/  
+    function admin_editpengumuman()
+        {
+            if($this->auth->is_logged_in() == true){
+                $id='';
+                if ($this->uri->segment(3) === FALSE)
+                {
+                    $id=$id;
+                }
+                else
+                {
+                    $id = $this->uri->segment(3);
+                }
+              
+              $data['ep']=$this->madmin->editpengumuman("tb_pengumuman","id_pengumuman=$id");
+              $data['scripttiny_mce'] = $this->scripttiny_mce(); 
+              $this->load->view('admin/editpengumuman',$data);   
+            }
+            
+        }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGHAPUS PENGUMUMAN DARI ADMIN
+*/
+     function admin_hapuspengumuman ()
+         {
+             if($this->auth->is_logged_in() == true){
+                $id='';
+                if ($this->uri->segment(3) === FALSE)
+                {
+                        $id=$id;
+                }
+                else
+                {
+                        $id = $this->uri->segment(3);
+                }
+              
+              $data['hp']=$this->madmin->hapuspengumuman($id,"tb_pengumuman","id_pengumuman");
+              $data['scripttiny_mce'] = $this->scripttiny_mce();  
+              echo "<meta http-equiv='refresh' content='0; url=".base_url()."index.php/admin/adminpengumuman'>";
+              }
+         }
+
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENGUPDATE PENGUMUMAN DARI ADMIN
+*/
+     function admin_updatepengumuman()
+         {  
+             $data["id_pengumuman"]=$this->input->post('id_pengumuman'); 
+             $data['judul_pengumuman']=$this->input->post('judul') ;
+             $data['isi']=$this->input->post('isi') ;
+             $data['tanggal']=$this->input->post('tgl') ; 
+             
+             $this->madmin->Update_Pengumuman("tb_pengumuman",$data,"id_pengumuman") ;
+             echo "<meta http-equiv='refresh' content='0; url=".base_url()."index.php/admin/adminpengumuman'>";
+         }
+		 
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MENYIMPAN PENGUMUMAN YANG TELAH DIBUAT ADMIN
+*/
+     function admin_simpanpengumuman()
+         {      
+             $data['judul_pengumuman']=$this->input->post('judul') ;
+             $data['isi']=$this->input->post('isi') ;
+             $data['tanggal']=$this->input->post('tanggal') ; 
+             $data['penulis']=$this->session->userdata('nama') ; 
+             
+             $this->madmin->Simpan_Pengumuman($data) ;
+             echo "<meta http-equiv='refresh' content='0; url=".base_url()."index.php/admin/adminpengumuman'>";
+         }
+		 
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MEMPERLIHATKAN DETAIL PENGUMUMAN DARI ADMIN
+*/
+     function detpengumuman()
+        {
+             if($this->auth->is_logged_in() == true){
+                $id='';
+                if ($this->uri->segment(3) === FALSE)
+                {
+                        $id=$id;
+                }
+                else
+                {
+                        $id = $this->uri->segment(3);
+                }
+               
+              $data['berita'] = $this->madmin->get_pengumuman();
+              $data['ep']=$this->madmin->Detail_Pengumuman("tb_pengumuman","id_pengumuman=$id");
+              $data['scripttiny_mce'] = $this->scripttiny_mce(); 
+              $this->template->load('template','unit/detail_pengumuman',$data);   
+            }
+        }
+    
+/** 
+* FUNGSI INI DIGUNAKAN UNTUK MEMANGGIL JAVASCRIPT TINY MCE
+*/      
+    //Function TinyMce------------------------------------------------------------------
+    private function scripttiny_mce() {
+        return '
+        <!-- TinyMCE -->
+        <script type="text/javascript" src="'.base_url().'jscripts/tiny_mce/tiny_mce_src.js"></script>
+        <script type="text/javascript">
+        tinyMCE.init({
+        // General options
+        mode : "textareas",
+        theme : "advanced",
+        plugins : "pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template,wordcount,advlist,autosave",
+
+        // Theme options
+        theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,styleselect,formatselect,fontselect,fontsizeselect",
+        theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
+        theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+        theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,pagebreak,restoredraft",
+        theme_advanced_toolbar_location : "top",
+        theme_advanced_toolbar_align : "left",
+        theme_advanced_statusbar_location : "bottom",
+        theme_advanced_resizing : true,
+
+        // Example content CSS (should be your site CSS)
+        //content_css : "'.base_url().'application/views/themes/css/BrightSide.css",
+
+        // Drop lists for link/image/media/template dialogs
+        //"'.base_url().'media/lists/image_list.js"
+        template_external_list_url : "lists/template_list.js",
+        external_link_list_url : "lists/link_list.js",
+        external_image_list_url : "'.base_url().'index.php/webadmin/image_list/",
+        media_external_list_url : "lists/media_list.js",
+
+        // Style formats
+        style_formats : [
+            {title : \'Bold text\', inline : \'b\'},
+            {title : \'Red text\', inline : \'span\', styles : {color : \'#ff0000\'}},
+            {title : \'Red header\', block : \'h1\', styles : {color : \'#ff0000\'}},
+            {title : \'Example 1\', inline : \'span\', classes : \'example1\'},
+            {title : \'Example 2\', inline : \'span\', classes : \'example2\'},
+            {title : \'Table styles\'},
+            {title : \'Table row 1\', selector : \'tr\', classes : \'tablerow1\'}
+        ],
+        //disabled relative urls
+        relative_urls : false,
+        
+        // Replace values for the template plugin
+        template_replace_values : {
+            username : "Some User",
+            staffid : "991234"
+        }
+        });
+        </script>';    
+    }     
+}

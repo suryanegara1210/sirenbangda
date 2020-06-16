@@ -1,0 +1,56 @@
+<input type="hidden" id="jb" value="<?php echo $this->uri->segment(3); ?>">
+<style>
+label.error {
+	margin-left: 2px;
+	width: auto;
+	display: block;
+	color:#F00;
+}
+</style>
+
+<article class="module width_full">
+<header>
+<h3>Buat SPM</h3>
+</header>             
+ <div class="module_content">      
+    <table border='0'>  
+      <tr>
+        <td>Sifat Pembayaran</td>
+        <td>:</td>
+        <td>
+          <select name="jenis_belanja" id="jenis_belanja"  >
+            <option value="">-</option>
+    		<?php
+    			foreach($sifat_bayar as $row){
+    				echo "<option value='{$row->kode_value}'>{$row->nama_value}</option>";
+    			}
+    		?>
+          </select></td>
+        <td><input type="submit" name="tampilkan" id="tampilkan" value="Tampilkan"/></td>
+      </tr>
+    </table> 
+ 
+        <div style="padding-left: 20px; padding-bottom: 10px;">
+        <?php
+            $this->load->view('spm/view_spp');    
+        ?> 
+        </div>
+</div>
+ 
+
+</article>
+<style type="text/css">
+.col_akhir {	width:50px;	
+}
+</style>
+
+<script type="text/javascript">
+      $("#tampilkan").click(function(){
+			  	var jb = $("#jenis_belanja").val();
+				if(jb == ''){
+					alert('Pilih Jenis belanja terlebih');	
+				}else{
+				    window.location = "<?php echo site_url('spm/create')?>/"+jb;
+				}
+        });
+</script>

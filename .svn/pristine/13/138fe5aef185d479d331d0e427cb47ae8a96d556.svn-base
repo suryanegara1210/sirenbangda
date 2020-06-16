@@ -1,0 +1,65 @@
+<?php
+
+class M_users extends CI_Model {
+	
+    public function __construct(){
+        parent::__construct();
+    }
+	
+	function get_user_by_credential($uname, $passwd)
+	{
+		$sql = "
+			SELECT *
+			FROM m_users 
+			WHERE username = ?
+				AND password = ?
+			LIMIT 1
+			";
+			
+		$query = $this->db->query($sql, array($uname, $passwd));
+		if( $query->num_rows() > 0 ) {
+			return $query->row();
+		}
+		
+		return FALSE;
+	}
+	
+	function get_user_by_id($id_user)
+	{
+		$sql = "
+			SELECT *
+			FROM m_users
+			WHERE id_user = ?
+			LIMIT 1;
+		";
+		
+		$query = $this->db->query($sql, array($id_user));
+		if( $query->num_rows() > 0 ) {
+			return $query->row();
+		}
+		
+		return FALSE;		
+	}
+	
+	function get_user_by_id_complete($id_user)
+	{
+		$sql = "
+			SELECT a.*, b.nama_unit, b.nama_unit_singkat, b.kode_unit,
+				b.kode_digit, c.nama_subunit, c.kode_subunit
+			FROM m_users a
+				LEFT JOIN m_unit b ON a.id_unit=b.id_unit
+				LEFT JOIN m_subunit c ON a.id_subunit=c.id_subunit
+			WHERE id_user = ?
+			LIMIT 1;
+		";
+		
+		$query = $this->db->query($sql, array($id_user));
+		if( $query->num_rows() > 0 ) {
+			return $query->row();
+		}
+		
+		return FALSE;		
+	}
+}
+
+?>

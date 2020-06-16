@@ -1,0 +1,143 @@
+<script type="text/javascript">
+<!--
+    $( function() {
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+		
+		$("#nilai_jasa").autoNumeric(numOptions);
+        		
+    });
+
+    $().ready( function() {
+        		
+        $("#resume").validate({
+            rules: {
+                no_mou: "required",
+                tgl_mou: "required",
+                no_jasa: "required",
+                nama_jasa: "required",
+				uraian_jasa: "required",
+                jangka_waktu: "required",
+                nilai_jasa: "required",
+                skema_bayar: "required",
+                tgl_cair: "required"                
+				                
+            },
+            messages: {
+                no_mou: "Mohon diisi nomor MOU yang diajukan ",
+                tgl_mou: "Mohon diisi tanggal MOU yang diajukan",
+                no_jasa: "Mohon diisi nomor jasa giro yang diajukan",
+                nama_jasa: "Mohon diisi nama jasa giro yang diajukan",
+				uraian_jasa: "Mohon diisi uraian jasa giro yang diajukan",
+                jangka_waktu: "Mohon diisi jangka waktu jasa giro yang diajukan",
+                nilai_jasa: "Mohon diisi nilai jasa giro yang diajukan",
+                skema_bayar: "Mohon diisi skema pembayaran jasa giro yang diajukan",
+                tgl_cair: "Mohon diisi tanggal pencairan jasa giro yang diajukan"
+				
+            },
+			submitHandler: function(form){
+				$("#nilai_jasa").val($("#nilai_jasa").autoNumeric('get'));
+				form.submit();
+			}
+        });		
+    });
+-->
+</script>
+    <form action="<?php echo site_url('pen_lain/simpan/'.constant::MOU_JASA_GIRO);?>" method="POST" id="resume" name="resume" accept-charset="UTF-8">    
+        <article class="module width_full">
+    		<header>
+  <h3>Input Ringkasan MOU Pendapatan Lainnya</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+				</center>
+	
+        <?php if(isset($isEdit)&& $isEdit){
+            echo "<input type=\"hidden\" name=\"id_mou\" id=\"id_mou\" value=\"$isi_mou->id_mou\" />";
+        } ?>
+                <table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak Pendapatan Jasa Giro</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No MOU</td>
+                        <td><input type="text" name="no_mou" placeholder="Nomor untuk MOU" size="40"
+                        <?php if(isset($isi_mou->no_mou)) echo "value=\"$isi_mou->no_mou\""; ?>/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td><input type="text" id="tgl_mou" name="tgl_mou" placeholder="Tanggal dibuatkan MOU" size="40"
+                        <?php if(isset($isi_mou->tgl_mou)) echo "value=\"$isi_mou->tgl_mou\""; ?>/></td>
+                    </tr>
+                    <tr>
+                        <td>No Jasa Giro</td>
+                        <td><input type="text" id="no_jasa" name="no_jasa" placeholder="Nomor Pendapatan Jasa Giro" size="40"
+                        <?php if(isset($isi_mou->no_jasa)) echo "value=\"$isi_mou->no_jasa\""; ?>/></td>
+                    </tr>
+                    <tr>
+                        <td>Nama Jasa Giro</td>
+                        <td><input type="text" name="nama_jasa" id="nama_jasa" placeholder="Nama Pendapatan Jasa Giro" size="40"
+                        <?php if(isset($isi_mou->pemberi)) echo "value=\"$isi_mou->pemberi\""; ?>/></td>
+                    </tr>
+                    <tr>
+                        <td>Uraian Jasa Giro</td>
+                        <td><input type="text" name="uraian_jasa" id="uraian_jasa" placeholder="Uraian Pendapatan Jasa Giro" size="40"
+                        <?php if(isset($isi_mou->uraian)) echo "value=\"$isi_mou->uraian\""; ?>/></td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jangka Waktu</td>
+                        <td><input type="text" id="jangka_waktu" name="jangka_waktu" placeholder="Jangka Waktu Pendapatan Jasa Giro" size="40"
+                        <?php if(isset($isi_mou->jangka_waktu)) echo "value=\"$isi_mou->jangka_waktu\""; ?>
+                        />*)bulan</td>
+                    </tr>
+                    <tr>
+                        <td>Nilai Jasa Giro</td>
+                        <td><input type="text" name="nilai_jasa" id="nilai_jasa" placeholder="Nilai Jumlah Pendapatan Jasa Giro" size="40"
+                        <?php if(isset($isi_mou->nilai)) echo "value=\"$isi_mou->nilai\""; ?>/></td>
+                    </tr>
+                    <tr>
+                        <?php
+                            if(isset($isi_mou->skema_pembayaran)){
+                                $skp=$isi_mou->skema_pembayaran;
+                            }else
+                                $skp='';
+                        ?>
+                        <td>Skema Pembayaran</td>
+                        <td><?php echo form_dropdown("skema_bayar",$skema_bayar,$skp,"id='skema_bayar'", "style='width:30px' "); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal Pencairan</td>
+                        <td><input type="text" name="tgl_cair" id="tgl_cair" placeholder="Tanggal Pencairan Pendapatan Jasa Giro" size="40"
+                        <?php if(isset($isi_mou->tgl_cair)) echo "value=\"$isi_mou->tgl_cair\""; ?>
+                        /></td>
+                    </tr>
+                </table>
+                <script>
+                    $(function() {
+        				$( "#tgl_mou" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+						$( "#tgl_cair" ).datepicker({
+        					dateFormat:"yy-mm-dd",
+        					changeMonth: true,
+        					changeYear: true,
+        				});
+        			});
+            
+            	</script>
+                
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="reset" value="Reset">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   
+        </article>
+    </form>
+        <!-- end of styles article --> 

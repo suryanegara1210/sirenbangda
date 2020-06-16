@@ -1,0 +1,141 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+	class Kendali extends CI_Controller
+	{
+		var $CI = NULL;
+		public function __construct()
+		{
+			$this->CI =& get_instance();
+	        parent::__construct();
+	        $this->load->helper(array('form','url', 'text_helper','date'));
+	        $this->load->database();
+	        $this->load->model(array('m_musrenbang','m_lov','m_template_cetak','m_desa','m_skpd','m_kendali','m_template_cetak','m_rka'));
+		}
+
+		public function kendali_renja()
+		{
+			$id_skpd = $this->session->userdata('id_skpd');
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$ta = $this->m_settings->get_tahun_anggaran();
+			$data['program'] =  $this->m_kendali->get_program_rka_4_cetak($id_skpd,$tahun);
+			$data['jendela_kontrol'] = $this->m_rka->count_jendela_kontrol($id_skpd,$ta);
+			$this->template->load('template','kendali_renja/view_kendali_renja',$data);
+		}
+		
+	function kirim_kendali_renja(){
+		$data['skpd'] = $this->session->userdata("id_skpd");
+		$this->load->view('kendali_renja/kirim_kendali_renja', $data);
+	}
+
+	function do_kirim_kendali_renja(){
+		$id = $this->input->post('skpd');
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$result = $this->m_rka->kirim_kendali_renja($id,$ta);
+		//echo $this->db->last_query();		
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Kendali Renja berhasil dikirim.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kendali Renja gagal dikirim, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+		
+		public function kendali_belanja()
+		{
+			$id_skpd = $this->session->userdata('id_skpd');
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$data['program'] = $this->m_kendali->get_program_dpa_4_cetak($id_skpd,$tahun);
+			$this->template->load('template','kendali_belanja/view_kendali_belanja',$data);
+		}
+
+//-----------------------------------------------FUNGSI CETAK--------------------------------------------------
+		private function cetak_kendali_renja_func($id_skpd)
+		{
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$data['kendali_type'] = "KENDALI RENJA";
+			$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+			$header = $this->m_template_cetak->get_value("GAMBAR");
+			$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+			$data['header'] = $this->m_template_cetak->get_value("HEADER");
+
+			$data1['program'] = $this->m_kendali->get_program_rka_4_cetak($id_skpd,$tahun);
+			$data['kendali'] = $this->load->view('kendali_renja/cetak/isi_kendali_renja', $data1, TRUE);
+			return $data;
+
+		}
+
+		function do_cetak_kendali_renja($id_skpd=NULL){
+			ini_set('memory_limit','-1');
+			if(empty($id_skpd)) {
+				$id_skpd = $this->session->userdata('id_skpd');
+			}
+
+			$data = $this->cetak_kendali_renja_func($id_skpd);
+			$data['qr'] = $this->ciqrcode->generateQRcode("sirenbangda", 'Kendali_Renja '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s"), 1);
+			$html = $this->template->load('template_cetak', 'kendali_renja/cetak/cetak', $data, TRUE);
+
+			$filename = 'Kendali_Renja'. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i_s") .'.pdf';
+			pdf_create($html,$filename,"A4","Landscape");
+		}
+
+		function preview_kendali_renja(){
+			$this->auth->restrict();		
+			$id_skpd = $this->session->userdata('id_skpd');		
+							
+			$skpd = $this->m_kendali->get_one_kendali_renja($id_skpd, TRUE);
+			if (!empty($skpd)) {
+				$data = $this->cetak_kendali_renja_func($id_skpd);
+				$this->template->load('template', 'kendali_renja/preview_kendali_renja', $data);
+			}else{
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data kendali renja tidak tersedia.');
+				redirect('home');
+			}		
+		}
+
+		private function cetak_kendali_belanja_func($id_skpd)
+		{
+			$tahun = $this->session->userdata('t_anggaran_aktif');
+			$data['kendali_type'] = "KENDALI BELANJA";
+			$protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
+			$header = $this->m_template_cetak->get_value("GAMBAR");
+			$data['logo'] = str_replace("src=\"","height=\"90px\" src=\"".$protocol.$_SERVER['HTTP_HOST'],$header);
+			$data['header'] = $this->m_template_cetak->get_value("HEADER");
+
+			$data1['program'] = $this->m_kendali->get_program_dpa_4_cetak($id_skpd,$tahun);
+			$data['kendali'] = $this->load->view('kendali_belanja/cetak/isi_kendali_belanja', $data1, TRUE);
+			return $data;
+
+		}
+
+		function do_cetak_kendali_belanja()
+		{
+			ini_set('memory_limit','-1');
+			if(empty($id_skpd)) {
+				$id_skpd = $this->session->userdata('id_skpd');
+			}
+
+			$data = $this->cetak_kendali_belanja_func($id_skpd);
+			$data['qr'] = $this->ciqrcode->generateQRcode("sirenbangda", 'Kendali_Belanja '. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i-s"), 1);
+			$html = $this->template->load('template_cetak', 'kendali_belanja/cetak/cetak', $data, TRUE);
+
+			$filename = 'kendali_belanja'. $this->session->userdata('nama_skpd') ." ". date("d-m-Y_H-i_s") .'.pdf';
+			pdf_create($html,$filename,"A4","Landscape");
+		}
+		function preview_kendali_belanja(){
+			$this->auth->restrict();		
+			$id_skpd = $this->session->userdata('id_skpd');		
+							
+			$skpd = $this->m_kendali->get_one_kendali_belanja($id_skpd, TRUE);
+			if (!empty($skpd)) {
+				$data = $this->cetak_kendali_belanja_func($id_skpd);
+				$this->template->load('template', 'kendali_belanja/preview_kendali_belanja', $data);
+			}else{
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data kendali belanja tidak tersedia.');
+				redirect('home');
+			}		
+		}
+//===================================================================================================================
+	}
+?>

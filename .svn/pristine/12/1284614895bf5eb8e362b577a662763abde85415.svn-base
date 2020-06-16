@@ -1,0 +1,138 @@
+<script src="<?php echo base_url('asset/chart/Chart.js'); ?>"></script>
+<script> 
+    var belum, spj, sp2d, saldo;
+    <?php
+    $belum=0;
+    $spj=0;
+    $sp2d=0;
+    $total=0;
+    foreach ($data as $row) {
+        if (empty($row->nominal)) {
+            $row->nominal=0;
+        }; 
+        
+        if ($row->flag=='belum') {
+            $total=$total+$row->nominal;
+            $belum=$row->nominal;
+        }elseif ($row->flag=='sp2d') {
+            $total=$total+$row->nominal;
+            $sp2d=$row->nominal;    
+        }elseif ($row->flag=='spj') {
+            $total=$total+$row->nominal;
+            $spj=$row->nominal;
+        }elseif ($row->flag=='pr') {
+            $pagu_real=$row->nominal;
+        }elseif ($row->flag=='pok') {
+            $pok=$row->nominal;
+        };
+    }
+
+    $saldo=$pagu_real-$total;
+    $persen_belum=round(($belum/$pagu_real)*100, 2);
+    $persen_spj=round(($spj/$pagu_real)*100, 2);
+    $persen_sp2d=round(($sp2d/$pagu_real)*100, 2);
+    $persen_saldo=100-$persen_belum-$persen_spj-$persen_sp2d;
+    ?>
+
+    belum=<?php echo $persen_belum; ?>;
+    spj=<?php echo $persen_spj; ?>;
+    sp2d=<?php echo $persen_sp2d; ?>;
+    saldo=<?php echo $persen_saldo; ?>;
+    var pieData = [        
+        {
+            value: sp2d,
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Sudah SP2D"
+        },
+        {
+            value: spj,
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: "Sedang SPJ"
+        },        
+        {
+            value: belum,
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "Belum SPJ dan SP2D"
+        },        
+        {
+            value: saldo,
+            color:"#949FB1",
+            highlight: "#A8B3C5",
+            label: "Saldo"
+        }
+    ];
+
+    window.onload = function(){
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myPie = new Chart(ctx).Pie(pieData);
+    };        
+</script>
+
+<article class="module width_full">
+<header>
+<h3> Monev Sub Unit</h3>
+</header>             
+<div class="module_content">
+    <div style="width: 90%; margin: auto; text-align: center;">
+        <font style="font-size: 15; color: #F7464A;">
+            &block;&block;
+        </font>
+        <b>
+        : Belum SPJ dan SP2D
+        </b>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <font style="font-size: 15; color: #46BFBD;">
+            &block;&block;
+        </font>
+        <b>
+        : Sedang SPJ
+        </b>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <font style="font-size: 15; color: #FDB45C;">
+            &block;&block;
+        </font>
+        <b>
+        : Sudah SP2D
+        </b>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <font style="font-size: 15; color: #949FB1;">
+            &block;&block;
+        </font>
+        <b>
+        : Saldo
+        </b>
+        <canvas style="margin-top: 20px; margin-bottom: 20px;" id="canvas" height="500" width="500"></canvas>
+    </div>
+    <table class='table-common tablesorter' style='width: 80%; margin: auto;' id='tsearch'>
+    <thead>
+      <tr>
+        <th>POK</th>
+        <th>Pagu Real</th>
+        <th>Belum SPJ dan SP2D</th>
+        <th>Sedang SPJ</th>
+        <th>Sudah SP2D</th>
+        <th>Saldo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align: middle;" rowspan="2" align="right"><?php echo Formatting::currency($pok); ?></td>
+        <td style="vertical-align: middle;" rowspan="2" align="right"><?php echo Formatting::currency($pagu_real); ?></td>
+        <td align="right"><?php echo Formatting::currency($belum); ?></td>
+        <td align="right"><?php echo Formatting::currency($spj); ?></td>
+        <td align="right"><?php echo Formatting::currency($sp2d); ?></td>        
+        <td align="right"><?php echo Formatting::currency($saldo); ?></td>
+      </tr>
+      <tr>
+        <td align="right"><?php echo $persen_belum; ?> %</td>
+        <td align="right"><?php echo $persen_spj; ?> %</td>
+        <td align="right"><?php echo $persen_sp2d; ?> %</td>
+        <td align="right"><?php echo $persen_saldo; ?> %</td>
+      </tr>
+    </tbody>    
+    </table>
+</div>
+</article>

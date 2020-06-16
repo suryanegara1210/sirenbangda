@@ -1,0 +1,90 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.nmpenyerah.value == 0){
+    alert("Anda belum mengisikan Nama Penyerah.");
+    form.nmpenyerah.focus();
+    return (false);
+  }
+  if (form.nippenyerah.value == ""){
+    alert("Anda belum mengisikan Nip Penyerah.");
+    form.nippenyerah.focus();
+    return (false);
+  }  
+  return (true);
+}
+</script>
+ <article class="module width_full">
+            <header><h3>Cek Kelengkapan</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='form' action="<?php echo base_url();?>unit/simpan_kelengkapan" onSubmit="return validasi(this)"> 
+                <table class="tablesorter" cellspacing="0" >
+    <!-- page content -->
+      
+    <?php foreach($daftar_spm->result_array() as $row)
+        {  
+        $id_spm= $row['id_spm'];
+        $th_spm= $row['th_spm'];     
+        $nama_fakultas= $row['nama_unit'];
+        }
+        //echo"$th_spm";
+     ?>
+     <?php 
+         /*
+         *  selanjutnya nama dan nip yang menyerahkan datanya akan diambil dr SIMPEG    
+         */
+     ?>
+       
+    <tr><td>Unit</td><td>:</td><td> <input size="30px" type="text" name="nomor" value="<?php echo"$nama_fakultas"?>" disabled></td></div></tr>  
+    <tr><td>Nomor</td><td>:</td><td> <input size="30px" type="text" name="nomor" value="<?php echo"$nomor/$singkat/$kode_digit/$th"?>" disabled></td></div></tr>  
+    <tr><td>NIP yang menyerahkan</td><td>:</td><td> <input size="50px" type="text" name="nippenyerah" value="" onkeypress="return harusangka(event)" placeholder="nip pegawai yang menyerahkan dokumen UP dari unit"></td></tr>  
+    <tr><td>Nama yang menyerahkan</td><td>:</td><td> <input size="50px" type="text" name="nmpenyerah" value="" placeholder="nama pegawai yang menyerahkan dokumen UP dari unit"></td></tr>  
+    <input type="hidden" name="id_spm" value="<?php echo"$id_spm";?>">
+    <input type="hidden" name="th_spm" value="<?php echo"$th_spm";?>">
+    
+   </table>
+   <br> 
+   <table style="margin-left: 7px; margin-top: 10px;">
+     <tr><td >PERSYARATAN UMUM</td></tr> 
+   </table>
+   <table  class="table-common" style="margin-left: 20px; " >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Persyaratan</th>
+                <th>Keterangan</th>
+                
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no =1; 
+            foreach($syarat->result_array() as $row)
+            {  
+            $id_uraian= $row['id_uraian'];
+            $uraian= $row['uraian'];
+            echo" <tr>
+                <td align='center'>$no</td>
+                <td align='left'>$uraian</td>
+                <input type='hidden' name='cek[]' value='$id_uraian' disabled:true>  
+                <td align='center'><input type='checkbox' name='tes[]' value='$id_uraian' disabled:false></td>
+              </tr>";
+              
+            
+            $no++; 
+            };   
+            ?>
+            
+ </table>    
+ </div>
+            <footer> 
+                <div class="submit_link"> 
+                    <input type='submit' value='Simpan' onclick="return confirm('Apakah anda yakin ingin menyimpan kelengkapan untuk SPM ini?')"> 
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>  
+ <?php echo form_close(); ?>
+ </article>

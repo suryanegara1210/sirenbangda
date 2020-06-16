@@ -1,0 +1,52 @@
+      <article class="module width_full">
+            <header>
+              <h3>Daftar SPP TUP SPJ (Tambahan Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/unit/kirim_revisi" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama Unit</th>
+                <th>Jumlah Rp.</th>  
+                <th colspan="3">Aksi</th>
+                
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            //echo"$th/$nomor";
+            $no = 1; 
+            foreach($data_kwitansi_tup->result_array() as $row)
+            {  
+            $jumlah=$row['jumlah']; 
+            $nama_subunit=$row['nama_subunit'];     
+            $id=$row['id_sp2d'];     
+            ?>
+              <tr>
+                <td align='center'><?php echo $no ?></td>
+                <td align="center"><?php echo "$nama_subunit";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/cek_spj_tup/".$id;?>' title='Klik Jika SPP GUP sudah diotorisasi PPK unit' onclick="return confirm('Apakah Anda Yakin SPP sudah diotorisasi PPK ... ?')"> <img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                
+                <?php }?>
+              </tr>
+              
+            <?php $no++;    
+            ?>         
+            
+ </table>
+ </div>    
+    
+            <footer>
+            
+                
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+</article>
+

@@ -1,0 +1,19 @@
+<script type="text/javascript">
+	prepare_facebox();
+
+	function preview_history(id) 
+	{
+		$.facebox({ajax: '<?php echo site_url('kwitansi/view_history')?>/'+id});
+	}
+</script>
+
+<article class="module width_full">
+<header>
+<h3>Edit Kwitansi <?php echo $jenis_kwitansi;?>
+<a class="link_history" href="javascript:void(0)" onclick="preview_history(<?php echo $id_kwitansi;?>)"
+> History </a>
+</h3>
+</header>
+<div class="module_content">
+<?php echo $form_kwitansi?>
+</article>

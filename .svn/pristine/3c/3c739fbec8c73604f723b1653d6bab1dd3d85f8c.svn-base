@@ -1,0 +1,14 @@
+            <!-- Date Piker -->
+            <link type="text/css" href="<?php echo base_url();?>asset/datepicker/css/trontastic/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
+<script type="text/javascript" src="<?php echo base_url();?>asset/datepicker/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="<?php echo base_url();?>asset/datepicker/js/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript">
+        $(function() {
+            $("#datepicker").datepicker({dateFormat: 'yy-mm-dd' });
+        });
+        </script>
+<script type="text/JavaScript">
+    function Start(page) {
+        OpenWin = this.open(page, "CtrlWindow", "toolbar=no,menubar=no,location=center,scrollbars=yes,resizable=yes,width=600,height=550");
+    }
+</script>

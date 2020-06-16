@@ -1,0 +1,351 @@
+<?php	
+	foreach ($laporan_data as $row) {
+		//1 : Arus masuk
+		//2 : Arus keluar
+		$laporan[1][$row->id_arus_kas]="";
+		$laporan[2][$row->id_arus_kas]="";
+		$total[$row->id_arus_kas]=0;
+
+		$laporan_sblm[$row->id_arus_kas]="";
+		$total_sblm[$row->id_arus_kas]=0;
+	}
+
+	$i=0;
+	$total_all=0;
+	$total_all_sblm=0;
+
+	foreach($list_aruskas as $row){
+		$i++;
+		$index_arus=0;
+
+		$jumlah[$i] = $row->nominal_skrg_ak_skrg-$row->nominal_sblm_ak_skrg;
+		$jumlah_sblm[$i] = $row->nominal_skrg_ak_sblm-$row->nominal_sblm_ak_sblm;
+		$jml[$i] = $jumlah[$i]-$jumlah_sblm[$i];
+
+		if($jumlah_sblm[$i]!=0){
+            $persen=round((abs($jml[$i]/$jumlah_sblm[$i]))*100, 2);
+        }else{
+            $persen='-';
+        }
+
+		if ($jumlah[$i] < 0) {
+			$jumlah_tampil = "(". Formatting::currency(abs($jumlah[$i])) .")";
+		}else{			
+			$jumlah_tampil = Formatting::currency($jumlah[$i]);
+		}
+		if ($jumlah_sblm[$i] < 0) {
+			$jumlah_tampil_sblm = "(". Formatting::currency(abs($jumlah_sblm[$i])) .")";
+		}else{			
+			$jumlah_tampil_sblm = Formatting::currency($jumlah_sblm[$i]);
+		}
+		if ($jml[$i] < 0) {
+			$jml_tampil = "(". Formatting::currency(abs($jml[$i])) .")";
+		}else{			
+			$jml_tampil = Formatting::currency($jml[$i]);
+		}
+		
+		$total[$row->id_arus_kas]=$total[$row->id_arus_kas]+$jumlah[$i];
+		$total_sblm[$row->id_arus_kas]=$total_sblm[$row->id_arus_kas]+$jumlah_sblm[$i];		
+		switch($row->jenis_akun){
+			case 1:
+				if ($jumlah[$i] < 0) {
+					// -
+					$index_arus=1;
+				}else{
+					// +
+					$index_arus=2;
+				}
+				break;
+			case 2:
+				if ($jumlah[$i] < 0) {
+					// -
+					$index_arus=2;
+				}else{
+					// +
+					$index_arus=1;
+				}
+				break;
+			case 3:
+				if ($jumlah[$i] < 0) {
+					// -
+					$index_arus=2;
+				}else{
+					// +
+					$index_arus=1;
+				}
+				break;
+			case 4:
+				if ($jumlah[$i] < 0) {
+					// -
+					$index_arus=2;
+				}else{
+					// +
+					$index_arus=1;
+				}
+				break;
+			case 5:
+				if ($jumlah[$i] < 0) {
+					// -
+					$index_arus=1;
+				}else{
+					// +
+					$index_arus=2;
+				}
+				break;			
+		}	
+		
+		$laporan[$index_arus][$row->id_arus_kas]=$laporan[$index_arus][$row->id_arus_kas].
+		"<tr>		
+			<td id=\"tab1\">". $row->akun_kode.". ". $row->akun_nama ."</td>
+			<td align=\"right\">". $jumlah_tampil ."</td>
+			<td align=\"right\">". $jumlah_tampil_sblm ."</td>
+			<td align=\"right\">". $jml_tampil ."</td>
+			<td align=\"right\">". $persen ."</td>
+		</tr>";
+	}
+?>
+<style type="text/css">
+    #tab0{
+        text-indent: 1em;
+    }
+
+    #tab1{
+        text-indent: 2em;
+    }
+</style>
+<h2>
+    <div style="text-align:center">
+        Universitas Udayana<br />
+        Laporan Arus Kas<br />
+        Bulan <?php echo $nama_bulan1; ?> - <?php echo $nama_bulan2; ?> Tahun <?php echo $thn_skrg; ?> <br />
+    </div>
+</h2>
+<table class="table-common" align="center" style="width: 98%;">
+	<tr>
+        <th rowspan="2">Uraian</th>
+        <th style="min-width: 120px;" rowspan="2">Arus Kas Bulan <BR><?php echo $nama_bulan1; ?>-<?php echo $nama_bulan2; ?> <BR>Tahun <?php echo $thn_skrg; ?></th>
+        <th style="min-width: 120px;" rowspan="2">Arus Kas Bulan <BR><?php echo $nama_bulan1_sblm; ?>-<?php echo $nama_bulan2_sblm; ?> <BR>Tahun <?php echo $thn_skrg_ak_sblm; ?></th>
+        <th colspan="2">Kenaikan / Penurunan</th>        
+    </tr>
+    <tr>        
+        <th>Jumlah</th>
+        <th>%</th>
+    </tr>
+<?php
+	$i=0;
+	foreach ($laporan_data as $title) {		
+?>	
+    <tr style="font-weight: bold;">
+        <td colspan="6"><?php echo $title->deskripsi; ?></td>
+    </tr> 
+    <tr id="tab0" style="font-weight: bold;">
+        <td colspan="6">Arus Masuk</td>
+    </tr> 
+<?php
+	if (empty($laporan[1][$title->id_arus_kas])) {
+?>
+	<tr style="font-weight: bold;">
+        <td colspan="6">&nbsp;</td>
+    </tr>
+<?php		
+	}else{
+		echo $laporan[1][$title->id_arus_kas];	
+	}
+?>
+    <tr id="tab0" style="font-weight: bold;">
+        <td colspan="6">Arus Keluar</td>
+    </tr> 
+<?php	
+		echo $laporan[2][$title->id_arus_kas];
+		$jml_temp = $total[$title->id_arus_kas]-$total_sblm[$title->id_arus_kas];
+
+		if ($jml_temp < 0) {
+			$jml_tampil = "(". Formatting::currency(abs($jml_temp)) .")";
+		}else{			
+			$jml_tampil = Formatting::currency($jml_temp);
+		}
+		if($total_sblm[$title->id_arus_kas]!=0){
+            $persen=round((abs($jml_temp/$total_sblm[$title->id_arus_kas]))*100, 2);
+        }else{
+            $persen='-';
+        }
+
+		if ($total[$title->id_arus_kas] < 0) {
+			$total_temp="(".Formatting::currency(abs($total[$title->id_arus_kas])).")";
+		}else{
+			$total_temp=Formatting::currency($total[$title->id_arus_kas]);
+		}
+		$total_all=$total_all+$total[$title->id_arus_kas];
+
+		if ($total_sblm[$title->id_arus_kas] < 0) {
+			$total_temp_sblm="(".Formatting::currency(abs($total_sblm[$title->id_arus_kas])).")";
+		}else{
+			$total_temp_sblm=Formatting::currency($total_sblm[$title->id_arus_kas]);
+		}
+		$total_all_sblm=$total_all_sblm+$total_sblm[$title->id_arus_kas];		
+?>
+		<tr style="font-weight: bold;">
+		    <td>Jumlah <?php echo $title->deskripsi; ?></td>
+		    <td align="right"><?php echo $total_temp; ?></td>
+		    <td align="right"><?php echo $total_temp_sblm; ?></td>
+		    <td align="right"><?php echo $jml_tampil; ?></td>
+		    <td align="right"><?php echo $persen; ?></td>
+		</tr>
+		<tr style="font-weight: bold;">
+		    <td colspan="6">&nbsp;</td>
+		</tr>
+<?php
+	}
+
+	$jml_temp = $total_all-$total_all_sblm;
+
+	if ($jml_temp < 0) {
+		$jml_tampil = "(". Formatting::currency(abs($jml_temp)) .")";
+	}else{			
+		$jml_tampil = Formatting::currency($jml_temp);
+	}
+	if($total_all_sblm!=0){
+        $persen=round((abs($jml_temp/$total_all_sblm))*100, 2);
+    }else{
+        $persen='-';
+    }
+
+	if ($total_all < 0) {
+		$total_temp="(".Formatting::currency(abs($total_all)).")";
+	}else{
+		$total_temp=Formatting::currency($total_all);
+	}	
+	if ($total_all_sblm < 0) {
+		$total_temp_sblm="(".Formatting::currency(abs($total_all_sblm)).")";
+	}else{
+		$total_temp_sblm=Formatting::currency($total_all_sblm);
+	}
+?>	
+	<tr style="background-color: #fff; font-weight: bold;">
+	    <td>Kenaikan / Penurunan Bersih Kas</td>
+	    <td align="right"><?php echo $total_temp; ?></td>
+	    <td align="right"><?php echo $total_temp_sblm; ?></td>
+	    <td align="right"><?php echo $jml_tampil; ?></td>
+	    <td align="right"><?php echo $persen; ?></td>
+	</tr>
+	<tr style="font-weight: bold;">
+	    <td colspan="6">&nbsp;</td>
+	</tr>
+	<tr style="font-weight: bold;">
+	    <td colspan="6">&nbsp;</td>
+	</tr>	
+
+<?php
+	$jml_temp = $setara_akhir->nominal_x1-$setara_akhir->nominal_x0;
+
+	if($setara_akhir->nominal_x0!=0){
+        $persen=round((abs($jml_temp/$setara_akhir->nominal_x1))*100, 2);
+    }else{
+        $persen='-';
+    }
+
+    $saldo_kas = $total_all+$setara_akhir->nominal_x1;
+    $saldo_kas_sblm = $total_all_sblm+$setara_akhir->nominal_x0;
+
+    if ($setara_akhir->nominal_x1 < 0) {
+		$jumlah_tampil = "(". Formatting::currency(abs($setara_akhir->nominal_x1)) .")";
+	}else{			
+		$jumlah_tampil = Formatting::currency($setara_akhir->nominal_x1);
+	}
+
+	if ($setara_akhir->nominal_x0 < 0) {
+		$jumlah_tampil_sblm = "(". Formatting::currency(abs($setara_akhir->nominal_x0)) .")";
+	}else{			
+		$jumlah_tampil_sblm = Formatting::currency($setara_akhir->nominal_x0);
+	}
+
+	if ($jml_temp < 0) {
+		$jml_tampil = "(". Formatting::currency(abs($jml_temp)) .")";
+	}else{			
+		$jml_tampil = Formatting::currency($jml_temp);
+	}
+?>
+	<tr style="background-color: #fff; font-weight: bold;">
+	    <td>Kas dan Setara Kas Akhir</td>
+	    <td align="right"><?php echo $jumlah_tampil; ?></td>
+	    <td align="right"><?php echo $jumlah_tampil_sblm; ?></td>
+	    <td align="right"><?php echo $jml_tampil; ?></td>
+	    <td align="right"><?php echo $persen; ?></td>
+	</tr>
+
+<?php
+	$jml_temp = $setara_awal->nominal_x1-$setara_awal->nominal_x0;
+
+	if($setara_awal->nominal_x0!=0){
+        $persen=round((abs($jml_temp/$setara_awal->nominal_x1))*100, 2);
+    }else{
+        $persen='-';
+    }
+
+    if ($setara_awal->nominal_x1 < 0) {
+		$jumlah_tampil = "(". Formatting::currency(abs($setara_awal->nominal_x1)) .")";
+	}else{			
+		$jumlah_tampil = Formatting::currency($setara_awal->nominal_x1);
+	}
+
+	if ($setara_awal->nominal_x0 < 0) {
+		$jumlah_tampil_sblm = "(". Formatting::currency(abs($setara_awal->nominal_x0)) .")";
+	}else{			
+		$jumlah_tampil_sblm = Formatting::currency($setara_awal->nominal_x0);
+	}
+
+	if ($jml_temp < 0) {
+		$jml_tampil = "(". Formatting::currency(abs($jml_temp)) .")";
+	}else{			
+		$jml_tampil = Formatting::currency($jml_temp);
+	}
+
+    $saldo_kas = $total_all+$setara_awal->nominal_x1;
+    $saldo_kas_sblm = $total_all_sblm+$setara_awal->nominal_x0;
+?>
+	<tr style="background-color: #fff; font-weight: bold;">
+	    <td>Kas dan Setara Kas Awal</td>
+	    <td align="right"><?php echo $jumlah_tampil; ?></td>
+	    <td align="right"><?php echo $jumlah_tampil_sblm; ?></td>
+	    <td align="right"><?php echo $jml_tampil; ?></td>
+	    <td align="right"><?php echo $persen; ?></td>
+	</tr>
+
+<?php
+	$bersih_kas = $setara_akhir->nominal_x1 - $setara_awal->nominal_x1;
+	$bersih_kas_sblm = $setara_akhir->nominal_x0 - $setara_awal->nominal_x0;
+
+	$jml_temp = $bersih_kas-$bersih_kas_sblm;	
+	if($bersih_kas_sblm!=0){
+        $persen=round((abs($jml_temp/$bersih_kas_sblm))*100, 2);
+    }else{
+        $persen='-';
+    }
+
+    if ($bersih_kas < 0) {
+		$jumlah_tampil = "(". Formatting::currency(abs($bersih_kas)) .")";
+	}else{			
+		$jumlah_tampil = Formatting::currency($bersih_kas);
+	}
+
+	if ($bersih_kas_sblm < 0) {
+		$jumlah_tampil_sblm = "(". Formatting::currency(abs($bersih_kas_sblm)) .")";
+	}else{			
+		$jumlah_tampil_sblm = Formatting::currency($bersih_kas_sblm);
+	}
+
+	if ($jml_temp < 0) {
+		$jml_tampil = "(". Formatting::currency(abs($jml_temp)) .")";
+	}else{			
+		$jml_tampil = Formatting::currency($jml_temp);
+	}
+?>
+	<tr style="background-color: #fff; font-weight: bold;">
+	    <td>Kenaikan / Penurunan Bersih Kas</td>
+	    <td align="right"><?php echo $jumlah_tampil; ?></td>
+	    <td align="right"><?php echo $jumlah_tampil_sblm; ?></td>
+	    <td align="right"><?php echo $jml_tampil; ?></td>
+	    <td align="right"><?php echo $persen; ?></td>
+	</tr>
+	<BR>
+</table>

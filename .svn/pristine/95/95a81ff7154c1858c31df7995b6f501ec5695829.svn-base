@@ -1,0 +1,102 @@
+<?php $sum_deb = $get_saldo_awal->sum_kredit;
+$sum_kre = $get_saldo_awal->sum_debet;
+$pos_saldo = $detil_akun->pos_saldo;
+if(isset($get_saldo_akhir_tahun->saldo)){
+   $saldo_akhir_tahun = $get_saldo_akhir_tahun->saldo; 
+} else{
+    $saldo_akhir_tahun = 0; 
+}
+
+if (isset( $saldo_akhir_tahun))
+{
+	$saldo_akhir_tahun_lalu=$saldo_akhir_tahun;
+} else{
+	$saldo_akhir_tahun_lalu=0;
+}
+
+
+if ($pos_saldo=='Db')
+					{
+						$saldo_awal = $saldo_akhir_tahun_lalu + $sum_kre - $sum_deb;
+					}
+					else
+					{	
+						$saldo_awal = $saldo_akhir_tahun_lalu + $sum_deb - $sum_kre;
+					} 
+
+	$a = $saldo_akhir_tahun_lalu;
+
+?>
+<form id="form1" name="form1" method="post" action="">
+<table width="100%" border="0" style="margin-left:20px;">
+  <tr>
+    <td width="11%">Kode Akun </td>
+    <td width="50%">: 
+      <input type="text" name="textfield2" id="textfield2" value="<?php echo $detil_akun->kode_akun; ?>" disabled="disabled" /></td>
+    <td width="1%">&nbsp;</td>
+    <td width="15%">Pos Saldo </td>
+    <td width="23%">:
+<input type="text" name="textfield" id="textfield" value="<?php echo $detil_akun->pos_saldo; ?>" disabled="disabled" /></td>
+  </tr>
+  <tr>
+    <td>Nama Akun  </td>
+    <td >: 
+      <input name="textfield3" type="text" id="textfield3" value="<?php echo $detil_akun->nama_akun; ?>" size="65" disabled="disabled"/></td>
+    <td>&nbsp;</td>
+    <td>Saldo Awal Tahun </td>
+    <td>:
+<input type="text" name="textfield4" id="textfield4" value="<?php echo $this->uang->angka($a);?>" disabled="disabled" /></td>
+  </tr>
+</table>
+</form>
+
+</br>
+
+<table width="100" border="1"  class="table-common" id="hasil" style="margin-left: 20px; width: 850px;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+                <th>Tanggal Pembukuan</th>
+                <th>Tanggal Transaksi</th>
+                <th>Bukti</th>
+                <th>Keterangan</th>
+                <th width="120px">Debet</th>
+                <th width="120px">Kredit</th>
+                <th width="120px">Saldo Akhir</th>
+         </tr>
+      </thead>
+           <tbody>		 
+			 <?php if($hasil ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+			 	$i=0;
+				$h=$a;
+			 	foreach($hasil->result() as $row) : $i++;?>
+                <tr>
+                	<td><?php echo $i;?></td>
+                    <td> <?php echo $row->tgl_buku; ?> </td>
+                    <td> <?php echo $row->tgl_transaksi; ?> </td>
+                    <td> <?php echo $row->bukti; ?> </td>
+                    <td> <?php echo $row->keterangan; ?> </td>
+                    <td align="right"> <?php echo $this->uang->angka($row->debet); ?> </td>
+                    <td align="right"> <?php echo $this->uang->angka($row->kredit); ?> </td>
+                    <td align="right"> 
+					<?php $d=$row->debet;
+					$k=$row->kredit; 
+					if ($pos_saldo=='Db')
+					{
+						$h=$d-$k+$h;
+						echo $this->uang->angka($h);
+					}
+					else
+					{	
+						$h=$k-$d+$h;
+						echo $this->uang->angka($h);
+					}
+					?> 
+                    </td>
+                    
+             </tr>
+			 <?php endforeach; }?>
+        </tbody>
+ </table>

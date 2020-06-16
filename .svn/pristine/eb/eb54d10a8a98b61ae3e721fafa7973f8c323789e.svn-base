@@ -1,0 +1,946 @@
+<article class="module width_full">
+<header>
+    <h3>Neraca</h3>
+</header>
+
+<div class="module_content">
+<center>
+<h1>
+BADAN LAYANAN UMUM UNIVERSITAS UDAYANA <br />
+LAPORAN ARUS KAS
+</h1>
+</center>
+<?php //print_r($a4254);
+?>
+<div style="width: 100%; height: 600px; overflow: auto;">
+    <table class="table-common" id="hasil" style="overflow:scroll;">
+        <tr>
+            <th colspan="2">&nbsp;</th>
+            <th>Januari</th>
+            <th>Februari</th>
+            <th>Maret</th>
+            <th>April</th>
+            <th>Mei</th>
+            <th>Juni</th>
+            <th>Juli</th>
+            <th>Agustus</th>
+            <th>September</th>
+            <th>Oktober</th>
+            <th>November</th>
+            <th>Desember</th>
+        </tr>
+        <tr>
+            <td colspan="14"><strong>ARUS KAS DARI AKTIVA OPRASI</strong></td>
+        </tr>
+        <tr>
+            <td colspan="14">Arus Masuk</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Pendapatan APBN</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $aktiva_operasi_masuk[$i]=0;
+                }
+            ?>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='4254';
+                    $nilai_akun=$a4254;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }    
+                    }
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $aktiva_operasi_masuk[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Pendapatan Usaha Dari Jasa Layanan</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='4241';
+                    $nilai_akun=$a4241;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $aktiva_operasi_masuk[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Pendapatan Kerjasama</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='4243';
+                    $nilai_akun=$a4243;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $aktiva_operasi_masuk[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Pendapatan Lain Lain</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='4249';
+                    $nilai_akun=$a4249;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }  
+                    }
+                    
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $aktiva_operasi_masuk[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td colspan="2" nowrap="nowrap"><strong>Sub Total Arus Masuk</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($aktiva_operasi_masuk[$i]);
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td colspan="14" nowrap="nowrap">Arus Keluar</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $aktiva_operasi_keluar[$i]=0;
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Biaya Layanan</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $layanan[$i]=0;
+                    $akun='521';
+                    $nilai_akun=$a521;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $layanan[$i]+=$saldo;
+                    
+                    $akun='522';
+                    $nilai_akun=$a522;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $layanan[$i]+=$saldo;
+                    
+                    $akun='523';
+                    $nilai_akun=$a523;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $layanan[$i]+=$saldo;
+                    
+                    $akun='524';
+                    $nilai_akun=$a524;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $layanan[$i]+=$saldo;
+                    
+                    $akun='525';
+                    $nilai_akun=$a525_a;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $layanan[$i]+=$saldo;
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($layanan[$i]);
+                        $aktiva_operasi_keluar[$i]+=$layanan[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Biaya Administrasi dan Umum</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $administrasi[$i]=0;
+                    $akun='525';
+                    $nilai_akun=$a525_b;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $aktiva_operasi_keluar[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Biaya Lain Lain</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo "-";
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Penambahan Persediaan</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='115';
+                    $nilai_akun=$a115;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }  
+                    }
+                    
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $aktiva_operasi_keluar[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Sub Total Arus Keluar</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($aktiva_operasi_keluar[$i]);
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Arus KAS Dari Aktivitas Operasi</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                    $aktiva_operasi[$i]=$aktiva_operasi_masuk[$i]-$aktiva_operasi_keluar[$i];
+                        echo $this->uang->angka($aktiva_operasi[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td colspan="14">&nbsp;</td>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="14"><strong>ARUS KAS DARI AKTIVITAS INVESTASI</strong></td>
+        </tr>
+        <?php for ($i = 1; $i <= 12; $i++) {
+                    $investasi_masuk[$i]=0;
+                    $investasi_keluar[$i]=0;
+                }
+            ?>
+        <tr>
+            <td nowrap="nowrap" colspan="14">Arus Masuk</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Hasil Penjualan Aset Tetap</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='424961';
+                    $nilai_akun=$a424961;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }  
+                    }
+                    
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($saldo);
+                        $investasi_masuk[$i]+=$saldo;
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Hasil Penjualan Aset Lain Lain</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo "-";
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        
+        <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='114';
+                    $nilai_akun=$a114;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }
+                    }
+                    
+                    if($saldo<0){
+                        $jangka_pendek_masuk[$i]=abs($saldo);
+                        $jangka_pendek_keluar[$i]=0;
+                    } else{
+                        $jangka_pendek_masuk[$i]=0;
+                        $jangka_pendek_keluar[$i]=$saldo;
+                    }
+                }
+            ?>
+        <?php for ($i = 1; $i <= 12; $i++) {
+                    $akun='12';
+                    $nilai_akun=$a12;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }  
+                    }
+                    
+                    if($saldo<0){
+                        $jangka_panjang_masuk[$i]=$saldo;
+                        $jangka_panjang_keluar[$i]=0;
+                    } else{
+                        $jangka_panjang_masuk[$i]=0;
+                        $jangka_panjang_keluar[$i]=$saldo;
+                    }
+                }
+            ?>
+        
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Hasil Pencairan Investasi Jangka Pendek</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($jangka_pendek_masuk[$i]);
+                        $investasi_masuk[$i]+=$jangka_pendek_masuk[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Hasil Penjualan Investasi Jangka Panjang</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($jangka_panjang_masuk[$i]);
+                        $investasi_masuk[$i]+=$jangka_panjang_masuk[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Keuntungan Penjualan Aset Non Lancar</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo "-";
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Sub Total Arus Masuk</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                        echo $this->uang->angka($investasi_masuk[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2">Arus Keluar</td>
+        </tr>
+        
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Perolehan Aset Tetap</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    $aset_tetap[$i]=0;
+                    $aset_lain[$i]=0;
+                    $akun='53';
+                    $nilai_akun=$a53;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $aset_tetap[$i]+=$saldo;
+                    
+                    $akun='536';
+                    $nilai_akun=$a536;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $aset_tetap[$i]-=$saldo;
+                    $aset_lain[$i]+=$saldo;
+                    
+                    $akun='537115';
+                    $nilai_akun=$a537115;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        } 
+                    }
+                    $aset_tetap[$i]-=$saldo;
+                    $aset_lain[$i]+=$saldo;
+                                        
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($aset_tetap[$i]);
+                        $investasi_keluar[$i]+=$aset_tetap[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Perolehan aset Lain Lain</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($aset_lain[$i]);
+                        $investasi_keluar[$i]+=$aset_lain[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Perolehan Investasi Jangka Pendek</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($jangka_pendek_keluar[$i]);
+                        $investasi_keluar[$i]+=$jangka_pendek_keluar[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Perolehan Investasi Jangka Panjang</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($jangka_panjang_keluar[$i]);
+                        $investasi_keluar[$i]+=$jangka_panjang_keluar[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Kerugian Penjualan Aset Non Lancar</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo "-";
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Sub Total Arus Keluar</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                        echo $this->uang->angka($investasi_keluar[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Arus KAS Dari Aktivitas Investasi</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                    $investasi[$i]=$investasi_masuk[$i]-$investasi_keluar[$i];
+                        echo $this->uang->angka($investasi[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td colspan="14">&nbsp;</td>
+        </tr>
+        <?php $kewajiban_jp[0]=0;
+                for ($i = 1; $i <= 12; $i++) {
+                    $akun='22';
+                    $nilai_akun=$a22;
+                    if (!$nilai_akun){
+                        $saldo=0;
+                    }else{
+                        if (isset($saldo_akhir_tahun_arr[$akun])){
+                            $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$akun];
+                        } else{
+                            $saldo_akhir_tahun=0;
+                        }
+                        
+                        if (!isset($nilai_akun[$i]['sum_debet'])){
+                            $nilai_akun[$i]['sum_debet']=0;
+                        }
+                        if (!isset($nilai_akun[$i]['sum_kredit'])){
+                            $nilai_akun[$i]['sum_kredit']=0;
+                        }
+                        
+                        if ($akun_arr[$akun]['pos_saldo']=='Db'){
+                            $saldo = $saldo_akhir_tahun +$nilai_akun[$i]['sum_debet'] - $nilai_akun[$i]['sum_kredit'];
+                        } else{
+                            $saldo = $saldo_akhir_tahun + $nilai_akun[$i]['sum_kredit'] - $nilai_akun[$i]['sum_debet'];
+                        }  
+                    }
+                    $kewajiban_jp[$i]=$saldo;
+                    
+                    if($kewajiban_jp[$i]>$kewajiban_jp[$i-1]){
+                        $kewajiban_jp_masuk[$i]=$kewajiban_jp[$i]-$kewajiban_jp[$i-1];
+                        $kewajiban_jp_keluar[$i]=0;
+                    } else{
+                        $kewajiban_jp_masuk[$i]=0;
+                        $kewajiban_jp_keluar[$i]=abs($kewajiban_jp[$i]-$kewajiban_jp[$i-1]);
+                    }
+                }
+            ?>
+        <tr>
+            <td nowrap="nowrap" colspan="14"><strong>ARUS KAS DARI AKTIVITAS PENDANAAN</strong></td>
+        </tr>
+        <?php for ($i = 1; $i <= 12; $i++) {
+                    $pendanaan_masuk[$i]=0;
+                    $pendanaan_keluar[$i]=0;
+                }
+            ?>
+        <tr>
+            <td nowrap="nowrap" colspan="14">Arus Masuk</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Perolehan Kewajiban Jangka Panjang</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($kewajiban_jp_masuk[$i]);
+                        $pendanaan_masuk[$i]+=$kewajiban_jp_masuk[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Pendapatan Dari Kejadian Luar Biasa</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo "-";
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Sub Total Arus Masuk</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                        echo $this->uang->angka($pendanaan_masuk[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2">Arus Keluar</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Pembayaran Kewajiban Jangka Panjang</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo $this->uang->angka($kewajiban_jp_keluar[$i]);
+                        $pendanaan_keluar[$i]+=$kewajiban_jp_keluar[$i];
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td nowrap="nowrap">Biaya Kejadian Luar Biasa</td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\">";
+                        echo "-";
+                    echo "</td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Sub Total Arus Keluar</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                        echo $this->uang->angka($kewajiban_jp_keluar[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Arus KAS Dari Aktivitas Pendanaan</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                    $pendanaan[$i]=$kewajiban_jp_masuk[$i]-$kewajiban_jp_keluar[$i];
+                        echo $this->uang->angka($pendanaan[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td colspan="14">&nbsp;</td>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Kenaikan Bersih Kas</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                    $kenaikan_bersih[$i]=$aktiva_operasi[$i]+$investasi[$i]+$pendanaan[$i];
+                        echo $this->uang->angka($kenaikan_bersih[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Kas dan Jumlah Setara Kas Awal</strong></td>
+        </tr>
+        <tr>
+            <td nowrap="nowrap" colspan="2"><strong>Jumlah Saldo Kas</strong></td>
+            <?php for ($i = 1; $i <= 12; $i++) {
+                    echo "<td  nowrap=\"nowrap\" align=\"right\"> <strong>";
+                        echo $this->uang->angka($kenaikan_bersih[$i]);
+                    echo "</strong></td>";
+                }
+            ?>
+        </tr>    
+    </table>
+</div>
+</div>

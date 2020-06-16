@@ -1,0 +1,12 @@
+<table class="fcari" width="800px">
+	<tbody>
+		<tr>
+			<td width="100px">Keterangan</td>
+			<td>
+				<?php
+					echo $revisi->ket;
+				?>
+			</td>
+		</tr>				
+	</tbody>
+</table>

@@ -1,0 +1,117 @@
+<script language="javascript">
+
+prepare_facebox();
+ 
+function edit(value1,value2){
+	alert();
+		  window.location = "<?php echo site_url('kwitansi_view/edit')?>/"+value1+"/"+value2;
+}
+
+</script>
+<!--==============================-->
+
+<?php function readmore($string){      
+	  $string = substr($string, 0, 200);      
+	  $string = $string . "...";      
+	return $string;   } 
+?>
+
+
+ <form method="post" name='view'>
+<h3>&nbsp;</h3>
+
+    <table  class="table-common" id="hasil" style="width:99.9%;" >  
+       <thead> 
+            <tr>
+            	<th>No.</th>
+            	<th>No Kwitansi</th>
+				<th>Nama Unit</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Status</th>
+                <th>Lampiran</th>
+                <th>Action</th>
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php 
+             if($isi!= false){
+			 	$i=0;
+			 	foreach($isi->result() as $row) : $i++;
+				?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                	<td align="center"><?php echo $row->no_kwitansi; ?></td>
+                    <td align="center"><?php echo $row->nama_unit;?></td>
+                    <td align="center"><?php echo $row->jenis_kwitansi; ?> </td>
+                    <td align="center"><?php echo date("d-m-Y", strtotime($row->tgl_kwitansi)); ?> </td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,30)."...";?> </td>
+                    <td align="right"><?php echo $this->uang->angka($row->nominal); ?> </td>
+                    <td align="center"><?php echo $row->status_kwitansi;  ?></td>
+                    <td align="center">
+                      <?php
+                      if (!empty($row->file_bast) && !empty($row->file_bap)) {
+                        if (!empty($row->file_bast)) {
+                        ?>
+                          <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_bast); ?>" class='icon2-printer' title='Cetak Lampiran BAST.'/>
+                        <?php
+                        }
+                        if (!empty($row->file_bap)){
+                        ?>
+                          <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_bap); ?>" class='icon2-printer' title='Cetak Lampiran BAP.'/>
+                        <?php
+                        }
+                      }elseif (!empty($row->file_daftar_honor) && !empty($row->file_sk)) {
+                        if (!empty($row->file_daftar_honor)) {
+                        ?>
+                          <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_daftar_honor); ?>" class='icon2-printer' title='Cetak Lampiran Daftar Honor.'/>
+                        <?php
+                        }
+                        if (!empty($row->file_sk)){
+                        ?>
+                          <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_sk); ?>" class='icon2-printer' title='Cetak Lampiran SK.'/>
+                        <?php
+                        }
+                      }elseif (!empty($row->file_daftar_nominatif)) {            
+                        ?>
+                          <a href="<?php echo base_url('file_upload/'. $row->id_unit .'/'.$row->file_daftar_nominatif); ?>" class='icon2-printer' title='Cetak Lampiran Daftar Nominatif.'/>
+                        <?php            
+                      }else{
+                      ?>
+                      -
+                      <?php
+                      }
+                      ?>
+                    </td>
+                    <td align="center"><a href="<?php echo site_url('kwitansi_view/veri/'.$row->id_kwitansi);?>">
+                    	<img src='<?php echo base_url();?>asset/images/edit.png' /></a>
+                        <?php
+                        /*
+						if($row->jenis_kwitansi=="HONOR")
+						{ ?>
+						<a class="link_history" href="<?php echo site_url();?>kwitansi/preview_honor/
+						<?php echo $row->id_kwitansi;?>/<?php echo $row->jenis_honor;?>" 
+						rel="facebox" title="Show Rincian Honor">
+							<img src="<?php echo base_url(); ?>asset/images/detail.png"/>
+						</a>
+						<?php } 
+                        */
+                        ?>
+					</td>
+                </tr>
+             <?php endforeach;?>  
+        </tbody>
+ </table>
+ <br />
+ </div>
+               <?php }else{ ?>
+                 <tr>
+                 <td align='center' colspan="10" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td></tr>
+                 </tbody>
+ </table>
+ <br />
+ </div>
+             <?php } ?> 
+</form>

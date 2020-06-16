@@ -1,0 +1,109 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.status.value == "setuju_verifikasi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  }
+  if (form.status.value == "terotorisasi_kaprodi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  } 
+  return (true);
+  }
+  </script>
+
+<article class="module width_full">
+            <header><h3>Daftar SPM UP (Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>unit/kirim_revisi" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="3">Aksi</th>
+                
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            $jum=$jumlah;  
+            $jumlah = number_format($jum,0,",",".");
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th=$row['th_spm'];
+            $nomor=$row['no_spm']; 
+            $status=$row['status_spm'];
+            
+            $nmr=$row['no_spm']; 
+            $tahun=$row['th_spm']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat'];
+            
+            $thn= '20'.$th;
+            $nomor = sprintf("%04d", $nmr);    
+            ?>
+              <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>"> 
+              <input type="hidden" name="status" value="<?php echo "$status"; ?>"> 
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$thn";?></td> 
+                <td align="center"><?php echo"$jumlah";?></td>
+                
+                <?php if($status =="diajukan"){?>
+                     <td align="center"><?php echo"$status";?></td>
+                <?php }else{?>
+                     <td align="center" style="background-color:#99ff33"><?php echo"$status";?></td>
+                <?php } ?> 
+                
+                
+                <?php if($status =="diajukan"){?>
+                <td align="center"> <a href='<?php echo base_url()."unit/preview_spm/".$th."/".$id;?>' title='Preview SPM' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center" style="padding-top:8px;" ><a href='<?php echo base_url()."unit/print_spm/".$th."/".$id;?>' title='Print SPM' ><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."unit/otorisasi_spm_up/".$th."/".$id;?>' title='Klik Jika SPM UP sudah ditanda tangani Dekan' onclick="return confirm('Apakah anda yakin SPM ini sudah divalidasi oleh Dekan?')"> <img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }else{?>
+                <td align="center"> <a href='<?php echo base_url()."unit/preview_spm2/".$th."/".$id;?>' title='Preview SPM' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center" style="padding-top:8px;" ><a href='#' title='Print SPM' onclick="return alert('Maaf SPM ini sudah sudah ditanda tangani Dekan')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"><a href='#' title='Klik Jika SPM UP sudah ditanda tangani Dekan' onclick="return alert('Maaf SPM ini sudah diotorisasi sebelumnya..')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }?>
+              </tr>
+              
+            <?php $no++    
+            ?> 
+            <?php }?>        
+            
+ </table>
+  <?php 
+  foreach($daftar_spm->result_array() as $row)
+            {    
+            $status=$row['status_spm'];
+  if($status =="diajukan"){?>
+   <table>
+            <tr><td><br/><br/></td></tr>
+            <tr>    
+                <td style="padding-left: 20px"><a href='<?php echo base_url()."unit/print_rekap_up/".$th."/".$id;?>' ><img src='<?php echo base_url();?>asset/images/print.png'> Download Rekap Rincian UP</a></td>
+                <td style="padding-left: 20px"><a href='<?php echo base_url()."unit/print_surat_pengantar/".$th."/".$id;?>' ><img src='<?php echo base_url();?>asset/images/print.png'> Download Surat Pengantar</a></td>
+                <td style="padding-left: 20px"><a href='<?php echo base_url()."unit/print_surat_pernyataan_unit/".$th."/".$id;?>' ><img src='<?php echo base_url();?>asset/images/print.png'> Download Surat Pernyataan</a></td>
+               
+            </tr>
+            <tr><td><br><br><br><br></td></tr>  
+   </table>
+   <?php }} ?>
+ </div>    
+    
+            <footer>
+            
+                
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+ </article>

@@ -1,0 +1,171 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_kendali_belanja extends CI_Model
+{
+	var $table_kendali_belanja = 't_kendali_belanja';
+	var $primary_id = 'id_kendali_belanja';
+
+	function add_kendali_belanja()
+	{
+		$data = $this->global_function->add_array($data, $add);
+
+		$result = $this->db->insert($this->table_kendali_belanja, $data);
+		return $result;
+	}
+
+	function get_data($data,$table){
+        $this->db->where($data);
+        $query = $this->db->get($this->$table);
+        return $query->row();
+    }
+
+    function get_kendali_belanja_by_id($id_kendali_belanja)
+	{
+		$sql = "
+				SELECT *
+				FROM t_kendali_belanja
+				WHERE id_kendali_belanja = ?
+			";
+
+		$query = $this->db->query($sql, array($id_kendali_belanja));
+		var_dump($this->query);
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return NULL;
+	}
+
+	function simpan_kendali_belanja($data_kendali_belanja)
+	{
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+
+		$data_kendali_belanja->created_date		= Formatting::get_datetime();
+		$data_kendali_belanja->created_by		= $this->session->userdata('username');
+
+		$this->db->set($data_kendali_belanja);
+    	$this->db->insert('t_kendali_belanja');
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	function get_data_table($search, $start, $length, $order)
+	{
+		$order_arr = array('id_kendali_belanja','kd_urusan','kd_bidang','kd_program','kd_kegiatan');
+		$sql="
+			SELECT * FROM ".$this->table_kendali_belanja."
+			WHERE kd_urusan LIKE '%".$search['value']."%'
+            OR kd_bidang LIKE '%".$search['value']."%'
+            OR kd_program LIKE '%".$search['value']."%'
+            OR kd_kegiatan LIKE '%".$search['value']."%'
+		";
+		$this->db->limit($length, $start);
+		$this->db->order_by($order_arr[$order["column"]], $order["dir"]);
+
+		$result = $this->db->query($sql);
+		return $result->result();
+	}
+
+	function count_data_table($search, $start, $length, $order)
+	{
+		$this->db->from($this->table_kendali_belanja);
+
+		$this->db->like("kd_urusan", $search['value']);
+		$this->db->or_like("kd_bidang", $search['value']);
+		$this->db->or_like("kd_program", $search['value']);
+		$this->db->or_like("kd_kegiatan", $search['value']);
+
+		$result = $this->db->count_all_results();
+		return $result;
+	}
+
+	function get_data_with_rincian($id_kendali_belanja,$table)
+	{
+		$sql="
+			SELECT * FROM ".$this->$table."
+			WHERE id_kendali_belanja = ?
+		";
+
+		$query = $this->db->query($sql, array($id_kendali_belanja));
+
+		if($query) {
+				if($query->num_rows() > 0) {
+					return $query->row();
+				}
+			}
+
+			return NULL;
+	}
+
+	function delete_kendali_belanja($id){
+   	    $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$this->db->where('id_kendali_belanja',$id);
+        $this->db->delete('t_kendali_belanja');
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+    }
+
+    function update_kendali_belanja($data,$id,$table,$primary) {
+        $this->db->where($this->$primary,$id);
+        return $this->db->update($this->$table,$data);
+    }
+
+	function kinerja_triwulan($id,$id_dpa_prog_keg_triwulan,$catatan,$keterangan,$capaian){
+		$counter = count($catatan);
+
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		//delete data yang sudah dihapus
+		//cek perbeddan id
+
+		//process here
+		$list = "(";
+		for($i=1;$i<=$counter;$i++){
+			$list.=$id[$i];
+			if($i!=$counter){
+				$list.=',';
+			}
+		}
+		$list .= ")";
+		$data_delete = $this->db->query("
+			SELECT id
+			FROM `tx_dpa_prog_keg_triwulan_detail`
+			WHERE id_dpa_prog_keg_triwulan = '$id_dpa_prog_keg_triwulan'
+			AND id NOT IN ".$list)->result();
+
+		foreach ($data_delete as $delete) {
+			$this->db->delete('tx_dpa_prog_keg_triwulan_detail', array('id' => $delete->id));
+		}
+
+		for($i=1;$i<=$counter;$i++){
+			$data = array(
+				'id_dpa_prog_keg_triwulan' => $id_dpa_prog_keg_triwulan,
+				'catatan' => $catatan[$i],
+				'keterangan' => $keterangan[$i],
+				'capaian' => $capaian[$i]
+			);
+			if(isset($id[$i])){
+				//ada id, update ke data sebelumnya
+				$this->db->where('id', $id[$i]);
+				$this->db->update('tx_dpa_prog_keg_triwulan_detail', $data);
+			}else{
+				//tidak ada id, insert
+				$this->db->insert('tx_dpa_prog_keg_triwulan_detail',$data);
+			}
+		}
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+
+	}
+}

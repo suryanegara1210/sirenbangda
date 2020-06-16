@@ -1,0 +1,40 @@
+<article class="module width_full">
+            <header><h3>History Transaksi</h3></header>
+                     
+                <div class="module_content" >
+                 <form method="post" name='formName4' action="" onSubmit='return validasi(this)'> 
+            <table  class="table-common" style="margin-left: 20px; " >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Tanggal</th> 
+                <th>Status</th> 
+                <th>Komentar</th> 
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            $no = 1;    
+              foreach($history->result_array() as $unit){  
+                  $tgl = $unit["tanggal_waktu"];
+                  $status = $unit["status_waktu"];
+                  $komentar = $unit["komentar"];  
+                         
+            ?>
+             
+              <tr>
+                <td align='center'><?php echo "$no";?></td>  
+                <td align='left'><?php echo "$tgl";?></td>  
+                <td align='left'><?php echo "$status";?></td>  
+                <td align='left'><?php echo "$komentar";?></td>  
+              </tr>
+              
+            <?php $no++; }    
+            ?> 
+</table>        
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer>  
+</article>

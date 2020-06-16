@@ -1,0 +1,148 @@
+        <ul class="tabs">
+            <li><a href="#tab1">Usulan Sudah Terotorisasi</a></li>
+            <li><a href="#tab2">Usulan Belum Terotorisasi</a></li>
+            <li><a href="#tab3">Belum Buat Rincian</a></li>
+        </ul>      
+        </header>
+
+        <div class="container">
+            <div id="tab1" class="tab_content"> 
+            <form method="post" name='formName4' action="<?php echo base_url();?>usulan/pengisian_spm" onSubmit='return validasi(this)'> 
+               
+            <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+            <thead> 
+                <tr>
+                    <th>Nomor</th>
+                    <th>Unit</th> 
+                    <th>Status Dokumen</th> 
+                    <th colspan="2">Aksi</th>
+
+                </tr>
+            </thead>
+            <?php 
+                if($daftar_up != false){
+                  $no=1;
+                foreach($daftar_up->result_array() as $row)
+                {  
+                $id=$row['id_usulan'];
+                $th_usulan=$row['tahun'];
+                $jns_usulan=$row['sifat_bayar'];
+                $nm_unit=$row['nama_subunit'];
+                $kode_unit=$row['id_subunit'];
+                $status_dokumen=$row['status_dokumen'];   
+                $keterangan=$row['keterangan'];     
+                ?>
+                  <input type="hidden" name="id_usulan" value="<?php echo "$id"; ?>">  
+                  <input type="hidden" name="th_usulan" value="<?php echo "$th_usulan"; ?>">  
+                  <input type="hidden" name="jns_usulan" value="<?php echo "jns_usulan"?>">  
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="center"><?php echo "$nm_unit";?></td>
+                    
+                    <?php if($status_dokumen =="belum diterima"){?> 
+                        <td align="center"><?php echo"$status_dokumen";?></td>
+                        <td align="center" width="10px">
+                        	<a href='<?php echo base_url()."usulan/detail_usulan_terotorisasi/".$th_usulan."/".$id."/".$kode_unit."/".$jns_usulan."";?>' title='Detail Usulan'>
+                            	<img src='<?php echo base_url();?>asset/images/detail.png'/>
+                            </a>
+                        </td>
+                        <td align="center" width="10px">
+                        <a onclick="otorisasi(<?php echo $th_usulan.",".$id;?>)"
+                            title='Otorisasi Dokumen'>
+                            	<img src='<?php echo base_url();?>asset/images/icn_alert_success.png'/>
+                            </a>
+                        </td>  
+                    <?php }else{?>
+                        <td align="center" style="background-color:#99ff33"><?php echo"$status_dokumen";?></td>
+                        <td align="center" width="10px">
+                            <a href='<?php echo base_url()."usulan/detail_usulan_terotorisasi/".$th_usulan."/".$id."/".$kode_unit."/".$jns_usulan."";?>' title='Detail UP'>
+                                <img src='<?php echo base_url();?>asset/images/detail.png'/>
+                            </a>
+                        </td> 
+                    	<td align="center" width="10px">                
+                                <img src='<?php echo base_url();?>asset/images/like.png' title="Dokumen telah siap dibuatkan SPM"/>
+                        </td>  
+                    <?php }?>
+    
+                <?php $no++;}?>  
+            </table><br />
+              
+                <?php }else{ ?>   
+                    <tr>
+                    <td align='center' colspan="5" style="margin-bottom: 20px; padding-bottom: 20px;">Data Kosong</td></tr> 
+            </table><br />
+            <?php }?>
+                
+            
+            </div><!-- end of #tab1 -->
+            
+            <div id="tab2" class="tab_content">           
+            <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+                 <thead> 
+                <tr >
+                    <th>Nomor</th>
+                    <th>UNit</th> 
+                    
+                </tr>
+            </thead>
+            <?php $no=1;
+                foreach($daftar_up_belum as $row)
+                {         
+                //$id_subunit=$row['id_subunit'];      
+                $nm_unit=$row['nama_subunit'];      
+                ?>
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="center"><?php echo "$nm_unit";?></td> 
+                    <td align="center" width="10px"><a href='<?php echo base_url()."unit/detail_up_terotorisasi2/".$kode_unit;?>' title='Detail UP'><img src='<?php echo base_url();?>asset/images/icn_categories.png'></a></td> 
+                    <?php $no++;}?>  
+            </table> 
+            
+
+            </div><!-- end of #tab2 -->
+            <div id="tab3" class="tab_content">      
+            <table  class="table-common" style="margin-left: 20px; width: 380px;" >  
+            <thead> 
+                <tr>
+                    <th>Nomor</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <?php $no=1;
+                foreach($telat as $row)
+                {         
+                $nm_unit=$row['nama_subunit'];      
+                ?>   
+                   
+                  <tr>
+                    <td align='center'><?php echo "$no";?></td>
+                    <td align="left"><?php echo "$nm_unit";?></td> 
+                  <?php $no++;}?>  
+            </table><br />  
+            </div><!-- end of #tab2 -->
+            
+        </div><!-- end of .tab_container -->  
+
+
+<script type="text/javascript">   
+    $(document).ready(function() {
+
+    //When page loads...
+    $(".tab_content").hide(); //Hide all content
+    $("ul.tabs li:first").addClass("active").show(); //Activate first tab
+    $(".tab_content:first").show(); //Show first tab content
+
+    //On Click Event
+    $("ul.tabs li").click(function() {
+
+        $("ul.tabs li").removeClass("active"); //Remove any "active" class
+        $(this).addClass("active"); //Add "active" class to selected tab
+        $(".tab_content").hide(); //Hide all tab content
+
+        var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+        $(activeTab).fadeIn(); //Fade in the active ID content
+        return false;
+    });
+
+	});
+    </script>

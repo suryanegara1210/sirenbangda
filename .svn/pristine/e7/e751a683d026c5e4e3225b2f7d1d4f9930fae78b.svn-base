@@ -1,0 +1,1968 @@
+<?php /**
+	* @brief Model Class yang terkait dengan Pengajuan Usulan Uang Persediaan (UP)
+	* dan Tambahan Uang Persediaan (TUP)
+	*
+	* @author I Made Agus Setiawan
+	* @author Dwi Antika
+	*/
+class m_usulan extends CI_Model {
+
+    public function __construct(){
+        parent::__construct();
+        date_default_timezone_set('Etc/GMT-8');
+    }
+
+	function get_usulan_by_id($id) {
+		$sql = "
+			SELECT a.*,b.status_usulan
+			FROM t_usulan a INNER JOIN m_status_usulan b USING(id_status_usulan)
+			WHERE a.id_usulan = ?
+		";
+
+		$query = $this->db->query($sql, array($id));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+		return FALSE;
+	}
+
+	function get_usulan($ta, $idsu, $type) {
+		$sql = "
+			SELECT a.*,b.status_usulan
+			FROM t_usulan a INNER JOIN m_status_usulan b USING(id_status_usulan)
+			WHERE YEAR(a.tgl_usulan) = ?
+				AND a.id_subunit = ?
+				AND a.sifat_bayar = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu, $type));
+
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 *Fungsi yang hanya mencari usulan terakhir dari setiap tipe usulan
+	 *
+	 */
+	function get_last_usulan($ta, $idsu, $type) {
+		$sql = "
+			SELECT a.*,b.status_usulan, d.flag_spj
+			FROM t_usulan a INNER JOIN m_status_usulan b USING(id_status_usulan)
+				LEFT JOIN t_spm c ON a.ref_id_spm=c.id_spm
+				LEFT JOIN t_sp2d d ON c.id_spm=d.id_spm
+			WHERE YEAR(a.tgl_usulan) = ?
+				AND a.id_subunit = ?
+				AND a.sifat_bayar = ?
+			ORDER BY a.tgl_usulan DESC
+			LIMIT 1
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu, $type));
+
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 *
+	 *
+	 */
+	function get_usulan_up ($ta, $idsu) {
+		return $this->get_usulan($ta, $idsu, Constant::JB_UP);
+	}
+
+	function get_usulan_tup ($ta, $idsu) {
+		return $this->get_usulan($ta, $idsu, Constant::JB_TUP);
+	}
+
+	function get_last_usulan_tup($ta, $idsu) {
+		return $this->get_last_usulan($ta, $idsu, Constant::JB_TUP);
+
+	}
+
+	function create_usulan($ta, $idsu, $type){
+	    $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+        $sunit = $this->m_umum->subunit_detail($idsu);
+		$uname = $this->session->userdata('username');
+		$idu   = $this->session->userdata('id_unit');
+		$akun_kode = $this->m_settings->get_bas_uang_muka();
+
+		//add new usulan
+		$this->db->set('tgl_usulan'	, 'now()', FALSE);
+		$this->db->set('sifat_bayar', $type);
+		$this->db->set('id_subunit'	, $idsu);
+		$this->db->set('id_unit'	, $idu);
+		$this->db->set('akun_kode'	, $akun_kode['kode_akun']);
+		$this->db->set('created_by'	, $uname);
+		$this->db->set('created_date', 'now()', FALSE);
+		$result = $this->db->insert('t_usulan');
+
+        $komentar='';
+        $id_usulan = $this->db->insert_id();
+
+		$this->log_history_usulan($id_usulan,1,$komentar);
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+
+		//return $result ? $this->db->insert_id() : $result;
+	}
+
+	function create_usulan_up($ta, $idsu) {
+		return $this->create_usulan($ta, $idsu, Constant::JB_UP);
+	}
+
+	function create_usulan_tup($ta, $idsu) {
+		return $this->create_usulan($ta, $idsu, Constant::JB_TUP);
+	}
+
+	function get_all_usulan_item_by_id_usulan($id_usulan) {
+		$sql = "
+			SELECT *
+			FROM t_usulan a INNER JOIN t_usulan_item b
+				ON a.id_usulan = b.ref_id_usulan
+			WHERE a.id_usulan = ?
+		";
+
+		$query = $this->db->query($sql, array($id_usulan));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+
+	//TODO: PERLU dipertimbangkan untuk dihapus
+	function get_item_usulan_by_id_usulan($id_usulan, $params) {
+		$sql = "
+			SELECT b.id_usulan_item, b.ref_id_usulan, b.ref_id_subunit,
+				b.sifat_bayar, b.kdgiat, b.nmgiat, b.kdoutput, b.nmoutput,
+				b.kdkomponen, b.nmkomponen, b.kdakun, b.kdakun, b.hdr, b.total_usulan_item,
+				b.keterangan, b.id_status_usulan_item, b.status_dokumen, c.*
+			FROM t_usulan a INNER JOIN t_usulan_item b
+					ON a.id_usulan = b.ref_id_usulan
+				LEFT JOIN t_uraian c
+					ON b.id_usulan_item = c.id_usulan_item
+			WHERE a.id_usulan = ?
+				AND b.kdgiat = ?
+				AND b.kdoutput = ?
+				AND b.kdkomponen = ?
+				AND b.kdakun = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($id_usulan, $params->kdgiat,
+											  $params->kdoutput, $params->kdkomponen,
+											  $params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+
+	}
+
+	function get_nilai_usulan_item_per_akun($params)
+	{
+		$sql = "
+			SELECT IFNULL(SUM(a.total_usulan_item),0) AS total_usulan_item
+			FROM t_usulan_item a 
+			WHERE a.ref_id_usulan = ?
+				AND a.kdgiat = ?
+				AND a.kdoutput = ?
+				AND a.kdkomponen = ?
+				AND a.kdakun = ?
+		";
+
+		$query = $this->db->query($sql, array($params->id_usulan, $params->kdgiat,
+											  $params->kdoutput, $params->kdkomponen,
+											  $params->kdakun));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row()->total_usulan_item;
+			}
+		}
+
+		return 0;		
+	}
+
+	function get_usulan_item_by_params($params) {
+		$sql = "
+			SELECT a.*, b.status_usulan_item
+			FROM t_usulan_item a INNER JOIN m_status_usulan_item b USING(id_status_usulan_item)
+			WHERE a.ref_id_usulan = ?
+				AND a.kdgiat = ?
+				AND a.kdoutput = ?
+				AND a.kdkomponen = ?
+				AND a.kdakun = ?
+				AND a.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($params->id_usulan, $params->kdgiat,
+											  $params->kdoutput, $params->kdkomponen,
+											  $params->kdakun, $params->hdr));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return FALSE;		
+	}
+
+	function get_usulan_item_by_id($id_usulan_item) {
+		$sql = "
+			SELECT a.*,b.status_usulan_item
+			FROM t_usulan_item a INNER JOIN m_status_usulan_item b USING(id_status_usulan_item)
+			WHERE a.id_usulan_item = ?
+		";
+
+		$query = $this->db->query($sql, array($id_usulan_item));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return FALSE;
+	}
+
+	function delete_usulan_item($id_usulan_item) {
+
+		//NOTE: Asumsi uraian akan di-delete secara cascade sesuai constraint
+		//Foreint Key nya
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$usulan_item = $this->get_usulan_item_by_id($id_usulan_item);
+
+		if($usulan_item) {
+			$this->db->where('id_usulan_item', $id_usulan_item);
+			$ret = $this->db->delete('t_usulan_item');
+
+			//perbaharui data total_usulan di t_usulan
+			$this->update_nilai_total_usulan($usulan_item->ref_id_usulan);
+		}
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	function save_cache_uraian($cache) {
+		//simpan data
+		//start transact sql
+
+		$this->db->trans_begin();
+
+		$uname = $this->session->userdata('username');
+
+		//cek item usulan sudah ada atau belum
+		$item_usulan = $this->get_item_usulan_by_id_usulan($cache->id_usulan,
+														   $cache);
+		//jika item belum ada, tambahkan di tabel t_usulan_item
+		if($item_usulan === FALSE) {
+			//add new item usulan
+			$this->db->set('ref_id_usulan'		, $cache->id_usulan);
+			$this->db->set('ref_id_subunit'		, $cache->id_subunit);
+			$this->db->set('sifat_bayar', 	$cache->sifat_bayar);
+			$this->db->set('kdgiat', 		$cache->kdgiat);
+			$this->db->set('nmgiat', 		$cache->nmgiat);
+			$this->db->set('kdoutput', 		$cache->kdoutput);
+			$this->db->set('nmoutput', 		$cache->nmoutput);
+			$this->db->set('kdkomponen', 	$cache->kdkomponen);
+			$this->db->set('nmkomponen', 	$cache->nmkomponen);
+			$this->db->set('kdakun', 		$cache->kdakun);
+			$this->db->set('nmakun', 		$cache->nmakun);
+			$this->db->set('hdr', 			$cache->hdr);
+			$this->db->set('created_by',	$uname);
+			$this->db->set('created_date','now()', FALSE);
+
+			//do insert
+			$this->db->insert('t_usulan_item');
+			$cache->id_usulan_item = $this->db->insert_id();
+		} else {
+			$cache->id_usulan_item = $item_usulan->id_usulan_item;
+		}
+
+		//simpan data
+		foreach($cache->rows as $id=>$cell) {
+			$this->db->set('id_usulan_item',$cache->id_usulan_item);
+			$this->db->set('uraian', 		$cell[1]);
+			$this->db->set('volume', 		$cell[2]);
+			$this->db->set('satuan', 		$cell[3]);
+			$this->db->set('harga_satuan', 	$cell[4]);
+			$this->db->set('jumlah', 		$cell[5]);
+
+			if( strpos($id, 'cache') === FALSE &&
+				strpos($id, 'empty') === FALSE ) {
+				//update
+				$this->db->set('changed_by',$uname);
+				$this->db->set('changed_date','now()', FALSE);
+
+				//do update
+				$this->db->where('id_uraian', $id);
+				$this->db->update('t_uraian');
+			} else {
+				//insert
+				$this->db->set('created_by',$uname);
+				$this->db->set('created_date','now()', FALSE);
+
+				//do insert
+				$this->db->insert('t_uraian');
+				$realid = $this->db->insert_id();
+
+				if($realid){
+					$cache->rows[$realid] = $cell;
+				}
+			}
+		}
+
+		if(count($cache->del_stack) > 0) {
+			//delete
+			while($delid = array_pop($cache->del_stack)){
+				//do delete
+				$this->db->where('id_uraian', $delid);
+				$this->db->delete('t_uraian');
+			}
+		}
+
+		// perbaharui data total usulan item di t_usulan_item
+		$this->update_nilai_total_usulan_item($cache->id_usulan_item);
+
+		//perbaharui data total_usulan di t_usulan
+		$this->update_nilai_total_usulan($cache->id_usulan);
+
+
+		//implement status SDH REVISI, JIKA status sebelumnya 3 (REVISI)
+		$item_usulan = $this->get_usulan_item_by_id($cache->id_usulan_item);
+		if($item_usulan->id_status_usulan_item == Constant::USULANITM_REVISI) {
+			$this->set_status_usulan_item($cache->id_usulan_item, Constant::USULANITM_SDHREVISI);
+		}
+
+		//$this->db->trans_complete();
+		if($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		} else {
+			$this->db->trans_commit();
+
+			//jika lancar, hilangkan data cache dan empty
+			foreach($cache->rows as $id=>$cell){
+				if(strpos($id, 'cache') !== FALSE ||
+				   strpos($id, 'empty') !== FALSE){
+					unset($cache->rows[$id]);
+				}
+			}
+
+			return $cache;
+		}
+	}
+
+	function update_nilai_total_usulan($idusulan) {
+		//FIXME: tentukan username yang melakukan
+		$sql = "UPDATE t_usulan a
+			SET a.total_usulan = (SELECT SUM(total_usulan_item) FROM t_usulan_item where ref_id_usulan = ?),
+				a.changed_by = 'model',
+				a.changed_date = now()
+			WHERE a.id_usulan = ?
+			";
+
+		$query = $this->db->query($sql, array($idusulan, $idusulan));
+		return $query;
+	}
+
+	function update_nilai_total_usulan_item($idusulan_item) {
+		//FIXME: tentukan username yang melakukan
+		$sql = "UPDATE t_usulan_item a
+			SET a.total_usulan_item = (SELECT SUM(jumlah) FROM t_uraian where id_usulan_item = ?),
+				a.changed_by = 'model',
+				a.changed_date = now()
+			WHERE a.id_usulan_item = ?
+			";
+
+		$query = $this->db->query($sql, array($idusulan_item, $idusulan_item));
+		return $query;
+	}
+
+	function get_nilai_usulan_by_id ($idusulan) {
+		$sql = "SELECT IFNULL(SUM(c.jumlah),0) AS total_usulan
+				FROM t_usulan a INNER JOIN t_usulan_item b
+						ON a.id_usulan = b.ref_id_usulan
+					INNER JOIN t_uraian c USING(id_usulan_item)
+				WHERE a.id_usulan = ?
+			";
+
+		$query = $this->db->query($sql, array($idusulan));
+		if($query->num_rows() > 0) {
+			return $query->row()->total_usulan;
+		}
+
+		return 0;
+	}
+
+	function get_uraian ($ta, $idsu, $type, $params){
+		$sql = "
+			SELECT b.id_usulan, b.tgl_usulan, b.sifat_bayar, b.id_subunit,
+				b.total_usulan, b.flag_kirim, a.*
+			FROM t_uraian a INNER JOIN t_usulan b USING(id_usulan)
+			WHERE YEAR(b.tgl_usulan) = ?
+				AND b.id_subunit = ?
+				AND b.sifat_bayar = ?
+				AND a.kdgiat = ?
+				AND a.kdoutput = ?
+				AND a.kdkomponen = ?
+				AND a.kdakun = ?
+				AND a.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu, $type, $params->kdgiat,
+								$params->kdoutput, $params->kdkomponen,
+								$params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+
+	function get_uraian_by_params($params) {
+		$sql = "
+			SELECT a.*
+			FROM t_uraian a INNER JOIN t_usulan_item b
+					ON a.id_usulan_item = b.id_usulan_item
+			WHERE b.ref_id_usulan = ?
+				AND b.kdgiat = ?
+				AND b.kdoutput = ?
+				AND b.kdkomponen = ?
+				AND b.kdakun = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($params->id_usulan, $params->kdgiat,
+								$params->kdoutput, $params->kdkomponen,
+								$params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+
+	function get_uraian_by_id_usulan_item($id_usulan_item) {
+		$sql = "
+			SELECT a.*
+			FROM t_uraian a INNER JOIN t_usulan_item b
+					ON a.id_usulan_item = b.id_usulan_item
+			WHERE b.id_usulan_item = ?
+		";
+
+		$query = $this->db->query($sql, array($id_usulan_item));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+
+	//TODO: perlu dipertimbangkan untuk diganti
+	function get_uraian_by_id_usulan ($id_usulan, $params){
+		$sql = "
+			SELECT a.*
+			FROM t_uraian a INNER JOIN t_usulan_item b
+					ON a.id_usulan_item = b.id_usulan_item
+			WHERE b.ref_id_usulan = ?
+				AND b.kdgiat = ?
+				AND b.kdoutput = ?
+				AND b.kdkomponen = ?
+				AND b.kdakun = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($id_usulan, $params->kdgiat,
+								$params->kdoutput, $params->kdkomponen,
+								$params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+
+	function get_nilai_uraian_by_id_usulan($id_usulan, $params){
+		$sql = "
+			SELECT SUM(jumlah) as jumlah
+			FROM t_uraian a INNER JOIN t_usulan_item b
+					ON a.id_usulan_item = b.id_usulan_item
+			WHERE b.ref_id_usulan = ?
+				AND b.kdgiat = ?
+				AND b.kdoutput = ?
+				AND b.kdkomponen = ?
+				AND b.kdakun = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($id_usulan, $params->kdgiat,
+								$params->kdoutput, $params->kdkomponen,
+								$params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->row()->jumlah;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * note: sifat bayar tidak diperlukan sebagai filter disini karena
+	 * jika dicek di TUP maka uraian UP harus diperhitungkan juga, sehingga
+	 * tahu brapa yang sudah digunakan pagu POK nya baik UP maupun TUP
+	 */
+	function get_nilai_uraian ($ta, $idsu, $params){
+		$sql = "
+			SELECT IFNULL(SUM(a.jumlah),0) as jumlah
+			FROM t_uraian a INNER JOIN t_usulan_item b
+					ON a.id_usulan_item = b.id_usulan_item
+				INNER JOIN t_usulan c
+					ON b.ref_id_usulan = c.id_usulan
+			WHERE YEAR(c.tgl_usulan) = ?
+				AND c.id_subunit = ?
+				AND b.kdgiat = ?
+				AND b.kdoutput = ?
+				AND b.kdkomponen = ?
+				AND b.kdakun = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu, $params->kdgiat,
+								$params->kdoutput, $params->kdkomponen,
+								$params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->row()->jumlah;
+		}
+
+		return FALSE;
+	}
+
+	function get_list_uraian_item_usulan($id_usulan_item) {
+		$sql = "
+			SELECT *
+			FROM t_uraian
+			WHERE id_usulan_item = ?
+			";
+
+		$query = $this->db->query($sql, array($id_usulan_item));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+
+
+	}
+
+	function get_list_uraian_usulan($id_usulan) {
+		//TODO: tambahan filter flag_kirim=0, flag_cek=1
+		$sql = "
+			SELECT a.id_usulan, a.sifat_bayar, a.id_status_usulan,
+				d.status_usulan, b.kdgiat, b.nmgiat, b.kdoutput, b.nmoutput,
+				b.kdkomponen, b.nmkomponen, b.kdakun, b.nmakun, b.hdr,
+				b.id_status_usulan_item, e.status_usulan_item, b.id_usulan_item,
+				IFNULL(sum(c.jumlah), 0) as jumlah
+			FROM t_usulan a INNER JOIN t_usulan_item b
+					ON a.id_usulan = b.ref_id_usulan
+				INNER JOIN t_uraian c
+					ON b.id_usulan_item = c.id_usulan_item
+				INNER JOIN m_status_usulan d
+					USING(id_status_usulan)
+				LEFT JOIN m_status_usulan_item e
+					ON b.id_status_usulan_item = e.id_status_usulan_item
+			WHERE a.id_usulan = ?
+			GROUP BY a.id_usulan, a.sifat_bayar, a.id_status_usulan,
+				d.status_usulan, b.kdgiat, b.nmgiat, b.kdoutput, b.nmoutput,
+				b.kdkomponen, b.nmkomponen, b.kdakun, b.nmakun, b.hdr,
+				b.id_status_usulan_item,e.status_usulan_item, b.id_usulan_item
+			ORDER BY b.kdgiat, b.kdoutput, b.kdkomponen, b.kdakun, a.tgl_usulan
+		";
+
+		$query = $this->db->query($sql, array($id_usulan));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+
+     /**
+    * Fungsi untuk menampilkan data rkakl berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @return sekumpulan objek data transaksi UP
+    */
+    function daftar_usulan($ta,$id_subunit){
+
+		$this->db->select("*");
+		$this->db->from("t_usulan");
+		$this->db->join("t_uraian",'t_uraian.id_usulan=t_usulan.id_usulan','inner');
+		$this->db->join("m_subunit",'t_usulan.id_subunit=m_subunit.id_subunit','inner');
+		$this->db->where('t_usulan.id_subunit',$id_subunit);
+		$this->db->where('t_usulan.flag_kirim',0);
+		$this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+		$this->db->group_by('t_usulan.id_usulan');
+		$result = $this->db->get();
+		return $result;
+	}
+
+	/**
+	 * Fungsi ini untuk menghitung jumlah nilai uraian yang diusulkan oleh $su sub unit
+	 * pada $ta tahun anggaran tertentu, khususnya untuk $type UP dan TUP.
+	 *
+	 * @param $ta   Tahun Anggaran : 4 digit
+	 * @param $su   Sub Unit Pembuat
+	 * @param $type UP-TUP
+	 * @param $max_status   hanya memperhitungkan uraian dengan status terakhir yg ditentukan
+	 * @param $where        akan dipergunakan jika $max_status = NULL
+	 *
+	 * @return  Jika benar, maka fungsi ini akan mengembalikan nilai total uraian yang
+	 *          telah dibuat. Jika salah, maka akan mengembalikan nilai 0
+	 */
+	function get_nilai_uraian_usulan ($ta, $su, $type, $max_status, $where = "") {
+		//jumlah uraian UP/TUP berdasarkan status usulan
+
+		//sementara masih menggunakan tahun 2 digit
+		//$ta  = substr($ta, -2);
+
+		$this->db->select('IFNULL(SUM(t_uraian.jumlah), 0) as jumlah ', false);
+		$this->db->from('t_usulan');
+		$this->db->join("t_usulan_item",'t_usulan.id_usulan=t_usulan_item.ref_id_usulan','INNER');
+		$this->db->join("t_uraian",'t_usulan_item.id_usulan_item=t_uraian.id_usulan_item','INNER');
+		$this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+		$this->db->where('t_usulan.id_subunit',$su);
+
+		switch ($type) {
+
+			case Constant::JB_TUP:
+			case Constant::JB_UP:
+				$this->db->where('t_usulan.sifat_bayar',$type);
+				break;
+			case Constant::JB_GUP:
+			case Constant::JB_LS:
+				break;
+		}
+
+		if($max_status === NULL) {
+		   if($where === ""){
+			   return 0;
+		   } else {
+			   $this->db->where($where);
+		   }
+		} else {
+		   $this->db->where("t_usulan.id_status_usulan < {$max_status}");
+		}
+
+		$result = $this->db->get();
+		if($result) {
+			$result = $result->row();
+			return $result->jumlah;
+		}
+
+		return 0;
+	}
+
+
+     /**
+    * Fungsi untuk menampilkan jumlah uraian berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari sub_unit
+    * @return objek uraian
+    *
+    * max_status <= 1, atau < 2
+    */
+    function total_up_yg_akan_diusulkan($ta, $idsu)
+    {
+        return $this->get_nilai_uraian_usulan ($ta, $idsu, Constant::JB_UP, 2);
+    }
+
+    function total_tup_yg_akan_diusulkan($ta, $idsu)
+    {
+        return $this->get_nilai_uraian_usulan ($ta, $su, Constant::JB_TUP, 2);
+    }
+
+
+	function send_usulan($id_usulan) {
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		//set flag_kirim = 1
+		$this->set_status_kirim_usulan($id_usulan, TRUE);
+
+		//set status usulan = 2 --> cek verifikator unit
+		$this->set_status_usulan($id_usulan, Constant::USULANSU_VERI);
+
+		//get all usulan item under usulan
+		$item_usulan = $this->get_all_usulan_item_by_id_usulan($id_usulan);
+		foreach($item_usulan as $item) {
+			//set status usulan item = 2 --> VERIFIKASI jika
+			//cek kalau sudah OK, maka tidak perlu di set lagi
+			if(!in_array($item->id_status_usulan_item, array(Constant::USULANITM_VERI, Constant::USULANITM_OK))) {
+				$this->set_status_usulan_item($item->id_usulan_item, Constant::USULANITM_VERI);
+			}
+		}
+
+		//log history
+		//TODO: didefinisikan log-nya segera
+        $komentar='';
+        $this->log_history_usulan($id_usulan,Constant::USULANSU_VERI,$komentar);
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	function set_status_kirim_usulan($id_usulan, $flag = FALSE) {
+		$uname = $this->session->userdata('username');
+
+		$sql = "
+			UPDATE t_usulan
+			SET flag_kirim = ?,
+				changed_by = ?,
+				changed_date = now()
+			WHERE id_usulan = ?
+		";
+
+		$query = $this->db->query($sql, array($flag ? 1 : 0, $uname, $id_usulan));
+		return $query;
+	}
+
+	function set_status_usulan($id_usulan, $id_status) {
+		$uname = $this->session->userdata('username');
+
+		$sql = "
+			UPDATE t_usulan
+			SET id_status_usulan = ?,
+				changed_by = ?,
+				changed_date = now()
+			WHERE id_usulan = ?
+		";
+
+		$query = $this->db->query($sql, array($id_status, $uname, $id_usulan));
+        $this->m_usulan->log_history_usulan($id_usulan,$id_status,'-');
+		return $query;
+	}
+
+	function set_spm_usulan($id_usulan, $id_spm, $status_usulan) {
+		$uname = $this->session->userdata('username');
+
+		$sql = "
+			UPDATE t_usulan
+			SET ref_id_spm = ?,
+                id_status_usulan = ?,
+				changed_by = ?,
+				changed_date = now()
+			WHERE id_usulan = ?
+		";
+
+		$query = $this->db->query($sql, array($id_spm,$status_usulan, $uname, $id_usulan));
+        //$this->m_usulan->log_history_usulan($id_usulan,$id_spm,'-');
+		return $query;
+	}
+
+	function set_status_usulan_item($id_usulan_item, $id_status) {
+		$uname = $this->session->userdata('username');
+
+		$sql = "
+			UPDATE t_usulan_item
+			SET id_status_usulan_item = ?,
+				changed_by = ?,
+				changed_date = now()
+			WHERE id_usulan_item = ?
+		";
+
+		$query = $this->db->query($sql, array($id_status, $uname, $id_usulan_item));
+		return $query;
+	}
+
+
+	function log_history_usulan($id_usulan,$id_status,$komentar) {
+	   $uname = $this->session->userdata('username');
+       $level = $this->session->userdata('level');
+	   $sql = "
+            INSERT t_usulan_history
+            SET id_usulan     = ?,
+                status_waktu  = (
+            	   SELECT status_usulan
+            	   FROM m_status_usulan
+            	   WHERE id_status_usulan = ?
+                ),
+                komentar       = ?,
+                level          = ?,
+                created_by     = ?,
+                created_date   = NOW()
+
+       ";
+       $query = $this->db->query($sql, array($id_usulan,$id_status,$komentar,$level,$uname));
+	   return $query;
+	}
+
+
+	/**
+    * Fungsi untuk mengupdate uraian berdasarkan id_uraian,id_subunit,id
+    * @param id_uraian is integer,  merupakan id dari uraian
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @param id is integer
+    */
+    function update_flag_cek($id_uraian,$id_subunit,$id)
+	{
+		 $this->db->set('flag_cek',1);
+		 $this->db->set('id_usulan',$id);
+		 $this->db->where('id_subunit',$id_subunit);
+		 $this->db->where('id_uraian',$id_uraian);
+		 $this->db->update('t_uraian');
+	}
+
+    function ada_mp_max($ta,$id_subunit)
+        {
+            $tahun = date('Y');
+            $this->db->select("*");
+            $this->db->from("t_max_up");
+            $this->db->where('tahun',$ta);
+            $this->db->where('id_subunit',$id_subunit);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+
+    function banyak_mp_max($ta,$id_subunit)
+        {
+            $this->db->select("nilai_max");
+            $this->db->from("t_max_up");
+            $this->db->where('tahun',$ta);
+            $this->db->where('id_subunit',$id_subunit);
+            $result = $this->db->get();
+            return $result ;
+        }
+      /**
+    * Fungsi untuk banyaknya data transaksi yang telah dikirim berdasarkan id_subunit, tahun
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @param tahun is integer, merupakan tahun dari transaksi
+    * @return integer
+    */
+    function banyak_usulan_terkirim($ta,$id_subunit,$id)
+        {
+
+            $this->db->select("t_usulan.flag_kirim");
+            $this->db->from("t_usulan");
+            $this->db->where('t_usulan.id_subunit',$id_subunit);
+            $this->db->where('t_usulan.sifat_bayar',$id);
+            $this->db->where('t_usulan.flag_kirim',1);
+            $this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+   /**
+    * Fungsi untuk banyaknya data transaksi berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @return integer
+    */
+    function banyak_up($ta,$id_subunit)
+        {
+            $this->db->select("*");
+            $this->db->from("t_usulan");
+            $this->db->join("t_uraian",'t_usulan.id_usulan=t_uraian.id_usulan','inner');
+            $this->db->where('t_usulan.id_subunit',$id_subunit);
+            $this->db->where('t_usulan.flag_kirim',0);
+            $this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+    /**
+    * Fungsi untuk banyaknya data transaksi berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @return integer
+    */
+    function banyak_usulan($ta,$id_subunit)
+        {
+            $this->db->select("*");
+            $this->db->from("t_usulan");
+            $this->db->join("t_uraian",'t_usulan.id_usulan=t_uraian.id_usulan','inner');
+            $this->db->where('t_usulan.id_subunit',$id_subunit);
+            $this->db->where('t_usulan.flag_kirim',0);
+            $this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+
+    /**
+    * Fungsi untuk menampilkan jumlah pagu berdasarkan kode_subunit
+    * @param kode_subunit is integer, merupakan kode dari sub_unit
+    * @return sekumpulan objek rkakl
+    */
+    function total_rkakl($ta,$kode_subunit)
+        {
+           $this->db->select('sum(jumlah)');
+           $this->db->from('t_rkakl');
+           $this->db->where('kode_unit',$kode_subunit);
+           $this->db->where('tahun',$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+
+     /**
+    * Fungsi untuk menampilkan jumlah pagu pada rkakl berdasarkan kode_subunit, satuan
+    * @param kode_subunit is integer, merupakan kode dari sub_unit
+    * @param satuan is integer, merupakan nama satuan dari barang
+    * @return sekumpulan objek rkakl
+    */
+    function total_keg_non_adhoc ($ta,$kode_subunit,$satuan)
+        {
+           $this->db->select('sum(jumlah)');
+           $this->db->from('t_rkakl');
+           $this->db->where('kode_unit',$kode_subunit);
+           $this->db->where_in('sat', $satuan);
+           $this->db->where('tahun',$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+
+
+
+
+    /**
+    * Fungsi untuk menampilkan data satuan
+    * @return sekumpulan objek data satuan
+    */
+    function tampil_satuan()
+        {
+            $group = $this->db->query("select * from m_lov where kode_app ='1'");
+            return $group->result();
+        }
+
+     /**
+    * Fungsi untuk menampilkan jumlah pagu berdasarkan kode_subunit,kdkomponen,kdoutput,kdakun,hdr
+    * @param kode_subunit is integer, merupakan kode dari subunit
+    * @param kdoutput is integer, merupakan kode dari output
+    * @param kdkomponen is integer, merupakan kode dari komponen
+    * @param kdakun is integer, merupakan kode dari akun
+    * @param $hdr is integer, merupakan kode dari header belanja
+    * @return sekumpulan objek
+    */
+     function jumlah_pagu_uraian_val($ta,$kode_subunit,$kdgiat,$kdkomponen,$kdoutput,$kdakun,$kdhdr)
+        {
+             $result = array();
+             $this->db->select('sum(jumlah)');
+             $this->db->from('t_rkakl');
+             $this->db->where('kdgiat',$kdgiat);
+             $this->db->where('kode_unit',$kode_subunit);
+             $this->db->where('kdkomponen',$kdkomponen);
+             $this->db->where('kdoutput',$kdoutput);
+             $this->db->where('kdakun',$kdakun);
+             $this->db->where('hdr',$kdhdr);
+             $this->db->where('tahun',$ta);
+             $query = $this->db->get();
+             return $query;
+        }
+    function getnamaList_val($ta,$kode_subunit,$kdgiat,$kdoutput,$kdkomponen,$kdakun,$kdhdr)
+        {
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit);
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdgiat',$kdgiat);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdakun',$kdakun);
+            $this->db->where('hdr',$kdhdr);
+            $this->db->where('tahun',$ta);
+            $result = $this->db->get();
+            return $result;
+        }
+    function jum_uraian2_val($ta,$id_subunit,$kdoutput,$kdkomponen,$kdakun,$kdhdr,$id)
+        {
+
+            $this->db->select('*');
+            $this->db->from("t_uraian");
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdakun',$kdakun);
+            $this->db->where('nmheader',$kdhdr);
+            $this->db->where('flag_cek',1);
+            $this->db->where('sifat_bayar',$id);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+
+    /**
+    * Fungsi untuk banyaknya data transaksi yang telah dikirim berdasarkan id_subunit, tahun
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @param tahun is integer, merupakan tahun dari transaksi
+    * @return integer
+    */
+    function banyak_up_terkirim($ta,$id_subunit)
+        {
+
+            $this->db->select("t_usulan.flag_kirim");
+            $this->db->from("t_usulan");
+            $this->db->where('t_usulan.id_subunit',$id_subunit);
+            $this->db->where('t_usulan.sifat_bayar',1);
+            $this->db->where('t_usulan.flag_kirim',1);
+            $this->db->where('t_usulan.th_transaksi',$ta);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+     /**
+    * Fungsi untuk menampilkan data pagu berdasarkan id_subunit,kdkomponen,kdoutput,kdakun,hdr
+    * @param id_subunit is integer, merupakan id dari subunit belanja
+    * @param kdkomponen is integer, merupakan kode dari komponen belanja
+    * @param kdoutput is integer, merupakan kode dari output belanja
+    * @param kdakun is integer, merupakan kode dari akun belanja
+    * @param hdr is integer, merupakan kode dari header belanja
+    * @return sekumpulan objek data pagu
+    */
+    function cek_pagu_uraian_up($id_subunit,$kdkomponen,$kdoutput,$kdakun,$hdr,$id)
+        {
+           $this->db->select('sum(jumlah)');
+           $this->db->from('t_uraian');
+           $this->db->where('id_subunit',$id_subunit);
+           $this->db->where('kdoutput',$kdoutput);
+           $this->db->where('kdkomponen',$kdkomponen);
+           $this->db->where('kdakun',$kdakun);
+           $this->db->where('nmheader',$hdr);
+           $this->db->where('sifat_bayar',$id);
+           $this->db->where('flag_cek',0);
+           $query = $this->db->get();
+           return $query;
+        }
+
+     /**
+    * Fungsi untuk menampilkan uraian yang belum terkirim ke unit  berdasarkan id_subunit,kdoutput,kdkomponen,kdakun,hdr
+    * @param id_subunit is integer, merupakan id dari subunit belanja
+    * @param kdkomponen is integer, merupakan kode dari komponen belanja
+    * @param kdoutput is integer, merupakan kode dari output belanja
+    * @param kdakun is integer, merupakan kode dari akun belanja
+    * @param hdr is integer, merupakan kode dari header belanja
+    * @return integer
+    */
+    function jum_uraian($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr,$usulan)
+        {
+
+            $this->db->select('*');
+            $this->db->from("t_uraian");
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdakun',$kdakun);
+            $this->db->where('nmheader',$hdr);
+            $this->db->where('flag_cek',0);
+            $this->db->where('sifat_bayar',$usulan);
+            $result = $this->db->get();
+            return $result->num_rows() ;
+        }
+     /**
+    * Fungsi untuk menampilkan uraian jenis belanja UP berdasarkan id_subunit,kdoutput,kdkomponen,kdakun,hdr
+    * @param id_subunit is integer, merupakan id dari subunit belanja
+    * @param kdkomponen is integer, merupakan kode dari komponen belanja
+    * @param kdoutput is integer, merupakan kode dari output belanja
+    * @param kdakun is integer, merupakan kode dari akun belanja
+    * @param hdr is integer, merupakan kode dari header belanja
+    * @return sekumpulan objek data uraian belanja
+    */
+    function get_id_uraian($id_subunit,$kdkomponen,$kdoutput,$kdakun,$hdr,$usulan)
+        {
+
+            $this->db->select('*');
+            $this->db->from("t_uraian");
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdakun',$kdakun);
+            $this->db->where('flag_cek',0);
+            $this->db->where('sifat_bayar',$usulan);
+            $result = $this->db->get();
+            return $result;
+        }
+    /**
+    * Fungsi untuk menyimpan data transaksi berdasarkan id_subunit, detail uraian
+    * @param id_subunit is integer, merupakan id dari sub_unit
+    * @param detail uraian is array, merupakan array dari data uraian
+    */
+    function insert_up($id_subunit,$detail_uraian,$usulan)
+        {   $this->load->model('m_umum');
+            $su_det=$this->m_umum->subunit_detail($id_subunit,Constant::JR_ID);
+                if (isset($su_det->id_unit)){
+                    $id_unit=$su_det->id_unit;
+                }else{
+                    $id_unit='';
+                }
+
+            $tgl= date('y-m-d H:i:s');
+            $this->db->set('tgl_usulan',$tgl);
+            $this->db->set('sifat_bayar',$usulan);
+            $this->db->set('id_subunit',$id_subunit);
+            $this->db->set('kode_unit',$id_unit);
+            $this->db->insert('t_usulan');
+
+            $id_tes= $this->db->insert_id();
+
+            foreach($detail_uraian->result_array() as $row){
+               $id_uraian = $row['id_uraian'];
+               $this->m_usulan->update_flag_cek($id_uraian,$id_subunit,$id_tes);
+            }
+        }
+
+
+
+     /**
+    * Fungsi untuk mengecek ada tidaknya transaksi berdasarkan id_subunit, th
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @param th is integer, merupakan tahun dari transaksi
+    * @return boolean
+    */
+    function cek_ada_transaksi($ta,$usulan,$id_subunit)
+        {
+            $this->db->select('*');
+            $this->db->from('t_usulan');
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->where('YEAR(tgl_usulan)',$ta);
+            $this->db->where('sifat_bayar',$usulan);
+            $this->db->where('id_status_usulan',1);
+            $result = $this->db->get();
+            if($result->num_rows() == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+    /**
+    * Fungsi untuk menyimpan data rekap
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @param daftar_up is array, merupakan array dari data transaksi
+    */
+    function masuk_rekap($ta,$id_subunit,$daftar_up,$id)
+        {
+            $dipa = $this->m_usulan->ambil_level_tertinggi_dipa();
+            echo $this->db->last_query();
+                foreach($dipa->result_array() as $row){
+                    $id_dipa = $row['id_dipa'];
+                }
+
+            $tgl= date('y-m-d H:m:s');
+            $this->db->set('tgl_rekap',$tgl);
+            $this->db->set('sifat_bayar',$id);
+            $this->db->set('id_dipa',$id_dipa);
+            $this->db->set('id_subunit',$id_subunit);
+            $this->db->insert('t_rekap');
+
+            $id_rekap= $this->db->insert_id();
+
+            foreach($daftar_up->result_array() as $id_up)
+                         {
+                             $id_usulan  = $id_up ['id_usulan'];
+                             $th_usulan  = $id_up ['tgl_usulan'];
+                             $this->m_usulan->ubah_status_usulan($id_usulan,$id_rekap);
+                             $this->m_usulan->masuk_waktu_pengajuan($id_usulan,$th_usulan);
+                         }
+        }
+
+     /**
+    * Fungsi untuk menampilkan dipa yang akan digunakan(aktif)
+    * @return sekumpulan objek
+    */
+   function ambil_level_tertinggi_dipa()
+        {
+           $this->db->select_max('id_dipa');
+           $this->db->from('m_dipa');
+           $this->db->where('aktif',1);
+           $query = $this->db->get();
+           return $query;
+        }
+
+   /**
+    * Fungsi untuk mengupdate status transaksi berdasarkan id_transaksi, id
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param id is integer, merupakan id dari rekap
+    */
+    function ubah_status_usulan($id_usulan,$id_rekap)
+        {
+            $this->db->set('id_status_usulan',2);
+            $this->db->set('flag_kirim',1);
+            $this->db->set('id_rekap',$id_rekap);
+            $this->db->where('id_usulan',$id_usulan);
+            $this->db->update('t_usulan');
+        }
+
+     /**
+    * Fungsi untuk menampilkan jumlah pagu berdasarkan kode_subunit, kdakun
+    * @param kode_subunit is integer, merupakan kode dari sub_unit
+    * @return sekumpulan objek rkakl
+    */
+    function total_belanja_modal ($ta,$kode_subunit,$kdakun)
+        {
+           $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');
+           $this->db->select('sum(jumlah)');
+           $this->db->from('t_rkakl');
+           $this->db->where('kode_unit',$kode_subunit);
+           $this->db->where_in('kdakun', $kdakun);
+           $this->db->where('tahun',$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+
+    /**
+    * Fungsi untuk menampilkan rincian UP berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @return sekumpulan objek
+    */
+       function rincian_up($ta,$usulan,$id_subunit)
+        {
+        $q=$this->db->query("SELECT t_usulan.id_usulan,t_usulan.tgl_usulan,
+                                    t_usulan.id_rekap,t_uraian.id_uraian, m_status_transaksi.status_transaksi,
+                                    t_uraian.kdoutput, t_uraian.nmoutput, t_uraian.kdkomponen,t_uraian.nmkomponen,
+                                    t_uraian.kdakun, t_uraian.nmakun, t_uraian.nmheader, sum(jumlah) as jumlah
+                             FROM t_uraian, t_usulan,m_status_transaksi
+                             WHERE m_status_transaksi.id_status_transaksi = t_usulan.id_status_usulan
+                             and t_uraian.id_usulan=t_usulan.id_usulan
+                             and t_usulan.id_subunit ='$id_subunit' and t_usulan.flag_kirim ='0'
+                             and flag_cek=1 and t_usulan.sifat_bayar ='$usulan'
+                             and YEAR(t_usulan.tgl_usulan)='$ta'
+                             group by t_usulan.id_usulan;");
+            return $q;
+        }
+
+    function tot_pagu_realisasi($ta,$id_subunit)
+        {
+           $this->db->select('*');
+           $this->db->from('t_pagu_real');
+           $this->db->where('subunit',$id_subunit);
+           $this->db->where('tahun',$ta);
+           $hasil = $this->db->get();
+           $result=$hasil->row();
+           if(isset($result->pagu_real))
+		      {return $result->pagu_real;}
+		   else
+		      {return 0;}
+        }
+
+
+    function maksimum_usulan($ta,$id_subunit)
+        {
+           $this->db->select('*');
+           $this->db->from('t_max_up');
+           $this->db->where('id_subunit',$id_subunit);
+           $this->db->where('tahun',$ta);
+           $hasil = $this->db->get();
+           $result=$hasil->row();
+               if(isset($result->nilai_max)){
+    		      return $result->nilai_max;
+               }else{
+                  return 0;
+               }
+        }
+
+    /**
+    * Fungsi untuk menyimpan history transaksi
+    * @param $id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    */
+    function masuk_waktu_pengajuan($id_transaksi,$th_transaksi)
+        {
+            $pengisi = $this->session->userdata('username');
+            $waktu = date('y-m-d H:i:s');
+            $w = $this->db->query("insert into t_usulan_history(id_usulan, tanggal_waktu, pengisi, status_waktu,level)
+                                   values('$id_transaksi','$waktu', '$pengisi', 'diajukan','1')");
+            }
+
+    /**
+    * Fungsi untuk menampilkan list subunit berdasarkan id_unit
+    * @param id_unit is integer, id dari unit
+    * @return array data subunit
+    */
+    function getUnitList($id_unit){
+
+            $this->db->select('*');
+            $this->db->from('m_subunit');
+            $this->db->where('id_unit',$id_unit);
+            $result = $this->db->get();
+            return $result->result_array();
+        }
+
+     /**
+    * Fungsi untuk menampilkan banyakanya rekap UP berdasarkan status usulan, id_subunit, id
+    * @param id_subunit is integer, merupakan id dari sub_unit
+    * @param th is integer, merupakan tahun dari usulan
+    * @return integer
+    */
+    function banyak_kb2($jns_usulan,$ta,$id_subunit){
+
+            $this->db->select('*');
+            $this->db->from("t_usulan_item");
+            $this->db->where('sifat_bayar',$jns_usulan);
+            $this->db->where('id_status_usulan_item',2);
+            $this->db->where('YEAR(created_date)',$ta);
+            $this->db->where('ref_id_subunit',$id_subunit);
+            $result = $this->db->get();
+
+            if($result){
+                return $result->num_rows();
+            }else{
+                return 0;
+            }
+
+    }
+    function banyak_list_usulan($jns_usulan,$ta,$id_subunit){
+        $this->db->select('*');
+        $this->db->from("t_usulan");
+        $this->db->where('sifat_bayar',$jns_usulan);
+        $status = array(2,3);
+        $this->db->where_in('id_status_usulan', $status);
+        $this->db->where('YEAR(created_date)',$ta);
+        $this->db->where('id_subunit',$id_subunit);
+        $result = $this->db->get();
+
+        if($result){
+            return $result->num_rows();
+        }else{
+            return 0;
+        }
+    }
+
+    /**
+    * Fungsi untuk menampilkan data transaksi UP berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @return sekumpulan objek data transaksi
+    */
+    function daftar_veri_usulan($ta,$id_subunit,$jns_usulan){
+
+            $sql= " SELECT sifat_bayar,ref_id_usulan,m_status_usulan_item.status_usulan_item, YEAR(t_usulan_item.`created_date`) AS tahun,
+                      t_usulan_item.ref_id_subunit, t_usulan_item.id_usulan_item,
+                      t_usulan_item.sifat_bayar, t_usulan_item.id_status_usulan_item,
+                      t_usulan_item.kdoutput, t_usulan_item.nmoutput, t_usulan_item.kdkomponen,
+                      t_usulan_item.nmkomponen,t_usulan_item.kdakun, t_usulan_item.nmakun,
+                      t_usulan_item.hdr, SUM(t_uraian.jumlah) AS jumlah
+                   FROM t_uraian, t_usulan_item, m_status_usulan_item
+                   WHERE t_usulan_item.id_status_usulan_item = m_status_usulan_item.id_status_usulan_item
+                   AND t_uraian.id_usulan_item = t_usulan_item.id_usulan_item
+                   AND t_usulan_item.ref_id_subunit = '$id_subunit'
+                   AND t_usulan_item.sifat_bayar = '$jns_usulan'
+                   AND YEAR(t_usulan_item.`created_date`) = '$ta'
+                   GROUP BY t_usulan_item.`id_usulan_item`;
+                  ";
+            $query = $this->db->query($sql);
+            return $query;
+
+        }
+    /**
+    * Fungsi untuk menampilkan data transaksi UP berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari subunit
+    * @return sekumpulan objek data transaksi
+    */
+    function tampilan_usulan($ta){
+        $ta=$this->m_settings->get_tahun_anggaran();
+
+            $sql= "SELECT `m_status_usulan`.`status_usulan`,YEAR(tgl_usulan) as tahun, t_usulan.id_usulan, t_usulan.sifat_bayar, t_usulan.id_status_usulan,
+   	                 `t_usulan`.`id_usulan`,`t_usulan`.`id_subunit`,
+                	  t_uraian.kdoutput, t_uraian.nmoutput, t_uraian.kdkomponen,
+                      t_uraian.nmkomponen,t_uraian.kdakun, t_uraian.nmakun,
+                      t_uraian.hdr, SUM(jumlah) AS jumlah
+                   FROM t_uraian, t_usulan, m_status_usulan
+                   WHERE t_usulan.id_status_usulan = m_status_usulan.id_status_usulan
+                   AND t_uraian.id_usulan = t_usulan.id_usulan
+                   AND YEAR(t_usulan.tgl_usulan) ='$ta'
+                   GROUP BY `t_usulan`.`id_usulan`;
+                  ";
+            $query = $this->db->query($sql);
+            return $query;
+
+        }
+
+    /**
+    * Fungsi untuk menampilkan data transaksi UP berdasarkan id_transaksi, th_transaksi
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    * @return sekumpulan objek data transaksi
+    */
+    function daftar_veri_usulan_terpilih($ta,$id_usulan,$jns_usulan){
+            $sql   = " SELECT t_usulan_item.sifat_bayar,kode_unit,`m_status_usulan_item`.`status_usulan_item`,YEAR(`t_usulan_item`.`created_date`) AS tahun, t_usulan_item.id_usulan_item, t_usulan_item.id_status_usulan_item,
+                        	`t_usulan_item`.`id_usulan_item`,`t_usulan_item`.`ref_id_subunit`, t_usulan_item.kdoutput, t_usulan_item.nmoutput,
+                        	t_usulan_item.kdkomponen, t_usulan_item.nmkomponen,t_usulan_item.kdakun, t_usulan_item.nmakun, t_usulan_item.hdr, SUM(jumlah) AS jumlah
+                        FROM t_uraian, t_usulan_item, m_status_usulan_item
+                        WHERE t_usulan_item.id_status_usulan_item = m_status_usulan_item.id_status_usulan_item
+                        AND t_uraian.id_usulan_item = t_usulan_item.id_usulan_item
+                        AND t_usulan_item.id_usulan_item = '$id_usulan'
+                        AND YEAR(t_usulan_item.`created_date`) = '$ta'
+                        AND t_usulan_item.sifat_bayar = '$jns_usulan'
+                        AND t_usulan_item.`id_status_usulan_item` = 2
+                        GROUP BY `t_usulan_item`.`id_usulan_item`";
+            $query = $this->db->query($sql);
+            return $query;
+        }
+
+    /**
+    * Fungsi untuk menampilkan data transaksi UP berdasarkan id_transaksi, th_transaksi
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    * @return sekumpulan objek data transaksi
+    */
+    function daftar_usulan_bk($ta,$id_usulan,$jns_usulan){
+            $sql   = " SELECT t_usulan_item.sifat_bayar,kode_unit,`m_status_usulan_item`.`status_usulan_item`,YEAR(`t_usulan_item`.`created_date`) AS tahun, t_usulan_item.id_usulan_item, t_usulan_item.id_status_usulan_item,
+                        	`t_usulan_item`.`id_usulan_item`,`t_usulan_item`.`ref_id_subunit`, t_usulan_item.kdoutput, t_usulan_item.nmoutput,
+                        	t_usulan_item.kdkomponen, t_usulan_item.nmkomponen,t_usulan_item.kdakun, t_usulan_item.nmakun, t_usulan_item.hdr, SUM(jumlah) AS jumlah
+                        FROM t_uraian, t_usulan_item, m_status_usulan_item
+                        WHERE t_usulan_item.id_status_usulan_item = m_status_usulan_item.id_status_usulan_item
+                        AND t_uraian.id_usulan_item = t_usulan_item.id_usulan_item
+                        AND t_usulan_item.ref_id_usulan = '$id_usulan'
+                        AND YEAR(t_usulan_item.`created_date`) = '$ta'
+                        AND t_usulan_item.sifat_bayar = '$jns_usulan'
+                        GROUP BY `t_usulan_item`.`id_usulan_item`";
+            $query = $this->db->query($sql);
+            return $query;
+        }
+
+    function cari_tot_usulan($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr,$jns_usulan)
+    {
+           $status_usulan = array('3','4','5','6','7','8','9','10', '11', '12','13','14','15','16','17');
+           $this->db->select('sum(total_usulan_item) as jumlah');
+           $this->db->from('t_usulan_item');
+           $this->db->where('t_usulan_item.kdoutput',$kdoutput);
+           $this->db->where('t_usulan_item.kdkomponen',$kdkomponen);
+           $this->db->where('t_usulan_item.kdakun',$kdakun);
+           $this->db->where('t_usulan_item.hdr',$hdr);
+           $this->db->where('sifat_bayar',$jns_usulan);
+           $this->db->where_not_in('id_status_usulan_item', $status_usulan);
+           $query = $this->db->get();
+           return $query;
+    }
+
+     function get_pagu_rkakl($th_usulan,$id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr)
+        {
+            $kode_unit = $this->session->userdata('kode_unit');
+            $this->db->select('sum(jumlah)');
+            $this->db->from('t_rkakl');
+            $this->db->join("m_subunit",'m_subunit.kode_subunit = t_rkakl.kode_unit','inner');
+            $this->db->where('m_subunit.id_subunit',$id_subunit);
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdakun',$kdakun);
+            $this->db->where('hdr',$hdr);
+            $this->db->where('tahun',$th_usulan);
+            $result = $this->db->get();
+            return $result;
+        }
+
+     /**
+    * Fungsi untuk menampilkan level tertnggi dari history berdasarkan id_transaksi,th_transaksi
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    * @return sekumpulan objek
+    */
+   function ambil_level_tertinggi($id_transaksi,$th_transaksi)
+        {
+           $this->db->select_max('level');
+           $this->db->from('t_usulan_history');
+           $this->db->where('id_usulan',$id_transaksi);
+           $this->db->where('YEAR(tanggal_waktu)',$th_transaksi);
+           $query = $this->db->get();
+           return $query;
+        }
+
+   /**
+    * Fungsi untuk menyimpan history transaksi
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    * @param level terkini is integer, merupakan level tertinggi pada history
+    */
+    function masuk_waktu_setuju_veri_unit($id_usulan,$level_terkini,$ket_veri,$th_usulan,$status_waktu,$pengisi){
+            $tgl_skrg = date("Y-m-d H:i:s");
+            $w = $this->db->query("
+                                    insert into t_usulan_history(id_usulan_i,tanggal_waktu,status_waktu,komentar,level,pengisi)
+                                    values('$id_usulan','$tgl_skrg','$status_waktu','$ket_veri','$level_terkini','$pengisi')
+                                  ");
+    }
+
+
+	function set_usulan_item_ok($id_usulan_item)
+	{
+		//set status usulan item menjadi => 5
+		return $this->set_status_usulan_item ($id_usulan_item, Constant::USULANITM_OK);
+	}
+
+	function set_usulan_item_revisi($id_usulan_item, $ket_revisi)
+	{
+		//start transaction
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		//update status usulan item menjadi revisi -> 3
+		$this->set_status_usulan_item($id_usulan_item, Constant::USULANITM_REVISI);
+
+		//update keterangan revisi, pengubah (changed_by) ngikut yang diatas
+		$this->db->set('keterangan', $ket_revisi);
+		$this->db->where('id_usulan_item', $id_usulan_item);
+		$this->db->update('t_usulan_item');
+
+		//get usulan_item
+		$usulan_item = $this->get_usulan_item_by_id($id_usulan_item);
+
+		//update usulan menjadi revisi -> 3
+		$this->set_status_usulan($usulan_item->ref_id_usulan, Constant::USULANSU_REVISI);
+
+		//complete transactions
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+
+    /**
+    * Fungsi untuk mengupdate status transaksi berdasarkan id_transaksi,th_transaksi
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    */
+   function update_trans($id_usulan,$ket_veri,$th_usulan,$status,$status_waktu){
+             $this->db->set('id_status_usulan_item',$status);
+             $this->db->set('status_dokumen',$status_waktu);
+             $this->db->set('keterangan',$ket_veri);
+             $this->db->where('id_usulan_item',$id_usulan);
+             $this->db->where('YEAR(created_date)',$th_usulan);
+             $this->db->update('t_usulan_item');
+        }
+   /**
+    * Fungsi untuk mengupdate status transaksi berdasarkan id_transaksi,th_transaksi
+    * @param id_transaksi is integer, merupakan id dari transaksi
+    * @param th_transaksi is integer, merupakan tahun dari transaksi
+    */
+    //TODO: tambah parameter keterangan verifikasi
+   function update_usulan($id_usulan_item,$th_usulan,$ket_veri){
+             //TODO: tambah transaksi
+            $this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+
+             $qf=$this->db->query(" UPDATE t_usulan
+                                    SET id_status_usulan = 3
+                                    WHERE
+                                        id_usulan = (
+                                            SELECT ref_id_usulan
+                                            FROM t_usulan_item
+                                            WHERE id_usulan_item = ".$id_usulan_item."
+                                        )
+                                    AND YEAR(tgl_usulan) = ".$th_usulan.";
+                                 ");
+            //TODO: EROR yg dimasukin ke t_usulan adalah id item
+            //$this->m_usulan->log_history_usulan($id_usulan_item,3,$ket_veri);
+   }
+
+   /**
+    * Fungsi untuk mengetahui ada transaksi yang direvisi atau tidak berdasarkan id rekap, th_rekap
+    * @param id_usulan is integer, merupakan id dari rekap
+    * @param ta is integer, merupakan tahun dari rekap
+    * @return result boolean true jika query berhasil
+    */
+    function cek_ada_revisi($ta,$id_usulan){
+            $this->db->from('t_usulan_item');
+            $this->db->join("t_usulan",'t_usulan_item.ref_id_usulan = t_usulan.id_usulan','inner');
+            $this->db->where('t_usulan.id_usulan',$id_usulan);
+            $this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+            $this->db->where_not_in('id_status_usulan_item', Constant::USULANITM_OK);
+            $result = $this->db->get();
+
+                if($result->num_rows() == 0){
+                    return false;
+                }else{
+                    return true;
+                }
+    }
+
+    /**
+    * Fungsi untuk mengupdate status rekap berdasarkan id_rekap,th_rekap
+    * @param id_rekap is integer, merupakan id dari rekap
+    * @param th_rekap is integer, merupakan tahun dari rekap
+    */
+   function update_setuju_usulan($id_usulan,$ta)
+        {
+             $this->db->set('id_status_usulan',4);
+             $this->db->where('id_usulan',$id_usulan);
+             $this->db->where('YEAR(tgl_usulan)',$ta);
+             $this->db->update('t_usulan');
+        }
+
+   /**
+    * Fungsi untuk menampilkan rekap transaksi yang sudah di otorisasi kaprodi berdasarkan id_unit
+    * @param id_unit is integer, merupakan id dari unit
+    * @return sekumpulan objek
+    */
+    function usulan_terotorisasi($ta,$id_unit,$jns_usulan)
+        {
+            $this->db->select("*, YEAR(tgl_usulan) as tahun");
+            $this->db->from("t_usulan");
+            $this->db->join("m_subunit",'t_usulan.id_subunit = m_subunit.id_subunit','inner');
+            $this->db->where('m_subunit.id_unit',$id_unit);
+            $this->db->where('YEAR(tgl_usulan)',$ta);
+            $this->db->where('t_usulan.id_status_usulan',5);
+            $this->db->where('t_usulan.sifat_bayar',$jns_usulan);
+            $this->db->group_by('t_usulan.id_usulan');
+            $result = $this->db->get();
+            if($result->num_rows() > 0) {
+			     return $result;
+            }
+                return false;
+		}
+
+     /**
+    * Fungsi untuk menampilkan subunit yang belum mengajukan UP berdasarkan id_unit
+    * @param id_unit is integer, merupakan id dari unit
+    * @return array transaksi
+    */
+    function usulan_belum_buat_rincian($id_unit,$jns_usulan)
+        {
+            $qf=$this->db->query(" SELECT id_subunit, nama_subunit from m_subunit where id_unit=$id_unit
+                                   AND m_subunit.id_subunit
+                                   NOT IN (SELECT m_subunit.id_subunit as id_subunit FROM (`t_usulan_item`)
+                                   INNER JOIN `m_subunit` ON `t_usulan_item`.`ref_id_subunit`=`m_subunit`.`id_subunit`
+                                   WHERE sifat_bayar ='$jns_usulan' GROUP BY `m_subunit`.`id_subunit`)");
+            return $qf->result_array();
+        }
+
+    /**
+    * Fungsi untuk menampilkan rekap yang hardcopy-nya belum diterima oleh unit berdasarkan id_unit,th_rekap
+    * @param id_unit is integer, merupakan id dari unit
+    * @param th_rekap is integer, merupakan tahun dari rekap
+    * @return array data transaksi
+    */
+    function daftar_sudah_buat($id_unit,$jns_usulan)
+        {
+            $qf=$this->db->query("  SELECT m_subunit.id_unit as id_unit,m_subunit.nama_subunit as nama_subunit
+                                    FROM (`t_usulan_item`)
+                                    INNER JOIN `m_subunit` ON `t_usulan_item`.`ref_id_subunit`=`m_subunit`.`id_subunit`
+                                    WHERE m_subunit.id_unit= '$id_unit' and sifat_bayar ='$jns_usulan' and id_status_usulan_item ='1'
+                                    GROUP BY `m_subunit`.`id_subunit`;
+                                 ");
+            return $qf->result_array();
+        }
+
+     /**
+    * Fungsi untuk mengupdate data rekap berdasarkan id_rekap, th_rekap
+    * @param id_rekap is integer, merupakan id dari rekap
+    * @param th_rekap is integer, merupakan tahun dari rekap
+    */
+    function update_dokumen($id_usulan,$ta){
+			$this->db->trans_strict(FALSE);
+            $this->db->trans_start();
+
+             $this->db->set('status_dokumen','sudah diterima');
+             $this->db->where('id_usulan', $id_usulan);
+             $this->db->where('YEAR(tgl_usulan)', $ta);
+             $this->db->update('t_usulan');
+
+             $this->m_usulan->log_history_usulan($id_usulan,6,'-');
+
+			$this->db->trans_complete();
+            return $this->db->trans_status();
+        }
+
+  /**
+    * Fungsi untuk menampilkan jumlah uraian berdasarkan id_subunit
+    * @param id_subunit is integer, merupakan id dari sub_unit
+    * @return objek uraian
+    */
+    function total_up($ta,$id_subunit,$sifat_bayar)
+        {
+           $this->db->select('sum(jumlah)');
+           $this->db->from('t_uraian');
+           $this->db->join("t_usulan_item",'t_usulan_item.id_usulan_item=t_uraian.id_usulan_item','inner');
+           $this->db->where('t_usulan_item.ref_id_subunit',$id_subunit);
+           $this->db->where('sifat_bayar',$sifat_bayar);
+           $this->db->where('YEAR(t_usulan_item.created_date)',$ta);
+           $query = $this->db->get();
+           return $query;
+        }
+
+  function get_data_rkakl($ta,$id_subunit)
+        {
+            $q=$this->db->query("
+                                  SELECT t_rkakl.kdoutput,t_rkakl.nmoutput, t_rkakl.kdkomponen,
+                                         t_rkakl.nmkomponen, t_rkakl.kdakun,t_rkakl.nmakun, hdr,
+                                         sum(jumlah) as jumlah
+                                  FROM t_rkakl
+                                  JOIN (
+                                        SELECT kode_subunit
+                                        FROM m_subunit
+                                        WHERE id_subunit= '$id_subunit'
+                                       ) as total_unit on t_rkakl.kode_unit=total_unit.kode_subunit
+                                  WHERE tahun='$ta'
+                                  GROUP BY t_rkakl.kdoutput,t_rkakl.kdkomponen, t_rkakl.kdakun
+                                ");
+            return $q->result();
+        }
+   function jum_spp_terdahulu2($ta,$id_subunit,$jns_usulan)
+        {
+            $q=$this->db->query("
+                                    SELECT t_usulan_item.kdoutput, t_usulan_item.kdkomponen,
+                                           t_usulan_item.kdakun,sum(jumlah) as jumlah
+                                    FROM t_usulan_item,t_uraian,t_usulan
+                                    WHERE ref_id_subunit=$id_subunit
+                                        AND t_usulan_item.sifat_bayar = '$jns_usulan' and flag_kirim = 1
+                                        AND YEAR(t_usulan_item.created_date)= $ta
+                                        AND t_usulan_item.id_usulan_item = t_uraian.id_usulan_item
+                                        AND t_usulan_item.ref_id_usulan = t_usulan.id_usulan
+                                    GROUP BY t_usulan_item.kdoutput, t_usulan_item.kdkomponen,
+                                             t_usulan_item.kdakun
+                                ");
+            return $q->result();
+        }
+     function jum_tot_up($ta,$id_subunit,$jns_usulan)
+        {
+           $this->db->select('sum(jumlah)');
+           $this->db->from('t_usulan_item');
+           $this->db->join("t_uraian",'t_usulan_item.id_usulan_item=t_uraian.id_usulan_item','inner');
+           $this->db->join("t_usulan",'t_usulan_item.ref_id_usulan=t_usulan.id_usulan','inner');
+           $this->db->where('t_usulan_item.ref_id_subunit',$id_subunit);
+           $this->db->where('t_usulan_item.sifat_bayar',$jns_usulan);
+           $this->db->where('YEAR(t_usulan_item.created_date)',$ta);
+           $this->db->where_not_in('id_status_usulan_item', 17);
+           $query = $this->db->get();
+           return $query;
+        }
+   /**
+    * Fungsi untuk menampilkan pagu rkakl berdasarkan kode_unit
+    * @param kode_unit is integer, merupakan kode dari unit
+    * @return sekumpulan objek
+    */
+   function daftar_pagu($kode_unit)
+        {
+           $this->db->select('*');
+           $this->db->from('t_rkakl');
+           $this->db->where('t_rkakl.kode_unit',$kode_unit);
+           $this->db->group_by('t_rkakl.kdoutput,t_rkakl.kdkomponen,t_rkakl.kdakun');
+           $query = $this->db->get();
+           return $query;
+        }
+
+   /**
+    * Fungsi untuk menampilkan rekap yang hardcopy-nya belum diterima oleh unit berdasarkan id_unit,th_rekap
+    * @param id_unit is integer, merupakan id dari unit
+    * @param th_rekap is integer, merupakan tahun dari rekap
+    * @return integer
+    */
+    function cek_dokumen($id_unit,$th_rekap,$jns_usulan)
+        {  $this->db->select("*");
+            $this->db->from("t_usulan");
+            $this->db->join("m_subunit",'t_usulan.id_subunit=m_subunit.id_subunit','inner');
+            $this->db->where('m_subunit.id_unit',$id_unit);
+            $this->db->where('t_usulan.id_status_rekap',3);
+            $this->db->where('t_usulan.th_rekap',$th_rekap);
+            $this->db->where('t_usulan.status_dokumen','belum diterima');
+            $this->db->where('t_usulan.sifat_bayar',$jns_usulan);
+            $this->db->group_by('t_usulan.id_usulan');
+            $result = $this->db->get();
+            return $result->num_rows() ; ;
+        }
+    /**
+    * Fungsi untuk menampilkan data UP berdasarkan id_unit, th_rekap
+    * @param id_unit is integer, merupakan id dari unit
+    * @param th_rekap is integer, merupakan tahun dari rekap
+    * @return sekumpulan objek
+    */
+    function up_terotorisasi2($id_unit,$th_rekap,$jns_usulan)
+        {
+            $this->db->select("m_sifatpembayaran.*,m_unit.*,t_usulan_item.*,t_usulan.id_usulan,t_usulan.id_spp,t_usulan_item.id_usulan_item, t_uraian.id_uraian,YEAR(t_usulan.tgl_usulan) as tahun, sum(jumlah) as jumlah");
+            $this->db->from("t_usulan");
+            $this->db->join("t_usulan_item",'t_usulan_item.ref_id_usulan = t_usulan.id_usulan','inner');
+            $this->db->join("t_uraian",'t_uraian.id_usulan_item=t_usulan_item.id_usulan_item','inner');
+            $this->db->join("m_subunit",'t_usulan.id_subunit=m_subunit.id_subunit','inner');
+            $this->db->join("m_unit",'m_unit.id_unit=m_subunit.id_unit','inner');
+            $this->db->where('m_subunit.id_unit',$id_unit);
+            $this->db->where('t_usulan.id_status_usulan',5);
+            $this->db->where('t_usulan.th_rekap',$th_rekap);
+            $this->db->where('t_usulan.sifat_bayar',$jns_usulan);
+            $result = $this->db->get();
+            return $result;
+        }
+
+    function print_daftar_up($id_subunit, $id_usulan, $sifat_bayar)
+        {
+/*            $qf=$this->db->query("
+			select t_uraian.kdoutput, t_uraian.kdkomponen, t_uraian.kdakun, t_uraian.nmakun, sum(jumlah) as jumlah
+			from t_uraian join (
+								SELECT t_uraian.kdoutput as output,t_uraian.kdkomponen as komponen, t_uraian.kdakun as akun
+								FROM t_rekap,t_transaksi,t_uraian,m_subunit
+								WHERE `t_rekap`.`id_rekap`=`t_transaksi`.`id_rekap` AND
+								`t_transaksi`.`id_transaksi`=`t_uraian`.`id_transaksi` AND
+								`t_rekap`.`id_subunit`=`m_subunit`.`id_subunit` AND
+								`t_rekap`.`id_subunit` = '$id_subunit' AND
+								`t_rekap`.`th_rekap` = '$th_rekap' AND
+								`t_rekap`.`id_rekap` = '$id_rekap'
+								GROUP BY `t_uraian`.`kdoutput`,`t_uraian`.`kdkomponen`, `t_uraian`.`kdakun`
+								) as apa
+			on 	t_uraian.kdoutput=apa.output and
+				t_uraian.kdkomponen=apa.komponen and
+				t_uraian.kdakun=apa.akun
+			where id_subunit='$id_subunit' AND
+			`t_uraian`.`id_jenisbelanja` = '1'
+			group by t_uraian.kdoutput, t_uraian.kdkomponen, t_uraian.kdakun;");*/
+
+            $qf=$this->db->query("
+			SELECT t_usulan_item.kdoutput, t_usulan_item.kdkomponen, t_usulan_item.kdakun, t_usulan_item.nmakun,
+					SUM(t_uraian.jumlah) AS jumlah
+			FROM t_usulan_item
+			JOIN t_usulan ON t_usulan.id_usulan = t_usulan_item.ref_id_usulan
+			JOIN t_uraian ON t_uraian.id_usulan_item = t_usulan_item.id_usulan_item
+			WHERE
+			t_usulan.id_subunit='$id_subunit' AND
+			t_usulan.id_usulan ='$id_usulan' AND
+			t_usulan.sifat_bayar='$sifat_bayar'
+			GROUP BY t_usulan_item.kdoutput, t_usulan_item.kdkomponen, t_usulan_item.kdakun");
+
+			return $qf->result_array();
+
+        }
+
+    function daftar_unit($id_subunit)
+        {
+            $this->db->select("*");
+            $this->db->from("m_subunit");
+            $this->db->join("m_unit",'m_unit.id_unit=m_subunit.id_unit','inner');
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->group_by('m_subunit.id_subunit');
+            $result = $this->db->get();
+            return $result;
+        }
+        
+    function ambil_usulan_cair($id_subunit, $ta){
+        $this->db->select('t_usulan.id_usulan, total_usulan, t_usulan.id_subunit, nama_subunit, IFNULL(SUM(nominal),0) AS sudah_cair,id_status_sp2d',false);
+        $this->db->from('t_usulan');
+        $this->db->join('m_subunit','t_usulan.id_subunit = m_subunit.id_subunit');
+        
+        $this->db->join('t_spm','t_usulan.ref_id_spm=t_spm.id_spm','left');
+        $this->db->join('t_sp2d','t_spm.id_spm=t_sp2d.id_spm','left');
+        
+        $this->db->join('t_cair_up','t_usulan.id_usulan=t_cair_up.id_usulan and oto_unit IS NOT NULL','left');
+        $this->db->where('t_usulan.id_subunit',$id_subunit);
+        $this->db->where('YEAR(t_usulan.tgl_usulan)',$ta);
+        $this->db->group_by('t_usulan.id_usulan');
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    function ada_usulan_blm_oto($id_subunit, $ta){
+        $this->db->from('t_cair_up');
+		$this->db->where('id_subunit',$id_subunit);
+		$this->db->where('tahun_anggaran',$ta);
+        $this->db->where('oto_unit is null',null, false);
+        $query = $this->db->get();
+        if($query->num_rows() > 0){
+            return true; 
+        } else{
+            return false;
+        }
+    }
+    
+    function simpan_mohon_cair_up($permohonan,$id_subunit,$id_usulan,$ta){
+        
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        
+        if ($permohonan>0){
+            $this->db->set('id_usulan',$id_usulan);
+            $this->db->set('id_subunit',$id_subunit);
+            $this->db->set('tahun_anggaran',$ta);
+            $this->db->set('saldo_normal','K');
+            $this->db->set('nominal',$permohonan);
+            $this->db->set('created_date', date('Y-m-d H:i:s'));
+            $this->db->set('created_by', $this->session->userdata('username'));
+            $this->db->insert('t_cair_up');
+        }
+        
+        $this->db->trans_complete();
+        return $this->db->trans_status();
+    }
+    
+    function ambil_mohon_cair_up_all($id_subunit, $ta){
+        $this->db->select('id_cair_up,nama_subunit,nominal,created_date,oto_kaprodi,oto_unit,saldo_normal,print_cair_up');
+        $this->db->from('t_cair_up');
+        $this->db->join('m_subunit','t_cair_up.id_subunit = m_subunit.id_subunit');
+        $this->db->where('t_cair_up.id_subunit',$id_subunit);
+        $this->db->where('t_cair_up.tahun_anggaran',$ta);
+        $this->db->order_by('created_date','desc');
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function ambil_belum_oto_kaprodi($id_subunit, $ta){
+        $this->db->select('id_cair_up,nama_subunit,nominal,created_date,oto_kaprodi,oto_unit, print_cair_up');
+        $this->db->from('t_cair_up');
+        $this->db->join('m_subunit','t_cair_up.id_subunit = m_subunit.id_subunit');
+        $this->db->where('t_cair_up.id_subunit',$id_subunit);
+        $this->db->where('t_cair_up.tahun_anggaran',$ta);
+        $this->db->where('t_cair_up.oto_kaprodi is null',null, false);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    function oto_su_cair_up_simpan($id_cair_up){
+        $this->db->set('oto_kaprodi', date('Y-m-d H:i:s'));
+        $this->db->where('id_cair_up',$id_cair_up);
+        return $this->db->update('t_cair_up'); 
+    }
+    
+    function detail_mohon_cair_up($id_cair_up){
+        $this->db->from('t_cair_up');
+        $this->db->where('id_cair_up',$id_cair_up);
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    function ambil_belum_oto_unit($id_unit, $ta){
+        $this->db->select('id_cair_up,nama_subunit,nominal,t_cair_up.created_date,oto_kaprodi,oto_unit, print_cair_up,total_usulan');
+        $this->db->from('t_cair_up');
+        $this->db->join('m_subunit','t_cair_up.id_subunit = m_subunit.id_subunit');
+        $this->db->join('t_usulan','t_cair_up.id_usulan = t_usulan.id_usulan');
+        $this->db->where("(t_cair_up.id_subunit) IN (SELECT id_subunit FROM m_subunit where id_unit='".$id_unit."')", NULL, FALSE);
+        $this->db->where('t_cair_up.tahun_anggaran',$ta);
+        $this->db->where('t_cair_up.oto_kaprodi is not null',null, false);
+        $this->db->where('t_cair_up.oto_unit is null',null, false);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    function oto_unit_cair_up_simpan($id_cair_up){
+        $this->db->set('oto_unit', date('Y-m-d H:i:s'));
+        $this->db->where('id_cair_up',$id_cair_up);
+        return $this->db->update('t_cair_up'); 
+    }
+    
+    function sp2d_cair_up($id){
+        $user=$this->session->userdata('username');
+        $tgl =date('Y-m-d H:i:s');
+        $sql= $this->db->query("
+                INSERT INTO t_cair_up (id_usulan,id_subunit,tahun_anggaran,saldo_normal,nominal,created_by,created_date) 
+                (
+                SELECT t_usulan.id_usulan,t_usulan.id_subunit, YEAR(t_usulan.tgl_usulan),?,total_usulan,?,?
+                FROM t_sp2d 
+                JOIN t_spm ON t_sp2d.id_spm = t_spm.id_spm
+                JOIN t_usulan ON t_spm.id_spm=t_usulan.ref_id_spm
+                WHERE id_sp2d=?
+                )
+            ",array('D',$user,$tgl,$id));
+        return $sql;
+    }
+
+}?>

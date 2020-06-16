@@ -1,0 +1,366 @@
+<?php
+
+class Sptb extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));       
+        $this->load->database();
+        
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_sptb',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas'));
+        
+        date_default_timezone_set('Etc/GMT-8');
+    }
+	
+	public $bulan=array(
+        'all'=>'All',
+        '1'=>'Januari',
+        '2'=>'Februari',
+        '3'=>'Maret',
+        '4'=>'April',
+        '5'=>'Mei',
+        '6'=>'Juni',
+        '7'=>'Juli',
+        '8'=>'Agustus',
+        '9'=>'September',
+        '10'=>'Oktober',
+        '11'=>'November',
+        '12'=>'Desember'
+    );
+
+	public $tahun=array(
+	    '2013'=>'2013',
+        '2014'=>'2014',
+        '2015'=>'2015',
+        '2016'=>'2016',
+        '2017'=>'2017'
+
+    );
+	
+    function create(){             
+        $this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+        $su  = $this->session->userdata('id_subunit');
+        $ta  = $this->m_settings->get_tahun_anggaran();         
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su); 
+        
+        $non_kw = array('UP','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }   
+        $this->template->load('template','sptb/buat_sptb',$data);
+        
+    }
+    
+    
+    function get_view_jenis_belanja()
+      {
+	  //$this->output->enable_profiler(TRUE); 	     
+      $this->auth->restrict();         
+         $jenis_belanja = $this->input->post('jenisblj');
+         $data['jenis_belanja'] = $this->input->post('jenisblj'); 
+         $id_unit = $this->session->userdata('id_unit');
+         $ta = $this->m_settings->get_tahun_anggaran();
+         $data['sptb'] = $this->m_sptb->rkakl_list($ta,$id_unit);
+		 $data['kunci']= $this->m_sptb->cek_kunci($id_unit,$jenis_belanja);
+         $jumlah_gu=array();
+           foreach ($data['sptb'] as $tgu){
+             $jumlah_gu[]= $this->m_sptb->banyak_kwitansi_sptb($tgu['kdoutput'],$tgu['kdakun'],$ta,$jenis_belanja, $id_unit);
+           }
+           $data['jumgu']= $jumlah_gu;     
+         $this->load->view('sptb/get_view_jenis_belanja',$data);
+        
+    }    
+    function view_buat_sptb()
+      {   
+        $this->auth->restrict();
+         $jb = $this->uri->segment(3);
+         $data['jb'] = $this->uri->segment(3);
+         $kdoutput = $this->uri->segment(4);
+         $id_akun = $this->uri->segment(5);
+         $ta = $this->m_settings->get_tahun_anggaran();
+         $data['hasil']= $this->m_sptb->data_kuitansi_sptb($kdoutput,$id_akun,$ta,$jb);
+		 $data['sptjm']= $this->m_lov->get_list_lov(Constant::KAP_SPTJM);
+			foreach($data['sptjm'] as $row){
+				$row->kode_value;
+			}     
+         $this->template->load('template','sptb/view_sptb_gu',$data);
+        
+    }
+    function simpan_sptb()
+    {    
+	//$this->output->enable_profiler(true);
+        $this->auth->restrict(); 
+         $jb = $this->input->post('jb');		 
+         $this->m_sptb->simpan_sptb();
+         $this->session->set_userdata('msg_typ','ok');
+         $this->session->set_userdata('msg', 'SPTB berhasil dibuat');
+         redirect('sptb/create/'.$jb); 
+        
+    }
+    function daftar_sptb()
+      {   
+         $this->auth->restrict();
+         $id_unit = $this->session->userdata('id_unit');
+         $jb = $this->uri->segment(3);
+         $ta = $this->m_settings->get_tahun_anggaran(); 
+         $bulan = date('m');
+         $data['nama_unit']= $this->m_umum->get_nama_unit_by_id($id_unit);
+         
+         $data['hasil']= $this->m_sptb->data_sptb($ta,$bulan,$id_unit,$jb);
+         $this->template->load('template','sptb/daftar_sptb',$data);
+        
+    } 
+    function preview_sptb()
+    {    
+         $this->auth->restrict();
+         $id = $this->uri->segment(3);
+         $id_unit = $this->session->userdata('id_unit');
+         $data_unit=$this->m_umum->get_nama_unit_by_id($id_unit);
+         $ta = $this->m_settings->get_tahun_anggaran(); 
+                                                                      
+         $data['hasil'] = $this->m_sptb->get_sptb_kwitansi($id,$ta);  
+         $data['detail']= $this->m_sptb->get_sptb_kwitansi_detail($id,$ta);
+         
+         $this->template->load('template','sptb/preview_sptb',$data);
+        
+    }
+	
+	function preview_sptjm()
+    {    
+         $this->auth->restrict();
+         $id = $this->uri->segment(3);
+         $id_unit = $this->session->userdata('id_unit');
+         $data_unit=$this->m_umum->get_nama_unit_by_id($id_unit);
+         $ta = $this->m_settings->get_tahun_anggaran(); 
+                                                                      
+         $data['hasil'] = $this->m_sptb->get_sptb_sptjm($id,$ta);          
+         $this->template->load('template','sptb/preview_sptjm',$data);
+        
+    }
+    /*function daftar(){         
+        $this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+        $su  = $this->session->userdata('id_subunit');
+        $ta  = $this->m_settings->get_tahun_anggaran();
+        //$limit_spjup = $this->m_logic->get_limit_spjup($ta,$su);
+        
+        //$data['nilai_up'] = $this->m_logic->get_nilai_up($ta, $su);
+        //$data['sisa_mp']=$this->m_logic->get_sisa_mp($ta, $su);
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+        //$data['sisa_mp']=$this->m_logic->get_sisa_mp($ta, $su);
+        //$data['limit_spjup'] = $limit_spjup;
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        //var_dump($data['sifat_bayar']);
+        for($pos = 0;$pos <= count($data['sifat_bayar']);$pos++){
+            switch($data['sifat_bayar'][$pos]->kode_value){
+                case 'UP':
+                case 'TUP':
+                case 'SAH':
+                unset($data['sifat_bayar'][$pos]);
+            }
+        }
+ 
+        $this->template->load('template','sptb/daftar',$data);
+        
+    }
+    function get_daftar()
+      {   
+      $this->auth->restrict();
+         //$data['output'] = $this->m_tup_spj->getOutputList();
+         $jb = $this->input->post('jenisblj');
+         $data['jenis_belanja'] = $this->input->post('jenisblj');   
+         $id_unit = $this->session->userdata('id_unit');
+         $bulan = date('m');
+         $ta  = $this->m_settings->get_tahun_anggaran();
+         $data['nama_unit']= $this->m_umum->get_nama_unit_by_id($id_unit);
+         $data['hasil']= $this->m_sptb->data_sptb($ta,$bulan,$id_unit,$jb);
+         
+         $this->load->view('sptb/daftar_by_post',$data);
+        
+    }
+    */
+    function print_sptb($download_pdf = true){
+        $this->auth->restrict();
+             
+             $id=$this->uri->segment(3);
+			 $this->m_sptb->update_sptb_unduh($id);    
+             $ret = '';
+             $ID = $id;
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='sptb_gu-'.$id.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'tup_spj/print_sptb/true/','Download Pdf');
+            
+             $data['link'] = $link_download ;
+             $id_unit = $this->session->userdata('id_unit');
+             $ta = $this->m_settings->get_tahun_anggaran();
+             
+             $data['hasil'] = $this->m_sptb->get_sptb_kwitansi($id,$ta);
+             $data['detail']= $this->m_sptb->get_sptb_kwitansi_detail($id,$ta);
+             $user_info = $this->load->view('sptb/print_sptb', $data,  true);
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($user_info,$pdf_filename);  
+             else
+                echo $output;   
+    }
+	
+	function print_sptjm($download_pdf = true){
+        $this->auth->restrict();
+             
+             $id=$this->uri->segment(3);
+             $ret = '';
+             $ID = $id;
+             $tgl_skrg = date("Y-m-d"); 
+             $jam_skrg = date("H:i");
+             $pdf_filename='sptjm_'.$id.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'tup_spj/print_sptjm/true/','Download Pdf');
+            
+             $data['link'] = $link_download ;
+             $id_unit = $this->session->userdata('id_unit');
+             $ta = $this->m_settings->get_tahun_anggaran();
+             
+             $data['hasil'] = $this->m_sptb->get_sptb_sptjm($id,$ta);
+             $user_info = $this->load->view('sptb/print_sptjm', $data,  true);
+			 //echo $user_info;
+            
+             if($download_pdf==true)
+                 generate_pdf_A4($user_info,$pdf_filename);  
+             else
+                echo $output;
+			  
+    }
+	
+
+    function daftar_sptb_filter(){
+        $this->auth->restrict();
+		//$this->output->enable_profiler();
+        $id_unit = $this->session->userdata('id_unit');
+		$bulan = $this->uri->segment(3);
+		$tahun = $this->uri->segment(4);
+		if($bulan=="all")
+		{$bulan="";}
+		$data['hasil']	= $this->m_sptb->get_sptb_filter($tahun,$bulan,$id_unit);
+		$data['bln']	= $bulan;
+		$data['thn']	= $tahun;
+		$data['bulan']	= $this->bulan;
+		$data['tahun']	= $this->tahun;
+
+		//echo $this->db->last_query();
+
+		$this->template->load('template','sptb/daftar_sptb_filter',$data); 
+    }
+	
+/*   function daftar_sptb_filter(){
+        $this->auth->restrict();
+		$this->template->load('template','sptb/daftar_sptb_filter'); 
+    }
+*/    function tampil_sptb(){
+        $this->auth->restrict();
+        $id_unit = $this->session->userdata('id_unit');
+        $bulan = $this->input->post('bulan');
+        $tahun = $this->input->post('tahun');
+		$data['hasil']= $this->m_sptb->get_sptb_filter($tahun,$bulan,$id_unit);
+		//echo $this->db->last_query();
+        $this->load->view('sptb/tampil_sptb',$data);
+		
+    }
+    function daftar_sptb_otorisasi(){
+        $this->auth->restrict();
+		$this->template->load('template','sptb/daftar_sptb_otorisasi'); 
+    }
+
+    function tampil_sptb_otorisasi(){
+        $this->auth->restrict();
+        $id_unit = $this->session->userdata('id_unit');
+        $bulan = $this->input->post('bulan');
+        $tahun = $this->input->post('tahun');
+		$where = "t_sptb.id_status_sptb = 31";
+		$data['hasil']= $this->m_sptb->get_sptb_filter($tahun,$bulan,$id_unit,$where);
+		//echo $this->db->last_query();
+        $this->load->view('sptb/tampil_sptb_otorisasi',$data);
+	}
+
+    function otorisasi_pd2(){
+        $this->auth->restrict();
+        $id_sptb	= $this->uri->segment(3);
+		$cek_unduh	= $this->m_sptb->cek_unduh($id_sptb);
+		$this->m_sptb->update_sptb_status($id_sptb,'32');
+
+/*           if($cek_unduh){
+              $this->session->set_userdata('msg_typ','ok');
+              $this->session->set_userdata('msg', 'Otorisasi SPTB Berhasil');
+              redirect('sptb/daftar_sptb_otorisasi');                 
+          }else{
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'SPTB belum pernah di Print, Otorisasi gagal');
+              redirect('sptb/daftar_sptb_otorisasi');                 
+          }
+*/    }
+
+function kunci_sptb(){
+	 $this->auth->restrict();
+	 $idu = $this->session->userdata('id_unit');
+
+	 $ta = $this->m_settings->get_tahun_anggaran();
+	 $data['nama_unit'] = $this->session->userdata('nama_unit');
+	 $data['pagu_real'] = $this->m_logic->get_pagu_real_unit($ta, $idu);
+	 $data['max_up'] = $this->m_logic->get_nilai_spm_up_unit ($ta, $idu);
+	 //echo $this->db->last_query();
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+	 $non_kw = array('UP','NHL','SAH','TUP');
+	 $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+	 foreach($data['sifat_bayar'] as $key=>$val){
+		if(in_array($val->kode_value, $non_kw)){
+			unset($data['sifat_bayar'][$key]);
+		}
+	 }
+	 
+	 $this->template->load('template','sptb/kunci_sptb',$data);
+}
+
+function tampil_kunci(){
+	$this->auth->restrict();
+	$idu = $this->session->userdata('id_unit');
+	$data['nama_unit'] = $this->session->userdata('nama_unit');
+	$sifat_bayar = $this->input->post('sifat_bayar');
+	$ta = $this->m_settings->get_tahun_anggaran();
+	
+	$data['pagu_real'] = $this->m_logic->get_pagu_real_unit($ta, $idu);
+	$data['max_up'] = $this->m_logic->get_nilai_spm_up_unit ($ta, $idu);
+	$data['kunci']= $this->m_sptb->cek_kunci($idu,$sifat_bayar);
+	$data['nilai_kw']= $this->m_sptb->get_total_kwitansi($idu,$sifat_bayar);
+	$this->load->view('sptb/tampil_kunci',$data); 
+}
+
+function lock(){
+	$this->auth->restrict();
+	$idu = $this->session->userdata('id_unit');
+	$created_by = $this->session->userdata('username');
+	$created_date = date("Y-m-d H:i:s");
+	$sifat_bayar = $this->input->post('sifat_bayar');
+	$data['lock']= $this->m_sptb->lock($idu,$sifat_bayar,$created_by,$created_date);
+}
+
+function unlock(){
+	$this->auth->restrict();
+	$idu = $this->session->userdata('id_unit');
+	$sifat_bayar = $this->input->post('sifat_bayar');
+	$data['unlock']= $this->m_sptb->unlock($idu,$sifat_bayar);
+}
+
+
+}?>

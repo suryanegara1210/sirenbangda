@@ -1,0 +1,44 @@
+<article class="module width_full">
+            <header><h3>Daftar Rincian Uang Persediaan (UP) Subunit</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/unit/verifikasi" onSubmit='return validasi(this)'> 
+            <table  class="table-common" style="margin-left: 20px; width: 280px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama SUbunit</th> 
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+             
+              
+              
+            $no = 1; 
+            $kegu=0;
+              foreach($daftar_unit as $unit){
+                  $nama_subunit = $unit["nama_subunit"];
+                  $id_subunit = $unit["id_subunit"];
+                         
+            ?>
+             
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <?php if ($jumgu[$kegu] < 1){ ?>
+                <td align="left"> <?php echo "$nama_subunit";?> </td>
+                <?php } else{ ?>
+                <td align="left"><?php echo "<a href='".base_url()."index.php/unit/get_rincian_up2/".$id_subunit."' >$nama_subunit ($jumgu[$kegu]) </a>";?></td> 
+                <?php }   $kegu++; ?> 
+              </tr>
+              
+            <?php $no++; }    
+            ?>     
+ </table>   
+ </div>
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>

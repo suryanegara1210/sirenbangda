@@ -1,0 +1,70 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-14 04:25:58 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:25:58 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:25:58 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:25:58 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:36:17 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:36:17 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:36:17 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:36:17 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-14 04:41:37 --> Severity: Notice  --> Undefined variable: isi_tender C:\xampp\htdocs\siaku\application\views\dpt\view_dpt.php 79
+ERROR - 2013-05-14 04:41:37 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\dpt\view_dpt.php 79
+ERROR - 2013-05-14 04:44:32 --> Severity: Warning  --> mysqli_connect(): MySQL server has gone away C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-14 04:44:32 --> Severity: Warning  --> mysqli_connect(): (HY000/2006): MySQL server has gone away C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-05-14 04:44:32 --> Unable to connect to the database
+ERROR - 2013-05-14 05:59:31 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 257
+ERROR - 2013-05-14 05:59:31 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 257
+ERROR - 2013-05-14 05:59:31 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 257
+ERROR - 2013-05-14 05:59:50 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 05:59:50 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:07:00 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:07:00 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:07:56 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:07:56 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:08:17 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:08:17 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:11:08 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:11:08 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:11:27 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:11:27 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:13:21 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:13:21 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 06:14:36 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-05-14 06:14:36 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-05-14 07:17:52 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:17:52 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:17:52 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:17:52 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-05-14 07:18:50 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-14 07:18:50 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-14 07:19:07 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:19:07 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:19:07 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:19:07 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-05-14 07:19:24 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-14 07:19:24 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-14 07:19:47 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:19:47 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:19:47 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-05-14 07:19:47 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-05-14 07:20:11 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-14 07:20:11 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 127 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-05-14 07:29:56 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 697 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-14 07:29:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:29:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:30:09 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 697 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-14 07:30:09 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:30:09 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:30:40 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 697 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-14 07:30:40 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:30:40 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:31:24 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 727 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-14 07:31:24 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:31:24 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:31:33 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 727 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-14 07:31:33 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:31:33 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:31:48 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 727 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 365
+ERROR - 2013-05-14 07:31:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369
+ERROR - 2013-05-14 07:31:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 369

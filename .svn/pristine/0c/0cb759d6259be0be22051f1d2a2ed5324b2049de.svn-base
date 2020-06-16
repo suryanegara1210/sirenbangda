@@ -1,0 +1,1085 @@
+<?php /**
+    * @brief Model Class yang terkait dengan Sub Bisnis Proses tambahan
+    * uang persediaan (TUP) pada Bisnis Proses Belanja
+    *
+    * Class Model ini untuk mengelola proses tambahan uang persediaan (TUP)
+    * yang merupakan bagian dari Bisnis Proses Belanja
+    *
+    * @author Putu Ari Arjana
+    *
+    */
+    class M_dpt extends CI_Model {
+    private $_JENIS_BELANJA = 2;
+    public function __construct()
+    {
+        parent::__construct();
+        //$this->table_name = 'tb_daftar';
+    }
+    /**
+    * Fungsi pengumuman TUP
+    * @return query array data pengumuman    
+    */
+    function tender_daftar_ambil($kdoutput,$kdkomponen,$kdakun){
+        $kode_subunit = $this->session->userdata('kode_subunit');
+        $this->db->select('*');
+        $this->db->from('t_rkakl');
+        $this->db->where("(idtdet, tahun) NOT IN (SELECT idtdet,tahun  FROM t_dpt_det)", NULL, FALSE);
+        $this->db->where('kode_unit',$kode_subunit);
+        $this->db->where('kdoutput',$kdoutput);
+        $this->db->where('kdkomponen',$kdkomponen);
+        $this->db->where('kdakun',$kdakun);
+        $this->db->where("(`type_kwitansi` = 'BARANG' OR `type_kwitansi` = 'MODAL')", NULL, FALSE);
+        $query = $this->db->get();
+        return $query->result();
+    }
+	
+	function list_tender_ambil($ta,$id_sunit){
+		$id_sunit = $this->session->userdata('id_subunit');
+    	$this->db->select('*');
+        $this->db->from('t_dpt_det');
+		$this->db->where('tahun',$ta);
+        $this->db->where('id_subunit',$id_sunit);
+		$this->db->where('sudah_kw',0);
+		$this->db->where('realisasi',0);
+        $query = $this->db->get();
+        return $query->result();
+	}
+	
+	function view_tender_ambil($ta, $idsunit){
+/*		$kode_subunit = $this->session->userdata('kode_subunit');
+    	$this->db->select('*');
+        $this->db->from('t_dpt_det');
+        $this->db->where('kode_subunit',$kode_subunit);
+        $query = $this->db->get();
+        return $query->result();*/
+		
+		$sql = "
+			SELECT kdgiat,kdoutput,kdakun, nmoutput,nmakun, SUM(jumlah) AS total
+			FROM t_dpt_det dpt
+			WHERE tahun='$ta' and id_subunit='$idsunit' 
+			GROUP BY kdgiat,kdoutput,kdakun, nmoutput,nmakun
+			ORDER BY kdgiat,kdoutput,kdakun, nmoutput,nmakun		
+		";
+		
+		$qf=$this->db->query($sql);
+		
+		return $qf->result();	
+	
+    }
+	
+	function view_list_detail_usulan_tender($ta, $idsunit, $akun) {
+            $qf=$this->db->query("
+				SELECT idtdet, id_subunit, CONCAT(kdgiat,kdoutput,kdakun) as mak, kdkomponen, nmkomponen, 
+                    hdr, uraian, vol, sat, hargasat, jumlah
+				FROM t_dpt_det dpt
+				WHERE CONCAT(kdgiat,kdoutput,kdakun) LIKE '%$akun' and id_subunit='$idsunit' 
+			");
+            return $qf->result();
+	}
+	
+	function simpan_dpt($id_rkakl,$id_dpt)
+        {   
+            $id_subunit = $this->session->userdata('id_subunit');
+            $qf=$this->db->query("
+				INSERT INTO 		
+					t_dpt_det(`id_dpt`,`idtdet`,`tahun`,`id_subunit`,`kode_subunit`,`nama_unit`,
+					`kdgiat`,`nmgiat`,`nmoutput`,`nmkomponen`,`kdskomponen`,
+					`nmskomponen`,`nmakun`,`kdoutput`,`kdkomponen`,`kdakun`,`hdr`,
+					`uraian`,`vol`,`sat`,`hargasat`,`jumlah`)
+				SELECT $id_dpt,idtdet,tahun,$id_subunit,kode_unit,nama_unit,kdgiat,nmgiat,nmoutput,
+					nmkomponen,kdskomponen,nmskomponen,nmakun,kdoutput,kdkomponen,kdakun,hdr,uraian,vol,sat,hargasat,jumlah
+				FROM t_rkakl 
+				WHERE idtdet=$id_rkakl");
+            //return $qf;
+        }   
+		
+		
+        function getKomponenList()
+        {
+            $kdoutput = $this->input->post('kdoutput');
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where("(`type_kwitansi` = 'BARANG' OR `type_kwitansi` = 'MODAL')", NULL, FALSE);  
+            $this->db->order_by('nmkomponen','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Komponen-';
+                $result[$row->kdkomponen]= ("$row->kdkomponen - $row->nmkomponen");
+            }
+            
+            return $result; 
+        
+    }
+    function getOutputList($kode_subunit)
+        {
+            
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit);
+            $this->db->where("(`type_kwitansi` = 'BARANG' OR `type_kwitansi` = 'MODAL')", NULL, FALSE); 
+            $this->db->order_by('kdoutput','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Output-';
+                $result[$row->kdoutput]= ("$row->kdoutput - $row->nmoutput");
+            }
+            
+            return $result;
+        }
+    function getAkunList()
+        {
+            $kdoutput = $this->input->post('kdoutput');
+            $kdkomponen = $this->input->post('kdkomponen');
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit);  
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where("(`type_kwitansi` = 'BARANG' OR `type_kwitansi` = 'MODAL')", NULL, FALSE);
+            $this->db->order_by('kdakun','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Akun-';
+                $result[$row->kdakun]= ("$row->kdakun - $row->nmakun"); 
+            }
+            
+            return $result;
+        } 
+        function id_dpt($id_subunit,$th){
+            $this->db->select('id_dpt');
+            $this->db->distinct();
+            $this->db->from('t_dpt');
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->where('tahun',$th);
+            $result = $this->db->get();    
+            return $result->row();
+            
+        }
+    function select_t_dpt($id_subunit,$th)
+        {              
+            $this->db->select('*');
+            $this->db->from('t_dpt');
+            $this->db->where('id_subunit',$id_subunit); 
+            $this->db->where('th',$th);
+            $result = $this->db->get();    
+            return $result; 
+        
+    }
+	
+    function masukkan_dpt($id_subunit,$th)
+        {      
+            //$id=$this->db->insert_id();  
+            $q = $this->db->query("insert into t_dpt(id_subunit, tahun) values ('$id_subunit','$th')");
+                     
+        }
+		
+    function getUnitList()
+         {
+            $this->db->select('*');
+            $this->db->from('m_unit');
+            $this->db->order_by('id_unit','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Unit-';
+                $result[$row->id_unit]= ("$row->kode_unit - $row->nama_unit");
+            }
+            
+            return $result;
+        }
+		
+    function getsubUnitList($id_unit)
+         {
+            $this->db->select('*');
+            $this->db->from('m_subunit');
+            $this->db->where('id_unit',$id_unit);    
+            $this->db->order_by('id_subunit','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Subunit-';
+                $result[$row->id_subunit]= ("$row->kode_subunit - $row->nama_subunit");
+            }
+            
+            return $result;;
+        }
+		
+    function list_usulan_tender($subunit, $tahun){     
+        $this->db->select('*');
+        $this->db->from('t_dpt_det');         
+        $this->db->where('id_subunit',$subunit);
+        $this->db->where('tahun',$tahun);           
+        $this->db->where('sudah_kw',0);           
+        $query = $this->db->get();
+        return $query->result();
+    }
+	
+    function get_subunit_dpt($th)
+         {
+            $this->db->select('*');
+            $this->db->from('t_dpt_det');
+            $this->db->where('tahun',$th);    
+            $this->db->where('sudah_kw',0);    
+            $result = $this->db->get();  
+            return $result->result_array();
+        }
+    
+    function banyak_detail2($kdoutput,$kdakun,$th)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_dpt_det");            
+            $this->db->where('t_dpt_det.sudah_kw',0);      
+            $this->db->where('t_dpt.kdoutput',$kdoutput);
+            $this->db->where('t_dpt.kdakun',$kdakun);
+            $this->db->where('t_dpt.tahun',$th);
+			$this->db->join('t_dpt','t_dpt.id_dpt=t_dpt_det.id_dpt'); 
+            $this->db->join('m_subunit','t_dpt.id_subunit=m_subunit.id_subunit');
+            $this->db->group_by('m_subunit.id_unit');
+            $result = $this->db->get();
+            return $result->num_rows() ;
+    }
+	
+    function banyak_detail($id_subunit,$th)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_dpt_det");            
+            $this->db->where('t_dpt_det.sudah_kw',0);      
+            $this->db->where('t_dpt_det.id_subunit',$id_subunit);
+            $this->db->where('t_dpt_det.tahun',$th);  
+            $result = $this->db->get();
+            return $result->num_rows() ;
+    }
+    function tes($id_subunit,$th)
+        {      
+            //$id=$this->db->insert_id();  
+            $q = $this->db->query("SELECT count(*) as jumlah FROM (`t_dpt_det`) WHERE `tahun` = '$th' AND `id_subunit` = $id_subunit AND `sudah_kw` = 0");
+            return $q->jumlah;
+                     
+        }
+		
+    function hapus_usulan($id_rkakl,$id_subunit,$tahun)
+        {     
+            $this->db->where('idtdet',$id_rkakl);
+            $this->db->where('tahun',$tahun);
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->delete('t_dpt_det');
+        }
+		
+    function usulan_permak($th)
+        {      
+            //$id=$this->db->insert_id();  
+            $q = $this->db->query("
+                SELECT a.kdoutput, a.kdakun,sum(jum_dpt) as jumlah, sum(jum_realisasi) as realisasi
+                FROM t_dpt a
+				INNER JOIN t_dpt_det b ON a.id_dpt=b.id_dpt
+                WHERE a.tahun = '$th' 
+                    AND b.sudah_kw = 0 
+                GROUP BY kdoutput,kdakun");
+            return $q->result_array();
+                     
+        }
+		
+    function usulan_permak_unit($kdoutput,$kdakun,$th)
+        {      
+            //$id=$this->db->insert_id();  
+            $q = $this->db->query("
+			SELECT total_unit.nama_unit,total_unit.id_unit,t_dpt.id_subunit,kdoutput,kdakun,
+				sum(jum_dpt) as jumlah, sum(jum_realisasi) as realisasi 
+			FROM t_dpt 
+			JOIN
+				(SELECT id_subunit, m_subunit.id_unit as tes, nama_unit,m_unit.id_unit 
+				 FROM m_subunit,m_unit 
+				 WHERE m_subunit.id_unit=m_unit.id_unit 
+				 GROUP BY id_subunit) 
+			AS total_unit ON t_dpt.id_subunit=total_unit.id_subunit 
+			WHERE tahun=$th 
+			AND kdoutput=$kdoutput 
+			AND kdakun=$kdakun 
+			GROUP BY kdoutput,kdakun,total_unit.tes
+			");
+            return $q->result_array();
+                     
+        }
+		
+        function usulan_permak_unit_subunit($kdoutput,$kdakun,$id_unit,$th)
+        {      
+            //$id=$this->db->insert_id();  
+            $q = $this->db->query("
+			SELECT total_unit.id_subunit,total_unit.nama_subunit,t_dpt.id_subunit,kdoutput,kdakun,
+				sum(jum_dpt) as jumlah, sum(jum_realisasi) as realisasi 
+			FROM t_dpt 
+			JOIN 
+				(select id_subunit,nama_subunit 
+				 from m_subunit 
+				 where id_unit=$id_unit 
+				 group by id_subunit) 
+			AS total_unit on t_dpt.id_subunit=total_unit.id_subunit 
+			WHERE tahun=$th 
+			AND kdoutput=$kdoutput 
+			AND kdakun=$kdakun 
+			GROUP BY kdoutput,kdakun,total_unit.id_subunit
+			");
+            return $q->result_array();
+                     
+        }
+        function no_kontrak_usulan($kdoutput,$kdakun,$id_unit,$th)
+        {      
+            
+            //$result = array();  
+            $q = $this->db->query("select no_kontrak from t_dpt_det join (select id_subunit,nama_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_dpt_det.id_subunit=total_unit.id_subunit where tahun=$th AND kdoutput=$kdoutput AND kdakun=$kdakun and no_kontrak is not NULL group by no_kontrak");
+            //return $q->result_array(); 
+  
+            foreach ($q->result() as $row)
+            {
+                //$result[0]= '-Pilih Nomor Kontrak-';
+                $result[$row->no_kontrak]= ("$row->no_kontrak");
+            }  
+            return $result;
+                   
+        }
+        function jum_no_kontrak_usulan($kdoutput,$kdakun,$id_unit,$th)
+        {      
+              
+            $q = $this->db->query("
+			SELECT no_kontrak 
+			FROM t_dpt_det 
+			JOIN t_dpt ON t_dpt.id_dpt=t_dpt_det.id_dpt
+			JOIN 
+				(SELECT id_subunit,nama_subunit 
+				 FROM m_subunit 
+				 WHERE id_unit=$id_unit) 
+			AS total_unit 
+			ON t_dpt.id_subunit=total_unit.id_subunit 
+			WHERE t_dpt.tahun=$th 
+			AND t_dpt.kdoutput=$kdoutput 
+			AND t_dpt.kdakun=$kdakun 
+			AND t_dpt_det.no_kontrak is not NULL 
+			GROUP BY t_dpt_det.no_kontrak
+			");
+            return $q->num_rows();
+                     
+        }
+    function banyak_detail_permak_unit($kdoutput,$kdakun,$id_unit,$th)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_dpt"); 
+			$this->db->join('t_dpt_det','t_dpt_det.id_dpt=t_dpt.id_dpt');           
+            $this->db->where('t_dpt_det.sudah_kw',0);      
+            $this->db->where('t_dpt.kdoutput',$kdoutput);
+            $this->db->where('t_dpt.kdakun',$kdakun);
+            $this->db->where('t_dpt.id_subunit IN (select id_subunit from m_subunit where id_unit ='.$id_unit.' group by id_subunit)');
+            $this->db->where('t_dpt.tahun',$th);  
+            $this->db->group_by('id_subunit');  
+            $result = $this->db->get();
+            return $result->num_rows() ;
+    }
+    function banyak_detail_permak_unit_subunit($kdoutput,$kdakun,$id_subunit,$th)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_dpt"); 
+			$this->db->join('t_dpt_det','t_dpt_det.id_dpt=t_dpt.id_dpt');           
+            $this->db->where('t_dpt_det.sudah_kw',0);      
+            $this->db->where('t_dpt.kdoutput',$kdoutput);
+            $this->db->where('t_dpt.kdakun',$kdakun);
+            $this->db->where('t_dpt.id_subunit',$id_subunit);
+            //$this->db->where('t_dpt_det.id_subunit IN (select id_subunit from m_subunit where id_unit ='.$id_unit.' group by id_subunit)');
+            $this->db->where('t_dpt.tahun',$th);  
+            $result = $this->db->get();
+            return $result->num_rows() ;
+    }
+	function hapus_uraian_dpt($id)
+        {     
+            $this->db->where('idtdet',$id);       
+            $this->db->delete('t_dpt_det');  
+        }
+		
+    function uraian_daftar($kdoutput,$kdakun,$id_subunit,$th)
+    {
+            $this->db->select('a.*, b.*, c.*'); 
+            $this->db->from("t_dpt a");
+			$this->db->join('t_dpt_det b','b.id_dpt=a.id_dpt');
+			$this->db->join('m_subunit c','a.id_subunit=c.id_subunit');             
+            $this->db->where('b.sudah_kw',0);      
+            $this->db->where('a.kdoutput',$kdoutput);
+            $this->db->where('a.kdakun',$kdakun);
+            $this->db->where('a.id_subunit',$id_subunit);
+            $this->db->where('a.tahun',$th); 
+            $query = $this->db->get();
+            return $query->result();
+    }
+    function update_detail_kel($id_dpt_det,$val)
+        {                         
+             $this->db->set('nilai_realisasi',$val); 
+             $this->db->where('id_dpt_det', $id_dpt_det);
+             $this->db->update('t_dpt_det');
+        }
+    function update_detail_kel2($id_dpt_det,$val)
+        {                         
+             $this->db->set('no_kontrak',$val); 
+             $this->db->where('id_dpt_det', $id_dpt_det);
+             $this->db->update('t_dpt_det');
+        }
+    function cek_pagu_real($id_subunit,$th)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_pagu_real");            
+            $this->db->where('id_subunit',$id_subunit);
+            $this->db->where('tahun',$th);  
+            $result = $this->db->get();
+            return count($result) ;
+    }
+    function open_tender($tahun)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_dpt");
+            $this->db->join("m_subunit",'m_subunit.id_subunit=t_dpt.id_subunit','inner');
+            $this->db->where('tahun',$tahun); 
+            $this->db->where('status','OPEN'); 
+            $query = $this->db->get();
+            return $query->result_array();
+    }
+    function buat_kwitansi(){
+        $this->load->model('m_umum');
+        
+        //ambil bahan kwitansi
+        $this->db->select('*,sum(realisasi) as jum');
+        $this->db->from('t_dpt_det');
+        $this->db->where("realisasi IS NOT NULL",null,false);
+        $this->db->where('sudah_kw','0');
+        $this->db->group_by(array("kdoutput", "kdkomponen", "kdskomponen", "kdakun", "id_header", "id_subunit")); 
+        $query = $this->db->get();
+        $bahan = $query->result();
+        
+        foreach($bahan as $bhn){
+            //bikin kwi
+            $subunit=$bhn->id_subunit;
+            $sub_det=$this->m_umum->subunit_detail($bhn->id_subunit,1);
+            if(isset($sub_det->id_unit)){
+                $idunit=$sub_det->id_unit;
+            }else{
+                $idunit=0;
+            }
+            
+            $j_pajak=0;
+            $ppn=0;
+            $pph=0;
+            $nominal=$bhn->jum;
+            $tgl_kwitansi=date('Y-m-d');
+            $tpt_kwitansi='Bukit Jimbaran';
+            $kode_bas='';
+            $pengambil='';
+            $nip_pengambil='';
+            $penerima='';
+            $nip_penerima='';
+            
+            $ket_kwitansi=$bhn->hdr." ".$bhn->uraian;
+            
+            
+            $objek = new stdClass();
+            
+            $ppn=($ppn/100)*$nominal;
+            $pph=($pph/100)*$nominal;
+    
+             $objek->jenis_kwitansi='8';
+             
+             $objek->id_sifatpembayaran='4';
+             $objek->id_unit=$idunit;
+             $objek->id_subunit=$bhn->id_subunit;
+             
+             $objek->tgl_kwitansi=$tgl_kwitansi;
+             $objek->tpt_kwitansi=$tpt_kwitansi;
+             $objek->kegiatan='4078';
+             $objek->kdoutput=$bhn->kdoutput;
+             $objek->nmoutput=$bhn->nmoutput;
+             $objek->kdkomponen=$bhn->kdkomponen;
+             $objek->nmkomponen=$bhn->nmkomponen;
+             $objek->kdskomponen=$bhn->kdskomponen;
+             $objek->nmskomponen=$bhn->nmskomponen;
+             $objek->kdakun=$bhn->kdakun;
+             $objek->nmakun=$bhn->nmakun;
+             $objek->hdr=$bhn->id_header;
+             $objek->nmheader=$bhn->hdr;
+             $objek->ket_kwitansi=$ket_kwitansi;
+             $objek->nominal=$nominal;
+             $objek->id_pajak=$j_pajak;
+             $objek->ppn=$ppn;
+             $objek->pph=$pph;
+             $objek->pengambil=$pengambil;
+             $objek->nip_pengambil=$nip_pengambil;
+             $objek->penerima=$penerima;
+             $objek->nip_penerima=$nip_penerima;
+             $objek->akun_kode=$kode_bas;
+             $objek->id_status_kwitansi= '4';
+                
+            //insert kwitansi
+            $id=$this->nomer->no_baru2('t_kwitansi','kwitansi','id_subunit',$objek->id_subunit, date('y'));
+        
+            $this->db->where('id_kwitansi', $id['id_kwitansi']);
+            $this->db->where('th_kwitansi', $id['th_kwitansi']);
+            $this->db->where('id_subunit', $id['id_subunit']);
+            $this->db->update('t_kwitansi',$objek);
+            
+            //update dpt_det
+            $this->db->set('sudah_kw','1');
+            $this->db->where('kdoutput',$bhn->kdoutput);
+            $this->db->where('kdkomponen',$bhn->kdkomponen);
+            $this->db->where('kdskomponen',$bhn->kdskomponen);
+            $this->db->where('kdakun',$bhn->kdakun);
+            $this->db->where('id_header',$bhn->id_header);
+            $this->db->where('id_subunit',$subunit);
+            $this->db->where("realisasi IS NOT NULL",null,false);
+            $this->db->where('sudah_kw','0');
+            $this->db->update('t_dpt_det');
+            
+        }
+        
+    }
+    
+    function buat_sptb(){
+            /*
+                ambil akun, output, unit kwitansi group by akun, output, unit
+                 looping tiap baris
+                    insert ke sptb
+                    ambil semua kwitansi yg ada ber akun, output, unit
+                     looping kwitansi
+                        tiap kwitansi update id sptb, status 5
+                        
+             */
+             
+             $this->db->select('*');
+             $this->db->from('t_kwitansi');
+             $this->db->where('jenis_kwitansi','8');
+             $this->db->where('id_sifatpembayaran','4');
+             $this->db->where('id_status_kwitansi','4');
+             
+             $this->db->group_by(array("kdoutput", "kdakun", "id_unit"));
+             $res=$this->db->get();
+             $kwitansi_tender=$res->result();
+             
+             foreach($kwitansi_tender as $kw_tnd){
+                // buat sptb
+                $id=$this->nomer->no_baru2('t_sptb','sptb','id_unit',$kw_tnd->id_unit, date('y')); 
+                $tgl_skrg = date("Y-m-d");
+                $this->db->set('output',$kw_tnd->kdoutput);
+                $this->db->set('id_akun',$kw_tnd->kdakun);
+                $this->db->set('id_status_sptb','1');
+                $this->db->set('id_sifatpembayaran','4');
+                $this->db->set('is_auto','1'); 
+                $this->db->set('tgl_sptb',$tgl_skrg);
+                $this->db->where('id_sptb', $id['id_sptb']);
+                $this->db->where('th_sptb', $id['th_sptb']);
+                $this->db->where('id_unit', $id['id_unit']);
+                $this->db->update('t_sptb');
+                
+                //update status kwitansi dan update nomor sptb
+                $this->db->set('id_status_kwitansi','5');
+                $this->db->set('id_sptb',$id['id_sptb']);
+                $this->db->where('jenis_kwitansi','8');
+                $this->db->where('id_sifatpembayaran','4');
+                $this->db->where('id_status_kwitansi','4');
+                $this->db->where('kdoutput',$kw_tnd->kdoutput);
+                $this->db->where('kdakun',$kw_tnd->kdakun);
+                $this->db->where('id_unit',$kw_tnd->id_unit);
+                $this->db->update('t_kwitansi');
+                
+             }
+    }
+    
+    function buat_spp_spm_sp2d(){
+        $this->db->select('*');
+        $this->db->from('t_sptb');
+        $this->db->where('id_status_sptb','1');
+        $this->db->where('is_auto','1');
+        $res=$this->db->get();
+        $sptb=$res->result();
+        
+        foreach($sptb as $sptbRow){
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");      
+            //dipa aktif terbaru
+            $this->db->select_max('id_dipa');
+            $this->db->from('m_dipa');    
+            $this->db->where('aktif',1);  
+            $dipaRs = $this->db->get();
+            $dipaRw = $dipaRs->row();
+            $dipa=$dipaRw->id_dipa;
+            
+            $id_unit=$sptbRow->id_unit;
+            
+            //insert spp
+            $idspp=$this->nomer->no_baru2('t_spp','spp','id_unit',$id_unit, date('y')); 
+            
+            $this->db->set('id_status_spp','9');
+            $this->db->set('id_sifatpembayaran','4'); 
+            $this->db->set('id_jenispembayaran','1'); 
+            $this->db->set('id_sptb',$sptbRow->id_sptb); 
+            $this->db->set('id_kegiatan','1'); 
+            $this->db->set('tgl_dibuat',$tgl_skrg);  
+            $this->db->set('id_unit',$id_unit); 
+            $this->db->set('id_dipa',$dipa); 
+            $this->db->where('id_spp', $idspp['id_spp']);
+            $this->db->where('th_spp', $idspp['th_spp']);
+            $this->db->where('id_unit', $idspp['id_unit']);
+            $this->db->update('t_spp'); 
+            
+            //insert spm
+            
+            $this->db->select('*');
+            $this->db->from('m_setting'); 
+            $result = $this->db->get();
+            $setting = $result->row();
+            
+            $cb = '';
+            $uraian = '';
+            
+            $tgl_skrg = date("Y-m-d");         
+            $kepada = $setting->kepada; 
+            $npwp = $setting->npwp; 
+            $no_rek = $setting->norek_pusat; 
+            $bank= $setting->bank;    
+            
+            $idspm=$this->nomer->no_baru2('t_spm','spm','id_unit',$id_unit, date('y')); 
+            
+            $this->db->set('id_status_spm','7');
+            $this->db->set('id_spp',$idspp['id_spp']); 
+            $this->db->set('tgl_spm',$tgl_skrg); 
+            $this->db->set('id_carabayar',$cb); 
+            $this->db->set('kepada',$kepada); 
+            $this->db->set('npwp',$npwp);  
+            $this->db->set('bank',$bank);  
+            $this->db->set('nomor_rekening',$id_unit); 
+            $this->db->set('uraian_spm',$uraian); 
+            $this->db->where('id_spm', $idspm['id_spm']);
+            $this->db->where('th_spm', $idspm['th_spm']);
+            $this->db->where('id_unit', $idspm['id_unit']);
+            $this->db->update('t_spm');
+            
+            //insert sp2d
+            $tahun = date("Y");
+            $tgl_skrg = date("Y-m-d");    
+            $idsp2d=$this->nomer->id_baru('t_sp2d','sp2d', date('y')); 
+            
+            $no = sprintf("%04d", $idsp2d['id_sp2d']);
+            $nomor_sp2d = ''.$no.'/LS/BLU/'.$tahun; 
+            
+            $this->db->set('id_spm',$idspm['id_spm']);
+            $this->db->set('no_sp2d',$nomor_sp2d);
+            $this->db->set('tgl_buat',$tgl_skrg);
+            $this->db->where('id_sp2d', $idsp2d['id_sp2d']);
+            $this->db->where('th_sp2d', $idsp2d['th_sp2d']);
+            $this->db->update('t_sp2d'); 
+            
+            //update sptb
+            $this->db->set('id_status_sptb','4'); 
+            $this->db->where('id_sptb', $sptbRow->id_sptb);
+            $this->db->where('th_sptb', $sptbRow->th_sptb);
+            $this->db->update('t_sptb');
+            
+            //update kwitansi
+            $this->db->set('id_status_kwitansi','14');
+            $this->db->set('id_spp',$idspp['id_spp']);
+            $this->db->set('id_sp2d',$idsp2d['id_sp2d']);
+            $this->db->where('id_sptb', $sptbRow->id_sptb);
+            $this->db->where('th_kwitansi', $sptbRow->th_sptb);
+            $this->db->update('t_kwitansi');
+        }
+    }
+	
+	function get_nama($id_unit){
+		$q = $this->db->query("
+			SELECT * FROM m_unit WHERE id_unit=$id_unit
+		");
+            return $q->result_array();	
+	}
+	
+	function get_id_unit($id_subunit){
+		$this->db->select('*');
+		$this->db->from('m_subunit');
+		$this->db->where('id_subunit',$id_subunit); 
+		$result = $this->db->get();
+		$setting = $result->row()->id_unit;
+		return $setting;	
+	}
+	
+	function get_nama_subunit($id_subunit){
+		$this->db->select('*');
+		$this->db->from('m_subunit');
+		$this->db->where('id_subunit',$id_subunit); 
+		$result = $this->db->get();
+		$setting = $result->row()->nama_subunit;
+		return $setting;	
+	}
+	
+	function get_nama_unit($id_unit){
+		$this->db->select('*');
+		$this->db->from('m_unit');
+		$this->db->where('id_unit',$id_unit); 
+		$result = $this->db->get();
+		$setting = $result->row()->nama_unit;
+		return $setting;	
+	}
+	
+	// Perbaikan DPT sesuai dengan input usulan
+	function get_usulan_dpt ($ta, $idsu) {
+		return $this->get_usulan($ta, $idsu);
+	}
+	
+	function get_tender_by_id($id) {
+		$sql = "
+			SELECT *
+			FROM t_dpt 
+			WHERE id_dpt = ?
+		";
+
+		$query = $this->db->query($sql, array($id));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+		return FALSE;
+	}
+	
+	function get_tender_by_id_subunit($id_subunit) {
+		$sql = "
+			SELECT *
+			FROM t_dpt 
+			WHERE id_subunit = ?
+			AND status = 'OPEN'
+		";
+
+		$query = $this->db->query($sql, array($id_subunit));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+		return FALSE;
+	}
+	
+	function get_usulan($ta, $idsu) {
+		$sql = "
+			SELECT *
+			FROM t_dpt
+			WHERE tahun = ?
+				AND id_subunit = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu));
+
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+	}
+	
+	function create_usulan_dpt($ta, $idsu) {
+		return $this->create_usulan($ta, $idsu);
+	}
+	
+	function create_usulan($ta, $idsu){
+	    $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+        $sunit = $this->m_umum->subunit_detail($idsu);
+		$uname = $this->session->userdata('username');
+		$idu   = $this->session->userdata('id_unit');
+		$akun_kode = $this->m_settings->get_bas_uang_muka();
+		$ta     = $this->m_settings->get_tahun_anggaran();
+
+		//add new usulan
+		$this->db->set('id_subunit'	, $idsu);
+		$this->db->set('tahun'	, $ta);
+		$this->db->set('created_by'	, $uname);
+		$this->db->set('created_date', 'now()', FALSE);
+		$result = $this->db->insert('t_dpt');
+
+        $id_dpt = $this->db->insert_id();
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+
+		//return $result ? $this->db->insert_id() : $result;
+	}
+	
+	function get_list_uraian_tender($id_subunit) {
+		//TODO: tambahan filter flag_kirim=0, flag_cek=1
+		$sql = "
+			SELECT a.id_dpt, a.`id_subunit`, a.kdgiat, a.nmgiat, a.kdoutput, a.nmoutput, 
+				a.kdkomponen, a.nmkomponen, a.kdakun, a.nmakun,
+				a.tahun, a.jum_dpt, a.status, b.id_dpt_det, b.hdr, b.`jumlah`, IFNULL(SUM(b.jumlah), 0) AS jumlah 
+			FROM t_dpt a INNER JOIN t_dpt_det b ON a.id_dpt = b.id_dpt 
+			WHERE a.id_subunit = '$id_subunit'
+			GROUP BY a.id_dpt, a.id_subunit, a.kdgiat, a.kdoutput, a.kdkomponen, a.kdakun, b.hdr, a.tahun, a.status 
+			ORDER BY a.kdgiat, a.kdoutput, a.kdkomponen, a.kdakun, a.created_date  
+		";
+
+		$query = $this->db->query($sql, array($id_subunit));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+	
+	function get_tender_item_by_id($id_dpt,$hdr) {
+		$sql = "
+			SELECT a.*,b.*
+			FROM t_dpt a INNER JOIN t_dpt_det b ON a.id_dpt = b.id_dpt 
+			WHERE a.id_dpt = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($id_dpt, $hdr));
+
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return FALSE;
+	}
+	
+	function get_uraian_by_id_dpt ($id_dpt, $params){
+		$sql = "
+			SELECT a.*, b.*
+			FROM t_dpt_det a INNER JOIN t_dpt b
+					ON a.id_dpt = b.id_dpt
+			WHERE a.id_dpt = ?
+				AND b.kdgiat = ?
+				AND b.kdoutput = ?
+				AND b.kdkomponen = ?
+				AND b.kdakun = ?
+				AND a.hdr = ?
+	";
+
+		$query = $this->db->query($sql, array($id_dpt, $params->kdgiat,
+								$params->kdoutput, $params->kdkomponen,
+								$params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+	}
+	
+	function get_list_uraian_item_tender($id_dpt,$hdr) {
+		$sql = "
+			SELECT *
+			FROM t_dpt_det
+			WHERE id_dpt = ?
+				AND hdr = ?
+			";
+
+		$query = $this->db->query($sql, array($id_dpt,$hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->result();
+		}
+
+		return FALSE;
+
+
+	}
+	
+	function get_nilai_tender_by_id ($id_dpt) {
+		$sql = "SELECT IFNULL(SUM(b.jumlah),0) AS total_tender
+				FROM t_dpt a INNER JOIN t_dpt_det b
+						ON a.id_dpt = b.id_dpt
+				WHERE a.id_dpt = ?
+			";
+
+		$query = $this->db->query($sql, array($id_dpt));
+		if($query->num_rows() > 0) {
+			return $query->row()->total_usulan;
+		}
+
+		return 0;
+	}
+	
+	function delete_tender_item($id_dpt, $hdr) {
+
+		//NOTE: Asumsi uraian akan di-delete secara cascade sesuai constraint
+		//Foreint Key nya
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+
+		$tender_item = $this->get_tender_item_by_id($id_dpt,$hdr);
+
+		if($tender_item) {
+			$this->db->where('id_dpt', $id_dpt);
+			$this->db->where('hdr', $hdr);
+			$ret = $this->db->delete('t_dpt_det');
+
+			//perbaharui data total_usulan di t_usulan
+			$this->update_nilai_total_tender($id_dpt);
+		}
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	function save_cache_uraian($cache) {
+		//simpan data
+		//start transact sql
+
+		$this->db->trans_begin();
+
+		$uname = $this->session->userdata('username');
+		$tahun     = $this->m_settings->get_tahun_anggaran();
+		//cek item usulan sudah ada atau belum
+		$item_tender = $this->get_item_tender_by_id_dpt($cache->id_dpt,$cache);
+		
+		//jika item belum ada, tambahkan di tabel t_usulan_item
+		if($item_tender === FALSE) {
+			//add new item usulan
+			$this->db->set('id_dpt',			$cache->id_dpt);
+			$this->db->set('id_subunit',		$cache->id_subunit);
+			$this->db->set('kdgiat', 			$cache->kdgiat);
+			$this->db->set('nmgiat', 			$cache->nmgiat);
+			$this->db->set('kdoutput', 			$cache->kdoutput);
+			$this->db->set('nmoutput', 			$cache->nmoutput);
+			$this->db->set('kdkomponen', 		$cache->kdkomponen);
+			$this->db->set('nmkomponen', 		$cache->nmkomponen);
+			$this->db->set('kdakun', 			$cache->kdakun);
+			$this->db->set('nmakun', 			$cache->nmakun);
+			$this->db->set('tahun',				$tahun);
+			$this->db->set('created_by',		$uname);
+			$this->db->set('created_date','now()', FALSE);
+
+			//do insert
+			$this->db->insert('t_dpt');
+			$cache->id_dpt = $this->db->insert_id();
+		} else {
+			$cache->id_dpt = $item_tender->id_dpt;
+		}
+
+		//simpan data
+		foreach($cache->rows as $id=>$cell) {
+			$this->db->set('id_dpt',$cache->id_dpt);
+			$this->db->set('hdr',$cache->hdr);
+			$this->db->set('uraian', 	$cell[1]);
+			$this->db->set('volume', 		$cell[2]);
+			$this->db->set('satuan', 		$cell[3]);
+			$this->db->set('harga_satuan', 	$cell[4]);
+			$this->db->set('jumlah', 	$cell[5]);
+
+			if( strpos($id, 'cache') === FALSE &&
+				strpos($id, 'empty') === FALSE ) {
+				//update
+				$this->db->set('changed_by',$uname);
+				$this->db->set('changed_date','now()', FALSE);
+
+				//do update
+				$this->db->where('id_dpt_det', $id);
+				$this->db->update('t_dpt_det');
+			} else {
+				//insert
+				$this->db->set('created_by',$uname);
+				$this->db->set('created_date','now()', FALSE);
+
+				//do insert
+				$this->db->insert('t_dpt_det');
+				$realid = $this->db->insert_id();
+
+				if($realid){
+					$cache->rows[$realid] = $cell;
+				}
+			}
+		}
+
+		if(count($cache->del_stack) > 0) {
+			//delete
+			while($delid = array_pop($cache->del_stack)){
+				//do delete
+				$this->db->where('id_dpt_det', $delid);
+				$this->db->delete('t_dpt_det');
+			}
+		}
+
+		// perbaharui data total usulan item di t_usulan_item
+		$this->update_nilai_total_tender($cache->id_dpt);
+
+		$item_tender = $this->get_tender_item_by_id($cache->id_dpt,$cache->hdr);
+
+		//$this->db->trans_complete();
+		if($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		} else {
+			$this->db->trans_commit();
+
+			//jika lancar, hilangkan data cache dan empty
+			foreach($cache->rows as $id=>$cell){
+				if(strpos($id, 'cache') !== FALSE ||
+				   strpos($id, 'empty') !== FALSE){
+					unset($cache->rows[$id]);
+				}
+			}
+
+			return $cache;
+		}
+	}
+	
+	function get_item_tender_by_id_dpt($id_dpt, $params) {
+		$sql = "
+			SELECT a.id_dpt, b.id_dpt, a.id_subunit,
+				a.kdgiat, a.nmgiat, a.kdoutput, a.nmoutput,
+				a.kdkomponen, a.nmkomponen, a.kdakun, a.kdakun, b.hdr, a.jum_dpt,
+				a.tahun, a.status, b.*
+			FROM t_dpt a
+				LEFT JOIN t_dpt_det b
+					ON a.id_dpt = b.id_dpt
+			WHERE a.id_dpt = ?
+				AND a.kdgiat = ?
+				AND a.kdoutput = ?
+				AND a.kdkomponen = ?
+				AND a.kdakun = ?
+				AND b.hdr = ?
+		";
+
+		$query = $this->db->query($sql, array($id_dpt, $params->kdgiat,
+											  $params->kdoutput, $params->kdkomponen,
+											  $params->kdakun, $params->hdr));
+
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+
+	}
+	
+	function update_nilai_total_tender($id_dpt) {
+		//FIXME: tentukan username yang melakukan
+		$sql = "UPDATE t_dpt a
+			SET a.jum_dpt = (SELECT SUM(jumlah) FROM t_dpt_det where id_dpt = ?),
+				a.changed_by = 'model',
+				a.changed_date = now()
+			WHERE a.id_dpt = ?
+			";
+
+		$query = $this->db->query($sql, array($id_dpt, $id_dpt));
+		return $query;
+	}
+	
+	
+	// End Perbaikan DPT
+        
+}

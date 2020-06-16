@@ -1,0 +1,1435 @@
+<?php
+/**
+ *
+ * Class ini digunakan sebagai common gateway ke internal data
+ *
+ * @author I Made Agus Setiawan <madeagus@gmail.com>
+ *
+ */
+class Usulan extends CI_Controller
+{
+    var $CI = NULL;
+
+    var $_user = NULL;
+
+    public function __construct()
+    {
+        $this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+        $this->load->model(array('m_logic', 'm_settings', 'm_pok','m_usulan', 'm_kwitansi',
+                                 'munit','m_umum','m_lov', 'm_max_up'));
+
+        $this->_user = $this->auth->get_user();
+    }
+
+    function index()
+    {
+    	//cek harus login
+        $this->auth->restrict();
+
+        //item yg tidak muncul di list usulan, harus dihilangkan
+        $non_kw                 = array(Constant::JB_GUP,
+        								Constant::JB_GUP_NHL,
+        								Constant::JB_TUP_NHL,
+        								Constant::JB_LS,
+        								Constant::JB_NHL,
+        								Constant::JB_SAH);
+
+        //cek privilege mode 1
+        $this->auth->has_privileges(array('create_up', 'read_up', 'update_up',
+        								  'create_tup', 'read_tup', 'update_tup'));
+
+
+        //hilangkan UP jika tidak ada privilige
+        if( !$this->_user->hasPrivilege('create_up') && $this->_user->hasPrivilege('read_up') &&
+        	!$this->_user->hasPrivilege('update_up')) {
+
+	        $non_kw[]	= Constant::JB_UP;
+        }
+
+        //hilangkan TUP
+        if( !$this->_user->hasPrivilege('create_tup') && $this->_user->hasPrivilege('read_tup') &&
+        	!$this->_user->hasPrivilege('update_tup')) {
+
+	        $non_kw[]	= Constant::JB_TUP;
+        }
+
+        $data['sifat_bayar']    = $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR, $non_kw);
+
+        $this->template->load('template','usulan/buat_usulan', $data);
+    }
+
+    function get_form_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $ju     = $this->input->post('jns_usulan');
+
+        switch($ju){
+            case Constant::JB_UP:
+
+                $this->_form_usulan_up();
+
+                break;
+            case Constant::JB_TUP:
+
+                $this->_form_usulan_tup();
+
+                break;
+        }
+    }
+
+    private function _form_usulan_up()
+    {
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $data['jns_usulan'] = "Uang Persediaan (UP)";
+
+        //requirement for UP proposal
+        //1. Max UP must be defined, means pagu real must be available
+        $nilai_max_up   = $this->m_logic->get_nilai_max_up($ta, $idsu);
+
+        if($nilai_max_up === FALSE){
+            $response['errno']  = 1;
+            $response['msg'] = "Sub Unit anda belum bisa mengajukan UP.
+                  Nilai Maksimum UP belum dimasukkan oleh Unit";
+            echo json_encode($response);
+            return;
+        }
+
+        //2. Cek Usulan
+        $usulan = $this->m_usulan->get_usulan_up($ta, $idsu);
+
+        //2.1 Jika belum ada usulan UP, tampilkan form buat master UP
+        if($usulan === FALSE) {
+
+        	if( !$this->_user->hasPrivilege('create_up') ) {
+	            $response['errno'] = 2;
+	            $response['msg'] = "Anda tidak memiliki privilege untuk melakukan aksi ini.";
+	            echo json_encode($response);
+	            return;
+        	}
+
+            $data['nm_sunit'] = $this->m_umum->get_nama_sunit_by_id($idsu);
+        $this->load->view('usulan/form_usulan', $data);
+            return;
+        }
+
+        //2. Jika sudah ada usulan UP, tampilkan informasi master
+        $data['id_usulan']      = $usulan->id_usulan;
+        $data['tgl_usulan']     = $usulan->tgl_usulan;
+        $data['total_usulan']   = $usulan->total_usulan;
+
+        //munculkan tombol kirim, jika;
+        //1. belum dikirim atau statusnya baru (1)
+        //2. ada revisi untuk usulan item, cek status usulan 3 dan semua item revisi
+        //   sudah di revisi, status 4, artinya tidak ada item usulan berstatus 3
+        $list_item = $this->m_usulan->get_all_usulan_item_by_id_usulan($usulan->id_usulan);
+        $done_revisi = TRUE;
+
+        if($list_item !== FALSE) {
+	        foreach($list_item as $item) {
+	        	//jika masih ada yang belum direvisi, jangan ijinkan mengirim
+		        if(in_array($item->id_status_usulan_item, array(Constant::USULANITM_REVISI))) {
+			        $done_revisi = FALSE;
+		        }
+	        }
+        }
+
+        $data['show_btn_kirim'] = ($usulan->flag_kirim == 0 ? TRUE : FALSE) |
+                                  (in_array($usulan->id_status_usulan,
+                                  			array(Constant::USULANITM_BARU,
+                                  				  Constant::USULANITM_REVISI)) && $done_revisi);
+
+        $data['flag_kirim']     = $usulan->flag_kirim;
+
+        $data['status_usulan']  = $usulan->status_usulan;
+        $data['id_status_usulan']  = $usulan->id_status_usulan;
+        $data['max_usulan']     = $nilai_max_up;
+        $data['pagu_real']      = $this->m_logic->get_pagu_real_sunit($ta, $idsu);
+
+        //tampilkan form usulan UP
+        //UP hanya bisa diajukan sebesar maks nilai max_up yang sudah ditentukan
+
+        $this->load->view('usulan/form_usulan_detail',$data);
+    }
+
+    function create_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $jns_usulan = $this->input->post('jns_usulan');
+
+        switch($jns_usulan) {
+            case Constant::JB_UP:
+                //cek apakah sudah ada usulan up
+                $usulan_up = $this->m_usulan->get_usulan_up($ta, $idsu);
+
+                //jika belum, lanjutkan dengan membuat master usulan UP
+                if($usulan_up === FALSE){
+                    $result = $this->m_usulan->create_usulan_up($ta, $idsu);
+
+                    if($result === FALSE) {
+                        //gagal, tampilkan informasi error
+                        $data['errno'] = 1;
+                        $data['msg'] = "Usulan Uang Persediaan (UP) gagal dibuat.";
+                        echo json_encode($data);
+                        return;
+                    }
+                }
+
+                //berhasil, coba open form usulan up
+                $this->_form_usulan_up();
+                break;
+            case Constant::JB_TUP:
+                //cek apakah sudah ada usulan tup
+                $usulan = $this->m_usulan->get_last_usulan_tup($ta, $idsu);
+
+                //jika belum, lanjutkan dengan membuat master usulan TUP
+                if($usulan === FALSE || $usulan->flag_spj == 1){
+                    $result = $this->m_usulan->create_usulan_tup($ta, $idsu);
+
+                    if($result === FALSE) {
+                        //gagal, tampilkan informasi error
+                        $data['errno'] = 2;
+                        $data['msg'] = "Usulan Tambahan Uang Persediaan (TUP) gagal dibuat.";
+                        echo json_encode($data);
+                        return;
+                    }
+                }
+
+                //berhasil, coba open form usulan tup
+                $this->_form_usulan_tup();
+                break;
+        }
+    }
+
+    private function _form_usulan_tup() {
+        //TODO: usulan TUP per kegiatan belum memperhitungkan brapa yang sudah diajukan
+        //pada usulan sebelumnya. Seharusnya jika suatu kegiatan sudah diusulkan
+        //pada TUP sebelumnya, maka yang muncul adalah sisa nya saja. untuk sementara
+        //diabaikan
+
+        //NOTE: TUP hanya bisa diajukan jika minimal SPJ UP terakhir sudah diajukan, dapat
+        //dilihat dari penerbitan SPP GU
+
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $data['jns_usulan'] = "Tambahan Uang Persediaan (TUP)";
+
+        //requirement for TUP proposal
+        //1.    sudah ada sp2d up, --> sudah mengajukan UP dan disetujui
+        //1.1 	cek terbaru: bisa dilihat dari status usulan UP, sudah dicairkan atau belum.
+        //$nilai_sp2d_up  = $this->m_logic->get_nilai_up_sunit($ta, $idsu);
+        $nilai_sp2d_up = 0;
+        if($nilai_sp2d_up == 0) {
+            $response['errno']  = 1;
+            $response['msg'] = "Sub Unit anda belum mengajukan UP atau UP belum disetujui.
+                  TUP belum bisa diusulkan.";
+            echo json_encode($response);
+            return;
+        }
+
+        ////1.1   get nilai sps sebagai maksimal nilai pengajuan TUP
+        //$nilai_max_usulan   = $this->m_logic->get_sps($ta, $idsu);
+
+        $nilai_max_usulan = $this->m_logic->get_pagu_real_sunit($ta, $idsu);
+        /*
+        if($nilai_max_usulan == 0){
+            $response['errno']  = 2;
+            $response['msg'] = "Dana sisa pagu terkini tidak mencukupi untuk mengajukan
+            usulan TUP. TUP tidak bisa diusulkan.";
+            echo json_encode($response);
+            return;
+        }
+        */
+
+        //2  Usulan TUP hanya bisa dibuat jika:
+        // - UP sedang diSPJkan, artinya status GUP terakhir minimal SPJ nya sudah diajukan
+        //   dan belum keluar SP2D
+        //   dapat dilihat dari spj unit masih berstatus diajukan (2)
+        // -
+        //$status_spj_up_unit_terakhir =
+        //$this->m_usulan->get_status_spj_up_unit_()
+
+        //2. Cek Usulan === FALSE OR Last Usulan sudah SPJ
+        $usulan = $this->m_usulan->get_last_usulan_tup($ta, $idsu);
+
+        //Jika belum ada usulan TUP, OR Usulan sudah SPJ, tampilkan form
+        //buat master TUP
+
+        if($usulan === FALSE || $usulan->flag_spj == 1) {
+
+        	if( !$this->_user->hasPrivilege('create_tup') ) {
+	            $response['errno'] = 2;
+	            $response['msg'] = "Anda tidak memiliki privilege untuk melakukan aksi ini.";
+	            echo json_encode($response);
+	            return;
+        	}
+
+            $data['nm_sunit'] = $this->m_umum->get_nama_sunit_by_id($idsu);
+            $this->load->view('usulan/form_usulan', $data);
+            return;
+        }
+
+        //2. Jika sudah ada usulan TUP, tampilkan informasi master
+        $data['id_usulan']      = $usulan->id_usulan;
+        $data['tgl_usulan']     = $usulan->tgl_usulan;
+        $data['total_usulan']   = $usulan->total_usulan;
+
+        //munculkan tombol kirim, jika;
+        //1. belum dikirim atau statusnya baru (1)
+        //2. ada revisi untuk usulan item, cek status usulan 3 dan semua item revisi
+        //   sudah di revisi, status 4, artinya tidak ada item usulan berstatus 3
+        $list_item = $this->m_usulan->get_all_usulan_item_by_id_usulan($usulan->id_usulan);
+        $done_revisi = TRUE;
+
+        if($list_item !== FALSE) {
+	        foreach($list_item as $item) {
+	        	//jika masih ada yang belum direvisi, jangan ijinkan mengirim
+		        if(in_array($item->id_status_usulan_item, array(Constant::USULANITM_REVISI))) {
+			        $done_revisi = FALSE;
+		        }
+	        }
+        }
+
+        $data['show_btn_kirim'] = ($usulan->flag_kirim == 0 ? TRUE : FALSE) |
+                                  (in_array($usulan->id_status_usulan,
+                                  			array(Constant::USULANITM_BARU,
+                                  				  Constant::USULANITM_REVISI)) && $done_revisi);
+
+        $data['flag_kirim']     = $usulan->flag_kirim;
+        $data['status_usulan']  = $usulan->status_usulan;
+        $data['id_status_usulan']  = $usulan->id_status_usulan;
+
+        //karena SPS sudah mengurangi TUP yang diajukan, maka nilai max usulan
+        //harus ditambah balik
+        $data['max_usulan']     = $nilai_max_usulan + $usulan->total_usulan;
+        $data['pagu_real']      = $this->m_logic->get_pagu_real_sunit($ta, $idsu);
+
+        //tampilkan form usulan TUP
+        //TUP hanya bisa diajukan sebesar maks nilai sisa pagu
+
+        $this->load->view('usulan/form_usulan_detail',$data);
+    }
+
+    function get_tabel_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //simpan kode di session
+        $cache  = new stdClass();
+        $cache->id_subunit  = $idsu;
+        $cache->kdgiat      = $this->input->post('kdgiat');
+        $cache->kdoutput    = $this->input->post('kdoutput');
+        $cache->kdkomponen  = $this->input->post('kdkomponen');
+        $cache->kdakun      = $this->input->post('kdakun');
+        $cache->hdr         = $this->input->post('kdhdr');
+        $cache->sifat_bayar = $this->input->post('jns_usulan');
+        $cache->del_stack   = array();
+        $cache->id_usulan   = $this->input->post('id_usulan');
+        $oper = $this->input->post('oper'); 
+
+        $usulan = $this->m_usulan->get_usulan_by_id($cache->id_usulan);
+
+
+        //get nilai pok with info
+        $pok    = $this->m_pok->get_nilai_pok_per_header($ta, $cdsu, $cache->kdgiat,
+                                $cache->kdoutput, $cache->kdkomponen, $cache->kdakun,
+                                $cache->hdr);
+
+        if(!$pok) {
+            //TODO: aksi jika error
+            return;
+        }
+
+        $item_usulan = $this->m_usulan->get_usulan_item_by_params($cache);
+
+        $cache->nmgiat      = $pok->nmgiat;
+        $cache->nmoutput    = $pok->nmoutput;
+        $cache->nmkomponen  = $pok->nmkomponen;
+        $cache->nmakun      = $pok->nmakun;
+
+        if($item_usulan === FALSE) {
+            $cache->id_usulan_item = NULL;
+            $data['total_uraian']   = 0;
+        } else {
+            $cache->id_usulan_item  = $item_usulan->id_usulan_item;
+            $data['total_uraian']   = $item_usulan->total_usulan_item;
+            $data['ket_veri']       = $item_usulan->keterangan;
+            $data['stat_usul_itm']  = $item_usulan->id_status_usulan_item;
+        }
+
+
+        $this->session->unset_userdata('cache_usulan');
+        $this->session->set_userdata('cache_usulan', $cache);
+
+        $data['flag_kirim']     = $usulan->flag_kirim;
+        //get nilai total pagu yang telah digunakan via kwitansi
+        $data['total_digunakan']= $this->m_kwitansi->get_nilai_kwitansi_by_akun_detail(
+                                    $ta, $idsu, $cache->kdgiat, $cache->kdoutput, 
+                                    $cache->kdkomponen, $cache->kdakun, $cache->hdr);
+        $data['nilai_pok']      = $pok->pok_total;
+
+        //info nilai akun
+        $data['nilai_pok_akun']         = $this->m_pok->get_nilai_pok_per_akun( 
+                                            $ta, $cdsu, $cache->kdgiat, $cache->kdoutput, 
+                                            $cache->kdkomponen, $cache->kdakun);
+        $data['total_uraian_akun']      = $this->m_usulan->get_nilai_usulan_item_per_akun($cache);
+        $data['total_digunakan_akun']   = $this->m_kwitansi->get_nilai_kwitansi_per_akun(
+                                            $ta, $idsu, $cache->kdgiat, $cache->kdoutput, 
+                                            $cache->kdkomponen, $cache->kdakun);
+
+        //Jika usulan item sudah ada, total_uraian_akun jangan menghitung item tersebut.
+        if($item_usulan !== FALSE) {
+            $data['total_uraian_akun'] -= $data['total_uraian'];
+        }
+
+        //format sesuai jqgrid
+        $satuan = $this->m_lov->get_list_lov(Constant::KAP_SATUAN);
+        $dtsatuan = array();
+        foreach($satuan as $row){
+            $dtsatuan[] = $row->kode_value.':'.$row->nama_value;
+        }
+        $data['satuan'] = implode(';', $dtsatuan);
+
+        $this->load->view('usulan/tabel_uraian',$data);
+    }
+
+    function get_data_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //ambil kode di session
+        $cache = $this->session->userdata('cache_usulan');
+
+        if(!isset($cache->rows)) {
+            //cari data uraian,
+            $uraian = $this->m_usulan->get_uraian_by_params($cache);
+            $cache->saved = TRUE;
+            if($uraian === FALSE) {
+                $uraian = $this->m_pok->get_list_pok($ta, $cdsu, $cache->kdgiat,
+                                                     $cache->kdoutput, $cache->kdkomponen,
+                                                     $cache->kdakun, $cache->hdr);
+                //Uraian pasti sudah ada, karena list mata anggaran ada
+            }
+
+            $i = 0;
+            $rows = array();
+            foreach($uraian as $row){
+                $id = isset($row->id_uraian) ? $row->id_uraian : 'cache'.$i;
+                $label = isset($row->id_uraian) ? $i+1 : 'C';
+
+                $hsat = floor($row->harga_satuan);
+                $array = array($label, trim($row->uraian), $row->volume,
+                                    $row->satuan, $hsat,
+                                    $row->volume * $hsat);
+                $rows[$id] = $array;
+                $i++;
+            }
+
+            $cache->rows = $rows;
+            $this->session->set_userdata('cache_usulan', $cache);
+        }
+
+
+        $i = 0;
+        $response = new stdClass();
+        foreach($cache->rows as $key=>$cell){
+            $response->rows[$i]['id'] = $key;
+            $response->rows[$i]['cell'] = $cell;
+            $i++;
+        }
+
+        echo json_encode($response);
+    }
+
+    function cache_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //ambil kode di session
+        $cache = $this->session->userdata('cache_usulan');
+
+        switch($this->input->post('oper')){
+            case "add":
+                $id = $this->input->post('id') . date("His"); //_empty.time
+                $cell = array('N',
+                              $this->input->post('uraian'),
+                              $this->input->post('volume'),
+                              $this->input->post('satuan'),
+                              $this->input->post('harga_satuan'),
+                              $this->input->post('jumlah'));
+                $cache->rows[$id] = $cell;
+                break;
+            case "edit":
+                $id = $this->input->post('id');
+                foreach($cache->rows as $key=>$cell){
+                    if($key == $id) {
+                        $cell = array('E', //$cell[0],
+                                      $this->input->post('uraian'),
+                                      $this->input->post('volume'),
+                                      $this->input->post('satuan'),
+                                      $this->input->post('harga_satuan'),
+                                      $this->input->post('jumlah'));
+                        $cache->rows[$key] = $cell;
+                        break;
+                    }
+                }
+                break;
+            case "del":
+                $id = $this->input->post('id');
+                $ids = explode(',', $id);
+                
+                //ubah menjadi array
+                foreach ($ids as $id) {
+                    if(array_key_exists($id, $cache->rows)) {
+                        if(strpos($id, 'cache') === FALSE &&
+                           strpos($id, 'empty') === FALSE ) {
+                            //jika bukan temporary dan bukan data baru, simpan di stack
+                            array_push($cache->del_stack, $id);
+                        }
+
+                        unset($cache->rows[$id]);                        
+                    }
+                }
+
+                break;
+        }
+
+        $this->session->set_userdata('cache_usulan', $cache);
+    }
+
+    function ajax_delete_item_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_usulan_item     = $this->input->post('id_usulan_item');
+        $ret = $this->m_usulan->delete_usulan_item($id_usulan_item);
+
+        if($ret === FALSE) {
+            $response['errno']  = 1;
+            $response['msg']    = "Hapus data usulan item gagal. coba ulang kembali";
+        } else {
+            $response['errno']  = 0;
+            $response['msg']    = "Hapus data berhasil";
+        }
+
+        echo json_encode($response);
+    }
+
+    function save_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        //get cache
+        $cache = $this->session->userdata('cache_usulan');
+        $id_usulan = $this->input->post('id_usulan');
+
+        //cek apakah ada status data belum disimpan
+        if(!empty($cache->rows) || !empty($cache->del_stack)) {
+            $cache->id_usulan = $id_usulan;
+            $ret = $this->m_usulan->save_cache_uraian($cache);
+
+            if($ret !== FALSE) {
+                $this->session->set_userdata('cache_usulan', $ret);
+                echo "OK|Penyimpanan berhasil.";
+                return;
+            } else {
+                echo "NOK|Penyimpanan gagal.";
+                return;
+            }
+        }
+
+        echo "OK|Tidak ada data yang perlu disimpan.";
+    }
+
+    function ajax_get_form_insert_uraian()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $id_usulan      = $this->input->post('id_usulan');
+        $data['oper']   = $this->input->post('oper');
+        $usulan         = $this->m_usulan->get_usulan_by_id($id_usulan);
+
+        if($usulan !== FALSE && 
+            in_array($usulan->id_status_usulan, 
+            array(Constant::USULANSU_BARU, Constant::USULANSU_REVISI))){
+            
+            //usulan baru(1) dan di edit
+            if($data['oper'] === 'edit') {
+                $data['kdgiat']     = $this->input->post('kdgiat');
+                $data['kdoutput']   = $this->input->post('kdoutput');
+                $data['kdkomponen'] = $this->input->post('kdkomponen');
+                $data['kdakun']     = $this->input->post('kdakun');
+                $data['hdr']        = $this->input->post('hdr');
+            } 
+
+            $data['kegiatans']  = $this->m_pok->get_list_kegiatan($ta, $cdsu, '%');
+            $this->load->view('usulan/form_input_uraian', $data);
+            return;
+        }
+
+        //Forbidden to access form input
+        echo '
+            <center>Form tidak bisa diakses</center>
+        ';
+
+    }
+
+    function ajax_get_list_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_usulan = $this->input->post('id_usulan');
+        $usulan     = $this->m_usulan->get_usulan_by_id($id_usulan);
+        $data['id_status_usulan']   = $usulan->id_status_usulan;
+        $data['list_usulan']        = $this->m_usulan->get_list_uraian_usulan($id_usulan);
+
+        $this->load->view('usulan/form_list_usulan', $data);
+    }
+
+    function ajax_get_total_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_usulan = $this->input->post('id_usulan');
+        echo $this->m_usulan->get_nilai_usulan_by_id($id_usulan);
+    }
+
+    function ajax_get_uraian_item_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_usulan_item         = $this->input->post('id_usulan_item');
+        $data['list_uraian']    = $this->m_usulan->get_list_uraian_item_usulan($id_usulan_item);
+        $this->load->view('usulan/list_uraian_item_usulan', $data);
+    }
+
+    /**
+    * function untuk mengirim rincian UP yang telah dibuat ke Unit
+    */
+    function send_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $id_usulan = $this->input->post('id_usulan');
+
+        //cek ada uraian kegiatan yang dimasukkan, berdasarkan nilai_usulan
+        $usulan             = $this->m_usulan->get_usulan_by_id($id_usulan);
+
+        //
+        switch($usulan->sifat_bayar){
+            case Constant::JB_UP:
+                $nilai_max_usulan   = $this->m_logic->get_nilai_max_up($ta, $idsu);
+                break;
+            case Constant::JB_TUP:
+                $nilai_max_usulan    = $this->m_logic->get_sps($ta, $idsu);
+                $nilai_max_usulan   += $usulan->total_usulan;
+                break;
+        }
+
+        if($usulan->total_usulan == 0) {
+            //error, tidak bisa simpan, karena masih 0
+            $response['errno']  = 1;
+            $response['msg']    = "Belum ada uraian kegiatan yang dimasukkan. Penyimpanan dibatalkan";
+            echo json_encode($response);
+            return;
+        }
+
+        if($usulan->total_usulan > $nilai_max_usulan) {
+            //error, usulan yang dikirim melebihi max yang diperbolehkan
+            $response['errno']  = 2;
+            $response['msg']    = "Maaf, Uraian yang diajukan melebihi MAX Usulan yang diperbolehkan.";
+            echo json_encode($response);
+            return;
+        }
+
+        //kirim usulan untuk diverifikasi
+        $ret = $this->m_usulan->send_usulan($id_usulan);
+        if($ret) {
+            $response['errno'] = 0;
+            $response['msg'] = "Usulan berhasil dikirim ke Unit.";
+        } else {
+            $response['errno'] = 3;
+            $response['msg'] = "Usulan gagal dikirim. Tolong cek dan ulang kembali proses pengiriman.";
+        }
+
+        echo json_encode($response);
+    }
+
+    function otorisasi_su_usulan()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        $id_usulan = $this->input->post('id_usulan');
+        $usulan = $this->m_usulan->get_usulan_by_id($id_usulan);
+
+        if($usulan !== FALSE) {
+
+        	$granted = FALSE;
+        	//cek apakah memiliki privilege untuk otorisasi
+        	if ( ($usulan->sifat_bayar == Constant::JB_UP && $this->_user->hasPrivilege('otorisasi_up')) ||
+        		 ($usulan->sifat_bayar == Constant::JB_TUP && $this->_user->hasPrivilege('otorisasi_tup')) )
+        		$granted = TRUE;
+
+        	if(!$granted) {
+	            $response['errno'] = 1;
+	            $response['msg'] = "Anda tidak memiliki privilege untuk melakukan aksi ini.";
+	            echo json_encode($response);
+	            return;
+        	}
+
+            //cek jika status nya disetujui (4), maka bisa diotorisasi, menjadi 5
+            if($usulan->id_status_usulan == 4) {
+                $ret = $this->m_usulan->set_status_usulan($id_usulan, 5);
+
+                if($ret) {
+                    $response['errno'] = 0;
+                    $response['msg'] = "Usulan berhasil diotorisasi.";
+
+                    echo json_encode($response);
+                    return;
+                }
+            }
+        }
+
+        $response['errno'] = 1;
+        $response['msg'] = "Proses otorisasi gagal.";
+        echo json_encode($response);
+    }
+
+    /**
+    * function untuk menampilkan detail rincian UP oleh verifikator unit
+    */
+    function rincian_usulan_subunit(){
+		$this->auth->restrict();
+
+		$id_unit = $this->session->userdata('id_unit');
+		$ta = $this->m_settings->get_tahun_anggaran();
+		   $non_kw = array('GU','LS','NHL','SAH','GU_NHL','TUP_NHL');
+		   $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+
+		    foreach($data['sifat_bayar'] as $key=>$val){
+		        if(in_array($val->kode_value, $non_kw)){
+		            unset($data['sifat_bayar'][$key]);
+		        }
+		    }
+		$this->template->load('template','usulan/rincian_usulan_subunit',$data);
+    }
+     /**
+    * function untuk menampilkan detail rincian usulan UP dan TUP oleh verifikator unit
+    */
+    function TampilListUsulan(){
+        $jns_usulan = $this->input->post('jns_usulan');
+        $id_unit = $this->session->userdata('id_unit');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        $daftar_unit = $this->m_usulan->getUnitList($id_unit);
+        $jumlah_gu=array();
+        foreach ($daftar_unit as $tgu){
+            $jumlah_gu[$tgu['id_subunit']]= $this->m_usulan->banyak_kb2($jns_usulan,$ta,$tgu['id_subunit']);
+            $banyak_usulan[$tgu['id_subunit']]=$this->m_usulan->banyak_list_usulan($jns_usulan,$ta,$tgu['id_subunit']);
+        }
+        $no = 1;
+        foreach($daftar_unit as $unit){
+            $nama_subunit = $unit["nama_subunit"];
+            $id_subunit = $unit["id_subunit"];
+            echo "<tr>";
+            echo "<td align='center'>".$no."</td>";
+            if ($banyak_usulan[$unit["id_subunit"]] < 1){
+                echo "<td align='left'>".$nama_subunit."</td>";
+            }else{
+                echo "<td align='left'><a href='".base_url()."usulan/get_veri_usulan/".$id_subunit."/".$jns_usulan."'>".$nama_subunit."(".$jumlah_gu[$unit["id_subunit"]].")</a></td>";
+            }
+            echo"</tr>";
+            $no++;
+        }
+     }
+
+    /**
+    * function untuk menampilkan detail rincian belanja per-subunit
+    */
+    function get_veri_usulan(){
+		$this->auth->restrict();
+		$id_subunit = $this->uri->segment(3);
+		$jns_usulan = $this->uri->segment(4);
+		$ta = $this->m_settings->get_tahun_anggaran();
+		$data['nama_unit'] = $this->m_umum->get_nama_sunit_by_id($id_subunit);
+		$data['daftar_up'] = $this->m_usulan->daftar_veri_usulan($ta,$id_subunit,$jns_usulan);
+		$data['id_subunit']= $id_subunit;
+		$this->template->load('template','usulan/form_veri_usulan',$data);
+    }
+
+    /**
+    * function untuk menampilkan form untuk verifikasi detail rincian belanja Usulan per-subunit
+    */
+    function cek_usulan(){
+          $this->auth->restrict();
+
+          $th_usulan   = $this->uri->segment(3);
+          $id_subunit  = $this->uri->segment(4);
+          $id_usulan   = $this->uri->segment(5);
+          $jns_usulan  = $this->uri->segment(6);
+          $data['id_usulan'] = $id_usulan;
+
+          //fungsi untuk mengambil data usulan yang terpilih
+          $data['daftar_usulan'] = $this->m_usulan->daftar_veri_usulan_terpilih($th_usulan,$id_usulan,$jns_usulan);
+          $tot_up=0;
+		  $tot_rkakl=0;
+		  foreach($data['daftar_usulan']->result_array() as $row){
+              $kode_subunit = $row['kode_unit']; //ditanyakan sama pak bos
+              $id_subunit = $row['ref_id_subunit'];
+              $kdoutput = $row['kdoutput'];
+              $kdkomponen = $row['kdkomponen'];
+              $kdakun = $row['kdakun'];
+              $hdr = $row['hdr'];
+              //fungsi untuk mengambil total nominal dari usulan
+              $data['jum_up_tup'] = $this->m_usulan->cari_tot_usulan($id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr,$jns_usulan);
+              foreach($data['jum_up_tup']->result_array() as $tes){
+                    $tot_up = $tes ['jumlah'];
+              };
+
+                  if($tot_up==NULL){
+                      $tot_up=0;
+                  }
+
+                    $data['tot_up'] = $tot_up;
+                    //fungsi untuk mengambil nilai POK dari t_rkakl
+                    $data['jum_rkakl'] = $this->m_usulan->get_pagu_rkakl($th_usulan,$id_subunit,$kdoutput,$kdkomponen,$kdakun,$hdr);
+                      foreach($data['jum_rkakl']->result_array() as $tes2){
+                            $tot_rkakl = $tes2['sum(jumlah)'];
+                      };
+
+                          if($tot_rkakl==NULL){
+                              $tot_rkakl=0;
+                          }
+                          $data['rkakl'] = $tot_rkakl;
+          }
+          $data['nama_unit'] = $this->m_umum->get_nama_sunit_by_id($id_subunit);
+          $data['sisa_pagu'] =  $tot_rkakl-$tot_up;
+          $this->template->load('template','usulan/cek_usulan',$data);
+    }
+
+    /**
+    * function untuk melakukan verifikasi terhadap rincian belanja UP
+    */
+    function verifikasi_usulan(){
+         $this->auth->restrict();
+         $id_usulan_item= $this->input->post('id_usulan_item');
+         $id_subunit    = $this->input->post('id_subunit');
+         $ket_revisi    = $this->input->post('keterangan');
+         $val_submit    = $this->input->post('simpan');
+         $jns_usulan    = $this->input->post('jns_usulan');
+
+         if($val_submit == 'Setuju'){
+
+                $this->m_usulan->set_usulan_item_ok($id_usulan_item);
+         }else if($val_submit == 'Revisi Ke Subunit'){
+
+               $this->m_usulan->set_usulan_item_revisi($id_usulan_item, $ket_revisi);
+        }
+
+        redirect(site_url("usulan/get_veri_usulan/$id_subunit/$jns_usulan"));
+    }
+
+    /**
+    * function untuk menyetujui semua rincian belanja yang diajukan oleh subunit
+    */
+    function setuju_semua_rincian(){
+          $this->auth->restrict();
+          $waktu = date("Y-m-d H:i:s");
+          $ta = $this->m_settings->get_tahun_anggaran();
+          $id_usulan = $this->input->post('id_usulan');
+          $id_subunit = $this->input->post('id_subunit');
+          $jns_usulan = $this->input->post('jns_usulan');
+          $success = $this->m_usulan->cek_ada_revisi($ta,$id_usulan);
+
+          if ($success){
+                    $this->session->set_userdata('msg_typ','err');
+                    $this->session->set_userdata('msg', 'Pastikan setiap rincian UP sudah lengkap dan benar');
+                    redirect('usulan/get_veri_usulan/'.$id_subunit.'/'.$jns_usulan);
+
+           }else{
+                    $this->m_usulan->update_setuju_usulan($id_usulan,$ta);
+                    $this->m_usulan->log_history_usulan($id_usulan,4,'-');
+                    $this->session->set_userdata('msg_typ','ok');
+                    $this->session->set_userdata('msg', 'Rincian UP berhasil disetujui');
+                    redirect('usulan/get_veri_usulan/'.$id_subunit.'/'.$jns_usulan);
+           }
+
+     }
+
+     /**
+    * function untuk menampilkan list rincian UP yang telah diotorisasi oleh Kajur
+    */
+    function usulan_terotorisasi(){
+          $this->auth->restrict();
+          $data['nama_unit'] = $this->session->userdata('nama_unit');
+          //fungsi untuk membuat combobox pada tampilan
+           $non_kw = array('GU','LS','NHL','SAH','GU_NHL','TUP_NHL');
+                   $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+
+                    foreach($data['sifat_bayar'] as $key=>$val){
+                        if(in_array($val->kode_value, $non_kw)){
+                            unset($data['sifat_bayar'][$key]);
+                        }
+                    }
+          $this->template->load('template','usulan/daftar_usulan',$data);
+        }
+
+    /**
+     * fungsi ini dipergunakan untuk menampilkan data dari ajax pada tampilan usulan terotorisasi
+    */
+      function get_usulan_terotorisasi(){
+          //mengambil data session
+          $this->auth->restrict();
+
+          $kode_unit = $this->session->userdata('kode_unit');
+          $id_unit = $this->session->userdata('id_unit');
+
+          //mengambil data post
+          $jns_usulan = $this->input->post('jns_usulan');
+          $ta = $this->m_settings->get_tahun_anggaran();
+
+              //mencari data dari usulan yang telah terorisasi
+              $data['daftar_up'] = $this->m_usulan->usulan_terotorisasi($ta,$id_unit,$jns_usulan);
+              //$data['jum_daftar_up'] = $this->m_usulan->jum_up_terotorisasi($id_unit);
+
+              $telat= $this->m_usulan->usulan_belum_buat_rincian($id_unit,$jns_usulan);
+
+              $data['telat'] = $telat;
+              $data['daftar_up_belum'] = $this->m_usulan->daftar_sudah_buat($id_unit,$jns_usulan);
+              $data['nama_unit'] = $this->session->userdata('nama_unit');
+
+              $this->load->view('usulan/daftar_usulan_detail',$data);
+      }
+
+        /**
+        * function untuk melakukan pengecekan dokumen hardcopy oleh unit
+        */
+
+        function cek_dokumen(){
+              $this->auth->restrict();
+              $id_rekap = $this->input->post('id');
+          	  $th_rekap = $this->input->post('tahun');
+              $super = $this->m_usulan->update_dokumen($id_rekap,$th_rekap);
+              //echo "<meta http-equiv='refresh' content='0; url=".site_url()."usulan/usulan_terotorisasi'>";
+              if($super === false) {
+                    $response['errno']  = 1;
+                    $response['msg'] = "Proses penerimaan dokumen gagal mohon diulang kembali.";
+                    echo json_encode($response);
+                    return;
+              }else{
+                    $response['errno']  = 0;
+                    $response['msg'] = "Proses penerimaan dokumen berhasil.";
+                    echo json_encode($response);
+                    return;
+              }
+        }
+
+    /*
+	* function untuk menampilkan detail rincian UP yang telah diotorisasi oleh Kajur
+	*/
+    function detail_usulan_terotorisasi(){
+          $this->auth->restrict();
+          $ta=$this->uri->segment(3);
+          $id_usulan=$this->uri->segment(4);
+          $id_subunit=$this->uri->segment(5);
+          $jns_usulan=$this->uri->segment(6);
+          $data['jns_usulan']= $jns_usulan;
+          $data['ta']= $ta;
+
+          $kode_subunit = $this->session->userdata('kode_unit');
+          $data['nama_subunit'] = $this->m_umum->get_nama_sunit_by_id($id_subunit); //echo $data['nama_subunit'];
+
+                  $jum_up=$this->m_usulan->total_up($ta,$id_subunit,$jns_usulan);
+                          foreach($jum_up->result_array() as $jmlh_up)
+                             {
+                                $tot_up = $jmlh_up ['sum(jumlah)'];
+                             }
+                  $jum_rkakl=$this->m_logic->get_pok_sunit($ta, $id_subunit);
+
+                  $satuan = array('Orang/Bulan', 'o/b', 'O-B', 'Orang-Bulan');
+                  $jum_non_adhoc=$this->m_usulan->total_keg_non_adhoc($ta,$kode_subunit,$satuan);
+                          foreach($jum_non_adhoc->result_array() as $j_non_adhoc)
+                             {
+                                $tot_non_adhoc = $j_non_adhoc ['sum(jumlah)'];
+                             }
+                  $kdakun = array('531112', '531111', '572111','532121','572113','536111','533111','532111','512311');
+                  $jum_b_modal=$this->m_usulan->total_belanja_modal($ta,$kode_subunit,$kdakun);
+                          foreach($jum_b_modal->result_array() as $j_modal)
+                             {
+                                $tot_modal = $j_modal ['sum(jumlah)'];
+                             }
+
+                  $data['tem']= $jum_rkakl-$tot_modal-$tot_non_adhoc;
+                  $data['jum_up']=$tot_up;
+                  if ($data['tem']>=50000000 and $data['tem'] <= 900000000){
+                      $tot_sementara = 1/12 * $data['tem'];
+                      if($tot_sementara > 50000000){
+                          $data['tot_up'] = 50000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>=900000000 and $data['tem'] <= 2400000000){
+                      $tot_sementara = 1/18 * $data['tem'];
+                      if($tot_sementara > 100000000){
+                          $data['tot_up'] = 100000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }elseif ($data['tem']>2400000000){
+                      $tot_sementara = 1/24 * $data['tem'];
+                      if($tot_sementara > 200000000){
+                          $data['tot_up'] = 200000000;
+                      }else{
+                          $data['tot_up'] = $tot_sementara;
+                      }
+                  }
+				  $data['maksimum_up']= $this->m_logic->get_nilai_max_up($ta, $id_subunit);
+                  $data['jum_tot_rkakl']=$jum_rkakl;
+                  $data['jum_up']=$tot_up;
+          $data['tot_pagu_realisasi']= $this->m_logic->get_pagu_real($ta,$id_subunit);
+          $data['daftar_up'] = $this->m_usulan->daftar_usulan_bk($ta,$id_usulan,$jns_usulan,'%');
+          $this->template->load('template','usulan/detail_usulan_terotorisasi',$data);
+    }
+
+    function tampil_pagu_persubunit_di_unit(){
+		$this->auth->restrict();
+		$kode_unit=$this->uri->segment(3);
+		$id_subunit=$this->uri->segment(4);
+		$jns_usulan=$this->uri->segment(5);
+		$ta=$this->uri->segment(6);
+
+		$data['spp']= $this->m_usulan->get_data_rkakl($ta,$id_subunit);
+
+		$total_spp_dulu2 = $this->m_usulan->jum_spp_terdahulu2($ta,$id_subunit,$jns_usulan);
+		//echo $this->db->last_query();
+		$spp2=array();
+		foreach($total_spp_dulu2 as $uraian2){
+		    $spp2=array_merge($spp2,array($uraian2->kdoutput.$uraian2->kdkomponen.$uraian2->kdakun => $uraian2->jumlah));
+		}
+		$data['spp2']=$spp2;
+
+		$jumlah = $this->m_logic->get_pok_sunit($ta, $id_subunit);
+		$data['total_rkakl'] =  $jumlah;
+
+		$tot_up=$this->m_usulan->jum_tot_up($ta,$id_subunit,$jns_usulan);
+		//echo $this->db->last_query();
+		            foreach($tot_up->result_array() as $tot_kwi)
+		                 {
+		                    $nominal = $tot_kwi['sum(jumlah)'];
+		                 }
+		$data['total_up'] =  $nominal;
+
+		$data['pagu'] = $this->m_usulan->daftar_pagu($kode_unit);
+		//echo $this->db->last_query();
+		$this->load->view('usulan/tampil_cek_pagu',$data);
+
+    }
+
+
+    /**
+    * function untuk print rincian belanja UP
+    */
+    function print_up_baru($download_pdf = ''){
+             $id_subunit	= $this->session->userdata('id_subunit');
+             $id_usulan 	= $this->uri->segment(3);
+             $tahun 		= date('Y');
+             $tgl_skrg 		= date("Y-m-d");
+             $jam_skrg 		= date("H:i");
+             $ret 			= '';
+       		 $ta 			= $this->m_settings->get_tahun_anggaran();
+
+             $pdf_filename='daftar_rincian_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'usulan/print_up/true/','Download Pdf');
+
+			$usulan     = $this->m_usulan->get_usulan_by_id($id_usulan);
+			$data['id_status_usulan']   = $usulan->id_status_usulan;
+			$data['list_usulan']        = $this->m_usulan->get_list_uraian_usulan($id_usulan);
+            $data['unit'] = $this->m_usulan->daftar_unit($id_subunit);
+
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/printx', $data, true);
+
+             if($download_pdf==true)
+               generate_pdf_A4($output,$pdf_filename);
+             else
+                echo $output;
+    }
+
+    /**
+    * function untuk print rincian belanja UP
+    */
+    function print_up($download_pdf = ''){
+             $id_subunit	= $this->session->userdata('id_subunit');
+             $id_usulan 	= $this->uri->segment(3);
+             $tahun 		= date('Y');
+             $tgl_skrg 		= date("Y-m-d");
+             $jam_skrg 		= date("H:i");
+             $ret 			= '';
+       		 $ta 			= $this->m_settings->get_tahun_anggaran();
+
+             $pdf_filename='daftar_rincian_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'usulan/print_up/true/','Download Pdf');
+
+			 $total_up=$this->m_usulan->total_up($ta,$id_subunit,'UP');
+                  foreach($total_up->result_array() as $jmlh_up)
+                     {
+                        $tot_up = $jmlh_up ['sum(jumlah)'];
+                     }
+             $data['total_up'] = $tot_up;
+             $data['daftar_up'] = $this->m_usulan->print_daftar_up($id_subunit, $id_usulan, 'UP');
+             $data['unit'] = $this->m_usulan->daftar_unit($id_subunit);
+
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/print_rincian_up', $data,  true);
+
+             //if($download_pdf==true)
+             //   generate_pdf_A4($output,$pdf_filename);
+             //else
+                echo $output;
+    }
+
+    /**
+    * function untuk print surat pernyataan belanja UP
+    */
+    function print_surat_pernyataan_up($download_pdf = 'true'){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i");
+             $ret = '';
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf';
+             $pdf_filename='surat_pernyataan_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(base_url().'usulan/print_surat_pernyataan_up/true/','Download Pdf');
+
+             $data['unit'] = $this->munit->daftar_unit();
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/print_surat_pernyataan_up', $data,  true);
+
+             if($download_pdf==true)
+                 generate_pdf_portrait($output,$pdf_filename);
+             else
+                echo $output;
+             }
+    }
+
+    /**
+    * function untuk print surat pengantar dari subunit belanja UP
+    */
+    function print_surat_pengantar_sub($download_pdf = 'true'){
+        if($this->auth->is_logged_in () == true){
+             $kode_unit = $this->session->userdata('kode_unit');
+             $id_subunit = $this->session->userdata('id_subunit');
+             $tgl_skrg = date("Y-m-d");
+             $jam_skrg = date("H:i");
+             $ret = '';
+             //$pdf_filename='SP_up'.$kode_unit.'.pdf';
+             $pdf_filename='surat_pengantar_up_su-'.$id_subunit.'_'.$tgl_skrg.'_'.$jam_skrg.'.pdf';
+             $link_download = ($download_pdf==TRUE)?'': anchor(site_url().'usulan/print_surat_pengantar_sub/true/','Download Pdf');
+
+             $data['unit'] = $this->munit->daftar_unit();
+
+             $data['tgl'] = date("Y-m-d");
+             $data['link'] = $link_download ;
+             $output = $this->load->view('usulan/print_surat_pengantar_sub', $data,  true);
+
+             if($download_pdf==true)
+                 generate_pdf_A4($output,$pdf_filename);
+             else
+                echo $output;
+        }
+    }
+
+/*********************** MAX_UP ***********************/
+
+    function setup_max_up ()
+    {
+        //must login
+        $this->auth->restrict();
+
+        //cek privilege
+        $this->auth->has_privileges('setup_max_up');
+
+
+        $ta  = $this->m_settings->get_tahun_anggaran();
+        $idu = $this->session->userdata('id_unit');
+
+        $data['max_up'] = $this->m_max_up->get_tabel_pagu_real_max_up($ta, $idu);
+		//echo $this->db->last_query();
+
+        $this->template->load('template','usulan/input_maks',$data);
+    }
+
+
+    /**
+     * AJAX
+     *
+     *
+     */
+    function save_max_up ()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //cek privilege
+        $this->auth->has_privileges('setup_max_up');
+
+        $ta         = $this->m_settings->get_tahun_anggaran();
+        $idsu       = $this->input->post('idsu');
+        $nilai_max  = $this->input->post('nilai_max');
+
+        $pagu_real  = $this->m_logic->get_pagu_real_sunit($ta, $idsu);
+
+        if($nilai_max > $pagu_real) {
+            //error
+            $response['errno']  = 1;
+            $response['message']= "Nilai Max UP tidak bisa melebihi nilai pagu real";
+            echo json_encode($response);
+            return;
+        }
+
+        //simpan max up
+        $ret = $this->m_max_up->simpan_max_up($ta, $idsu, $nilai_max);
+        if($ret === FALSE) {
+            $response['errno']  = 2;
+            $response['message']= "Proses Penyimpanan gagal. Mohon diulang kembali";
+            echo json_encode($response);
+            return;
+        }
+
+        $response['errno']  = 0;
+        $response['message']= "Penyimpanan berhasil";
+        echo json_encode($response);
+        return;
+
+    }
+
+    function save_pagu_real ()
+    {
+    	//special guard for ajax request
+    	$this->auth->restrict_ajax_request('/usulan');
+
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //cek privilege
+        $this->auth->has_privileges('setup_max_up');
+
+        $ta         = $this->m_settings->get_tahun_anggaran();
+        $idsu       = $this->input->post('idsu');
+        $nilai_pagu  = $this->input->post('nilai_pagu');        
+        
+        //simpan max up
+        $ret = $this->m_max_up->simpan_pagu_real($ta, $idsu, $nilai_pagu);        
+        
+        if($ret === FALSE) {
+            $response['errno']  = 2;
+            $response['message']= "Proses Penyimpanan gagal. Mohon diulang kembali";
+            echo json_encode($response);
+            return;
+        }
+
+        $response['errno']  = 0;
+        $response['message']= "Penyimpanan berhasil";
+        echo json_encode($response);
+        return;		
+    }
+
+    function mohon_cair_up(){
+        $this->auth->has_privileges('mohon_cair_up');
+        $ta=$this->m_settings->get_tahun_anggaran();
+        $data['su']         = $this->session->userdata('id_subunit');
+        $data['usulan']     = $this->m_usulan->ambil_usulan_cair($data['su'],$ta);
+        $data['ada_blm_oto']= $this->m_usulan->ada_usulan_blm_oto($data['su'],$ta);
+		//echo $this->db->last_query();
+		$data['link_oto']   = 'usulan/oto_su_cair_up_simpan/';
+        $data['daftar_mohon_cair_up'] = $this->m_usulan->ambil_mohon_cair_up_all($data['su'],$ta);
+        $this->template->load('template','usulan/mohon_cair_up',$data);
+    }
+    function simpan_mohon_cair_up(){
+        $this->auth->has_privileges('mohon_cair_up');
+        date_default_timezone_set('Etc/GMT-8');
+        $ta=$this->m_settings->get_tahun_anggaran();
+        $id_usulan=$this->input->post('id_usulan');
+        $id_subunit=$this->input->post('id_subunit');
+        $permohonan=$this->input->post('permohonan');
+        $hasil=$this->m_usulan->simpan_mohon_cair_up($permohonan,$id_subunit,$id_usulan,$ta);
+        if ($hasil){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Permohonan Berhasil Disimpan');
+            redirect('usulan/mohon_cair_up');
+        }else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Permohonan GAGAL Disimpan');
+            redirect('usulan/mohon_cair_up');
+        }
+    }
+
+    function detail_mohon_cair_up($id,$cetak=''){
+        $this->auth->has_privileges('mohon_cair_up');
+        //FIXME: kalau dipaksa nampilin yang ga ada, gemana?
+        $data['mohon_cair_up']  = $this->m_usulan->detail_mohon_cair_up($id);
+        $data['subunit']        = $this->m_umum->subunit_detail($data['mohon_cair_up']->id_subunit);
+        $data['unit']           = $this->m_umum->unit_detail($data['subunit']->id_unit);
+        if($cetak==='cetak'){
+            $this->alat->update_print('t_cair_up','cair_up', $id);
+            $sekarang=date("Ymd_Hi");
+            $filename='mohon_cair_up_'.$id.'_'.$sekarang.'.pdf';
+            $output = $this->load->view('usulan/mohon_cair_up_isi', $data,  true);
+            generate_pdf_A4($output,$filename);
+        }else{
+            $this->template->load('template','usulan/mohon_cair_up_detail',$data);
+        }
+    }
+    function oto_su_cair_up(){
+        $this->auth->has_privileges('oto_su_cair_up');
+        $ta=$this->m_settings->get_tahun_anggaran();
+        $data['su']         = $this->session->userdata('id_subunit');
+        $data['permohonan'] = $this->m_usulan->ambil_belum_oto_kaprodi($data['su'],$ta);
+        $data['link_oto']       = 'usulan/oto_su_cair_up_simpan/';
+        $this->template->load('template','usulan/mohon_cair_up_otor',$data);
+    }
+
+    function oto_su_cair_up_simpan(){
+        $this->auth->has_privileges('oto_su_cair_up');
+        $hasil=$this->m_usulan->oto_su_cair_up_simpan($this->uri->segment(3));
+        if ($hasil){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Permohonan Berhasil Disetujui');
+            redirect('usulan/oto_su_cair_up');
+        }else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Permohonan GAGAL Disetujui');
+            redirect('usulan/oto_su_cair_up');
+        }
+    }
+
+    function oto_unit_cair_up(){
+        $this->auth->has_privileges('oto_unit_cair_up');
+        $ta=$this->m_settings->get_tahun_anggaran();
+        $data['unit']           = $this->session->userdata('id_unit');
+        $data['permohonan']     = $this->m_usulan->ambil_belum_oto_unit($data['unit'],$ta);
+        $data['link_oto']           = 'usulan/oto_unit_cair_up_simpan/';
+        $data['oto_unit']        = true;
+        $this->template->load('template','usulan/mohon_cair_up_otor',$data);
+    }
+
+    function oto_unit_cair_up_simpan(){
+        $this->auth->has_privileges('oto_unit_cair_up');
+        $hasil=$this->m_usulan->oto_unit_cair_up_simpan($this->uri->segment(3));
+        if ($hasil){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Permohonan Berhasil Disetujui');
+            redirect('usulan/oto_unit_cair_up');
+        }else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Permohonan GAGAL Disetujui');
+            redirect('usulan/oto_unit_cair_up');
+        }
+    }
+    function cek_cair($id){
+        //$this->m_usulan->sp2d_cair_up($id);
+    }
+
+} ?>

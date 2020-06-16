@@ -1,0 +1,807 @@
+<script language="javascript">
+    $( function() {
+        
+        /*
+        jQuery.validator.addClassRules('akun', {
+            required: true
+        });
+       */ 	
+            
+        $("#input_bukti").validate({
+            rules: {
+                jenis_transaksi: "required",
+                sub_unit: "required",
+                kas_bank: "required",
+                tgl_bukti: "required",
+				dari: "required",
+                keterangan: "required"
+            },
+            messages: {
+                jenis_transaksi: "Mohon pilih jenis transaksi",
+                sub_unit: "Mohon pilih sub unit",
+                kas_bank: "Mohon pilih kas bank",
+                tgl_bukti: "Mohon diisi tanggal bukti",
+				dari: "Mohon diisi diterima dari",
+                keterangan: "Mohon diisi keterangan"
+            },
+			submitHandler: function(form){
+                $(".kredit").each(function() {
+                    $(this).val($(this).autoNumeric('get'));
+                });
+                $(".debet").each(function() {
+                    $(this).val($(this).autoNumeric('get'));
+                });
+				form.submit();
+                try {
+                    form.submit();
+				} catch(e) {
+					console.log(e);
+					return false;
+				}
+			}
+        });		
+    });
+    
+    $( function() {
+        var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+    });
+    
+    $(function() {
+	    $( "#tgl_bukti" ).datepicker({
+		    dateFormat:"yy-mm-dd",
+		    changeMonth: true,
+		    changeYear: true,
+	    });
+    });
+    
+    function enaTam(){
+        var jt= $("#jenis_transaksi").val();
+        if(jt=='MM'){
+            $("#tambahbaris").removeAttr('disabled');
+            $('.add').removeAttr('disabled');
+            $("#selisih").show();
+        }else{
+            if ( $("#kas_bank").val() == '') {
+                $('#tambahbaris').attr('disabled','disabled');
+                $('.add').attr('disabled','disabled');
+            }else{
+                $("#tambahbaris").removeAttr('disabled');
+                $(".add").removeAttr('disabled');
+            }
+            $("#selisih").hide();
+        }
+    }
+    
+    //disable all, pas edit akun
+    $(document).on("change","input#akun",function(event){
+        var nama_baris=this.name;
+    	var id_baris=nama_baris.split('[');
+    	id_baris=id_baris[1].split(']');
+    	id_baris=id_baris[0];
+    	var nama_field= '#nama_akun'+id_baris;
+        
+        $( nama_field ).val( '' );
+        $('input[name="debet['+id_baris+']"]').val('');
+        $('input[name="debet['+id_baris+']"]').prop('disabled', true);
+        $('input[name="kredit['+id_baris+']"]').val('');
+        $('input[name="kredit['+id_baris+']"]').prop('disabled', true);
+    });
+    
+    function ambilBasAtas(){
+        
+        if ( $("#jenis_transaksi").val() == '' || $("#sub_unit").val() == '') {
+            $('#kas_bank').html("<option value='0'>Pilih Jenis Transaksi !!!</option>");
+            $('#kas_bank').attr('disabled','disabled');
+        }else{
+            $('#kas_bank').html("<option value='0'>L O A D I N G . . .</option>");
+            var jt = {jt:$("#jenis_transaksi").val(),
+                        idsubunit:$("#sub_unit").val()
+                        <?php if(isset($atas['akun_bas'])) echo ', pilih:'.$atas['akun_bas']; ?>};
+            $.ajax({ //post id unit
+                type: "POST",
+                url : "<?php echo site_url('bukti_akuntansi/bas_perjenis_tran')?>",
+                data: jt,
+                success: function(msg){
+                    $('#kas_bank').html(msg); //masukkan list sub-unit
+                    $("#kas_bank").removeAttr('disabled'); //aktifkan pilihan sub-unit
+                    enaTam();
+                }
+            });
+            
+        }
+        enaTam();
+    }
+    
+	function jumlah(){
+        var totalDebet=0;
+        var totalKredit=0;
+        
+        $(".debet").each(function() {
+            var deb_ini = parseFloat($(this).autoNumeric('get'));
+            var nil_deb = isNaN(deb_ini) ? 0 : deb_ini;
+            totalDebet=totalDebet + nil_deb;
+        });
+        $(".kredit").each(function() {
+            var kre_ini = parseFloat($(this).autoNumeric('get'));
+            var nil_kre = isNaN(kre_ini) ? 0 : kre_ini;
+            totalKredit=totalKredit + nil_kre;
+        });
+        
+        var total = new Array();
+         
+        total['debet']= isNaN(totalDebet) ? 0 : totalDebet;
+        total['kredit']= isNaN(totalKredit) ? 0 : totalKredit;
+        return total;
+    }
+    
+    function updateJumlah(){
+        var jum=jumlah();
+        $('#totaldebet').autoNumeric(numOptions);
+        $('#totaldebet').autoNumeric('set',jum['debet']);
+        
+        $('#totalkredit').autoNumeric(numOptions);
+        $('#totalkredit').autoNumeric('set',jum['kredit']);
+        
+        $('#selisih_nil').autoNumeric(numOptions);
+        if (selisih=jum['debet']-jum['kredit']>0){
+            $('#selisih_nil').autoNumeric('set',jum['debet']-jum['kredit']);
+        }else{
+            $('#selisih_nil').autoNumeric('set',jum['kredit']-jum['debet']);
+        }
+        
+    }
+    
+    //autocomplete akun
+    $(document).on("focus keyup","input#akun",function(event){
+        var nama_baris=this.name;
+        var id_baris=nama_baris.split('[');
+        id_baris=id_baris[1].split(']');
+        id_baris=id_baris[0];
+        var nama_field= '#nama_akun'+id_baris;
+        //FIXME: cek auto komplete kalau kas bank hilang
+        var jt= $("#jenis_transaksi").val();
+        if (jt=='MM'){
+            var kasbank= '';
+        }else{
+            var kasbank= $("#kas_bank").val();
+        }
+        
+        var jenis_bukti= $("#jenis_bukti").val();
+        var noResult="Tidak Ada Data...";
+        var noResultArr= new Array(noResult);
+        
+        noResultArr[0]=noResult
+        $(this).autocomplete({
+            minLength: 1,
+            source: 
+            function(req, add){
+                $.ajax({
+                    url: "<?php echo site_url(); ?>bukti_akuntansi/cariAkun",
+                    dataType: 'json',
+                    type: 'POST',
+                    data:{ term: req.term, kasbank:kasbank,jb:jenis_bukti},
+                    success:    
+                    function(data){
+                        if(data.response =="true"){
+                            add(data.message);
+                        }else{
+                            add(noResultArr);
+                        }
+                    },
+                });
+            },
+            select: 
+                function(event, ui) {
+                    event.preventDefault();
+                    if(ui.item.label!=noResult){
+                        this.value = ui.item.id;
+                        $( nama_field ).text( ui.item.label );
+                        if (ui.item.saldoNormal=='D'){
+                            $('input[name="debet['+id_baris+']"]').prop('disabled', false);
+                        }else{
+                            $('input[name="kredit['+id_baris+']"]').prop('disabled', false);
+                        }
+                        $('input[name="subunit['+id_baris+']"]').prop('disabled', false);
+                    }
+                    
+                },
+        });
+    });
+    
+
+</script>
+
+    <article class="module width_full">
+    <header><h3>
+            <?php
+                if (isset($isEdit) && $isEdit){
+                    echo "Edit Bukti Transaksi";
+                } else{
+                    echo "Input Bukti Transaksi";
+                }
+            ?>
+    </h3></header>
+    
+    <div class="module_content">
+    <!-- page content -->
+    
+    <form id="input_bukti" action="<?php echo site_url('bukti_akuntansi/simpan');?>" 
+                method="POST" name="bkm" id="bkm" accept-charset="UTF-8">
+    
+    <?php
+        if ((isset($isi_mou) && count($isi_mou)>0) || (isset($isEdit) && $isEdit)
+            || (isset($isLadik)&& $isLadik) ||(isset($isNoRef) && $isNoRef)){
+    ?>
+            
+        <?php if(isset ($isi_bkm->status)&& $isi_bkm->status=='REVISI'){
+        ?>
+            <input type="hidden" value="<?php echo $isi_bkm->status;?>" name="status" />
+            <center>
+                <h3>Status Verifikasi</h3>
+            <table style="background-color:#FF0000;">
+                <tr>
+                    <td>Status</td>
+                    <td>: <?php echo $isi_bkm->nama_value; ?></td>
+                </tr>
+                <tr>
+                    <td>Komentar</td>
+                    <td>: <?php echo $isi_bkm->komentar; ?></td>
+                </tr>
+            </table>
+            </center>
+        <?php
+            } 
+        ?>
+            <div style="width: 50%; float: left;">
+                <table id="bkminput">
+                    <input type="hidden" value="<?php if (isset($jenis_bukti)){echo $jenis_bukti;}?>" name="jenis_bukti" id="jenis_bukti" />
+                    <?php if(isset($isLadik)&& $isLadik){ ?>
+                        <input type="hidden" value="0" name="id_ref" />
+                        <input type="hidden" value="<?php echo constant::MOU_LADIK; ?>" name="jenis_ref" />
+                        <input type="hidden"
+                            value="<?php if(isset($idsub)){echo $idsub;} ?>"
+                            name="idsub" />
+                    <?php } else { ?>
+                        <input type="hidden" value="<?php 
+                            if(isset($isNoRef) && $isNoRef){
+                                    echo '';
+                                }else{
+                                    if (isset($isEdit) && $isEdit){
+                                        echo $isi_bkm->id_ref;
+                                    }else{
+                                        echo $id_ref;
+                                    }
+                                }?>" name="id_ref" />
+                        <input type="hidden" value="<?php if (isset($jenis_mou)){echo $jenis_mou;}?>" name="jenis_ref" />
+                    <?php } ?>
+                    <?php if (isset($isEdit) && $isEdit){?>
+                        <input type="hidden" value="<?php echo $isi_bkm->id_bukti;?>" name="id_bukti" />
+                    <?php } ?>
+                    
+                    <?php if(isset($isLadik) || (isset($isNoRef) && $isNoRef)){}else{ ?>
+                        <tr>
+                            <td>Nomor Kerjasama</td>
+                            <td>: 
+                                <?php
+                                    if(isset($isi_mou->no_mou)){
+                                        echo $isi_mou->no_mou;
+                                    }else{
+                                        echo $isi_mou->no_sk;
+                                    }
+                                ?>
+                                
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    <?php
+                        if(isset($isi_bkm->jenis_transaksi)){
+                            $jt= $isi_bkm->jenis_transaksi;
+                        }else{
+                            $jt='';
+                        }
+                    ?>
+                    <?php if(isset($isEdit) && $isEdit && isset($isi_bkm->no_bukti)){ ?>
+                    <tr>
+                        <td>Nomor Transaksi</td>
+                        <td>: <?php echo $isi_bkm->no_bukti;?> </td>
+                    </tr>
+                    <?php } ?>
+                    <tr>
+                        <td>Jenis Transaksi</td>
+                        <td>: <?php echo form_dropdown("jenis_transaksi",$jenis_transaksi,$jt,"id='jenis_transaksi' style='width:94%;'"); ?></td>
+                    </tr>
+                    <?php if($jenis_bukti !== constant::BUK_BM){ ?> 
+                    <tr id="unittr">
+                        <td>Unit</td>
+                        <td>:
+                            <?php
+                                echo form_dropdown("nm_unit",$nm_unit,"","id='unit_drp' class='kombocari' id='nm_unit' style='width:94%;'");
+                            ?>
+                        </td>
+                    </tr>
+                    <tr id="subunittr">
+                        <td>Subunit</td>
+                        <td>:
+                            <?php
+                                if(isset($isi_bkm->id_subunit)){
+                                    $ids='';
+                                    $ids=$isi_bkm->id_subunit;
+                                }else if(isset($idsub)){
+                                    $ids=$idsub;
+                                }else{
+                                    $ids='';
+                                }
+                                
+                                echo form_dropdown("sub_unit",$sub_unit,$ids," class='kombocari' id='sub_unit' style='width:94%;'");
+                            ?>
+                        </td>
+                    </tr>
+                    <tr id="kasbanktr">
+                        <td>KAS / Bank</td>
+                        <td>:
+                            <select name="kas_bank" id="kas_bank" style="width:260px" disabled>
+                                <option value="">Pilih Jenis Transaksi !!!</option>
+                            </select>   <img id="cari_bas_img" height="20px" src="<?php echo base_url() ?>/asset/images/search.png" onclick="$('#cari_bas_tr').toggle()" style="display:none;"/>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                    <tr id="cari_bas_tr" style="display:none;">
+                        <td></td>
+                        <td style="background:#DEDEDE">&nbsp;&nbsp;Cari Kode Akun BAS  
+                            <input type="text" name="cari_bas" style="width:50%" id="cari_bas"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal Transaksi</td>
+                        <td>: <input type="text" name="tgl_bukti" id="tgl_bukti" value="<?php
+                            if (isset($isi_bkm->tgl_bukti)){
+                                $tgl_bukti = strtotime($isi_bkm->tgl_bukti);
+                                echo date("Y-m-d", $tgl_bukti);
+                            }else{
+                                echo date("Y-m-d");
+                            }
+                            ?>"/></td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td>Referansi</td>
+                        <td>: <input type="text" id="ref" name="ref" value="<?php if (isset($isi_bkm->ref)){echo $isi_bkm->ref;}?>"/></td>
+                    </tr>
+                    <tr>
+                        <td>Diterima dari</td>
+                        <td>: <input type="text" id="dari" name="dari" value="<?php if (isset($isi_bkm->dari)){echo $isi_bkm->dari;}?>"/></td>
+                    </tr>
+                    <tr>
+                        <td>Keterangan</td>
+                        <td>: <textarea cols="40" rows="5" name="keterangan" id="keterangan" onchange="edit_uraian()"><?php 
+                        if (isset($isi_bkm->keterangan)){
+                            echo $isi_bkm->keterangan;
+                        }else if(isset($isLadik) && $isLadik){
+                            echo $namasub;
+                        }
+                        ?></textarea></td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>
+                            <h4>Detail Kas Masuk</h4>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <!-- belah kiri -->
+            <?php if(isset($pen_isi)&& $pen_isi){ ?>
+                <div style="width: 48%; float: left; overflow-y: auto;">
+                    <div style="max-height: 200px;">
+                        <?php
+                            //isi per penerimaan
+                            if (isset($pen_isi)){
+                                echo $pen_isi;
+                            }
+                        ?>
+                    </div>
+                </div>
+            <?php } ?>
+
+                
+                <table name="bkmdet" class="table-common" id="bkmdet" style="width: 99%;" >  
+                    <tr>
+                        <th style="width: 40%;">Akun</th>
+                        <th style="width: 15%;">Debet</th>
+                        <th style="width: 15%;">Kredit</th>
+                        <th style="width: 30%;">Uraian</th>
+                        <th>Action</th>       
+                    </tr>
+                <tr>
+                    <th align='center'>TOTAL</th>
+                    <th><input name="totaldebet" id="totaldebet" type="text" readonly style="width: 100%;"/></th>
+                    <th><input name="totalkredit" id="totalkredit" type="text" readonly style="width: 100%;"/></th>
+                    <th> <div id="selisih" style="display:none">Selisih: <input name="selisih_nil" id="selisih" type="text"  readonly style="width: 60%;" /> </div> </th>
+                    <th>
+                        <?php if(isset($isLadik) && $isLadik){
+                            if($jenis_bukti==constant::BUK_BM ) { ?>
+                                <input type="button" id='tambahbaris' disabled="disabled" value="   +   " onclick="addRow('bkmdet','')" />
+                            <?}
+                        } else{
+                            if($jenis_bukti!==constant::BUK_BM ) {?>
+                                <input type="button" id='tambahbaris' disabled="disabled" value="   +   " onclick="addRow('bkmdet','')" />
+                        <?php }} ?>
+                    </th>
+                </tr>
+            </table>
+            </div>
+            <footer>
+				<div class="submit_link">
+					<input type="submit" value="Simpan" class="alt_btn" name="submit">
+				</div>
+			</footer>
+   </form>
+   <?php } else{
+    echo "<h1>Resume MOU Tidak ditemukan...!!!</h1><h2>Tidak diijinkan memasukkan surat setor untuk MOU yang tidak ada.</h2>";
+   } ?>
+   
+   
+   
+        </article>
+        <!-- end of styles article --> 
+
+<script language="javascript">
+    
+    <?php
+        if (isset($isEdit) && $isEdit ){ //&& $isi_bkm->jenis_ref!==constant::MOU_LADIK 
+            if(isset($atas['akun_bas'])){
+                echo "
+                ambilBasAtas();
+                $('#kas_bank').val(".$atas['akun_bas'].");";
+            }
+            
+        }
+    ?>
+    
+    
+    $("#jenis_transaksi").change(function(){
+        //document.getElementById('nominaltr').style.removeProperty("display");
+        var jt= $("#jenis_transaksi").val();
+        if (jt=='MM'){
+            $("#kasbanktr").css('display', 'none');
+			$("#unittr").css('display', 'none');
+            $("#subunittr").css('display', 'none');
+        }else{
+            $("#kasbanktr").css('display', '');
+			$("#unittr").css('display', '');
+            $("#subunittr").css('display', '');
+        }
+        $('#cari_bas_img').css('display', '');
+        ambilBasAtas();
+        enaTam();
+    });
+    $("#kas_bank").change(function(){
+        enaTam();
+    });
+    $("#sub_unit").change(function(){
+        ambilBasAtas();
+    });
+    
+    
+    function updateData(tableID,data){
+        var tabel = document.getElementById(tableID);
+		var rowCount = tabel.rows.length;
+		var row = tabel.insertRow(rowCount-1);
+    }
+    
+    function masuk_tabel(data,src,id){
+            id = typeof(id) !== 'undefined' ? id : '';
+        bkmData=new Object();
+        bkmData.akun_bas=document.getElementById('akun_cari').value;
+        bkmData.saldo_normal=document.getElementById('akun_sn').value;
+        document.getElementById('akun_cari').value;
+        bkmData.nilai=data.nilai;
+        bkmData.jenis_pen=data.jenis_pen;
+        bkmData.uraian=data.jenis_pen+' '+data.th_ajar+' '+data.semester+' '+data.nama_subunit;
+        var oRow = src.parentElement.parentElement;
+        var rownum=oRow.rowIndex;
+        document.getElementById('tbl_ladik').deleteRow(rownum);
+        var rownumatas=rownum-1;
+        document.getElementById('tbl_ladik').deleteRow(rownum - 1);
+        $('.add').show();
+        addRow('bkmdet', bkmData, true,id);
+    }
+    
+    function addRowAtas(tableID, data,id){
+		data = typeof(data) !== 'undefined' ? data : '';
+        if(data != ''){
+            counter=counter+1;
+            var tabel = document.getElementById(tableID);
+            var rowCount = tabel.rows.length;
+            var row = tabel.insertRow(rowCount);
+            
+            var thajar = row.insertCell(0);
+            thajar.appendChild(document.createTextNode(data.th_ajar+" "+data.semester));
+            
+            var jpen = row.insertCell(1);
+            jpen.appendChild(document.createTextNode(data.jenis_pen));
+            
+            var total = row.insertCell(2);
+            total.appendChild(document.createTextNode(data.nilai));
+            
+            var tambah = row.insertCell(3);
+            var bt_tmb = document.createElement("input");
+            bt_tmb.type = "button";
+            bt_tmb.value = "Tambah";
+                bt_tmb.onclick= function() {tambah_baris('tbl_ladik',this,id);}
+            tambah.appendChild(bt_tmb);
+        }
+    }
+    
+    function addRow(tableID, bkmData, isAwal, id){
+		bkmData = typeof(bkmData) !== 'undefined' ? bkmData : '';
+		isAwal = typeof(isAwal) !== 'undefined' ? isAwal : false;
+		id = typeof(id) !== 'undefined' ? id : '';
+        
+		counter=counter+1;
+		var tabel = document.getElementById(tableID);
+		var rowCount = tabel.rows.length;
+		var row = tabel.insertRow(rowCount-1);
+        
+		var akun = row.insertCell(0);
+        
+        if (bkmData!=''){
+            var hd_id_detbkm = document.createElement("input");
+            hd_id_detbkm.type="hidden";
+            hd_id_detbkm.name= "id_bkmdet["+counter+"]";
+            hd_id_detbkm.value=bkmData.id_bkmdet;
+            akun.appendChild(hd_id_detbkm);
+	    }
+        <?php if(isset($isLadik)&& $isLadik){ ?> 
+            var hd_jenpen = document.createElement("input");
+            hd_jenpen.type="hidden";
+            hd_jenpen.name= "jenpen["+counter+"]";
+            hd_jenpen.value=bkmData.jenis_pen;
+            akun.appendChild(hd_jenpen);
+        <?php } ?>
+        var inp_akun = document.createElement("input");
+            inp_akun.type="text";
+            inp_akun.id="akun";
+            inp_akun.autocomplete="on";
+            inp_akun.name= "akun["+counter+"]";
+            inp_akun.style.width="100%";
+            inp_akun.setAttribute('class', 'akun');
+            if(isAwal==true){
+                inp_akun.readOnly = true;
+            }
+        if (bkmData!=''){
+	       inp_akun.value=bkmData.akun_bas;
+	    }
+        akun.appendChild(inp_akun);
+        
+        var div_nama =document.createElement("div");
+            div_nama.id="nama_akun"+counter;
+            div_nama.name="nama_akun["+counter+"]";
+		akun.appendChild(div_nama);
+        
+        var debet = row.insertCell(1);
+		var inp_debet = document.createElement("input");
+		inp_debet.id="debet"+counter;
+		inp_debet.setAttribute('class', 'debet');
+        inp_debet.type="text";
+		inp_debet.style.width="100%";
+        inp_debet.name= "debet["+counter+"]";
+        inp_debet.setAttribute('onkeyup','updateJumlah()');
+        inp_debet.disabled=true;
+        //inp_debet.autoNumeric(numOptions);
+        if (bkmData!=''){
+            if(isAwal==true){
+                if (bkmData.saldo_normal=='D'){
+                    inp_debet.value=bkmData.nilai
+                    //inp_debet.autoNumeric('set',bkmData.nilai);
+                    inp_debet.disabled=false;
+                    inp_debet.readOnly = true;
+                }
+            
+            }else if(bkmData.debet!=null){
+                inp_debet.value=bkmData.debet;
+                inp_debet.disabled=false;
+            }
+	    }
+		debet.appendChild(inp_debet);
+        
+        $('#debet'+counter).autoNumeric(numOptions);
+        if (bkmData!=''){
+            if(isAwal==true){
+                if (bkmData.saldo_normal=='D'){
+                    $('#debet'+counter).autoNumeric('set',bkmData.nilai);
+                }
+            }
+        }
+        
+        var kredit = row.insertCell(2);
+		var inp_kredit = document.createElement("input");
+		inp_kredit.id="kredit"+counter;
+		inp_kredit.setAttribute('class', 'kredit');
+        inp_kredit.type="text";
+        inp_kredit.style.width="100%";
+        inp_kredit.name= "kredit["+counter+"]";
+        inp_kredit.setAttribute('onkeyup','updateJumlah()');
+        inp_kredit.disabled=true;
+        //inp_kredit.autoNumeric(numOptions);
+        if (bkmData!=''){
+            if(isAwal==true){
+                if (bkmData.saldo_normal=='K'){
+                    inp_kredit.value=bkmData.nilai
+                    //inp_kredit.autoNumeric('set',bkmData.nilai);
+                    inp_kredit.disabled=false;
+                    inp_kredit.readOnly = true;
+                }
+            }else if (bkmData.kredit!=null){
+                inp_kredit.value=bkmData.kredit;
+                inp_kredit.disabled=false;
+            }
+	       
+	    }
+		kredit.appendChild(inp_kredit);
+        
+        $('#kredit'+counter).autoNumeric(numOptions);
+        if (bkmData!=''){
+            if(isAwal==true){
+                if (bkmData.saldo_normal=='K'){
+                    $('#kredit'+counter).autoNumeric('set',bkmData.nilai);
+                }
+            }
+        }
+        
+        
+        var uraian = row.insertCell(3);
+		var inp_uraian = document.createElement("textarea");
+        inp_uraian.name= "uraian["+counter+"]";
+		inp_uraian.id= "uraian"+counter;
+        inp_uraian.style.width="100%";
+        if (bkmData!=''){
+                inp_uraian.value=bkmData.uraian;
+        }
+        else
+        {
+            inp_uraian.value=$("#keterangan").val();
+        }
+		uraian.appendChild(inp_uraian);
+        
+		var cell4 = row.insertCell(4);
+		var element3 = document.createElement("input");
+		element3.type = "button";
+		element3.value = "del";
+        if (id==''){
+            element3.onclick= function() {delRow(tableID,this);}
+        }else{
+            element3.onclick= function() {delRow(tableID,this,id);}
+        }
+		cell4.appendChild(element3);
+		        
+		inp_akun.focus();
+        updateJumlah();
+	}
+
+    function edit_uraian(){        
+        for (var i = 1; i <= counter; i++) {
+            var keterangan = $("#keterangan").val();
+            $("#uraian"+i).val(keterangan);            
+        };
+    }
+
+    function delRow(tabeID,src,id){
+        id = typeof(id) !== 'undefined' ? id : '';
+	    
+        if(id!==''){
+            addRowAtas('tbl_ladik', pen[id],id);
+        }
+        
+        var oRow = src.parentElement.parentElement;
+	    document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+        updateJumlah();
+        
+    }
+    
+    var counter=0;
+
+    <?php if (isset($det_bkm)){?> 
+    var detBkmBw= <?php echo json_encode($det_bkm); ?>; //detail bkm untuk yg edit
+    var banyak= <?php echo count($det_bkm); ?>;
+    if (banyak>0){
+        //FIXME: CEK MULAI UNTUK BKM SAMA GA AMA BM??
+        
+        for(var i=0;i<banyak+1;i++){
+            if ((typeof(detBkmBw[i]) !== 'undefined') && typeof(detBkmBw[i].akun_bas) !== 'undefined' ){
+                addRow('bkmdet',detBkmBw[i]);
+            }
+        }
+        /*
+        detBkmBw.forEach(function(detBkmBwR) {
+            addRow('bkmdet',detBkmBwR);
+        });
+        */
+        updateJumlah();
+    }else{
+        //var counter=0;
+    }
+    <?php } ?>
+    
+    $(document).on("focus keyup","input#cari_bas",function(event){
+        var noResult="Tidak Ada Data...";
+        var noResultArr= new Array(noResult);
+        
+        noResultArr[0]=noResult
+        $(this).autocomplete({
+            minLength: 1,
+            source: 
+            function(req, add){
+                $.ajax({
+                    url: "<?php echo site_url(); ?>surat_setor/cariAkun",
+                    dataType: 'json',
+                    type: 'POST',
+                    data:{ term: req.term},
+                    success:    
+                    function(data){
+                        if(data.response =="true"){
+                            add(data.message);
+                        }else{
+                            add(noResultArr);
+                        }
+                    },
+                });
+            },
+            select: 
+                function(event, ui) {
+                    event.preventDefault();
+                    if(ui.item.label!=noResult){
+                        this.value = ui.item.id;
+                        append_combo('#kas_bank', ui.item.id, ui.item.label, true);
+                        $("#cari_bas_tr").css('display', 'none');
+                        enaTam();
+                    }
+                },
+        });
+    });
+    
+    $(document).on("focus keyup","input#akun_cari",function(event){
+        var jt= $("#jenis_transaksi").val();
+        if (jt=='MM'){
+            var kasbank= '';
+        }else{
+            var kasbank= $("#kas_bank").val();
+        }
+        
+        var noResult="Tidak Ada Data...";
+        var noResultArr= new Array(noResult);
+        
+        noResultArr[0]=noResult
+        $(this).autocomplete({
+            minLength: 1,
+            source: 
+            function(req, add){
+                $.ajax({
+                    url: "<?php echo site_url(); ?>bukti_akuntansi/cariAkun",
+                    dataType: 'json',
+                    type: 'POST',
+                    data:{ term: req.term, kasbank:kasbank},
+                    success:    
+                    function(data){
+                        if(data.response =="true"){
+                            add(data.message);
+                        }else{
+                            add(noResultArr);
+                        }
+                    },
+                });
+            },
+            select: 
+                function(event, ui) {
+                    event.preventDefault();
+                    if(ui.item.label!=noResult){
+                        this.value = ui.item.id;
+                        $("#akun_sn").val(ui.item.saldoNormal);
+                    }
+                },
+        });
+    });
+        
+</script>

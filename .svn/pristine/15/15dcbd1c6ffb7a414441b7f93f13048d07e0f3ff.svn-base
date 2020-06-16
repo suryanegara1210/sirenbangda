@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<HTML xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title><?php echo $title; ?></title>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<meta name="description" content="Sistem Informasi Akuntansi dan Keuangan Universitas Udayana" />
+	<meta name="keywords" content="perencanaan, sistem informasi, rencana kerja,
+			realisasi, belanja, sptb, spp, spm, sp2d, udayana" />
+
+	<link href="<?php echo base_url().'asset/themes/simper-style/'; ?>css/style-loginbox.css" type="text/css" rel="stylesheet">
+
+	<!-- Optimize for mobile devices -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+	<script language="javascript" src="<?php echo base_url();?>asset/js/jquery-1.5.2.min.js"></script>
+
+</head>
+<body id="common">
+    <br /><br />
+    <div id="page">
+
+<CENTER>
+<DIV id=loginWrapper>
+	<DIV id=loginBox>
+		<DIV id=loginBox-head></DIV>
+		<DIV id=loginBox-title>
+			<H1>Sistem Informasi <br> Akuntansi & Keuangan</H1>
+		</DIV>
+		<DIV id="loginBox-body"><BR><center>
+		<div class="error-box" id="error"></div>
+		<FORM id="login-form" autocomplete="off">
+			<LABEL for="aid_username">Username</LABEL>
+					<INPUT id="username" name="username" type="text" title="Masukkan Username yang anda miliki."
+					required> <BR>
+			<LABEL for="aid_password">Password</LABEL>
+				<INPUT id="password" type="password" name="password" title="Masukkan password anda" required> <BR>
+
+			<INPUT type="submit" value="Login">
+
+		</FORM>
+		<!-- <a href="../unit.pdf">Manual daftar user UNIT</a>
+		<a href="../subunit.pdf">Manual daftar user Sub Unit</a>
+ -->		.::<a href="../master/registrasi/add">REGISTRASI</a>::.<BR><BR>
+ 			>> Download SOP & ROAD MAP DOCUMENTS <<<BR>
+ 			<a title="ALUR PENGAJUAN UP" href="<?php echo base_url('asset/dw_sop/up.pdf'); ?>"><img style="margin-top:4px;" width="32" src="<?php echo base_url('asset/images/download.png'); ?>"></a>
+ 			<a title="ALUR PENGAJUAN GU" href="<?php echo base_url('asset/dw_sop/gu.pdf'); ?>"><img width="32" src="<?php echo base_url('asset/images/download.png'); ?>"></a>
+ 			<a title="ALUR PENGAJUAN LS" href="<?php echo base_url('asset/dw_sop/ls.pdf'); ?>"><img width="32" src="<?php echo base_url('asset/images/download.png'); ?>"></a>
+ 			<a title="ALUR PENGAJUAN UP-TUP" href="<?php echo base_url('asset/dw_sop/up-tup.pdf'); ?>"><img width="32" src="<?php echo base_url('asset/images/download.png'); ?>"></a>
+ 			<a title="ROAD MAP DOCUMENTS" href="<?php echo base_url('asset/dw_sop/road-map-doc.pdf'); ?>"><img width="32" src="<?php echo base_url('asset/images/download.png'); ?>"></a>
+		</center>
+		</DIV>
+	<DIV id="loginBox-foot">
+
+	</DIV>
+</DIV>
+</CENTER>
+</div>
+</body>
+</HTML>
+
+<script type="text/javascript">
+	$( function () {
+		//fadein login
+		$("#loginWrapper").css("display", "none");
+		$("#loginWrapper").fadeIn(1000);
+
+		//make username focus
+		$('#username').focus();
+
+		function show_msg(msg)
+		{
+			$('#error').html(msg);
+			$('#error').slideDown('fast');
+
+			//tampilkan for error
+			$('input[type=text]').val('');
+			$('input[type=password]').val('');
+			$('input[type=text]').focus();
+
+			setTimeout(function () {
+				$('#error').slideUp('fast');
+			}, 2000);
+
+		}
+
+		$('#login-form').submit(function() {
+			$.post ($(this).attr('action'),
+					$(this).serialize(),
+					function(data) {
+						try {
+							var response = $.parseJSON(data);
+
+							if(response.errno != 0){
+								show_msg(response.message);
+							} else {
+								//redirect
+								$('#loginWrapper').fadeOut(500, function() {
+									window.location = response.message;									
+								});
+							}
+						} catch(e) {
+							//log error, misal format json salah
+							console.log('System error : "' + e + '"');
+							show_msg('Terjadi kesalahan sistem, hubungi admin');
+						}
+					});
+
+			return false;
+		});
+	});
+</script>

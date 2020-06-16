@@ -1,0 +1,80 @@
+<script type="text/javascript">
+	var dt;
+	$(document).ready(function(){
+	    dt = $("#rekap_kecamatan").DataTable({
+	    	"processing": true,
+        	"serverSide": true,	        	
+        	"aoColumnDefs": [                
+                {
+                    "bSortable": false,
+                    "aTargets": ["no-sort"]  
+                }
+            ],
+            "ajax": {
+	            "url": "<?php echo $url_load_data; ?>",
+	            "type": "POST"
+	        }        	
+	    });
+
+	    $('div.dataTables_filter input').unbind();
+	    $("div.dataTables_filter input").keyup( function (e) {
+		    if (e.keyCode == 13) {
+		        dt.search( this.value ).draw();
+		    }
+		} );
+        
+	});
+	function show_gallery(id){
+        $.ajax({
+            type : 'POST',
+            data : {id_musrenbang : id},
+            url : '<?php echo $url_show_gallery;?>',
+            dataType: 'text',
+            complete: function(data) {
+                console.log(JSON.parse(data.responseText));
+                var img = JSON.parse(data.responseText);
+                $.fancybox(img, {
+                    padding: 0,
+                
+                    openEffect : 'elastic',
+                    openSpeed  : 150,
+                
+                    closeEffect : 'elastic',
+                    closeSpeed  : 150,
+                
+                    closeClick : true
+                });
+            }
+        });   
+    }
+</script>
+<article class="module width_full">
+	<header>
+	  <h3>Tabel Data Rekapitulasi Kecamatan</h3>
+	</header>
+	<div class="module_content"; style="overflow:auto">
+    <div style='float:right'>
+    <a href="<?php echo site_url('rekapitulasi_kecamatan/do_cetak_rekap_kecamatan') ?>"><input style="margin: 3px 10px 0px 0px; float: right;" type="button" value="Cetak Rekapitulasi Kecamatan" /></a>
+    <a href="<?php echo site_url('rekapitulasi_kecamatan/preview_rekap_kecamatan') ?>"><input style="margin: 3px 10px 0px 0px; float: right;" type="button" value="Lihat Rekapitulasi Kecamatan" /></a>
+    </div><br>
+		<table id="rekap_kecamatan" class="table-common tablesorter" style="width:100%">
+			<thead>
+				<tr>
+					<th class="no-sort">No</th>
+					<th>Jenis Pekerjaan</th>
+					<th>Volume</th>
+					<th>Satuan</th>
+          			<th>Lokasi</th>
+          			<th>Dana</th>
+          			<th>Nama Desa</th>
+          			<th>Nama SKPD</th>
+					<th>Keputusan</th>
+					<th>Keterangan</th>
+					<th class="no-sort">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+</article>

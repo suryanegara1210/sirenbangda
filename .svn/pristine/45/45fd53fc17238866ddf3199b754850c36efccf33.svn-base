@@ -1,0 +1,108 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * @brief proporsi pusat
+ * 
+ * @author Putu Praba Santika
+ */
+class M_pro_pusat extends CI_Model {
+	   
+    public $tabel = array();
+       
+    function __construct(){
+        parent::__construct();
+    }
+
+    function get_bagian($id_subunit,$ta){
+        $this->db->select('pagu_real');
+        $this->db->from('t_pagu_real');
+        $this->db->where('tahun',$ta);
+        $this->db->where('subunit',$id_subunit);
+        $query = $this->db->get();
+        $row=$query->row();
+        if (isset($row->pagu_real)){
+            return $row->pagu_real;
+        }else{
+            return 0;
+        }
+        
+    }
+    
+    function get_subunit($id_unit){
+        $this->db->select('id_subunit,nama_subunit');          
+        $this->db->from('m_subunit');          
+        $this->db->order_by('id_subunit','ASC');
+        $this->db->where("id_unit",$id_unit);
+        $query=$this->db->get();
+        return $query->result();
+    }
+    
+    function get_sudah_terpakai($id_subunit,$ta){
+        $this->db->select('SUM(jum_pro) as jum_pakai');
+        $this->db->from('t_proporsi');
+        $this->db->where('tahun',$ta);
+        $this->db->where('subunit_asal',$id_subunit);
+        $query = $this->db->get();
+        $row=$query->row();
+        if ($row->jum_pakai === null){
+            return 0;
+        }else{
+            return $row->jum_pakai;
+        }
+    }
+    
+    function simpan($isi,$subunit_pusat){
+        $month = date('m');
+        if($month <7){
+            $semester = 1;
+        }else{
+            $semester = 2;
+        }
+        
+        date_default_timezone_set('Etc/GMT-8');
+        
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+            
+        foreach($_POST['subunit'] as $id_subunit=>$nilai){
+            $objek = new stdClass();
+            $objek->tahun           = $this->m_settings->get_tahun_anggaran();
+            $objek->semester        = $semester;
+            $objek->subunit_asal    = $subunit_pusat;
+            $objek->subunit_tujuan  = $id_subunit;
+            $objek->proporsi        = 100;
+            $objek->jumlah          = $nilai;
+            $objek->jum_pro         = $nilai;
+            $objek->jen_pen         = '-';
+            $objek->remark          = '-';
+            $objek->create_date    = date('Y-m-d H:i:s');
+            $objek->create_by      = $this->session->userdata('username');
+            $this->db->insert('t_proporsi', $objek);
+            
+            $objek->tahun           = $this->m_settings->get_tahun_anggaran();
+            $objek->semester        = $semester;
+            $objek->subunit_asal    = $id_subunit;
+            $objek->subunit_tujuan  = $subunit_pusat;
+            $objek->proporsi        = 100;
+            $objek->jumlah          = $nilai*-1;
+            $objek->jum_pro         = $nilai*-1;
+            $objek->jen_pen         = '-';
+            $objek->remark          = '-';
+            $objek->create_date    = date('Y-m-d H:i:s');
+            $objek->create_by      = $this->session->userdata('username');
+            $this->db->insert('t_proporsi', $objek);
+             
+        }
+        
+        $this->db->trans_complete();
+        if($this->db->trans_status() === true){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil Menyimpan.');
+            $this->session->unset_userdata('pro_pusat');
+            redirect('pro_pusat/input');
+        } else {
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL Menyimpan.');
+            redirect('pro_pusat/input');
+        }
+    }
+}

@@ -1,0 +1,299 @@
+<?php /**
+ * @brief Model Class untuk mengakomodasi penerimaan
+ *
+ * Model Class untuk mengambil data dari database yang sering digunakan berulang
+ *
+ * @author Putu Praba Santika
+ */
+class M_umum extends CI_Model{
+    /**
+    * buat array untuk semua unit berisi id_unit dan nama_unit untuk buat dropdown
+    * $result[""]= '-->> Pilih Fakultas <<--';
+    * $result[-1]= '-->> Seluruh Fakultas';
+    **/
+    public function unit_semua($tipe=constant::WITH_ALL){
+        $result = array();
+        $this->db->from('m_unit');
+        $this->db->order_by('id_unit','ASC');
+        $array_keys_values = $this->db->get();
+        switch($tipe){
+            case constant::WITH_ALL:
+                $result['']= '~~~ Pilih Unit ~~~';
+                $result[-1]= '~~~ Seluruh Unit ~~~';
+                break;
+            case constant::WITHOUT_ALL:
+                $result['']= '~~~ Pilih Unit ~~~';
+                break;
+            case constant::WITHOUT_PILIH:
+                $result[-1]= '~~~ Seluruh Unit ~~~';
+                break;
+        }
+
+        foreach ($array_keys_values->result() as $row){
+            $result[$row->id_unit]= $row->nama_unit;
+        }
+        return $result;
+    }
+
+    /**
+    * buat array untuk semua subunit berisi id_subunit dan nama_subunit untuk buat dropdown
+    * $result[""]= '-->> Pilih Fakultas <<--';
+    * $result[-1]= '-->> Seluruh Fakultas';
+    **/
+    public function subunit_semua($id_unit='',$tipe=constant::WITH_ALL){
+        $result = array();
+        $this->db->from('m_subunit');
+        $this->db->order_by('id_subunit','ASC');
+        if ($id_unit!==''){
+            $this->db->where("id_unit",$id_unit);
+        }
+        $array_keys_values = $this->db->get();
+        switch($tipe){
+            case constant::WITH_ALL:
+                $result['']= '~~~ Pilih Jurusan ~~~';
+                $result[-1]= '~~~ Seluruh Jurusan ~~~';
+                break;
+            case constant::WITHOUT_ALL:
+                $result['']= '~~~ Pilih Jurusan ~~~';
+                break;
+        }
+        foreach ($array_keys_values->result() as $row){
+            $result[$row->id_subunit]= $row->nama_subunit;
+        }
+        return $result;
+    }
+
+    /**
+     * ambil detail unit
+     */
+    function unit_detail($id_unit,$tipe=Constant::JR_ID){
+        $this->db->from('m_unit');
+        switch($tipe){
+            case Constant::JR_ID :
+                $this->db->where("id_unit",$id_unit);
+                break;
+            case Constant::JR_CD:
+                $this->db->where("kode_unit",$id_unit);
+                break;
+        }
+
+        $this->db->order_by('id_unit','ASC');
+        $query = $this->db->get();
+        $result= $query->row();
+        if ($result){
+            return $result;
+        } else {
+            return FALSE;
+        }
+    }
+
+    function get_nama_unit_by_id ($idu) {
+        $hasil = $this->unit_detail($idu, Constant::JR_ID);
+        if($hasil->nama_unit){
+            return $hasil->nama_unit;
+        }else{
+            return FALSE;
+        }
+
+    }
+
+    function get_nama_unit_by_code ($cdu) {
+        $hasil = $this->unit_detail($cdu, Constant::JR_CD);
+        if(isset($hasil->nama_unit)){
+            return $hasil->nama_unit;
+        }else{
+            return FALSE;
+        }
+    }
+
+    /**
+     * ambil detail subunit
+     */
+    function subunit_detail($id_subunit,$tipe=Constant::JR_ID){
+        $this->db->from('m_subunit');
+
+        switch($tipe){
+            case Constant::JR_ID:
+                $this->db->where('id_subunit',$id_subunit);
+                break;
+            default:
+                $this->db->where('kode_subunit',$id_subunit);
+                break;
+        }
+
+        $this->db->order_by('id_subunit','ASC');
+        $query = $this->db->get();
+        $result= $query->row();
+        if ($result){
+            return $result;
+        } else {
+            return FALSE;
+        }
+
+    }
+
+    function get_nama_sunit_by_id ($idu) {
+        $hasil = $this->subunit_detail($idu, Constant::JR_ID);
+        if (isset($hasil->nama_subunit)){
+            return $hasil->nama_subunit;
+        }else{
+            return FALSE;
+        }
+    }
+
+    function get_nama_sunit_by_code ($cdu) {
+        $hasil = $this->subunit_detail($cdu, Constant::JR_CD);
+        if(isset($hasil->nama_subunit)){
+            return $hasil->nama_subunit;
+        }else{
+            return FALSE;
+        }
+    }
+
+    function kode_digit_unit($kode_unit){
+        $this->db->select('kode_digit');
+        $this->db->from('m_unit');
+        $this->db->where('kode_unit',$kode_unit );
+        $hasil=$this->db->get();
+        $unit=$hasil->row();
+        if ($unit){
+            return $unit->kode_digit;
+        } else{
+            return '-1';
+        }
+    }
+
+    function ambil_prodi(){
+        $this->db->select('kode_subunit_digit, nama_subunit');
+        $this->db->from('m_subunit');
+        $hasil=$this->db->get();
+        return $hasil->result();
+    }
+
+    function tahun_aktif_ambil(){
+        $this->db->from('m_config_penerimaan');
+        $this->db->where('aktif','1');
+        $this->db->order_by('mulai_bayar');
+        $hasil=$this->db->get();
+        return $hasil->row();
+    }
+
+    /**
+     * Update status untuk semua MOU
+     */
+    function mouUpdateStatus($tabel,$resume){
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        //update tabel master
+        $this->db->where('id_mou', $resume['id_mou']);
+        $this->db->where('th_mou', $resume['th_mou']);
+        $this->db->update($tabel, $resume);
+
+        //insert tabel his
+        $history->id_mou=$resume['id_mou'];
+        $history->th_mou=$resume['th_mou'];
+        date_default_timezone_set('Etc/GMT-8');
+        $history->waktu=date('Y-m-d H:i:s');
+        $history->pengisi=$this->session->userdata('username');
+        $history->status=$resume['status_semua'];
+        //$history->komentar=$resume['komentar'];
+        $this->db->insert($tabel.'_his', $history);
+
+        $this->db->trans_complete();
+        if($this->db->trans_status() === FALSE){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    /**
+     * Ambil detail BAS dari database
+     * @param akun integer kode akun dalam bas
+     */
+    function basDetail($akun){
+        $this->db->from('m_bas');
+        $this->db->where('akun_kode',$akun);
+        $hasil=$this->db->get();
+        return $hasil->row();
+    }
+
+    function cariAkun($keyword, $batas='', $sn=''){
+        $this->db->select('*');
+        $this->db->from("m_bas");
+        if ($keyword!==''){
+            $this->db->like('akun_kode',$keyword, 'after');
+        }
+
+        if (isset ($batas) && $batas!==''){
+            $like="(";
+            $batas_arr = explode(",", $batas);
+            foreach($batas_arr as $batas_ak){
+                //$this->db->like('akun_kode',$batas_ak, 'after');
+                $like=$like."akun_kode LIKE '".$batas_ak."%' OR ";
+                if ($batas_ak === end($batas_arr)){
+                    $like=$like."akun_kode LIKE '".$batas_ak."%'";
+                }
+            }
+            $like=$like.")";
+            $this->db->where($like, NULL, FALSE);
+        }
+
+        if(isset ($sn) && $sn!==''){
+            $this->db->where('saldo_normal',$sn);
+        }
+
+        $this->db->where('level','8');
+
+        $this->db->order_by("akun_kode", "asc");
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+
+    function nama_file($jen_pen){
+        switch($jen_pen){
+            case Constant::MOU_LADIK_LAIN :
+                $nama_file='_ladik_lain';
+                break;
+            case Constant::MOU_HIBAH_TERENCANA :
+                $nama_file='_hibah';
+                break;
+            case Constant::MOU_PPPMAS :
+                $nama_file='_pppmas';
+                break;
+            case Constant::MOU_HIBAH_TAKTER :
+                $nama_file='_hibah_takter';
+                break;
+            case Constant::MOU_UNIT_USAHA :
+                $nama_file='_unit_usaha';
+                break;
+            case Constant::MOU_ASET :
+                $nama_file='_aset_inseden';
+                break;
+            case Constant::MOU_ASET_RUTIN :
+                $nama_file='_aset_rutin';
+                break;
+            case Constant::MOU_INVESTASI :
+                $nama_file='_investasi';
+                break;
+            case Constant::MOU_JASA_GIRO :
+                $nama_file='_jasa_giro';
+                break;
+            case 'NOREF':
+                $nama_file='_noref';
+                break;
+            default:
+                return false;
+                break;
+        }
+        return $nama_file;
+    }
+
+    function get_under_construction(){
+        $this->db->from('under_construction');        
+        $hasil=$this->db->get();
+        $hasil = $hasil->row();
+        return $hasil->website_running;
+    }
+}

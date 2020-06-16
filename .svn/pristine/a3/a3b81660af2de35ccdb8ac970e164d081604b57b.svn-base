@@ -1,0 +1,241 @@
+<script type="text/javascript">
+    prepare_form();
+
+    $(function () {
+        //handle kalkulasi jumlah bruto
+        function hitung_subtotal(ob1, ob2, ob3) {
+            var n1 = parseFloat($(ob1).autoNumeric('get'));
+            var n2 = parseFloat($(ob2).autoNumeric('get'));
+
+            var n3 = n1 * n2;
+            $(ob3).autoNumeric('set', n3);
+        }
+
+        $('#jml_hadir').change(function() {
+            hitung_subtotal($('#jml_hadir'), $('#bruto'), $('#subtotal'));
+        });
+
+        $('#bruto').change(function() {
+            hitung_subtotal($('#jml_hadir'), $('#bruto'), $('#subtotal'));
+        });
+        
+        $('#form-cache').validate({
+            //onkeyup: false,
+            invalidHandler: function(e, validator) {
+                var errors = validator.numberOfInvalids();
+                if (errors) {
+                    var message = errors == 1
+                        ? 'Terdapat 1 field yang belum diisi. Mohon dicek kembali'
+                        : 'Terdapat ' + errors + ' fields yang belum diisi.  Mohon dicek kembali';
+                    $("div.error span").html(message);
+                    $("div.error").show();
+                } else {
+                    $("div.error").hide();
+                }
+            },
+            errorPlacement: function(error, element) {
+                //error.appendTo($("div.error span"));
+            },   
+            submitHandler: function(form) {
+                $("div.error").hide();
+                $('#jml_hadir').val($('#jml_hadir').autoNumeric('get'));
+                $('#bruto').val($('#bruto').autoNumeric('get'));
+                $('#subtotal').val($('#subtotal').autoNumeric('get'));
+
+                //serialize form dan tambahan extra data
+                var form_data = $(form).serializeArray();
+                form_data.push({name: 'jns_honor', value: $('#jns_honor').val()});
+
+                $.post ($(form).attr('action'), form_data,
+                        function(data) {
+                            data = parseJSON(data);
+     
+                            if(data.errno == 0) {
+                                $('#jns_honor').trigger('change');
+                            } else {
+                                $('#jml_hadir').autoNumeric('set', $('#jml_hadir').val());
+                                $('#bruto').autoNumeric('set', $('#bruto').val());
+                                $('#subtotal').autoNumeric('set', $('#subtotal').val());
+                            }
+                        });
+            },            
+        });
+
+        $('#btnReset').click(function() {            
+            $('#form-cache').trigger('reset');
+            $('#oper').val('add');
+            $('#idh').val('');            
+            $(this).hide();
+            $('#nama_pegawai').focus();
+            hitung_grand_total();        
+        }); 
+
+        hitung_grand_total();        
+    });
+
+    function hitung_grand_total() {
+        var grand_total = 0;
+        $('td[name^="subtotal"]').each( function() {
+            grand_total += parseFloat($(this).autoNumeric('get'));
+        });
+        
+        $('#grand_total').autoNumeric('set', grand_total);
+        $('#nominal').autoNumeric('set', grand_total);
+    }
+
+    function edit_honor(idh) {
+          $.post("<?php echo site_url('kwitansi/cache_honor')?>", 
+            {
+                oper: 'get',
+                id: idh,
+                jns_honor: $('#jns_honor').val()
+            })
+          .success(function(data) {
+            var response = parseJSON(data);
+
+            if(response.label) {
+                $('#oper').val('edit');
+                $('#idh').val(idh);
+                $('#nama_pegawai').val(response.nama);
+                $('#golongan').val(response.golongan);
+                $('#kd_mk').val(response.kd_mk);
+                $('#m_kul').val(response.m_kul);
+                $('#jml_hadir').autoNumeric('set', response.jml_hadir);
+                $('#bruto').autoNumeric('set', response.bruto);                    
+                $('#subtotal').autoNumeric('set', response.subtotal);                    
+
+                $('#btnReset').show();
+                $('#nama_pegawai').focus();
+            }           
+          });
+    }
+
+    function delete_honor(element, idh) {
+        console.log('delete',idh);
+
+        if(confirm('Apakah anda yakin untuk menghapus item honor ini?')) {
+
+            $(element).hide();
+            $('#loadDel'+idh).show();
+            
+            $.post("<?php echo site_url('kwitansi/cache_honor')?>", 
+            {
+                oper: 'del',
+                id: idh,
+                jns_honor: $('#jns_honor').val()
+            })
+            .success(function(data) {
+                var result = parseJSON(data);
+                
+                if(!result.message) {
+                    result.message = 'Terjadi kesalahan sistem, mohon diulang kembali';  
+                    $(element).show();
+                    $('#loadDel'+idh).hide();
+
+                } else {
+                    //remove row
+                    $(element).parents('tr').remove();
+                    hitung_grand_total();
+                }
+            });
+        }
+    }
+</script>
+<div><strong>RINCIAN HONOR MENGAJAR</strong><br />
+  <br/>
+<?php echo $form_import ?>
+</div>
+<style type="text/css">
+.input-row th {
+    margin: 0px;
+    padding: 1px;
+    height: 20px;
+}
+
+.input-row th input,
+.input-row th select {
+    width: inherit;
+    height: inherit;
+}
+
+#form-cache input[type=submit] {
+    border: 1px solid #18597E;
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+    width: 16px; height: 16px; 
+}
+
+#form-cache input.error, 
+#form-cache select.error, 
+#form-cache textarea.error {
+    /*border: 2px solid red;*/
+    background-color: #FF2200;
+}
+
+</style>    
+<div class="error" style="display:none; width: auto; margin-top: 5px">
+  <i class='icon2-error' style='margin-top: -2px'/>  <span style="display: inline-block; color: red"></span>
+</div>
+
+<form id="form-cache" name="form-cache" method="post" action="<?php echo site_url('kwitansi/cache_honor') ?>">            
+<table class="table-common" id="nama_honor" style="width: 99.9%;" name="nama_honor" >  
+            <tr>
+                <th>No</th>
+                <th>Nama Dosen</th>
+                <th>Gol</th>
+                <th>Kode MK</th>
+                <th>Mata Kuliah</th>
+                <th>Jml Hadir</th>
+                <th>Honor Bruto / kehadiran</th>
+                <th>Sub Total</th>
+                <th>Action</th>       
+            </tr>
+        <tr class="input-row">
+            <input type="hidden" name="oper" id="oper" value="add">
+            <input type="hidden" name="id" id="idh" value="">
+            <th align='center'>#</th>
+            <th style='width: 100%'><input required name="nama_pegawai" type="text" id="nama_pegawai" autocomplete="off" placeholder="Nama Dosen" title="Masukan Nama Dosen"/></th>
+            <th style='width: 50px'><input class='txt-center' name="golongan" type="text" id="golongan" readonly placeholder="Gol" title="Pilih nama untuk mengisi golongan dosen"/></th>
+            <th style='width: 80px'><input class='txt-center' required name="kd_mk" type="text" id="kd_mk" placeholder="kode MK" title="Masukan Kode Mata Kuliah"/></th>
+            <th style='width: 150px'><input required name="m_kul" type="text" id="m_kul" placeholder="Mata Kuliah" title="Masukan Nama Mata Kuliah"/></th>
+            <th style='width: 50px'><input class='number txt-center' required name="jml_hadir" type="text" id="jml_hadir" class='number txt-center' title="Masukkan Jumlah Kehadiran Dosen"/></th>
+            <th style='width: 110px'><input class="currency" required name="bruto" type="text" id="bruto" placeholder="Nilai Honor" title="Masukkan Nilai Honor per Kehadiran"/></th>
+            <th style='width: 110px'><input name="subtotal" type="text" id="subtotal" class="currency" readonly/></th>
+            <th >
+                <input type="submit" id="btnCache" value=" " class="icon2-disk"/>
+                <a href="javascript:void(0)" id="btnReset" class='icon2-cancel' style="display: none"></a>
+            </th>
+        </tr>
+
+<?php 
+$grand_total = 0;
+if(isset($honors)) {
+    foreach ($honors as $idh=>$row) { ?>
+        <tr >
+            <td class='txt-center'><?php echo $row['label']; ?></td>
+            <td class='txt-fix'><?php echo $row['nama']; ?></td>
+            <td class='txt-center'><?php echo $row['golongan']; ?></td>
+            <td class='txt-center'><?php echo $row['kd_mk']; ?></td>
+            <td ><?php echo $row['m_kul']; ?></td>
+            <td class='txt-center'><?php echo $row['jml_hadir']; ?></td>
+            <td class='currency'><?php echo $row['bruto']; ?></td>
+            <td class='currency' name='subtotal<?php echo $idh?>'><?php echo $row['subtotal']; ?></td>
+            <td class='txt-center'>
+                <a href="javascript:void(0)" class='icon2-delete' onclick="delete_honor(this, '<?php echo $idh?>')"></a>
+                <i class='loading' id='loadDel<?php echo $idh?>' style='display: none'/>
+                <a href="javascript:void(0)" class='icon2-application_edit' onclick="edit_honor('<?php echo $idh?>')"></a>
+            </td>
+        </tr>        
+<?php    
+        $grand_total += doubleval($row['subtotal']);
+    }
+} ?>       
+
+        <tr class='input-row'>
+            <th colspan="7" style="text-align: right">Grand Total</th>
+            <th style="text-align: right">
+                <span name="grand_total" id="grand_total" class="currency" style='font-size: 12px; margin-right: 2px'> 
+                <?php echo $grand_total ?></span></th>
+            <th ></th>
+        </tr>       
+  </table>
+</form>

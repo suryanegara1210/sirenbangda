@@ -1,0 +1,122 @@
+	    <article class="module width_full">
+    		<header><h3>Detail Bukti Akuntansi</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+
+            <?php include_once ('isi.php') ?>
+            <?php
+                if (isset($isVeri) && $isVeri){
+            ?>
+                   <h3>Status Verifikasi</h3>
+                   <form action="<?php echo site_url('bukti_akuntansi/saveVeri');?>" method="POST" name="bkm" id="bkm" accept-charset="UTF-8">
+                    <input type="hidden" value="<?php echo $isi_bkm->id_bukti;?>" name="id_bukti" />
+                    <input type="hidden" value="<?php echo $isi_bkm->jenis_ref;?>" name="jenis_mou" />
+                    <table>
+                        <tr>
+                            <td colspan="2"><input type="checkbox" name="status" value="benar" onclick="document.getElementById('komentar').disabled=this.checked;">Bukti Kas Masuk sudah benar.</td>
+                        </tr>
+                        <tr>
+                            <td>Komentar</td>
+                            <td><textarea cols="40" rows="5" name="komentar" id="komentar"></textarea></td>
+                        </tr>
+                    </table>
+                    
+                   
+                    
+             <?php
+                }   
+             ?>
+            </div>
+            <footer>
+                <div id="status"></div>
+				<div class="submit_link">
+                    <script type="text/javascript">
+                        function buat_baru(){
+                            location.href = '<?php echo $link_buat_baru; ?>';
+                        }
+                    </script>
+                    <input type="button" value="Buat Baru" onclick="buat_baru()">
+                    
+                    <?php if (isset($isi_bkm->status)&& $isi_bkm->status=='DITERIMA' ){ ?>
+                        <input type="button" value="Cetak" onclick="cetak()">
+                        <script>
+                            function cetak(){
+                                var lokasi='<?php echo site_url('bukti_akuntansi/detail/'.$isi_bkm->id_bukti."/cetak"); ?>';
+                                
+                                location.href=lokasi;
+                            }
+                        </script>
+                    <?php }?>
+                    
+                    <?php if (!isset($isi_bkm->status)|| $isi_bkm->status=='SUDAH_REVISI' ){ ?> 
+                        <script>
+                            function edit(){
+                                var lokasi='<?php echo $link_edit; ?>';
+                                location.href=lokasi;
+                            }
+                            function kirim(){
+                                var con=confirm('Apakah anda yakin ingin mengirim ke verifikator?');
+                                if (con){
+                                    
+                                    $.blockUI({
+                                            message: 'Mengirim Bukti Akuntansi, mohon ditunggu ...',
+                                            css: window._css,
+                                            overlayCSS: window._ovcss
+                                    });
+                                    
+                                    $.post(
+                                    "<?php echo  base_url().'bukti_akuntansi/kirim/';?>",
+                                    {id:<?php echo $isi_bkm->id_bukti ?>},
+                                    function(data){
+                                        $('#krm').hide();
+                                        
+                                        try {
+                                            console.log('data');
+                                            console.log(data);
+                                            //FIXME: $.parseJSON selalu ngasilin null
+                                            //var response = $.parseJSON(data);
+                                            var response = data;
+                                            console.log('response');
+                                            console.log(response);
+                                            if(response.errno != 0){
+                                                $.blockUI({
+                                                    message: response.message,
+                                                    timeout: 3000,
+                                                    css: window._csserr,
+                                                    overlayCSS: window._ovcsserr
+                                                });								
+                                            } else {							
+                                                $.blockUI({
+                                                    message: response.message,
+                                                    timeout: 1500,
+                                                    css: window._css,
+                                                    overlayCSS: window._ovcss
+                                                });
+                                            }
+                                        } catch(e) {
+                                            //log error, misal format json salah
+                                            console.log('System error : "' + e + '"');
+                                            $.unblockUI();
+                                        }
+                                        
+                                    }
+                                    ,'json');
+                                }
+                            }
+                        </script>
+                        <input type="button" value="Perbaiki" onclick="edit()">
+                        <input type="button" id="krm" class="alt_btn" value="Kirim Ke Verifikator" onclick="kirim()">
+                    <?php }?>
+                    
+                    <?php
+                        if (isset($isVeri) && $isVeri){
+                            echo "<input type=\"submit\" value=\"Simpan\" class=\"alt_btn\" name=\"submit\"></form>";
+                        }
+                        
+                    ?>
+				
+                </div>
+			</footer>
+   </form>
+        </article>
+        <!-- end of styles article --> 

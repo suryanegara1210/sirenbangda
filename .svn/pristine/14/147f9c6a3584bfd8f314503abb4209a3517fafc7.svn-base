@@ -1,0 +1,21 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-25 07:20:15 --> 404 Page Not Found --> usulan/daftar_usulan
+ERROR - 2013-06-25 13:21:46 --> Severity: Notice  --> Undefined variable: id_spm C:\xampp\htdocs\siaku\application\models\m_spm.php 995
+ERROR - 2013-06-25 15:40:36 --> Query error: Unknown column 't_spj.id_unit' in 'where clause'
+ERROR - 2013-06-25 15:40:38 --> Query error: Unknown column 't_spj.id_unit' in 'where clause'
+ERROR - 2013-06-25 15:40:46 --> Query error: Unknown column 't_spj.id_unit' in 'where clause'
+ERROR - 2013-06-25 15:41:37 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 138
+ERROR - 2013-06-25 15:41:37 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 140
+ERROR - 2013-06-25 15:41:37 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 141
+ERROR - 2013-06-25 15:41:37 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 138
+ERROR - 2013-06-25 15:41:37 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 140
+ERROR - 2013-06-25 15:41:37 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 141
+ERROR - 2013-06-25 15:43:12 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 't_spj.status < '8'
+					GROUP BY t_kwitansi.id_sptb' at line 16
+ERROR - 2013-06-25 15:44:06 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 138
+ERROR - 2013-06-25 15:44:06 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 140
+ERROR - 2013-06-25 15:44:06 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 141
+ERROR - 2013-06-25 15:44:06 --> Severity: Notice  --> Undefined property: stdClass::$no_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 138
+ERROR - 2013-06-25 15:44:06 --> Severity: Notice  --> Undefined property: stdClass::$tgl_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 140
+ERROR - 2013-06-25 15:44:06 --> Severity: Notice  --> Undefined property: stdClass::$uraian_spm C:\xampp\htdocs\siaku\application\views\spj\form_spj_detail.php 141

@@ -1,0 +1,191 @@
+<?php
+	if (!empty($jendela_kontrol->baru) || !empty($jendela_kontrol->baru2) || !empty($jendela_kontrol->revisi) || !empty($jendela_kontrol->revisi2) || (empty($jendela_kontrol->baru) && empty($jendela_kontrol->baru2) && empty($jendela_kontrol->revisi) && empty($jendela_kontrol->revisi2) && empty($jendela_kontrol->kirim) && empty($jendela_kontrol->kirim2))) {
+		$enable_add = TRUE;
+		$enable_edit = TRUE;
+		$enable_delete = TRUE;
+	}else{
+		$enable_add = FALSE;
+		$enable_edit = FALSE;
+		$enable_delete = FALSE;
+	}
+?>
+<script type="text/javascript">	
+	$(document).ready(function(){
+		$(".tbh_kegiatan").click(function(){
+			var ids = $(this).attr("id-s");
+			var idr = $(this).attr("id-r");
+			var idp = $(this).attr("id-p");
+
+			prepare_facebox();
+			$.ajax({
+				type: "POST",
+				url: '<?php echo site_url("renstra/cru_kegiatan_skpd"); ?>',
+				data: {id_renstra: idr, id_sasaran: ids, id_program: idp},
+				success: function(msg){
+					if (msg!="") {						
+						$.facebox(msg);
+					};	
+				}
+			});			
+		});
+
+		$(".remove-kegiatan").click(function(){			
+			if (confirm('Apakah anda yakin untuk menghapus data kegiatan ini?')) {				
+				$.blockUI({
+					css: window._css,
+					overlayCSS: window._ovcss
+				});
+				$.ajax({
+					type: "POST",
+					url: '<?php echo site_url("renstra/delete_kegiatan"); ?>',
+					data: {id_kegiatan: $(this).attr("idK")},
+					dataType: "json",
+					success: function(msg){
+						if (msg.success==1) {							
+							element_program.trigger( "click" );
+							$.blockUI({
+								message: msg.msg,
+								timeout: 2000,
+								css: window._css,
+								overlayCSS: window._ovcss
+							});				
+							reload_jendela_kontrol();			
+						};	
+					}
+				});
+			}
+		});
+
+		$(".edit-kegiatan").click(function(){
+			var ids = $(this).parent().parent().attr("id-s");
+			var idr = $(this).parent().parent().attr("id-r");
+			var idp = $(this).parent().parent().attr("id-p");
+
+			prepare_facebox();
+			$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+			$.ajax({
+				type: "POST",
+				url: '<?php echo site_url("renstra/cru_kegiatan_skpd"); ?>',
+				data: {id_renstra: idr, id_sasaran: ids, id_program: idp, id_kegiatan: $(this).attr("idK")},
+				success: function(msg){
+					if (msg!="") {						
+						$.facebox(msg);
+						$.blockUI({							
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					};	
+				}
+			});
+		});
+
+		$("#kegiatan td.td-click").click(function(){
+			prepare_facebox();
+			$.blockUI({
+				css: window._css,
+				overlayCSS: window._ovcss
+			});
+			$.ajax({
+				type: "POST",
+				url: '<?php echo site_url("renstra/preview_kegiatan_renstra"); ?>',
+				data: {id: $(this).parent().attr("id-k")},
+				success: function(msg){
+					if (msg!="") {						
+						$.facebox(msg);
+						$.blockUI({							
+							timeout: 500,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					};	
+				}
+			});			
+		});
+	});
+</script>
+<article class="module width_full">
+	<header>
+ 		<h3>
+			Kegiatan
+			<a href="javascript:void(0)" class="icon-remove-sign close-kegiatan-frame" title="Tutup Layar Kegiatan"></a>
+		</h3>			
+ 	</header>
+ 	<div class="module_content">
+		<table id="kegiatan" class="table-common" style="width: 99%">
+			<thead>
+				<tr>
+					<th colspan="10">
+						Kegiatan
+						<?php
+							if ($enable_add) {
+						?>
+							<a href="javascript:void(0)" class="icon-plus-sign tbh_kegiatan" style="float: right" title="Tambah Kegiatan" id-r="<?php echo $id_renstra; ?>" id-s="<?php echo $id_sasaran; ?>" id-p="<?php echo $id_program; ?>"></a>
+						<?php
+							}
+						?>						
+					</th>
+				</tr>
+				<tr>
+					<th width="25px">No</th>
+					<th width="80px">Kode</th>
+					<th>Kegiatan</th>
+					<th>Kondisi Awal</th>
+					<th>Target 1</th>
+					<th>Target 2</th>
+					<th>Target 3</th>
+					<th>Target 4</th>
+					<th>Target 5</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php
+				if (!empty($kegiatan)) {					
+					$i=0;
+					foreach ($kegiatan as $row) {
+						$i++;
+			?>
+				<tr class="tr-click" id-r="<?php echo $row->id_renstra; ?>" id-s="<?php echo $row->id_sasaran; ?>" id-p="<?php echo $row->parent; ?>" id-k="<?php echo $row->id; ?>">
+					<td class="td-click" width="50px"><?php echo $i; ?></td>
+					<td class="td-click"><?php echo $row->kd_urusan.". ".$row->kd_bidang.". ".$row->kd_program.". ".$row->kd_kegiatan; ?></td>
+					<td class="td-click"><?php echo $row->nama_prog_or_keg; ?></td>
+					<td class="td-click"><?php echo $row->kondisi_awal." ".$row->nama_value; ?></td>
+					<td align="center" class="td-click"><?php echo $row->target_1." ".$row->nama_value; ?></td>
+					<td align="center" class="td-click"><?php echo $row->target_2." ".$row->nama_value; ?></td>
+					<td align="center" class="td-click"><?php echo $row->target_3." ".$row->nama_value; ?></td>
+					<td align="center" class="td-click"><?php echo $row->target_4." ".$row->nama_value; ?></td>
+					<td align="center" class="td-click"><?php echo $row->target_5." ".$row->nama_value; ?></td>
+					<td align="center" width="50px">
+					<?php
+						if ($enable_edit) {
+					?>
+						<a href="javascript:void(0)" idK="<?php echo $row->id; ?>" class="icon-pencil edit-kegiatan" title="Edit Kegiatan"/>
+					<?php
+						}
+
+						if ($enable_delete) {
+					?>
+						<a href="javascript:void(0)" idK="<?php echo $row->id; ?>" class="icon-remove remove-kegiatan" title="Hapus Kegiatan"/>
+					<?php
+						}
+					?>					
+					</td>
+				</tr>		
+			<?php
+					}
+				}else{
+			?>
+				<tr>
+					<td colspan="10" align="center">Tidak ada data...</td>
+				</tr>
+			<?php
+				}
+			?>
+			</tbody>
+		</table>
+	</div>
+</article>

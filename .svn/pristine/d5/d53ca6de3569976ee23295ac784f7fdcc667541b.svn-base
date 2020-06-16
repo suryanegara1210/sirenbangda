@@ -1,0 +1,108 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Users extends CI_Controller {
+
+	function __construct()
+	{
+		parent::__construct();
+		
+		$this->load->database();
+		$this->load->helper('url');
+		
+		$this->load->library('grocery_CRUD');	
+	}
+	
+	function _example_output($output = null,$judul=NULL)
+	{
+		//$this->load->view('example',$output);
+		$output->judul=$judul;
+		$this->template->load('template','master',$output);
+	}
+	
+	function index()
+	{
+		redirect('home');
+	}	
+	
+	function unit(){
+		$id_unit = $this->uri->segment(4);
+		$idu = $this->session->userdata('id_unit');		
+		$su  = $this->session->userdata('id_subunit');
+
+		if ($id_unit != $idu || !empty($su)) {			
+			$this->session->set_userdata('msg_typ','err');
+      		$this->session->set_userdata('msg', 'Pengguna Tidak Memiliki Hak Akses Ke Halaman Ini');
+			redirect('home');
+		}
+
+		try{
+			$crud = new grocery_CRUD();
+			
+			$crud->set_theme('datatables');
+			$crud->set_table('m_unit');
+			$crud->set_subject('Unit');
+			//$crud->required_fields('nama_unit');
+			$crud->fields('alamat','bank_relasi','rekening','npwp','dekan_nama','dekan_nip','pd2_nama','pd2_nip','bpp_nama','bpp_nip');
+			//$crud->fields('alamat','bank_relasi','rekening','npwp','dekan_nama','dekan_nip','pd2_nama','pd2_nip','bpp_nama','bpp_nip');
+			$crud->columns('nama_unit','nama_unit_singkat');
+            $crud->unset_add();
+            $crud->unset_delete();
+            $crud->unset_list();
+            $crud->unset_back_to_list();
+
+			$output = $crud->render();
+
+			$this->_example_output($output,'Setting Identitas Unit');
+		}catch(Exception $e){		
+			if($e->getCode() == 14) //The 14 is the code of the "You don't have permissions" error on grocery CRUD.
+			{				
+			    redirect('home');
+			}
+			else
+			{
+				show_error($e->getMessage().' --- '.$e->getTraceAsString());
+			}			
+		}
+	}
+    
+    function subunit(){    	
+		$id_subunit = $this->uri->segment(4);
+		$idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+
+		if ($id_subunit != $su || empty($su)) {			
+			$this->session->set_userdata('msg_typ','err');
+      		$this->session->set_userdata('msg', 'Pengguna Tidak Memiliki Hak Akses Ke Halaman Ini');
+			redirect('home');
+		}
+
+		try{
+			$crud = new grocery_CRUD();
+
+			$crud->set_theme('datatables');
+			$crud->set_table('m_subunit');
+			$crud->set_subject('Subunit');
+			$crud->columns('nama_subunit');
+			$crud->fields('pim_jab','pim_nama','pim_nip');            
+            $crud->set_relation('id_unit','m_unit','nama_unit');
+            
+            $crud->unset_add();
+            $crud->unset_delete();
+            $crud->unset_list();
+            $crud->unset_back_to_list();
+			
+			$output = $crud->render();
+			
+			$this->_example_output($output,'Setting Identitas Subunit');
+		}catch(Exception $e){		
+			if($e->getCode() == 14) //The 14 is the code of the "You don't have permissions" error on grocery CRUD.
+			{				
+			    redirect('home');
+			}
+			else
+			{
+				show_error($e->getMessage().' --- '.$e->getTraceAsString());
+			}
+		}
+	}	
+}

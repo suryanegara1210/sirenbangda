@@ -1,0 +1,133 @@
+                <table id="jenis" class="table-common" style="width: 98%;" >
+                    <tr>
+                        <th>Rincian Arus Kas</th>
+                        <th>Aksi</th>
+                    </tr>
+                    <?php
+                        if ($rincian) {
+                            foreach ($rincian as $rin){
+                                echo "<tr>
+                                        <td>
+                                        <input type=\"hidden\" id=\"id_rincian{$rin->id_arus_kas_bas}\" name=\"id_rincian{$rin->id_arus_kas_bas}\" value=\"{$rin->id_arus_kas_bas}\"/>
+                                        <input type=\"hidden\" id=\"kode_bas_rin{$rin->id_arus_kas_bas}\" name=\"kode_bas_rin{$rin->id_arus_kas_bas}\" value=\"{$rin->kode_bas}\" />
+                                        <input type=\"hidden\" id=\"akun_nama{$rin->id_arus_kas_bas}\" name=\"akun_nama{$rin->id_arus_kas_bas}\" value=\"{$rin->kode_bas}. {$rin->akun_nama}\" />
+                                        {$rin->kode_bas}. {$rin->akun_nama}</td>
+                                        <td align=\"center\">
+                                            <img id=\"editjenis\" src=\"".base_url()."asset/images/edit.png\" onclick=\"edit_rincian({$rin->id_arus_kas_bas})\" /></a>
+                                            <img src=\"".base_url()."asset/images/delete.png\" onclick=\"del_rincian({$rin->id_arus_kas_bas})\" /></a>
+                                        </td>
+                                    </tr>";
+                            }
+                        }else{
+                    ?>
+                            <tr>
+                                <td align="center" colspan="2"> Tidak terdapat data . . . </td>
+                            </tr>
+                    <?php
+                        }
+                    ?>
+                    <tr>
+                        <th>
+                            <input type="hidden" type="text" id="iditem" name="iditem" value="<?php echo $iditem; ?>"/>
+                            <input type="hidden" type="text" id="id_rincian" name="id_rincian" />
+                            <input type="text" id="kode_bas_rin" name="kode_bas_rin" style="width:30%" placeholder="kode BAS" />
+                            <input type="text" id="nama_bas_rin" name="nama_bas_rin" style="width:65%" disabled />
+                        </th>
+                        <th>
+                            <input type="button" value="Simpan" name="submit" onclick="save_rincian()" >
+                            <input type="button" value="Batal" name="batal" onclick="reset_rincian()" >
+                        </th>
+                    </tr>
+                </table>
+                
+                <div id="item"></div>
+                
+                <div id="hasil"></div>
+ 
+<script>
+function edit_rincian(id){
+    $('#id_rincian').val($('#id_rincian'+id).val());
+    $('#kode_bas_rin').val($('#kode_bas_rin'+id).val());
+    $('#nama_bas_rin').val($('#akun_nama'+id).val());
+}
+
+function save_rincian(){    
+    if ($("#nama_bas_rin").val() != "") {
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/aruskas_rincian_simpan')?>",
+            data: {iditem:$("#iditem").val(),id_rincian:$("#id_rincian").val(),kode_bas_rin:$("#kode_bas_rin").val()},
+            success: function(msg){
+                $('#hasil').html(msg);
+                refres_rincian();
+            }
+        });        
+    }else{
+        alert('Mohon pilih BAS terlebih dahulu.');
+    }
+}
+
+function del_rincian(id){
+    var jalan=confirm("Yakin akan menghapus \""+$('#kode_bas_rin'+id).val()+"\"");
+    if (jalan){
+        $.ajax({
+            type: "POST",
+            url : "<?php echo site_url('report/aruskas_rincian_del')?>",
+            data: {id_rincian:id},
+            success: function(msg){
+                $('#hasil').html(msg);
+                refres_rincian();
+            }
+        });        
+    }
+}
+
+function reset_rincian(){
+    $('#iditem').val('');
+    $('#id_rincian').val('');
+    $('#kode_bas_rin').val('');
+    $('#nama_bas_rin').val('');    
+}
+
+function refres_rincian(){
+    item_ambil('<?php echo $iditem ; ?>');
+}
+
+
+$(document).on("focus keyup","input#kode_bas_rin",function(event){
+        var noResult="Tidak Ada Data...";
+        var noResultArr= new Array(noResult);
+        
+        noResultArr[0]=noResult
+        $(this).autocomplete({
+            minLength: 1,
+            source: 
+            function(req, add){
+                $.ajax({
+                    url: "<?php echo site_url(); ?>surat_setor/cariAkun",
+                    dataType: 'json',
+                    type: 'POST',
+                    data:{ term: req.term},
+                    success:    
+                    function(data){
+                        if(data.response =="true"){
+                            add(data.message);
+                        }else{
+                            add(noResultArr);
+                        }
+                    },
+                });
+            },
+            select: 
+                function(event, ui) {
+                    event.preventDefault();
+                    if(ui.item.label!=noResult){
+                        this.value = ui.item.id;
+                        $("#nama_bas_rin").val(ui.item.label);
+                        
+                    }
+                },
+        });
+    });
+
+</script>

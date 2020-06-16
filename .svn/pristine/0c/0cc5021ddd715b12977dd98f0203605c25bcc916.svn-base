@@ -1,0 +1,79 @@
+<h2>
+    <div style="text-align:center">
+        Badan Layana Umum Universitas Udayana<br />
+        Ringkasan Kontrak Hibah<br />
+    </div>
+</h2>
+<table id="mouinput">
+                    <tr>
+                        <td colspan="2"><h3>Ringkasan Kontrak</h3></td>
+                    </tr>
+                    <tr>
+                        <td>No MOU</td>
+                        <td>: <?php echo $isi_mou->no_mou; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal MOU</td>
+                        <td>: <?php echo $this->uang->tanggal($isi_mou->tgl_mou); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Pemberi Hibah</td>
+                        <td>: <?php echo $isi_mou->pemberi; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Penerima Hibah</td>
+                        <td>: <?php echo $isi_mou->penerima; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Peruntukan Hibah</td>
+                        <td>: <?php echo $isi_mou->uraian; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Jenis Hibah</td>
+                        <td>: <?php echo $isi_mou->jenis; ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Bentuk hibah</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Bentuk Hibah</td>
+                        <td>: <?php echo $isi_mou->bentuk_hibah; ?></td>
+                    </tr>
+                    <?php if (isset($isi_mou->nominal)){
+                        $uang=$this->uang->angka($isi_mou->nominal);
+                        echo "<tr>
+                        <td>Nominal</td>
+                        <td>: ".$uang."</td>
+                    </tr>";
+                    }?>
+                    
+                    <?php if (isset($isi_mou->bentuk)){
+                        echo "<tr>
+                        <td>Bentuk</td>
+                        <td>: ".$isi_mou->bentuk."</td>
+                    </tr>";
+                    }?>
+                    <?php if (isset($isi_mou->banyak)){
+                        echo "<tr>
+                        <td>Banyak</td>
+                        <td>: ".$isi_mou->banyak."</td>
+                    </tr>";
+                    }?>
+                    <?php if (isset($isi_mou->nilai)){
+                        echo "<tr>
+                        <td>Nilai</td>
+                        <td>: ".$this->uang->angka($isi_mou->nilai)."</td>
+                    </tr>";
+                    }?>
+                    <tr>
+                        <td colspan="2"><h3>Jangka waktu hibah</h3></td>
+                    </tr>
+                    <tr>
+                        <td>Mulai Hibah</td>
+                        <td>: <?php echo $this->uang->tanggal($isi_mou->mulai); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Akhir Hibah</td>
+                        <td>: <?php echo $this->uang->tanggal($isi_mou->akhir); ?></td>
+                    </tr>
+                </table>

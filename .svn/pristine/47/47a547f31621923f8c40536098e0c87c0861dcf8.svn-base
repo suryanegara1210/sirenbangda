@@ -1,0 +1,3 @@
+<?php echo form_dropdown("kdakun",$option_akun,'',"id='kdakun' style='width:450px;'"); ?> 
+<input type="hidden" name="kdkomponen" value="<?php echo"$kdkomponen" ?>"> 
+<input type="hidden" name="kdoutput" value="<?php echo "$kdoutput" ?>"> 

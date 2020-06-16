@@ -1,0 +1,13 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-12 15:48:23 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-07-12 15:50:28 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-12 15:51:22 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-07-12 15:51:58 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-12 15:52:06 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-12 15:53:18 --> Severity: Notice  --> Undefined index: jum_hadir C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 266
+ERROR - 2013-07-12 09:54:56 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-12 09:54:56 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-12 15:55:27 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-07-12 15:55:27 --> Severity: Notice  --> Undefined index: jum_hadir C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 421
+ERROR - 2013-07-12 16:00:08 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387

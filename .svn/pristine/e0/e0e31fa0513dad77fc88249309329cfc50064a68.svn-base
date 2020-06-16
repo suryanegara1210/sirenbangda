@@ -1,0 +1,35 @@
+    <td>Akun</td>
+    <td>:</td>
+    <td>
+        <div>
+            <?php echo form_dropdown("kdakun",$option_akun,'',"id='kdakun' style='width:450px;'"); ?> 
+        </div>
+    </td>
+
+
+<script type="text/javascript">
+          $("#kdakun").change(function(){
+                var selectValues = $("#kdakun").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_akun\" disabled><option value=\"Pilih Komponen\">Pilih Komponen Dahulu</option></select>";
+                    $('#heder').html(msg);
+                }else{
+                    var kdoutput = $("#kdoutput").val();
+                    var jns_kwitansi = $("#jns_kwitansi").val();
+                    var kdkomponen = $("#kdkomponen").val();
+					var kdskomponen = $("#kdskomponen").val();
+                    var kdakun = $("#kdakun").val();
+					
+					var dataString  = 'kdoutput='+ kdoutput + '&jns_kwitansi=' + jns_kwitansi + '&kdkomponen=' + kdkomponen + '&kdakun=' + kdakun + '&kdskomponen=' + kdskomponen;	
+                    $('#id_header').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_header_test')?>",
+                            data: dataString,
+                            success: function(msg){
+                                $('#heder').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>  

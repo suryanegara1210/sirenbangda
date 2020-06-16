@@ -1,0 +1,283 @@
+<script src="<?php echo base_url('asset/chart/Chart.js'); ?>"></script>
+<script>
+    var var_label = new Array();
+    var var_data_sp2d = new Array();
+    var var_data_all = new Array();
+    
+    <?php
+    foreach ($sp2d as $row) {
+    ?>
+        var_label.push('<?php echo $row->nama_subunit; ?>');
+        var_data_sp2d.push('<?php if (empty($row->nominal_sp2d)) {echo 0;}else{echo $row->nominal_sp2d;} ?>');
+        var_data_all.push('<?php if (empty($row->nominal_all)) {echo 0;}else{echo $row->nominal_all;} ?>');
+    <?php
+    }
+    ?>
+
+    var barChartData = {
+        labels : var_label,
+        datasets : [
+            {
+                fillColor : "rgba(245,242,67,0.5)",
+                strokeColor : "rgba(245,242,67,0.8)",
+                highlightFill: "rgba(245,242,67,0.75)",
+                highlightStroke: "rgba(245,242,67,1)",
+                data : var_data_all                
+            },
+            {
+                fillColor : "rgba(151,187,205,0.5)",
+                strokeColor : "rgba(151,187,205,0.8)",
+                highlightFill : "rgba(151,187,205,0.75)",
+                highlightStroke : "rgba(151,187,205,1)",
+                data : var_data_sp2d                
+            }
+        ]        
+    }
+    
+    window.onload = function(){
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myBar = new Chart(ctx).Bar(barChartData, {
+            responsive : true,
+            legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+        });
+
+        var ctx1 = document.getElementById("canvas_pie").getContext("2d");
+        window.myPie = new Chart(ctx1).Pie(pieData);
+    }
+</script>
+
+<article class="module width_full">
+<header>
+<h3> Monev Unit</h3>
+</header>             
+<div class="module_content">
+    <div style="width: 90%; margin: auto; text-align: center;">
+        <font style="font-size: 15;color: rgba(245,242,67,0.5);">
+            &block;&block;
+        </font>
+        <b>
+        : Belum SP2D
+        </b>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font style="font-size: 15;color: rgba(151,187,205,0.5);">
+            &block;&block;
+        </font>
+        <b>
+        : Realisasi (SP2D)
+        </b>
+        <canvas id="canvas" height="450" width="600"></canvas>        
+    </div>
+    <table class='table-common tablesorter' style='width: 80%; margin: auto;' id='tsearch'>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Sub Unit</th>
+        <th>POK</th>
+        <th>Pagu Real</th>
+        <th>Realisasi (SP2D)</th>
+        <th>Belum SP2D</th>
+        <th>Saldo</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php
+    $total_pok=0;
+    $total_all=0;
+    $total_sp2d=0;
+    $total_pagu_real=0;
+    $total_saldo=0;
+    $i=0;
+    foreach ($sp2d as $row) {
+        $i++;
+
+        if (empty($row->pagu_real)){
+            $pagu_real = 0;
+        }else{
+            $pagu_real = $row->pagu_real;
+        }
+
+        if (empty($row->nominal_all)){
+            $nominal_all = 0;
+        }else{
+            $nominal_all = $row->nominal_all;
+        }
+
+        if (empty($row->nominal_sp2d)){
+            $nominal_sp2d = 0;
+        }else{
+            $nominal_sp2d = $row->nominal_sp2d;
+        }
+
+        if (empty($row->pok)){
+            $nominal_pok = 0;
+        }else{
+            $nominal_pok = $row->pok;
+        }
+
+        $saldo=$pagu_real - ($nominal_all + $nominal_sp2d);
+
+        if ($pagu_real != 0) {
+        	$persen_sp2d=round(($nominal_sp2d/$pagu_real)*100, 2);
+        }else{
+        	$persen_sp2d=0;
+        }
+        if ($pagu_real != 0) {
+        	$persen_all=round(($nominal_all/$pagu_real)*100, 2);
+        }else{
+        	$persen_all=0;
+        }
+        
+        $persen_saldo=100-$persen_sp2d-$persen_all;
+
+        $total_saldo = $total_saldo + $saldo;
+        $total_pagu_real=$total_pagu_real+$pagu_real;
+        $total_all=$total_all+$nominal_all;
+        $total_sp2d=$total_sp2d+$nominal_sp2d;
+        $total_pok=$total_pok+$nominal_pok;
+    ?>
+        <tr>
+            <td style="vertical-align: middle;" rowspan="2"><?php echo $i; ?></td>
+            <td style="vertical-align: middle;" rowspan="2"><?php echo $row->nama_subunit; ?></td>
+            <td style="vertical-align: middle;" rowspan="2" align="right"><?php echo Formatting::currency($nominal_pok); ?></td>
+            <td style="vertical-align: middle;" rowspan="2" align="right"><?php echo Formatting::currency($pagu_real); ?></td>
+            <td align="right"><?php echo Formatting::currency($nominal_sp2d); ?></td>
+            <td align="right"><?php echo Formatting::currency($nominal_all); ?></td>            
+            <td align="right"><?php echo Formatting::currency($saldo); ?></td>            
+        </tr>
+        <tr>
+            <td align="right"><?php echo $persen_sp2d; ?> %</td>
+            <td align="right"><?php echo $persen_all; ?> %</td>
+            <td align="right"><?php echo $persen_saldo; ?> %</td>
+        </tr>
+    <?php
+    }
+    
+    $persen_total_sp2d=round(($total_sp2d/$total_pagu_real)*100, 2);
+    $persen_total_all=round(($total_all/$total_pagu_real)*100, 2);
+    $persen_total_saldo=100-$persen_total_sp2d-$persen_total_all;    
+    ?>      
+    </tbody>
+    <thead>
+      <tr>
+        <td style="font-weight: bold; text-align: center; vertical-align: middle; background-color:#dedede;" rowspan="2" colspan="2">Total</th>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;" rowspan="2"><?php echo Formatting::currency($total_pok); ?></td>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;" rowspan="2"><?php echo Formatting::currency($total_pagu_real); ?></td>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;"><?php echo Formatting::currency($total_sp2d); ?></td>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;"><?php echo Formatting::currency($total_all); ?></td>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;"><?php echo Formatting::currency($total_saldo); ?></td>
+      </tr>
+      <tr>        
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;"><?php echo $persen_total_sp2d; ?> %</td>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;"><?php echo $persen_total_all; ?> %</td>
+        <td style="font-weight: bold; text-align: right; vertical-align: middle; background-color:#dedede;"><?php echo $persen_total_saldo; ?> %</td>
+      </tr>
+    </thead>        
+    </table>
+
+    <div style="width: 90%; margin: auto; margin-top:20px; text-align: center;">
+        <p><font style="font-size: 15; color: #F7464A;">
+          &block;&block;
+          </font>
+          <b>
+          : Belum SP2D
+          </b>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <font style="font-size: 15; color: #46BFBD;">
+            &block;&block;
+          </font>
+          <b>
+          : Realisasi (SP2D)
+          </b>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <font style="font-size: 15; color: #FDB45C;">
+            &block;&block;
+          </font>
+          <b>
+          : Saldo
+          </b>        
+          <canvas style="margin-top: 20px; margin-bottom: 20px;" id="canvas_pie" height="500" width="500"></canvas>
+        </p>
+    </div>
+    
+    <table class='table-common tablesorter' style='width: 98%; margin: auto;' id='tsearch'>
+    <thead>
+      <tr>
+        <th rowspan="2" align="center">No</td>
+        <th rowspan="2" align="center">Subunit</td>
+        <th colspan="2">Kwitansi</th>
+        <th colspan="2">SPJ</th>
+        <th colspan="2">SPTB</th>
+        <th colspan="2">SPP</th>
+        <th colspan="2">SPM</th>
+        <th colspan="2">SP2D</th>
+       </tr>
+       <tr>
+        <th>Jml</th>
+        <th>Tgl</th>
+        <th>Jml</th>
+        <th>Tgl</th>
+        <th>Jml</th>
+        <th>Tgl</th>
+        <th>Jml</th>
+        <th>Tgl</th>
+        <th>Jml</th>
+        <th>Tgl</th>
+        <th>Jml</th>
+        <th>Tgl</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php
+		$i=0;
+		foreach ($spj as $row) {
+        $i++;
+	?>
+    	<tr>
+        	<td><?php echo $i; ?></td>
+            <td><?php echo $row->nama_subunit; ?></td>
+            <td align="right"><?php echo $row->jml_kw; ?></td>
+            <td><?php echo date("d-m-Y H:i:s", strtotime($row->tgl_kwitansi)); ?></td>
+            <td align="right"><?php echo $row->jml_spj; ?></td>
+            <td><?php echo date("d-m-Y H:i:s", strtotime($row->tgl_spj)); ?></td>
+            <td align="right"><?php echo $row->jml_sptb; ?></td>
+            <td><?php echo date("d-m-Y H:i:s", strtotime($row->tgl_sptb)); ?></td>
+            <td align="right"><?php echo $row->jml_spp; ?></td>
+            <td><?php echo date("d-m-Y H:i:s", strtotime($row->tgl_spp)); ?></td>
+            <td align="right"><?php echo $row->jml_spm; ?></td>
+            <td><?php echo date("d-m-Y H:i:s", strtotime($row->tgl_spm)); ?></td>
+            <td align="right"><?php echo $row->jml_sp2d; ?></td>
+            <td><?php echo date("d-m-Y H:i:s", strtotime($row->tgl_sp2d)); ?></td>
+        </tr>
+    <?php
+		}
+	?>
+    </tbody>
+    </table>
+</div>
+</article>
+
+<script> 
+    var belum=<?php echo $persen_total_all; ?>;
+    var sp2d=<?php echo $persen_total_sp2d; ?>;
+    var saldo=<?php echo $persen_total_saldo; ?>;
+    var pieData = [        
+        {
+            value: saldo,
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Saldo"
+        },
+        {
+            value: sp2d,
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: "Realisasi (SP2D)"
+        },        
+        {
+            value: belum,
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "Belum SP2D"
+        }
+    ];    
+</script>

@@ -1,0 +1,56 @@
+<article class="module width_full">
+            <header><h3>Daftar Tender Per MAK</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>tup/verifikasi" onSubmit='return validasi(this)'> 
+            <table  class="table-common" style="margin-left: 20px; width: 580px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Output / Akun</th> 
+                <th>Jumlah POK (Rp.)</th> 
+                <th>Jumlah Realisasi </th> 
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+              
+            $no = 1; 
+            $kegu=0;
+              foreach($permak as $unit){
+                  $kdoutput = $unit["kdoutput"];
+                  $kdakun = $unit["kdakun"];
+                  $jumlah = $unit["jumlah"];
+                  $jamilah = number_format($jumlah,0,",",".");
+                  $realisasi = $unit["realisasi"];
+                  $realisasi_angka = number_format($realisasi,0,",",".");
+                         
+            ?>
+             
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <?php if ($jumgu < 1){ ?>
+                    <td align="left"> <?php echo "$kdoutput/$kdakun";?> </td>
+                <?php } else{ ?>
+                    <td align="center">
+                        <a href='<?php echo base_url();?>dpt/daftar_tender_permak_unit/<?php echo "$kdoutput";?>/<?php echo "$kdakun";?>' title='Edit Rincian UP'>
+                            <blink> <?php echo "$kdoutput/$kdakun (".$jumgu[$kdoutput][$kdakun].")";?></blink> 
+                        </a>
+                    </td>
+                <?php }   $kegu++; ?>
+                    <td align="right"> <?php echo "$jamilah";?> </td>  
+                    <td align="right"> <?php echo "$realisasi_angka";?> </td>  
+              </tr>
+              
+            <?php $no++; }    
+            ?>     
+ </table>   
+ </div>
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+</article>
+

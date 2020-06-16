@@ -1,0 +1,26 @@
+<?php  
+   
+		$i=0;
+		foreach($hasil->result() as $row) : $i++;
+		//$status=$row->status;
+        echo $row->sifat_bayar;
+	if($row->no_sp2d == ""){
+	    echo "<tr><td colspan='7' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	}else{
+		?>
+        
+		<tr>
+			<td align="center"><?php echo $i;?></td>
+            <td align="left"><?php echo $row->nama_unit; ?></td>
+			<?php if($row->sifat_bayar == Constant::JB_UP  || $row->sifat_bayar == Constant::JB_TUP ){?>
+                <td align="center"><?php echo $row->kdakun;?></td>
+            <?php }else{?>
+            	<td align="center"><?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+            <?php }?>  
+			<td align="center"><?php echo $row->sifat_bayar; ?> </td>
+			<td align="center"><?php echo $row->no_sp2d ;?> </td>
+            <td align="center"><?php echo $row->tgl_sp2d; ?> </td>         
+            <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>
+            <td align="center"><a href="<?php echo base_url();?>sp2d/preview_sp2d/<?php echo $row->id_sp2d;?>/<?php echo $row->sifat_bayar;?>" title="Show SP2D"><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>   
+		</tr>             
+ <?php } endforeach; ?>      

@@ -1,0 +1,128 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.nmpenyerah.value == 0){
+    alert("Anda belum mengisikan Nama Penyerah.");
+    form.nmpenyerah.focus();
+    return (false);
+  }
+  if (form.nippenyerah.value == ""){
+    alert("Anda belum mengisikan Nip Penyerah.");
+    form.nippenyerah.focus();
+    return (false);
+  }
+  if (form.khusus.value == "0"){
+        alert("Anda belum mengisikan Persyaratan Khusus.");
+        form.khusus.focus();
+        return (false);
+          }
+      return (true);
+      }
+    function harusangka(nippenyerah){
+          var karakter = (nippenyerah.which) ? nippenyerah.which : event.keyCode
+          if (karakter > 31 && (karakter < 48 || karakter > 57))
+    return false;
+
+      return true;
+
+}
+</script>
+ <article class="module width_full">
+            <header><h3>Cek Kelengkapan</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='form' action="<?php echo base_url();?>ls/simpan_veri" onSubmit="return validasi(this)"> 
+                <table class="tablesorter" cellspacing="0" >
+    <!-- page content -->
+      
+    <?php foreach($daftar_spm->result_array() as $row)
+        {  
+        $id_spm= $row['id_spm'];
+        $th_spm= $row['th_spm'];
+        //$nomor_spm= $row['nomor_spm'];
+        $nama_fakultas= $row['nama_unit'];
+        }
+        //echo"$th_spm";
+     ?>
+       
+    <tr><td>Unit</td><td>:</td><td> <input size="30px" type="text" name="nomor" value="<?php echo"$nama_fakultas"?>" disabled></td></div></tr>  
+    <tr><td>Nomor</td><td>:</td><td> <input size="30px" type="text" name="nomor" value="<?php echo"$nomor/$singkat/$kode_digit/$th"?>" disabled></td></div></tr>  
+    <tr><td>Nama yang menyerahkan</td><td>:</td><td> <input size="100px" type="text" name="nmpenyerah" value=""></td></tr>  
+    <tr><td>NIP yang menyerahkan</td><td>:</td><td> <input size="30px" type="text" name="nippenyerah" value="" onkeypress="return harusangka(event)"></td></tr>  
+    <input type="hidden" name="id_spm" value="<?php echo"$id_spm";?>">
+    <input type="hidden" name="th_spm" value="<?php echo"$th_spm";?>">
+    
+   </table>
+   <br> 
+   <table style="margin-left: 7px; margin-top: 10px;">
+     <tr><td >A. PERSYARATAN UMUM</td></tr> 
+   </table>
+   <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Persyaratan</th>
+                <th>Keterangan</th>
+                
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            
+            $no =1; 
+            foreach($umum->result_array() as $row)
+            {  
+            $id_uraian= $row['id_uraian'];
+            $uraian= $row['uraian'];
+            echo" <tr>
+                <td align='left'>$no</td>
+                <td>$uraian</td>
+                <input type='hidden' name='cek[]' value='$id_uraian' disabled:true>  
+                <td align='center'><input type='checkbox' name='tes[]' value='$id_uraian' disabled:false></td>
+              </tr>";
+              
+            
+            $no++; 
+            };   
+            ?>
+            
+ </table>
+ <table style="margin-left: 7px; margin-top: 10px;">
+     <tr><td >B. PERSYARATAN KHUSUS</td></tr>    
+ </table>
+ <table style="margin-left: 15px; margin-top: 10px;"> 
+     <tr><div id="propinsi"><td><?php echo form_dropdown("khusus",$khusus,"","id='id_jenis_khusus'") ?></td></div></tr>  
+   
+ </table>
+ <table><div id='tabel'></div> </table>   
+ </div>
+            <footer> 
+                <div class="submit_link">  
+                    <?php echo form_submit("submit","SIMPAN"); ?>
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>  
+ <?php echo form_close(); ?>
+ </article>
+ 
+ <script type="text/javascript">
+          $("#id_jenis_khusus").change(function(){
+                var selectValues = $("#id_jenis_khusus").val();
+                if (selectValues == 0){
+                    var msg = "";
+                    $('#tabel').html(msg);
+                }else{
+                    var id_jenis_khusus = {id_jenis_khusus:$("#id_jenis_khusus").val()};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('gup/select_uraian')?>",
+                            data: id_jenis_khusus,
+                            success: function(msg){
+                                $('#tabel').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>

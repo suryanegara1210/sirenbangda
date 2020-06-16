@@ -1,0 +1,98 @@
+ 
+            <?php if($jns_usulan == Constant::JB_UP  || $jns_usulan == Constant::JB_TUP ){?> 
+            <table  class="table-common" id="hasil" style= "width: 95%">  
+            <thead>
+            <tr>
+                <th>No.</th>
+                <th>Nama Sub Unit</th>
+                <th>Jumlah</th>
+                <th>Status</th>
+                <th>Status Dokumen</th> 
+            </tr>
+            <?php }else{?>
+            <table  class="table-common" id="hasil" style= "width: 95%">  
+            <thead>
+            <tr>
+                <th>No.</th>
+                <th>Kode MAK</th>
+                <th>No. SPP</th>
+                <th>Tanggal</th>
+                <th>Jumlah</th>
+                <th colspan="2">Action</th> 
+            </tr>
+            <?php }?>
+      </thead>
+           <tbody>         
+             <?php
+             if(isset($hasil)){ 
+                 $i=0;
+				 $barisOto=0;
+                 $arr = array();
+                 foreach($hasil->result() as $row) : $i++;
+                ?>
+                <tr>
+                    <?php if($jns_usulan == Constant::JB_UP || $jns_usulan == Constant::JB_TUP){ ?>
+                        <td align="center"><?php echo $i;?></td>
+                        <td align="left"><?php echo $row->nama_subunit ?> </td>
+                        <td align="right"><?php echo number_format($row->jumlah,0,",","."); ?> </td>
+                        <td align="left"><?php echo $row->status_usulan; ?> </td>
+                        <td align="left"><?php echo $row->status_dokumen; ?> </td>
+                        <?php
+                        	if ($row->status_dokumen==='sudah diterima' && $row->id_status_usulan==='5' ){
+								$barisOto++;
+								}
+						?>
+                    <?php }else{ 
+                        $tes = $row->no_spp;
+                        $nomor = substr("$tes",19);
+                    ?> 
+                        <td align="center"><?php echo $i;?></td>
+                        <td align="center"><?php echo $row->kdgiat;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                        <td align="center"><?php echo $row->no_spp ?> </td>
+                        <td align="center"><?php echo $row->tgl_spp; ?> </td>
+                        <td align="right"><?php echo $this->uang->angka($row->jumlah); ?> </td>    
+                       
+                        <?php if($row->id_status_spp==42){?>  
+                        <td align="center"><a href="<?php echo base_url();?>spp/preview_spp/<?php echo $row->id_spp;?>" title="Show SPP" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                        <td align="center"><a href="<?php echo base_url();?>spm/pengisian_spm/<?php echo $row->sifat_bayar; ?>/<?php echo $row->id_spp;?>" title="Buat SPM" onclick="return confirm('Apakah Anda Yakin untuk Membuat SPM ?')" ><img src="<?php echo base_url(); ?>asset/images/add.png"/></a></td>
+                        <?php }else {?>
+                        <td align="center"><a href="<?php echo base_url();?>spp/preview_spp/<?php echo $row->id_spp;?>" title="Show SPP" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a></td>
+                        <td align="center"><a href='#' title='Buatkan SPM' onclick="return alert('SPP ini sudah dibuatkan SPM')"><img src='<?php echo base_url();?>asset/images/like.png'></a></td>
+                        <?php } ?>
+                        
+                        
+                    <?php }?>
+                </tr>   
+                                   
+             <?php endforeach; 
+                }else{
+                    echo "<tr><td colspan='6' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+                }
+             ?>
+                    <input type="hidden" name="id_usulan[]" value="<?php $arr; ?>" id="id_usulan"/>
+                    <input type="hidden" name="jns_usulan" value="<?php echo $jns_usulan; ?>" id="jns_usulan"/>
+                         
+                <?php                    
+                    if($jns_usulan == Constant::JB_UP ){
+                        if($sum_usulan >= $max_up){
+                            echo'<tr><td colspan="5" align="right"><input type="button" id="buat_spm" value="Buat SPM" /></td></tr>'; 
+                        } else{
+                            echo'<tr><td colspan="5" align="right"><i style="color: red;">Jumlah Usulan Belum Memenuhi Syarat Untuk Pembuatan SPM (Jumlah Usulan Minimal 50% dari Max UP ('. number_format($max_up,0,",",".") .'))</i></td></tr>'; 
+                        }
+                    }else if($jns_usulan == Constant::JB_TUP ){
+                        if($barisOto > 0){
+                            echo'<tr><td colspan="5" align="right"><input type="button" id="buat_spm" value="Buat SPM" /></td></tr>';
+                        } 
+                    }
+                ?>
+        </tbody>
+</table>      
+
+<script type="text/javascript">
+     $(function(){
+            $("#buat_spm").click(function(){
+               window.location = "<?php echo site_url()."spm/pengisian_spm/".$jns_usulan."";?>";                    
+            });
+     })
+    
+</script>

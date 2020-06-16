@@ -1,0 +1,552 @@
+<?php /**
+	* @brief Model Class yang terkait dengan Pembuatan Laporan Akhir 
+	* mengenai Akuntansi dan Keuangan
+	*
+	* Class Model ini untuk mengelola proses pembuatan Jurnal, Neraca Saldo
+	* Debet dan Kredit serta Buku Besar Akuntansi
+	*
+	* @author I Wayan Sudharmika
+	* @author Putu Praba Santika
+	* @author Putu Ari Arjana
+	* @author Dwi Antika
+	* @author I Wayan Shandyasa
+	*/
+	class m_akun extends CI_Model {
+	   
+    public function __construct()
+    {
+        parent::__construct();
+        $this->table_name = 'tb_jurnal';
+    }
+/**
+* Fungsi untuk membuat SPM terbayar GUP LS
+* @return q array data jika query berhasil
+*/
+function spm_terbayar_gup_ls(){
+    $q=$this->db->query("select sum(nominal) as jumlah,t_spm.id_spm,no_spm,kdakun,nama_unit,nama_unit_singkat,m_sifatpembayaran.singkat from t_spm 
+join t_spp on t_spm.id_spp=t_spp.id_spp
+join t_sptb on t_spp.id_sptb=t_sptb.id_sptb
+join t_kwitansi on t_sptb.id_sptb=t_kwitansi.id_sptb
+join m_sifatpembayaran on t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran
+join m_unit2 on t_spm.id_unit=m_unit2.id_unit where id_status_spm=9 and flag_jurnal=0");
+            return $q;
+}
+/**
+* Fungsi untuk membuat SPM terbayar UP
+* @return q array data jika query berhasil
+*/
+function spm_terbayar_up()
+        {      
+            $q=$this->db->query("select sum(jumlah) as jumlah,t_spm.id_spm,no_spm,kdakun,nama_unit,nama_unit_singkat, singkat from t_spm
+join t_rekap on t_rekap.id_spm=t_spm.id_spm
+join t_transaksi on t_transaksi.id_rekap=t_rekap.id_rekap
+JOIN t_uraian on t_transaksi.id_transaksi=t_uraian.id_transaksi
+join m_sifatpembayaran on t_transaksi.id_jenis_belanja =m_sifatpembayaran.id_sifatpembayaran
+join m_unit2 on t_spm.id_unit=m_unit2.id_unit where id_status_spm=9 and flag_jurnal=0");
+            return $q;
+        }
+/**
+* Fungsi untuk membuat SPM terbayar TUP
+* @return q array data jika query berhasil
+*/
+function spm_terbayar_tup()
+        {      
+            $q=$this->db->query("select sum(jumlah) as jumlah,t_spm.id_spm,no_spm,kdakun,nama_unit,nama_unit_singkat, singkat from t_spm
+join t_spp on t_spp.id_spp=t_spm.id_spp
+join t_rekap on t_spp.id_spp=t_rekap.id_spp
+join t_transaksi on t_transaksi.id_rekap=t_rekap.id_rekap
+join t_uraian on t_transaksi.id_transaksi=t_uraian.id_transaksi
+join m_sifatpembayaran on t_transaksi.id_jenis_belanja =m_sifatpembayaran.id_sifatpembayaran
+join m_unit2 on t_spm.id_unit=m_unit2.id_unit where id_status_spm=9 and flag_jurnal=0;");
+            return $q;
+        }
+/**
+* Fungsi untuk membuat SPM terbayar SP2D3
+* @return q array data true jika query berhasil
+*/
+function list_sp2d3($id_spm,$th_spm)
+        {      
+            $q=$this->db->query("SELECT m_bg.nomor_bg,t_spm.*,t_sp2d.id_sp2d,t_sp2d.tgl_buat, t_sp2d.th_sp2d,t_sp2d.no_sp2d, m_status_spm.*, kode_digit, nama_unit, sum(jumlah) as jumlah FROM m_bg,t_sp2d,t_spm,m_status_spm,t_rekap,t_transaksi,t_uraian,m_unit2 WHERE t_sp2d.id_bg=m_bg.id_bg and t_sp2d.id_spm=t_spm.id_spm and m_status_spm.id_status_spm=t_spm.id_status_spm and t_rekap.id_spm=t_spm.id_spm and t_transaksi.id_rekap=t_rekap.id_rekap and t_transaksi.id_transaksi=t_uraian.id_transaksi and t_spm.id_unit=m_unit2.id_unit and t_rekap.id_jenis_belanja =1 and t_spm.id_spm=$id_spm and t_spm.th_spm=$th_spm group by t_spm.id_spm;");
+            return $q;
+        }
+/**
+* Fungsi untuk mencari data akun sesuai dengan kata kunci yang diinputkan
+* @param keyword is char untuk inputan searching
+* @return query array data dari keyword
+*/
+function lookup($keyword){
+		$this->db->select('*')->from('t_akun');
+        $this->db->like('kode_akun',$keyword,'after');
+        $query = $this->db->get();    
+        
+        return $query->result();
+}
+/**
+* Fungsi untuk medapatkan nilai debet dari akun
+* @return query array data jika query berhasil
+*/
+  function getAll_debet(){
+	$user=$this->session->userdata('username');
+    $this->db->select('id,kode_akun,debet');
+    $this->db->from('t_jurnal');
+	$this->db->where('kredit','0');
+	$this->db->where('bukti is NULL');
+	$this->db->where('id_user',$user);
+    $query = $this->db->get();
+
+    return $query->result();
+  }
+/**
+* Fungsi untuk mendapatkan jumlah total debet per akun
+* @return query array data jika query berhasil
+*/  
+function get_jum_All_debet(){
+	$user=$this->session->userdata('username');
+    $this->db->select('SUM(debet) as jum_deb');
+    $this->db->from('t_jurnal');
+	$this->db->where('kredit','0');
+	$this->db->where('bukti is NULL');
+	$this->db->where('id_user',$user);
+    $get_jum_All_debet = $this->db->get(); 
+	return $get_jum_All_debet->row();
+}
+/**
+* Fungsi untuk pengecekan debet sesuai akun
+* @return result array data jika query berhasil
+*/
+function cek_ada_debet()
+{
+	$user=$this->session->userdata('username');
+    $this->db->select('id,kode_akun,debet');
+    $this->db->from('t_jurnal');
+	$this->db->where('kredit','0');
+	$this->db->where('bukti is NULL');
+	$this->db->where('id_user',$user);
+	$result = $this->db->get();
+    return $result->num_rows() ;  
+}
+/**
+* Fungsi untuk menyimpan debet sesuai dengan kode akun
+* @param kd_akun_deb is integer diambil untuk menampilkan nilai debet 
+* @param nilai_debet is integer diambil untuk mengisi nilai debet
+*/		
+function simpan_kd_akun_deb($kd_akun_debet,$nilai_debet){
+    $user=$this->session->userdata('username');
+	$data = array(
+      'kode_akun'=>$kd_akun_debet,
+      'debet'=>$nilai_debet,
+      'kredit'=>0,
+	  'id_user'=>$user
+    );
+    $this->db->insert('t_jurnal',$data);
+  }
+/**
+* Fungsi untuk mendapatkan kredit sesuai akun 
+* @return query array data jika query berhasil
+*/
+  function getAll_kredit(){
+    $this->db->select('id,kode_akun,kredit');
+    $this->db->from('t_jurnal');
+	$this->db->where('debet','0');
+	$this->db->where('bukti is NULL');
+    $query = $this->db->get();
+
+    return $query->result();
+  }
+/**
+* Fungsi untuk mendapatkan jumlah kredit sesuai akun
+* @return get_jum_All_kredit array data jika query berhasil
+*/
+function get_jum_All_kredit(){
+	$user=$this->session->userdata('username');
+    $this->db->select('SUM(kredit) as jum_kre');
+    $this->db->from('t_jurnal');
+	$this->db->where('debet','0');
+	$this->db->where('bukti is NULL');
+	$this->db->where('id_user',$user);
+    $get_jum_All_kredit = $this->db->get(); 
+	return $get_jum_All_kredit->row();
+}  
+/**
+* Fungsi untuk menyimpan kredit seduai dengan kode akun
+* @param kd_akun_kredit is integer diambil untuk mengetahui nilai kredit
+* @param nilai_kredit is integer diambil untuk mengisi nilai kredit
+*/
+function simpan_kd_akun_kre($kd_akun_kredit,$nilai_kredit){
+    $user=$this->session->userdata('username');
+	$data = array(
+      'kode_akun'=>$kd_akun_kredit,
+      'kredit'=>$nilai_kredit,
+      'debet'=>0,
+	  'id_user'=>$user
+    );
+    $this->db->insert('t_jurnal',$data);
+  }
+/**
+* Fungsi untuk memenyimpan jurnal
+* @param objek is integer untuk isian jurnal
+* @param id_user is integer  diambil unruk mengetahui user 
+* @return true boolean true jika query berhasil
+* @return false boolean false jika query gagal
+*/
+function simpan_jurnal($objek,$id_user){
+	$this->db->where('id_user', $id_user);
+	$this->db->where('bukti is NULL');
+	$this->db->update('t_jurnal', $objek);
+	if ($this->db->affected_rows()>0){
+		return true;
+	}else{
+		return false;	
+	}
+  }
+/**
+* Fungsi untuk mengupdate data jurnal SPM
+*/
+function update_spm_jurnal(){
+        $id_spm = $this->input->post('id_spm');  
+        $th_spm = $this->input->post('th_spm');  
+             $this->db->set('flag_jurnal',1); 
+             $this->db->where('id_spm', $id_spm);
+             $this->db->where('th_spm', $th_spm);
+             $this->db->update('t_spm');
+    }  
+/**
+* Fungsi untuk menampilkan jurnal
+* @param perPage is integer untuk mensetting halaman 
+* @param uri is integer variabel libraries
+* @return getData array data jika query berhasil
+* @return null
+*/
+function get_jurnal($perPage,$uri) 
+{ 
+	$this->db->select('*');
+	$this->db->from('t_jurnal');
+	$this->db->where('year(tgl_transaksi)', date('Y'));
+	$this->db->where('tgl_transaksi is not null');
+	$this->db->order_by('tgl_transaksi, bukti','ASC');
+	$getData = $this->db->get('', $perPage, $uri);
+	if($getData->num_rows() > 0)
+	return $getData->result_array();
+	else
+	return null;
+}
+/**
+* Fungsi untuk meampilkan data jurnal 
+* @return this array data jika query berhasil
+*/
+function print_jurnal()
+		{			
+			$this->db->select('*');
+			$this->db->limit(500);
+        	$this->db->from('t_jurnal');
+			$this->db->where('tgl_transaksi is not null');
+			$this->db->where('year(tgl_transaksi)', date('Y'));
+			$this->db->order_by('bukti', 'desc');  
+			return $this->db->get(); 
+		}	
+/**
+* Fungsi untuk mendapatkan detail akun
+* @param kode5 is integer untuk mendapatkan detail akun dari tabel t_akun
+* @return detil_akun array data jika query berhasil
+*/
+function detil_akun($kode5)
+		{			
+			$this->db->select('*');
+        	$this->db->from('t_akun');
+			$this->db->where('kode_akun',$kode5); 
+			$detil_akun = $this->db->get(); 
+			return $detil_akun->row();
+    		 
+		}
+/**
+* Fungsi untuk mendapatkan saldo akhir tahun 
+* @param kd_akun is integer diambil untuk mengetahui akun yg dipergunakan
+* @return get_saldo_akhir_tahun objek data integer jika query berhasil
+*/		
+function get_saldo_akhir_tahun($kd_akun)
+		{			
+			$this->db->select('*');
+        	$this->db->from('t_saldo_akhir_tahun');
+			$this->db->where('kode_akun',$kd_akun);
+			$this->db->where('tahun',(date('Y')-1));
+			$get_saldo_akhir_tahun = $this->db->get(); 
+			return $get_saldo_akhir_tahun->row(); 
+		}
+/**
+* Fungsi untuk mendapatkan saldo akhir tahun keseluruhan
+* @return saldo_akhir_arr array data jika query berhasil
+*/
+function saldo_akhir_tahun_all()
+		{			
+			$this->db->select('*');
+        	$this->db->from('t_saldo_akhir_tahun');
+			$this->db->where('tahun',(date('Y')-1));
+			$get_saldo_akhir_tahun = $this->db->get(); 
+			$saldo_akhir=$get_saldo_akhir_tahun->result(); 
+            foreach($saldo_akhir as $sa)
+			{
+                $saldo_akhir_arr[$sa->kode_akun] = $sa->saldo;
+            }
+            return $saldo_akhir_arr;
+		}
+/**
+* Fungsi untuk mendapatkan saldo awal
+* @param bulan is integer untuk inputan bulan
+* @param kd_akun is integer untuk memilih akun yang dipergunakan
+* @return get_saldo_awal array data jika query berhasil
+*/
+function get_saldo_awal($bulan,$kd_akun)
+		{			
+			$this->db->select('sum(debet) as sum_debet, sum(kredit) as sum_kredit');
+        	$this->db->from('t_jurnal');
+			$this->db->join("t_akun",'t_akun.kode_akun=t_jurnal.kode_akun','inner');
+			$this->db->where('t_jurnal.kode_akun',$kd_akun);
+			$this->db->where('year(tgl_transaksi)', date('Y'));
+			$this->db->where('month(tgl_transaksi) < ',$bulan); 
+			$get_saldo_awal = $this->db->get(); 
+			return $get_saldo_awal->row(); 
+		}
+/**
+* Fungsi untuk mendapatkan buku besar
+* @param bulan is integer untuk inputan bulan 
+* @param kd_akun is integer untuk memilih akun yang dipergunakan
+* @return this array data jika query berhasil
+*/						  
+function buku_besar($bulan,$kd_akun)
+		{			
+			$this->db->select('*');
+        	$this->db->from('t_jurnal');
+			$this->db->join("t_akun",'t_akun.kode_akun=t_jurnal.kode_akun','inner');
+			$this->db->where('t_jurnal.kode_akun',$kd_akun);
+			$this->db->where('year(tgl_transaksi)', date('Y'));
+			$this->db->where('month(tgl_transaksi)',$bulan); 
+			return $this->db->get(); 
+		}
+/**
+* Fungsi untuk mendapatkan detail buku besar
+* @param bulan is integer untuk inputan bulan
+* @param kd_akun is integer untuk mengetahui akun yang dipergunakan
+* @return this array data jika query berhasil
+*/
+function buku_besar_detil($bulan,$kd_akun)
+		{	
+			$bulans=$bulan+1;		
+			$this->db->select('*');
+        	$this->db->from('t_jurnal');
+			$this->db->join("t_akun",'t_akun.kode_akun=t_jurnal.kode_akun','inner');
+			$this->db->where('t_jurnal.kode_akun',$kd_akun);
+			$this->db->where('year(tgl_transaksi)', date('Y'));
+			$this->db->where('month(tgl_transaksi)<', $bulans); 
+			return $this->db->get(); 
+		}
+/**
+* Fungsi untuk mendapatkan neraca lajur
+* @param bulan is integer untuk inputan bulan
+* @return q list of object data jika query berhasil
+*/
+function v_n_lajur($bulan)
+		{	
+			$q=$this->db->query("SELECT *, t_akun.kode_akun AS kd FROM t_akun
+			LEFT JOIN
+			(SELECT kode_akun, SUM(debet)AS sum_debet, SUM(kredit)AS sum_kredit FROM t_jurnal 
+			WHERE MONTH (t_jurnal.tgl_transaksi)<'".$bulan."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+			GROUP BY t_jurnal.kode_akun) AS isi
+			ON t_akun.kode_akun=isi.kode_akun ");
+            return $q; 
+		}
+/**
+* Fungsi untuk mendapatkan pendapatan 
+* @param bulan is integer untuk inputan bulan 
+* @param bulan_lalu is integer untuk inputan bulan lalu
+* @return q list of object data jika query berhasil
+*/
+function v_lop_pendapatan($bulan, $bulan_lalu)
+		{	
+			$q=$this->db->query("SELECT * , t_akun.kode_akun AS kd FROM t_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet_l, SUM(kredit)AS sum_kredit_l FROM t_jurnal 
+				WHERE MONTH (t_jurnal.tgl_transaksi)<='".$bulan_lalu."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun) AS a4
+				ON t_akun.kode_akun=a4.kode_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet_s, SUM(kredit)AS sum_kredit_s FROM t_jurnal 
+				WHERE MONTH (t_jurnal.tgl_transaksi)='".$bulan."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun) AS a5
+				ON t_akun.kode_akun=a5.kode_akun
+				WHERE LENGTH(t_akun.kode_akun)>2 AND SUBSTRING(t_akun.kode_akun, 1, 3) = '424' OR SUBSTRING(t_akun.kode_akun, 1, 3) = '425'
+								");
+            return $q; 
+		}
+/**
+* Fungsi untuk mendapatkan biaya
+* @param bulan is integer untuk inputan bulan 
+* @param bulan_lalu is integer untuk inputan bulan lalu
+* @return q list of object data jika query berhasil
+*/		
+function v_lop_biaya($bulan, $bulan_lalu)
+		{	
+			$q=$this->db->query("SELECT * , t_akun.kode_akun AS kd FROM t_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet_l, SUM(kredit)AS sum_kredit_l FROM t_jurnal 
+				WHERE MONTH (t_jurnal.tgl_transaksi)<='".$bulan_lalu."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun) AS a4
+				ON t_akun.kode_akun=a4.kode_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet_s, SUM(kredit)AS sum_kredit_s FROM t_jurnal 
+				WHERE MONTH (t_jurnal.tgl_transaksi)='".$bulan."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun) AS a5
+				ON t_akun.kode_akun=a5.kode_akun
+				WHERE LENGTH(t_akun.kode_akun)>=1 AND (SUBSTRING(t_akun.kode_akun, 1, 2) = '51' OR SUBSTRING(t_akun.kode_akun, 1, 2) = '52')
+								");
+            return $q; 
+		}		
+/**
+* Fungsi untuk mendapatkan neraca per jenis 
+* @param bulan is integer untuk inputan bulan 
+* @param jenis_neraca untuk menetapkan jenis neraca 
+* @return q list of object data jika query berhasil
+*/
+function v_neraca($bulan, $jenis_neraca){
+    $bulan_lalu=$bulan-1;
+    $query="SELECT * ,t_akun.kode_akun AS kd FROM t_akun 
+			LEFT JOIN
+			(SELECT kode_akun, SUM(debet)AS sum_debet_l, SUM(kredit)AS sum_kredit_l FROM t_jurnal WHERE MONTH (t_jurnal.tgl_transaksi)<='".$bulan_lalu."'
+			GROUP BY t_jurnal.kode_akun) AS a4
+			ON t_akun.kode_akun=a4.kode_akun
+			LEFT JOIN
+			(SELECT kode_akun, SUM(debet)AS sum_debet_s, SUM(kredit)AS sum_kredit_s FROM t_jurnal WHERE MONTH (t_jurnal.tgl_transaksi)<='".$bulan."'
+			GROUP BY t_jurnal.kode_akun) AS a5
+			ON t_akun.kode_akun=a5.kode_akun";
+    if($jenis_neraca=='aktiva_lancar'){
+        $query=$query." WHERE SUBSTRING(t_akun.kode_akun, 1, 2) = '11'";
+    }elseif($jenis_neraca=='investasi_panjang'){
+        $query=$query." WHERE SUBSTRING(t_akun.kode_akun, 1, 2) = '12'";
+    }elseif($jenis_neraca=='aktiva_tetap'){
+        $query=$query." WHERE SUBSTRING(t_akun.kode_akun, 1, 2) = '13' OR SUBSTRING(t_akun.kode_akun, 1, 2) = '15'";
+    }elseif($jenis_neraca=='kewajiban'){
+        $query=$query." WHERE SUBSTRING(t_akun.kode_akun, 1, 2) = '22'";
+    }elseif($jenis_neraca=='ekuitas'){
+        $query=$query." WHERE SUBSTRING(t_akun.kode_akun, 1, 2) = '31' OR SUBSTRING(t_akun.kode_akun, 1, 2) = '32' OR SUBSTRING(t_akun.kode_akun, 1, 2) = '33'";
+    }
+	$q=$this->db->query($query);
+    return $q->result(); 
+}
+/**
+* Fungsi untuk mendapatkan neraca aktiva lancar
+* @param bulan is integer untuk inputan data bulan
+* @param bulan_lalu is integer untuk inputan bulan lalu
+* @return q list of object data jika query berhasil
+* details fungsi ini tidak digunakan / batal
+*/
+function v_neraca_aktiva_lancar($bulan, $bulan_lalu)
+		{	
+			$q=$this->db->query("SELECT * ,t_akun.kode_akun AS kd FROM t_akun 
+					LEFT JOIN
+					(SELECT kode_akun, SUM(debet)AS sum_debet_l, SUM(kredit)AS sum_kredit_l FROM t_jurnal WHERE MONTH (t_jurnal.tgl_transaksi)<='".$bulan_lalu."'
+					GROUP BY t_jurnal.kode_akun) AS a4
+					ON t_akun.kode_akun=a4.kode_akun
+					LEFT JOIN
+					(SELECT kode_akun, SUM(debet)AS sum_debet_s, SUM(kredit)AS sum_kredit_s FROM t_jurnal WHERE MONTH (t_jurnal.tgl_transaksi)<='".$bulan."'
+					GROUP BY t_jurnal.kode_akun) AS a5
+					ON t_akun.kode_akun=a5.kode_akun
+					WHERE t_akun.kode_akun= '1' OR SUBSTRING(t_akun.kode_akun, 1, 2) = '11'
+								");
+            return $q; 
+		}
+/**
+* Fungsi untuk mendapatkan biaya lajur
+* @param bulan is integer untuk inputan bulan
+* @param bulan_lalu is integer untuk inputan bulan lalu
+* @return q list of object data jika query berhasil
+* details fungsi ini tidak digunakan / batal
+*/		
+function v_lop_biayaxx($bulan, $bulan_lalu)
+		{	
+			$q=$this->db->query("SELECT * , t_akun.kode_akun AS kd FROM t_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet_l, SUM(kredit)AS sum_kredit_l FROM t_jurnal 
+				WHERE MONTH (t_jurnal.tgl_transaksi)='".$bulan_lalu."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun) AS a4
+				ON t_akun.kode_akun=a4.kode_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet_s, SUM(kredit)AS sum_kredit_s FROM t_jurnal 
+				WHERE MONTH (t_jurnal.tgl_transaksi)='".$bulan."' and YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun) AS a5
+				ON t_akun.kode_akun=a5.kode_akun
+				WHERE LENGTH(t_akun.kode_akun)>=1 AND SUBSTRING(t_akun.kode_akun, 1, 1) = '5' 
+								");
+            return $q; 
+		}		
+/**
+* Fungsi untuk mendapatkan laporan akuntansi keuangan
+* @param akun is integer 
+* @return result true boolean list objek data
+* @return result false query tidak dikerjakan
+*/ 		
+function ambil_lak($akun){
+   /* $q=$this->db->query("SELECT * , t_akun.kode_akun AS kd FROM t_akun
+				LEFT JOIN
+				(SELECT kode_akun, SUM(debet)AS sum_debet, SUM(kredit)AS sum_kredit, MONTH (t_jurnal.tgl_transaksi) as bln FROM t_jurnal 
+				WHERE YEAR (t_jurnal.tgl_transaksi)='".date('Y')."' 
+				GROUP BY t_jurnal.kode_akun), MONTH (t_jurnal.tgl_transaksi) as a2
+				WHERE LENGTH(t_akun.kode_akun)>=1 AND SUBSTRING(t_akun.kode_akun, 1, ".strlen($akun).") = '".$akun."' ");
+      */
+      
+        $q=$this->db->query("SELECT SUM(debet)AS sum_debet, SUM(kredit)AS sum_kredit, MONTH(tgl_transaksi) as bln FROM t_jurnal WHERE MID(kode_akun,1,".strlen($akun).")='".$akun."' GROUP BY MID(kode_akun,1,".strlen($akun).")='".$akun."', MONTH(tgl_transaksi)");
+            
+            foreach ($q->result() as $row){
+                $result[$row->bln]['sum_debet']= $row->sum_debet;
+                $result[$row->bln]['sum_kredit']= $row->sum_kredit;
+            }
+            if(isset($result)){
+                return $result;
+            } else return false;
+            
+}
+/**
+* Fungsi untuk mendapatkan laporan akuntansi keuangan akhir 
+* @param akun is integer mengisi nilai akun
+* @param akhir is integer nilai akhir data
+* @return result true boolean list objek data
+* @return result false query tidak dikerjakan
+*/
+function ambil_lak_akhir($akun,$akhir){
+        $q=$this->db->query("SELECT SUM(debet)AS sum_debet, SUM(kredit)AS sum_kredit, MONTH(tgl_transaksi) as bln FROM t_jurnal WHERE MID(kode_akun,1,".strlen($akun).")='".$akun."' AND MID(kode_akun,-1,1)='".$akhir."' GROUP BY MID(kode_akun,1,".strlen($akun).")='".$akun."', MONTH(tgl_transaksi)");
+          
+            foreach ($q->result() as $row){
+                $result[$row->bln]['sum_debet']= $row->sum_debet;
+                $result[$row->bln]['sum_kredit']= $row->sum_kredit;
+            }
+            if(isset($result)){
+                return $result;
+            } else return false;
+            
+}
+/**
+* Fungsi untuk mendapatkan akun 
+* @return akun_arr array data akun
+*/
+function akun_all(){
+    $this->db->from('t_akun');
+    $akun = $this->db->get(); 
+    foreach($akun->result() as $akn){
+        $akun_arr[$akn->kode_akun]['pos_saldo'] = $akn->pos_saldo;
+        $akun_arr[$akn->kode_akun]['pos_lap'] = $akn->pos_lap;
+    }
+    return $akun_arr;
+}
+/**
+* Fungsi untuk mendapatkan jurnal 
+* @param tahun is integer adalah tahun yang dipergunakan
+* @return hasil array data jurnal
+*/
+function jurnal_all($tahun) {            
+    $this->db->select('*');
+    $this->db->from('t_jurnal');
+    $this->db->where('tgl_transaksi is not null');
+    $this->db->where('year(tgl_transaksi)',$tahun);
+    $this->db->order_by('bukti', 'desc');  
+    $hasil=$this->db->get(); 
+    return $hasil->result();
+}
+}

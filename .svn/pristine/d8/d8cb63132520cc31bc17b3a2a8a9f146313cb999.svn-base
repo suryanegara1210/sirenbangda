@@ -1,0 +1,10 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-26 18:00:31 --> Severity: Notice  --> Undefined variable: sifat_bayar C:\xampp\htdocs\siaku\application\views\sptb\view_sptb_gu.php 17
+ERROR - 2013-07-26 18:00:31 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\view_sptb_gu.php 17
+ERROR - 2013-07-26 12:03:08 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-26 12:03:08 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-26 18:56:12 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\sptb\view_sptb_gu.php 37
+ERROR - 2013-07-26 19:00:19 --> Severity: Notice  --> Undefined property: stdClass::$kode_value C:\xampp\htdocs\siaku\application\views\sptb\view_sptb_gu.php 74
+ERROR - 2013-07-26 19:01:10 --> Severity: Notice  --> Undefined property: stdClass::$kode_value C:\xampp\htdocs\siaku\application\views\sptb\view_sptb_gu.php 75
+ERROR - 2013-07-26 19:05:26 --> Severity: Notice  --> Array to string conversion C:\xampp\htdocs\siaku\application\views\sptb\view_sptb_gu.php 76

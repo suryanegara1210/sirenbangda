@@ -1,0 +1,18 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_kecamatan extends CI_Model 
+{
+	var $table = 'm_kecamatan';
+    public function __construct()
+    {
+        parent::__construct();           
+    }    
+
+	function get_kec_autocomplete($search){		
+		$this->db->select('id_kec AS id, nama_kec AS label');		
+		$this->db->like('nama_kec', $search);		
+		$result = $this->db->get($this->table);
+		return $result->result();
+	}
+}
+?>

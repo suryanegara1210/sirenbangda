@@ -1,0 +1,112 @@
+<script>
+/*	$( function() {
+		$(".idx").autoNumeric(window.numOptions);
+	});
+	
+	
+	$(".idx").each(function() {
+		$(this).val($(this).autoNumeric('get'));
+	});
+*/
+	/*$( function() {
+			var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+			var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+			
+			$(".idx").autoNumeric(window.numOptions);
+					
+    });*/
+
+	/*submitHandler: function(form){
+				$(".idx").val($(".idx").autoNumeric('get'));
+				form.submit();
+	}*/
+
+
+</script>
+<article class="module width_full">
+            <header>
+              <h3>Input Realisasi Tender - Unit  <?php echo $nama_unit; ?> - Sub Unit <?php echo $nama_subunit; ?></h3></header>
+                     
+                <div class="module_content">
+                   CATATAN : Satu item hanya boleh diinput realisasi sekali, jika sudah dibuatkan kwitansi, tidak bisa diedit lagi
+                <form method="post" name='formName4' action="<?php echo base_url();?>dpt/simpan_realisasi" onSubmit='return validasi(this)'> 
+                
+                         
+    <table  class="table-common" style="margin-left: 2px; width: 100%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Nama Subunit</th>
+                <th>Output/<br/>Komponen/<br/>Akun</th>
+                <th>Header</th>
+                <th>Uraian</th>
+                <th>Volume</th>
+                <th>Satuan</th>
+                <th>Harga Satuan</th>
+                <th>Jumlah POK</th>
+                <th>Jumlah Realisasi</th> 
+                <th>Nomor Kontrak</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php $i=0;
+                 foreach($isi_tender as $row) : $i++;?>
+                 <input type="hidden" name="kdoutput" value="<?php echo $row->kdoutput;?>">
+                 <input type="hidden" name="kdakun" value="<?php echo $row->kdakun;?>">
+                 <input type="hidden" name="id_subunit" value="<?php echo $row->id_subunit;?>">
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="center"><?php echo $row->nama_subunit;?></td>
+                    <td align="left"><?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td align="left"><?php echo $row->hdr; ?> </td>
+                    <td align="left"><?php echo $row->uraian; ?> </td>
+                    <td align="center"><?php echo $row->volume; ?> </td>
+                    <td align="center"><?php echo $row->satuan; ?> </td>
+                    <td align="right"><?php echo Formatting::currency($row->harga_satuan,0,false); ?> </td>
+                    <td align="right"><?php echo Formatting::currency($row->jum_dpt,0,false); ?> </td>
+                    
+                    <td>
+                        <input type="hidden" class="jum" name='jum[<?php echo $row->id_dpt_det;?>]' id="jum<?php echo $row->id_dpt_det;?>" value="<?php echo $row->jum_dpt; ?>" />
+                        <input name='id[<?php echo $row->id_dpt_det;?>]' onkeyup="cekcek(this)" id="id<?php echo $row->id_dpt_det;?>" type='text' value='<?php if (isset($row->nilai_realisasi)){echo $row->nilai_realisasi;} ?>' size=10 class="idx">
+                    </td> 
+                    <td><input name='tes[<?php echo $row->id_dpt_det;?>]' type='text' value='<?php if (isset($row->no_kontrak)){echo $row->no_kontrak;} else { echo $this->session->userdata('kontrak');} ?>' size=10></td> 
+        
+                </tr>
+             <?php endforeach; ?> 
+        </tbody>
+</table> 
+ </table>                                                                    
+ </div>
+
+
+ <footer>
+                
+    <div class="submit_link">  
+        <input type='submit' value='Simpan' onclick="return confirm('Apakah anda yakin ingin menyimpan realisasi Tender ini?')">
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer> 
+ <?php echo form_close(); ?>              
+</article>
+<script>
+    
+    function cekcek(real){
+        var nama_real=real.name;
+
+        	var id_baris=nama_real.split('[');
+        	id_baris=id_baris[1].split(']');
+        	id_baris=id_baris[0];
+        	var nama_field= 'jum'+id_baris;
+            
+            var real_val = parseFloat(real.value);
+            var pok= parseFloat(document.getElementById(nama_field).value);
+            //alert('pok'+pok);
+            //alert('real'+real);
+            if (pok<real_val){
+                real.value='';
+                alert('Realisasi Melebihi Pagu');
+            }
+    }
+
+</script>
+

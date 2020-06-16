@@ -1,0 +1,287 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Rka extends CI_Controller
+{
+	var $CI = NULL;
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();
+        //$this->load->helper(array('form','url', 'text_helper','date'));        
+        $this->load->database();
+        //$this->load->model('m_musrenbang','',TRUE);
+        $this->load->model(array('m_rka','m_urusan', 'm_bidang', 'm_program', 'm_kegiatan'));
+	}
+
+	function index()
+	{
+        $this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+		$data['url_delete_data'] = site_url('rka/delete_rka');
+		$this->template->load('template','rka/rka_view',$data);
+	}
+
+	function cru_rka()
+	{
+		$kd_urusan_edit = NULL;
+		$kd_bidang_edit = NULL;
+		$kd_program_edit = NULL;
+		$kd_kegiatan_edit = NULL;
+
+		$kd_urusan = array("" => "");
+		foreach ($this->m_urusan->get_urusan() as $row) {
+			$kd_urusan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_bidang = array("" => "");
+		foreach ($this->m_bidang->get_bidang() as $row) {
+			$kd_bidang[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_program = array("" => "");
+		foreach ($this->m_program->get_prog() as $row) {
+			$kd_program[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$kd_kegiatan = array("" => "");
+		foreach ($this->m_kegiatan->get_keg() as $row) {
+			$kd_kegiatan[$row->id] = $row->id .". ". $row->nama;
+		}
+
+		$data['kd_urusan'] = form_dropdown('kd_urusan', $kd_urusan, $kd_urusan_edit, 'data-placeholder="Pilih Urusan" class="common chosen-select" id="kd_urusan"');
+		$data['kd_bidang'] = form_dropdown('kd_bidang', $kd_bidang, $kd_bidang_edit, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+		$data['kd_program'] = form_dropdown('kd_program', $kd_program, $kd_program_edit, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+		$data['kd_kegiatan'] = form_dropdown('kd_kegiatan', $kd_kegiatan, $kd_kegiatan_edit, 'data-placeholder="Pilih Kegiatan" class="common chosen-select" id="kd_kegiatan"');
+
+		$this->template->load('template','rka/cru_rka', $data);
+	}
+	
+	function save_rka() {
+	$this->auth->restrict();
+        //action save cekbank di table t_cekbank
+		$id_rka		 	= $this->input->post('id_rka');
+		$call_from		= $this->input->post('call_from');
+		$kd_urusan		= $this->input->post('kd_urusan');
+		$kd_bidang	 	= $this->input->post('kd_bidang');
+		$kd_program	 	= $this->input->post('kd_programm');
+		$kd_kegiatan	= $this->input->post('kd_kegiatan');
+    	$capaian_sekarang		= $this->input->post('capaian_sekarang');
+    	$jumlah_dana_sekarang	= $this->input->post('jumlah_dana_sekarang');
+    	$capaian_mendatang		= $this->input->post('capaian_mendatang');
+    	$jumlah_dana_mendatang	= $this->input->post('jumlah_dana_mendatang');
+    	$kesesuaian_ya		= $this->input->post('kesesuaian_ya');
+        $kesesuaian_tidak		= $this->input->post('kesesuaian_tidak');
+        $hasil_pengendalian   	= $this->input->post('hasil_pengendalian');
+        $tindak_lanjut	   		= $this->input->post('tindak_lanjut');
+        $hasil_tindak_lanjut  	= $this->input->post('hasil_tindak_lanjut');
+
+		if(strpos($call_from, 'rka/cru_rka') != FALSE) {
+			$call_from = '';
+		}
+		//cek apakah cekbank tsb ada
+		$data_rka = $this->m_rka->get_rka_by_id($id_rka);
+		if(empty($data_rka)) {
+			//cek bank baru
+			$data_rka = new stdClass();
+			$id_rka = '';
+		}
+		//all
+		$data_rka->id_rka					= $id_rka;
+		$data_rka->kd_urusan			= $kd_urusan;
+		$data_rka->kd_bidang	 		= $kd_bidang;
+		$data_rka->kd_program	 		= $kd_program;
+		$data_rka->kd_kegiatan			= $kd_kegiatan;
+    	$data_rka->capaian_sekarang		= $capaian_sekarang;
+    	$data_rka->jumlah_dana_sekarang	= $jumlah_dana_sekarang;
+    	$data_rka->capaian_mendatang	= $capaian_mendatang;
+    	$data_rka->jumlah_dana_mendatang	= $jumlah_dana_mendatang;
+    	$data_rka->kesesuaian_ya		= $kesesuaian_ya;
+        $data_rka->kesesuaian_tidak		= $kesesuaian_tidak;
+        $data_rka->hasil_pengendalian   = $hasil_pengendalian;
+        $data_rka->tindak_lanjut	   	= $tindak_lanjut;
+        $data_rka->hasil_tindak_lanjut  = $hasil_tindak_lanjut;
+		
+		$ret = TRUE;
+		if(empty($id_rka)) {
+			//insert
+			$ret = $this->m_rka->simpan_rka($data_rka);
+			//echo $this->db->last_query();
+		} else {
+			//update
+			$ret = $this->m_rka->update_rka($data_rka, $id_rka);
+			//echo $this->db->last_query();
+		}
+		if ($ret === FALSE){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Data RKA gagal disimpan');						  
+		} else {
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Data RKA Berhasil disimpan');
+		}
+
+		if(!empty($call_from))
+			redirect($call_from);
+
+        redirect('rka');
+		//var_dump($cekbank);
+		//print_r ($id_cek);
+    }
+	/*function save_rka()
+	{
+		$id_rka 	= $this->input->post('id_rka');
+        $call_from	= $this->input->post('call_from');
+        $id_rka 	= $this->input->post('id_rka');
+        $data_post 	= array(
+            'kd_urusan'				=> $this->input->post('kd_urusan'),
+    		'kd_bidang'	 			=> $this->input->post('kd_bidang'),
+    		'kd_program'	 		=> $this->input->post('kd_programm'),
+    		'kd_kegiatan'			=> $this->input->post('kd_kegiatan'),
+    		'capaian_sekarang'		=> $this->input->post('capaian_sekarang'),
+    		'jumlah_dana_sekarang'	=> $this->input->post('jumlah_dana_sekarang'),
+    		'capaian_mendatang'		=> $this->input->post('capaian_mendatang'),
+    		'jumlah_dana_mendatang'	=> $this->input->post('jumlah_dana_mendatang'),
+    		'kesesuaian_ya'			=> $this->input->post('kesesuaian_ya'),
+            'kesesuaian_tidak'		=> $this->input->post('kesesuaian_tidak'),
+            'hasil_pengendalian'   	=> $this->input->post('hasil_pengendalian'),
+            'tindak_lanjut'	   		=> $this->input->post('tindak_lanjut'),
+            'hasil_tindak_lanjut'  	=> $this->input->post('hasil_tindak_lanjut')
+        );
+
+        if(strpos($call_from, 'rka/edit_rka') != FALSE) {
+			$call_from = '';
+		}
+		$cek_rka = $this->m_rka->get_data(array('id_rka'=>$id_rka),'table_rka');
+		if($cek_rka === empty($cek_rka)) {
+			$cek_rka = new stdClass();
+			$id_rka = '';
+		}
+	}*/
+
+	function load_rka()
+	{
+		$search = $this->input->post("search");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+		$order = $this->input->post("order");
+		
+		$rka = $this->m_rka->get_data_table($search, $start, $length, $order["0"]);		
+		$alldata = $this->m_rka->count_data_table($search, $start, $length, $order["0"]);
+
+		$data = array();
+		$no=0;
+
+
+		foreach ($rka as $row) {
+			$no++;
+			$data[] = array(
+							$no, 
+							$row->kd_urusan.".".
+							$row->kd_bidang.".".
+                            $row->kd_program.".".
+                            $row->kd_kegiatan,
+                            $row->capaian_sekarang,
+                            $row->jumlah_dana_sekarang,
+                            $row->capaian_mendatang,
+                            $row->jumlah_dana_mendatang,
+                            $row->kesesuaian_ya,
+                            $row->kesesuaian_tidak,
+                            $row->hasil_pengendalian,
+                            $row->tindak_lanjut,
+                            $row->hasil_tindak_lanjut,
+							'<a href="javascript:void(0)" onclick="edit_rka('. $row->id_rka .')" class="icon2-page_white_edit" title="Edit RKA"/>
+							<a href="javascript:void(0)" onclick="delete_rka('. $row->id_rka .')" class="icon2-delete" title="Hapus RRA"/>'
+							);
+		}
+		$json = array("recordsTotal"=> $alldata, "recordsFiltered"=> $alldata, 'data' => $data);
+		
+        echo json_encode($json);
+	}
+	
+	function edit_rka($id_rka)
+	{
+		//$this->output->enable_profiler(TRUE);
+        $this->auth->restrict();
+        $data['url_save_data'] = site_url('rka/save_rka');
+
+        $data['isEdit'] = FALSE;
+        if (!empty($id_rka)) {
+            $data_ = array('id_rka'=>$id_rka);
+            $result = $this->m_rka->get_data_with_rincian($id_rka,'table_rka');
+			if (empty($result)) {
+				$this->session->set_userdata('msg_typ','err');
+				$this->session->set_userdata('msg', 'Data musrenbang tidak ditemukan.');
+				redirect('rka');
+			}
+			
+            $data['id_rka']				= $result->id_rka;
+            
+    		$data['capaian_sekarang'] 	= $result->capaian_sekarang;
+    		$data['jumlah_dana_sekarang'] 	= $result->jumlah_dana_sekarang;
+    		$data['capaian_mendatang'] 	= $result->capaian_mendatang;
+    		$data['jumlah_dana_mendatang'] 	= $result->jumlah_dana_mendatang;
+    		$data['kesesuaian_ya'] 	= $result->kesesuaian_ya;
+    		$data['kesesuaian_tidak'] 	= $result->kesesuaian_tidak;
+    		$data['hasil_pengendalian'] 	= $result->hasil_pengendalian;
+    		$data['tindak_lanjut'] 	= $result->tindak_lanjut;
+    		$data['hasil_tindak_lanjut'] 	= $result->hasil_tindak_lanjut;
+
+            $data['isEdit']				= TRUE;
+			
+            //$mp_filefiles				= $this->m_musrenbang->get_file(explode( ',', $result->file), TRUE);		
+			//$data['mp_jmlfile']			= $mp_filefiles->num_rows();
+			//$data['mp_filefiles']		= $mp_filefiles->result();
+            
+            
+            $kd_urusan_edit = $result->kd_urusan;
+    		$kd_bidang_edit = $result->kd_bidang;
+    		$kd_program_edit = $result->kd_program;
+    		$kd_kegiatan_edit = $result->kd_kegiatan;
+    
+            //prepare combobox
+    		$kd_urusan = array("" => "");
+    		foreach ($this->m_urusan->get_urusan() as $row) {
+    			$kd_urusan[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$kd_bidang = array("" => "");
+    		foreach ($this->m_bidang->get_bidang() as $row) {
+    			$kd_bidang[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$kd_program = array("" => "");
+    		foreach ($this->m_program->get_prog() as $row) {
+    			$kd_program[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$kd_kegiatan = array("" => "");
+    		foreach ($this->m_kegiatan->get_keg() as $row) {
+    			$kd_kegiatan[$row->id] = $row->id .". ". $row->nama;
+    		}
+    
+    		$data['kd_urusan'] = form_dropdown('kd_urusan', $kd_urusan, $kd_urusan_edit, 'data-placeholder="Pilih Urusan" class="common chosen-select" id="kd_urusan"');
+    		$data['kd_bidang'] = form_dropdown('kd_bidang', $kd_bidang, $kd_bidang_edit, 'data-placeholder="Pilih Bidang Urusan" class="common chosen-select" id="kd_bidang"');
+    		$data['kd_program'] = form_dropdown('kd_program', $kd_program, $kd_program_edit, 'data-placeholder="Pilih Program" class="common chosen-select" id="kd_program"');
+    		$data['kd_kegiatan'] = form_dropdown('kd_kegiatan', $kd_kegiatan, $kd_kegiatan_edit, 'data-placeholder="Pilih Kegiatan" class="common chosen-select" id="kd_kegiatan"');
+    
+    		
+		}
+        $this->template->load('template','rka/cru_rka', $data);
+        
+        
+        
+	}
+
+	function delete_rka() 
+	{  
+        $id = $this->input->post('id');
+        
+        $result = $this->m_rka->delete_rka($id);
+        if ($result) {
+			$msg = array('success' => '1', 'msg' => 'RKA berhasil dihapus.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! RKA gagal dihapus, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+}

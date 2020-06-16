@@ -1,0 +1,45 @@
+<?php  
+   
+		$i=0;
+		foreach($hasil->result() as $row) : $i++;
+		$status=$row->status;
+        echo $row->sifat_bayar;
+	if($row->no_kwitansi ==""){
+	    echo "<tr><td colspan='13' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	}else{
+		?>
+        
+		<tr>
+			<td align="center"><?php echo $i;?></td>
+			<td align="center"><?php echo "$row->kdgiat.$row->kdoutput.$row->kdakun"; ?> </td>  
+			<td align="center"><?php echo $row->sifat_bayar; ?> </td>
+			<td align="center"><?php echo $row->nama_subunit ;?> </td>
+			<td align="center"><?php echo $row->no_sptb ;?> </td>
+            <td align="center"><?php echo $row->tgl_sptb; ?> </td>
+            <td align="center"><?php echo $row->status_sptb; ?> </td>      
+            <td align="center"><?php echo $this->uang->angka($row->jumlah); ?> </td>
+            <td align="center">
+            	<a href="<?php echo site_url();?>sptb/preview_sptb/<?php echo $row->id_sptb;?>" 
+                	title="Show SPTB" ><img src="<?php echo base_url(); ?>asset/images/preview.png"/></a>
+            </td>
+            <td align="center">
+            	<a onclick="print_sptb(<?php echo $row->id_sptb;?>)" 
+                	title="Print SPTB" ><img src="<?php echo base_url(); ?>asset/images/print.png"/></a>
+            </td>
+            <td align="center">
+            	<a onclick="print_sptjm(<?php echo $row->id_sptb;?>)" 
+                	title="Print SPTJM" ><img src="<?php echo base_url(); ?>asset/images/print.png"/></a>
+            </td>
+			<td align="center">
+            <?php if($row->id_status_sptb==31){ 
+						if($row->jum_unduh!=0){
+			?>
+            	<a onclick="otorisasi(<?php echo $row->id_sptb;?>)" 
+                	title="Otorisasi PD2" ><img src="<?php echo base_url(); ?>asset/images/icn_alert_success.png"/></a>
+             <?php }else{echo"-";}}else{?>
+            	<a href="#" 
+                	title="Sudah di-otorisasi" ><img src="<?php echo base_url(); ?>asset/images/like.png"/></a>
+            <?php }?>        
+            </td>
+		</tr>             
+ <?php } endforeach; ?>      

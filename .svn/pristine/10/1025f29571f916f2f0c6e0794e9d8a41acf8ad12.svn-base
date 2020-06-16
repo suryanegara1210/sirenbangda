@@ -1,0 +1,102 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_home extends CI_Model 
+{
+
+    public function __construct()
+    {
+        parent::__construct();           
+    }
+
+    function get_schedule_all(){		
+		//$query = "SELECT *, YEAR(date_start) AS tahun_start, MONTH(date_start) AS bulan_start, DAY(date_start) AS day_start, YEAR(date_end) AS tahun_end, MONTH(date_end) AS bulan_end, DAY(date_end) AS day_end FROM t_schedule WHERE YEAR(date_start)=YEAR(DATE_SUB(NOW(),INTERVAL 3 MONTH)) AND YEAR(date_end)=YEAR(DATE_ADD(NOW(),INTERVAL 3 MONTH)) AND MONTH(date_start) >= MONTH(DATE_SUB(NOW(),INTERVAL 3 MONTH)) AND MONTH(date_end) <= MONTH(DATE_ADD(NOW(),INTERVAL 3 MONTH));";
+		$query="SELECT id,title, date_start AS start, date_end AS end, CONCAT('javascript:see_schedule(',id,')') AS url FROM t_schedule WHERE date_start >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 3 MONTH),'%Y-%m-1') AND date_end <= DATE_FORMAT(DATE_ADD(NOW(),INTERVAL 3 MONTH),'%Y-%m-31');";
+		$result = $this->db->query($query);
+		return $result->result_array();
+	}
+
+	function get_schedule_one($id){
+		$query="SELECT * FROM t_schedule WHERE id=?";
+		$result = $this->db->query($query, array($id));
+		return $result->row();	
+	}
+
+	function get_berita_all(){
+		$query="SELECT * FROM `t_berita` ORDER BY date_cru DESC, id DESC LIMIT 3";		
+		$result = $this->db->query($query);
+		return $result->result();	
+	}
+
+	function get_berita_one($id){
+		$query="SELECT * FROM t_berita WHERE id=?";
+		$result = $this->db->query($query, array($id));
+		return $result->row();	
+	}
+
+	function get_file4publik(){
+		$query="SELECT * FROM `t_file_4_publik` ORDER BY date_cru DESC, id DESC LIMIT 3";		
+		$result = $this->db->query($query);
+		return $result->result();	
+	}
+
+	function get_file4publik_one($id){
+		$query="SELECT * FROM t_file_4_publik WHERE id=?";
+		$result = $this->db->query($query, array($id));
+		return $result->row();		
+	}
+
+	function get_all_berita($search, $start, $length, $order, $order_arr){
+		$query = "SELECT * 
+					FROM 
+						t_berita
+					WHERE 
+						title LIKE ? 
+						OR content LIKE ?
+					ORDER BY ".$order_arr[$order["column"]]." ".$order["dir"]." 
+					LIMIT ".$start.", ".$length.";";
+		$data = array("%". $search['value'] ."%", "%". $search['value'] ."%");
+		$result = $this->db->query($query, $data);
+		return $result->result();
+	}
+
+	function count_all_berita($search){		
+		$query = "SELECT COUNT(*) AS count 
+					FROM 
+						t_berita
+					WHERE 
+						title LIKE ? 
+						OR content LIKE ?";
+		$data = array("%". $search['value'] ."%", "%". $search['value'] ."%");
+		$result = $this->db->query($query, $data);
+		$result = $result->row();
+		return $result->count;		
+	}
+
+	function get_all_files($search, $start, $length, $order, $order_arr){
+		$query = "SELECT * 
+					FROM 
+						t_file_4_publik
+					WHERE 
+						title LIKE ? 
+						OR keterangan LIKE ?
+					ORDER BY ".$order_arr[$order["column"]]." ".$order["dir"]." 
+					LIMIT ".$start.", ".$length.";";
+		$data = array("%". $search['value'] ."%", "%". $search['value'] ."%");
+		$result = $this->db->query($query, $data);
+		return $result->result();
+	}
+
+	function count_all_files($search){		
+		$query = "SELECT COUNT(*) AS count 
+					FROM 
+						t_file_4_publik
+					WHERE 
+						title LIKE ? 
+						OR keterangan LIKE ?";
+		$data = array("%". $search['value'] ."%", "%". $search['value'] ."%");
+		$result = $this->db->query($query, $data);
+		$result = $result->row();
+		return $result->count;		
+	}
+}
+?>

@@ -1,0 +1,47 @@
+<?php 
+$id=$_POST['jns_pajak'];
+$nominal= $_POST['nominal'];
+
+if($id =="0"){ ?>
+	<tr>
+        <td>
+        <div style="float:left; padding-right:10px;">
+         PPN : 
+		 <input name='p_ppn' type='' value='0' size="2" id="p_ppn" readonly="readonly" /> Nominal PPN : <label>Rp.0</label>
+        </div>
+         
+         <div style="border-left-style:double; float:left; padding-left:10px;">  
+         PPH : 
+         <input name='p_pph' type='' value='0' size="2" id="p_pph" readonly="readonly" /> Nominal PPH : <label>Rp.0</label> 
+		 </div>
+		 </td>
+         </td>
+      </tr>
+<?php }else{
+   foreach($hasil->result() as $row)
+   		$dpp = (100/110)*$nominal;
+		$ppn = floor(($row->ppn/100)*$dpp);
+		$pph = floor(($row->pph/100)*$dpp);
+   {
+	   
+	  ?>
+      <tr>
+         <td>
+         <div style="float:left; padding-right:10px;">
+         PPN : 
+		 <input name='p_ppn' type='' value='<?php echo $row->ppn;?>' size="3" id="p_ppn" readonly="readonly" /> 
+         Nominal PPN : <label id="nom_ppn">Rp.<?php echo number_format($ppn,0,",",".");;?></label>
+         </div>
+         
+         <div style="border-left-style:double; float:left; padding-left:10px;">
+         PPH : 
+         <input name='p_pph' type='' value='<?php echo $row->pph;?>' size="3" id="p_pph" readonly="readonly" /> 
+         Nominal PPH : <label id="nom_pph">Rp.<?php echo number_format($pph,0,",",".");?></label>
+         </div> 
+		 </td>
+         </td>
+      </tr>
+      <?php }
+}
+   ?>
+

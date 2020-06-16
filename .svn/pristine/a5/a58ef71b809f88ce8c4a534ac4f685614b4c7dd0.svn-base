@@ -1,0 +1,76 @@
+<article class="module width_full">
+<header>
+<h3>Verifikasi SPM</h3>
+</header>
+ <div class="module_content">
+
+<table  class="table-common" style="margin-left: 20px; width: 780px;" >
+             <thead>
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="3">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+
+            $no = 1;
+            if($hasil == false ){
+                echo "
+                    <tr>
+                      <td colspan='6' align='center'>
+                            Data Kosong
+                      </td>
+                    </tr>
+                ";
+            }else{
+                foreach($hasil as $row){
+                $id_spm = $row->id_spm;
+                $id_spj = $row->id_spj;
+                $jns_usulan = $row->sifat_bayar;
+            ?>
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo $row->nama_unit;?></td>
+                <td align="center"><?php echo $row->no_spm;?></td>
+                <td align="center"><?php echo $this->uang->angka($row->jumlah_spm);?></td>
+                <td align="center"><?php echo $row->status_spm;?></td>
+                <td align="center"> <a href='<?php echo base_url()."spm/preview_spm/".$id_spm."/".$jns_usulan;?>' title='Preview SPM' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png' onclick="cek_otorisasi('<?php echo $id_spm; ?>','<?php echo $id_spj; ?>','<?php echo $jns_usulan ?>')"/></a></td>
+            </tr>
+
+        <?php
+            $no++ ;}
+           }
+        ?>
+
+ </table>
+
+</article>
+
+<script type="text/javascript">
+    function cek_otorisasi(idspm,idspj,jns_usulan){
+        var answer = confirm('Proses ini akan mengotorisasi SPM oleh yang berwenang, lanjutkan ?');
+        if(answer){
+
+            <?php if($user->hasPrivilege('verify_spm_level_1')) { ?>
+
+                window.location="<?php echo base_url()."spm/otorisasi_spm_veri/"; ?>"+jns_usulan+"/"+idspm+"/"+idspj;
+
+            <?php } else if ($user->hasPrivilege('verify_spm_level_2')) { ?>
+
+                window.location="<?php echo base_url()."spm/otorisasi_spm_subagdm/"; ?>"+jns_usulan+"/"+idspm+"/"+idspj;
+
+            <?php } else if ($user->hasPrivilege('verify_spm_level_3')) { ?>
+
+                window.location="<?php echo base_url()."spm/otorisasi_spm_kabag/"; ?>"+jns_usulan+"/"+idspm+"/"+idspj;
+
+            <?php } ?>
+       }
+    }
+    
+</script>
+

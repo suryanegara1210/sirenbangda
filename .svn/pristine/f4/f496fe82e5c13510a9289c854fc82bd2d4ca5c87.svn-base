@@ -1,0 +1,121 @@
+<script type="text/javascript">
+    prepare_facebox();
+
+    function preview_transaksi(var_id_bukti){        
+        /*console.log('preview',var_no_bukti);*/
+        $.facebox({ajax: '<?php echo site_url('report/preview')?>/'+var_id_bukti});
+    }
+</script>
+
+<div id="pesan"></div>
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="<?php echo base_url();?>report/simpan_jurnal" onSubmit='return validasi(this)'>
+<table  class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Nomor Bukti</th>
+                <th>Tanggal Transaksi</th>
+                <th colspan="2">Akun</th>
+                <th>Nama Akun</th>
+                <th>Keterangan</th>
+                <th>Debet</th>
+                <th>Kredit</th> 
+            </tr>
+      </thead>
+           <tbody> 
+           <?php if ( COUNT ($isi_bukti)<=0){
+                        echo "<tr><td colspan=\"9\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=1;
+                        $sum_debet=0;
+                        $sum_kredit=0;
+            			$id_bukti_lama ='';
+                        $saldo=$saldo_awal;
+                        foreach($isi_bukti as $row){;
+                        $saldo=$saldo+($row->debet)-($row->kredit);
+                        $sum_debet+= $row->debet;
+                        $sum_kredit+= $row->kredit;
+                        $id_bukti	= $row->id_bukti;
+						?>
+                        <tr>
+					   <?php             
+                        if ($id_bukti_lama!=$id_bukti){
+							$tanggal	= DATE("d-m-Y",strtotime($row->tgl_bukti));
+                             echo "
+                                    <td align=\"center\"> $i </td>
+									<td align=\"left\"><a href=\"javascript:void(0)\" onclick=\"preview_transaksi(". $row->id_bukti. ")\" title='preview transaksi'> $row->no_bukti </a></td>
+									<td align=\"left\"> $tanggal </td>
+                             ";
+                             $i++;
+                             $id_bukti_lama=$id_bukti;
+                         }  
+                        else
+                        {
+                            echo " <td align='center'></td>
+								   <td align='center'></td>
+								   <td align='center'></td>
+							";
+                        }
+                        ?>
+							<?php if ($row->kredit==""){
+								echo "<td colspan=\"2\" align=\"left\"> $row->akun_bas </td> ";
+                                echo "<td align=\"left\"> $row->akun_nama </td> ";
+							}else{
+								echo "<td width=\"15px\"></td><td align=\"left\"> $row->akun_bas - $row->akun_nama </td> ";
+                                echo "<td align=\"left\"> $row->akun_nama </td> ";
+							} ?>
+                            <td align="left" width="250px"><?php echo $row->uraian; ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->debet,0,false);?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->kredit,0,false); ?> </td>
+                        </tr>
+                        <?php }; ?>
+                        <tr>
+                            <input type="hidden" id="saldo" value="<?php echo $saldo; ?>" />
+                        	<input type="hidden" id="sum_debet" value="<?php echo $sum_debet; ?>" />
+                            <input type="hidden" id="sum_kredit" value="<?php echo $sum_kredit; ?>" />
+                            <td colspan="7" align="center" bgcolor="#00FF00">Jumlah</td>
+                            <td align="right" bgcolor="#00FF00"><?php echo Formatting::currency($sum_debet,0,false); ?> </td>
+                            <td align="right" bgcolor="#00FF00"><?php echo Formatting::currency($sum_kredit,0,false); ?> </td>
+                        </tr>
+                        <?php
+                        if($isKunci || $ada_ls_sp2d_blm_cair || $ada_gup_blm_otor_kaprodi){
+                            $blok=true;
+                        }else{
+                            $blok=false;
+                        }
+                        ?>
+                        <?php if(!$blok){ ?>
+						<tr><td colspan="9" align="right"><input style="min-width: 200px;" type="text" name="cmt" id="cmt" maxlength="25">&nbsp;&nbsp;<input type="button" disabled="disabled" id="simpan" value="Posting" name="simpan" onclick="simpanlah()" /></td></tr> 
+                        <?php }else{ ?>
+                            <tr>
+                                <td colspan="9" align="center" style="background-color:red; color:white;font-size:20px "><?php 
+                                    if ($isKunci){
+                                        echo "Jurnal TERKUNCI, tidak bisa posting jurnal!!!<br/>";
+                                    }else if ($ada_ls_sp2d_blm_cair){
+                                        echo "Ada SP2D yang belum cair!!!<br/>";
+                                    }else if ($ada_gup_blm_otor_kaprodi){
+                                        echo "Ada GUP yang belum diotorisasi!!!<br/>";
+                                    }
+                                ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
+            <?php } ?>
+        </tbody>
+</table>
+</form>
+</div>
+
+<script>
+$(function(){
+	var sum_debet= $("#sum_debet").val();
+	var sum_kredit= $("#sum_kredit").val();
+	
+	if(sum_debet!=sum_kredit){
+		$('#simpan').attr("disabled", "disabled");
+	}else{
+		$('#simpan').removeAttr('disabled');
+	}
+})
+</script>

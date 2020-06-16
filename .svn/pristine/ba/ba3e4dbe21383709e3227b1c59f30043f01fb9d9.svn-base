@@ -1,0 +1,58 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-04 11:47:03 --> 404 Page Not Found --> usulan/daftar_usulan
+ERROR - 2013-07-04 12:26:11 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-07-04 12:26:11 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-07-04 12:26:11 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-07-04 12:26:11 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 109
+ERROR - 2013-07-04 12:26:31 --> Severity: Notice  --> Undefined variable: id_spj C:\xampp\htdocs\siaku\application\models\m_spm.php 214
+ERROR - 2013-07-04 12:27:58 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-07-04 12:27:58 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-07-04 12:27:58 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-07-04 12:27:58 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 109
+ERROR - 2013-07-04 12:28:20 --> Severity: Notice  --> Undefined variable: id_spj C:\xampp\htdocs\siaku\application\models\m_spm.php 214
+ERROR - 2013-07-04 12:39:01 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 764
+ERROR - 2013-07-04 12:39:01 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 765
+ERROR - 2013-07-04 12:39:01 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 764
+ERROR - 2013-07-04 12:39:01 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 765
+ERROR - 2013-07-04 12:39:05 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 764
+ERROR - 2013-07-04 12:39:05 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 765
+ERROR - 2013-07-04 12:39:05 --> Severity: Notice  --> Undefined index: id_kwitansi C:\xampp\htdocs\siaku\application\controllers\spm.php 764
+ERROR - 2013-07-04 12:39:05 --> Severity: Notice  --> Undefined index: id_sptb C:\xampp\htdocs\siaku\application\controllers\spm.php 765
+ERROR - 2013-07-04 12:39:23 --> Severity: Notice  --> Undefined variable: u C:\xampp\htdocs\siaku\application\models\m_sp2d.php 106
+ERROR - 2013-07-04 12:39:23 --> Severity: Notice  --> Undefined variable: u C:\xampp\htdocs\siaku\application\models\m_sp2d.php 106
+ERROR - 2013-07-04 12:39:29 --> Severity: Notice  --> Undefined variable: u C:\xampp\htdocs\siaku\application\models\m_sp2d.php 106
+ERROR - 2013-07-04 12:39:29 --> Severity: Notice  --> Undefined variable: u C:\xampp\htdocs\siaku\application\models\m_sp2d.php 106
+ERROR - 2013-07-04 12:43:37 --> Query error: Table 'siaku_db_withpenerimaan.t_cair_up' doesn't exist
+ERROR - 2013-07-04 12:52:25 --> Severity: Notice  --> Undefined variable: blok C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 69
+ERROR - 2013-07-04 12:52:25 --> Severity: Notice  --> Undefined variable: blok C:\xampp\htdocs\siaku\application\views\usulan\mohon_cair_up.php 106
+ERROR - 2013-07-04 14:29:36 --> Severity: Warning  --> Creating default object from empty value C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 387
+ERROR - 2013-07-04 08:30:00 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-04 08:30:00 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268
+ERROR - 2013-07-04 14:57:35 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 14:58:08 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 15:01:27 --> Severity: Notice  --> Undefined variable: nmoutput C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 270
+ERROR - 2013-07-04 15:01:27 --> Severity: Notice  --> Undefined variable: nmkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 271
+ERROR - 2013-07-04 15:01:27 --> Severity: Notice  --> Undefined variable: nmsubkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 272
+ERROR - 2013-07-04 15:01:27 --> Severity: Notice  --> Undefined variable: nmakun C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 273
+ERROR - 2013-07-04 15:02:22 --> Severity: Notice  --> Undefined variable: nmoutput C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 270
+ERROR - 2013-07-04 15:02:22 --> Severity: Notice  --> Undefined variable: nmkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 271
+ERROR - 2013-07-04 15:02:22 --> Severity: Notice  --> Undefined variable: nmsubkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 272
+ERROR - 2013-07-04 15:02:22 --> Severity: Notice  --> Undefined variable: nmakun C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 273
+ERROR - 2013-07-04 15:05:10 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 15:10:59 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 15:14:40 --> Query error: Unknown column 'a.id_spj' in 'where clause'
+ERROR - 2013-07-04 15:14:51 --> Query error: Unknown column 'a.id_spj' in 'where clause'
+ERROR - 2013-07-04 15:14:52 --> Query error: Unknown column 'a.id_spj' in 'where clause'
+ERROR - 2013-07-04 15:14:52 --> Query error: Unknown column 'a.id_spj' in 'where clause'
+ERROR - 2013-07-04 15:14:52 --> Query error: Unknown column 'a.id_spj' in 'where clause'
+ERROR - 2013-07-04 15:26:49 --> Query error: Unknown column 'a.id_spj' in 'where clause'
+ERROR - 2013-07-04 16:00:52 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 16:01:32 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 16:07:54 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\kwitansi\kwitansi_barang.php 262
+ERROR - 2013-07-04 16:53:50 --> Severity: Notice  --> Undefined variable: nmoutput C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 272
+ERROR - 2013-07-04 16:53:50 --> Severity: Notice  --> Undefined variable: nmkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 273
+ERROR - 2013-07-04 16:53:50 --> Severity: Notice  --> Undefined variable: nmsubkomponen C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 274
+ERROR - 2013-07-04 16:53:50 --> Severity: Notice  --> Undefined variable: nmakun C:\xampp\htdocs\siaku\application\controllers\kwitansi.php 275
+ERROR - 2013-07-04 11:02:34 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-04 11:02:34 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268

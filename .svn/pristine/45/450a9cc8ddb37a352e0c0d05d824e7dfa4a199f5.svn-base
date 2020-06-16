@@ -1,0 +1,388 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-12-12 13:58:23 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:58:23 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:23 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:45 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:58:45 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:45 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:51 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:58:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:54 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:58:54 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:58:54 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:17 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:59:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:21 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:59:21 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:21 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:41 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:59:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:43 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:59:43 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:43 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:51 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:59:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:55 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 13:59:55 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 13:59:55 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:04 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:00:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:24 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:00:24 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:24 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:38 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:00:38 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:38 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:52 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:00:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:54 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:00:54 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:00:54 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:03 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:01:03 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:03 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:13 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:01:13 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:13 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:18 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:01:18 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:18 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:36 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:01:36 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:36 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:56 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:01:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:01:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:05 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:27 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:27 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:27 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:37 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:37 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:37 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:44 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:44 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:44 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:50 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:50 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:50 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:51 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:51 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:52 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:52 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:57 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:02:57 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:02:57 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:08 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:08 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:08 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:14 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:14 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:14 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:16 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:16 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:16 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:21 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:21 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:21 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:23 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:23 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:23 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:25 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:25 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:25 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:29 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:29 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:29 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:31 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:31 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:31 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:33 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:33 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:33 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:37 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:37 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:37 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:39 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:39 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:39 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:41 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:46 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:46 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:47 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:48 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:50 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:50 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:50 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:52 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:52 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:53 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:53 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:53 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:55 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:55 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:55 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:56 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:58 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:03:58 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:03:58 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:00 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:00 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:00 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:01 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:01 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:01 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:03 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:03 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:03 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:07 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:24 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:24 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:24 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:27 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:27 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:27 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:29 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:29 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:29 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:30 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:30 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:30 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:31 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:31 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:31 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:33 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:33 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:33 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:34 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:34 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:34 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:35 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:35 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:35 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:36 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:36 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:36 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:38 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:38 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:38 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:39 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:39 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:39 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:40 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:40 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:40 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:41 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:42 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:42 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:42 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:43 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:43 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:43 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:45 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:45 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:45 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:46 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:46 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:47 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:47 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:47 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:48 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:49 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:49 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:49 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:50 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:50 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:50 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:51 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:51 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:53 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:53 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:53 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:54 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:54 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:54 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:56 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:56 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:57 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:04:57 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:04:57 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:03 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:03 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:03 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:04 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:04 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:04 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:06 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:06 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:06 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:07 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:09 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:09 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:09 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:10 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:10 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:10 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:11 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:11 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:11 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:12 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:12 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:12 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:13 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:13 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:13 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:15 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:15 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:15 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:16 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:16 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:16 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:17 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:17 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:18 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:18 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:18 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:19 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:19 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:19 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:20 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:20 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:20 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:37 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:37 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:37 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:40 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:40 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:40 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:41 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:41 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:43 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:43 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:43 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:44 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:44 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:44 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:45 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:45 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:45 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:47 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:47 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:47 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:48 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:48 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:49 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 748 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:05:49 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:05:49 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:02 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:02 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:02 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:05 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:05 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:07 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:07 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:09 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:09 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:09 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:10 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:10 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:10 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:11 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:11 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:11 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:13 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:13 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:13 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:14 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:14 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:14 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:15 --> Severity: Warning  --> Missing argument 3 for M_spm::selek_data_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 778 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 400
+ERROR - 2014-12-12 14:06:15 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:06:15 --> Severity: Notice  --> Undefined variable: jb C:\xampp\htdocs\siaku\application\models\m_spm.php 404
+ERROR - 2014-12-12 14:10:10 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:12 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:16 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:19 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:21 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:23 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:24 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:27 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:29 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:31 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:33 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:35 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:37 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:38 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:40 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:41 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:43 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:44 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:46 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:47 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:49 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:51 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:53 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:10:56 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:06 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:11 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:14 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:16 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:19 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:22 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:25 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:28 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:34 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:42 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:47 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:50 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:52 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:11:54 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:12:00 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:12:02 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:12:04 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 14:12:06 --> Severity: Notice  --> Undefined variable: id C:\xampp\htdocs\siaku\application\models\m_sp2d.php 482
+ERROR - 2014-12-12 15:53:31 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND tahun = 2014' at line 4
+ERROR - 2014-12-12 15:53:35 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND tahun = 2014' at line 4

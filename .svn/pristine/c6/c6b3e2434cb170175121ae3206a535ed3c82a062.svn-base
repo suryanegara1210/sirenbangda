@@ -1,0 +1,244 @@
+<script language="javascript">
+
+prepare_facebox();
+
+function preview_kw(id) {
+    console.log('preview',id);
+    $.facebox({ajax: '<?php echo site_url('kwitansi/preview')?>/'+id})
+  } 
+
+function tambah_spj(var_sifat_bayar, var_nominal, var_nilai_max, var_nilai_min, var_id_spj) {	
+	var link_tmbh = "<?php echo site_url('kwitansi_view/tambah_spj/');?>"+"/"+var_sifat_bayar+"/"+var_nominal+"/"+var_nilai_max+"/"+var_nilai_min+"/"+var_id_spj;
+	//alert(link_tmbh);
+    //console.log('preview',id);
+    $.facebox({ajax: link_tmbh})
+  } 
+</script>
+
+<script language="javascript">
+
+$(function() {    
+	var st_spj				= $("#st_spj_su").val();
+	var jum_kwi_byst		= $("#jum_kwi_byst").val();
+	var jum_tidak_downlod	= $("#jum_tidak_downlod").val();	
+			
+			//enable tombol tambah jika statusnya 1, dan 3 saja			
+			if(st_spj=='SPJ Baru' || st_spj=='SPJ Revisi')
+			{
+				$('#btn_tambah_spj').removeAttr('disabled');
+			}
+			else
+			{
+				$('#btn_tambah_spj').attr("disabled", "disabled");
+			}			
+			
+			//enable tombol jika nilai kwitansi sudah lebih dari nilai x persen dan kurang dari / = nilai up
+			
+			var nilai_persen	= parseFloat(($("#nilai_persen").val()).replace(/[\.\,]/g, ''));
+			var nilai_up		= parseFloat(($("#nilai_up").val()).replace(/[\.\,]/g, ''));
+			var nilai_kwitansi	= parseFloat(($("#nilai_kwitansi").val()).replace(/[\.\,]/g, ''));
+			//alert(nilai_persen+" "+nilai_up+" "+nilai_kwitansi);
+			if (nilai_kwitansi>=nilai_persen && nilai_kwitansi<=nilai_up)
+			{
+				//========					
+					if((st_spj=='SPJ Baru' && jum_kwi_byst==0) || (st_spj=='SPJ Revisi'))
+					{
+						$('#kirim_spj').removeAttr('disabled');
+						}
+					else if(st_spj=='Kwitansi SPJ OK' && jum_tidak_downlod==0)
+					{
+						$('#kirim_spj').removeAttr('disabled');
+						}
+						
+					else
+					{
+						$('#kirim_spj').attr("disabled", "disabled");
+						}
+				//========
+				//
+			}
+			else if ($("#jenis_belanja").val()=='LS'){
+						$('#kirim_spj').removeAttr('disabled');
+						}
+			else {
+				$('#kirim_spj').attr("disabled", "disabled");
+			}
+
+});
+</script>
+
+<?php
+if(!$isi_spjsu)
+{	echo"
+			<div align='center'>
+				Sifat bayar ini Belum dibuatkan SPJ, tekan tombol 
+				<input type='button' value='create spj' onclick='create_spj_su()'></input>
+				untuk membuat SPJ
+			</div>
+		";
+}
+else
+{
+//==============================================================
+//start : jika sudah ada spj
+$nominal=0;
+if($isi){
+	foreach($isi as $rows)
+	{
+		$nominal 	+= $rows->nominal;
+		$st_spj		= $rows->status_spj_su;
+		$id_spj_su	= $rows->id_spj_su;
+	}
+}
+foreach($isi_spjsu->result() as $rows)
+{
+	$status_spj		= $rows->status_spj;
+	$sifat_bayar	= $rows->sifat_bayar;
+	$id_spj_su			= $rows->id_spj_su;
+}
+
+?>
+    <table width="100%" border="0" style="background-color:yellow; padding:5px">
+      <tr>
+      	<Td>
+        <input type="hidden" name="id_spj_su" id="id_spj_su" 
+        value="<?php echo $id_spj_su;?>" />
+		</Td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>    
+      <tr>
+        <td>Jumlah Nilai Max</td>
+        <td><label for="nilai_up"></label>
+         <input type="text" align="right" name="nilai_up" id="nilai_up" 
+        value="<?php echo number_format($nilai_max,0,",",".");?>" readonly="readonly" />
+        </td>
+        <td>Jumlah Nilai Kwitansi</td>
+        <td><input type="text" align="right" name="nilai_kwitansi" id="nilai_kwitansi" readonly="readonly" value="<?php echo number_format($nominal,0,",",".");?>"/></td>
+      </tr>
+      <tr>
+        <td>Jumlah x persen Min</td>
+        <td><input type="text" align="right" name="nilai_persen" id="nilai_persen" readonly="readonly" 
+        value="<?php echo number_format($nilai_min,0,",",".");?>" />
+        </td>
+        <td>Status SPJ</td>
+        <td><input type="text" name="st_spj_su" id="st_spj_su" readonly="readonly" 
+        value="<?php echo $status_spj;?>"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">*) Untuk membuat paket Kwitansi, jumlah nominal kwitansi yang dipilih harus 
+          lebih besar dari X persen Min dan lebih kecil dari nilai Max <br />
+          *) Apabila SPTB terkunci maka kwitansi akan dikirim untuk periode SPJ berikutnya
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4"><div align="right">
+		  <!--<a class="link_history" href="<?php echo site_url();?>kwitansi_view/tambah_spj/
+			<?php echo $sifat_bayar."/".$nominal."/".$nilai_max."/".$nilai_min."/".$id_spj_su;?>" 
+            rel="facebox">-->
+            <input name="btn_tambah_spj" type="button" id="btn_tambah_spj" value="Tambah SPJ" onclick="tambah_spj('<?php echo $sifat_bayar; ?>','<?php echo $nominal; ?>','<?php echo $nilai_max; ?>','<?php echo $nilai_min; ?>','<?php echo $id_spj_su; ?>')" disabled="disabled"/>
+		  </a>
+		  <?php if (empty($kunci)) { ?>
+		  	<input name="kirim_spj" type="button" disabled="disabled" id="kirim_spj" onclick="kirim_verunit()"
+			value="Kirim SPJ" />
+		  <?php } else { ?>
+		  	<input type="button" value="SPTB terkunci" style="color:#F00">
+		  <?php } ?>
+            
+        </div></td>
+      </tr>
+    </table>
+    
+    <table  class="table-common" id="hasil" style="width:99.9%;" >  
+       <thead> 
+            <tr>
+            	<th width="10px">No.</th>
+            	<th width="150px">No Kwitansi</th>
+                <th width="100px">Jenis Kwitansi</th>
+                <th width="100px">Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+                <th>Status</th>
+                <th colspan="2">Action</th>
+            </tr>
+      </thead>
+           <tbody>		 
+			 <?php 
+             if($isi!= false){
+			 	$i				= 0;
+				$valid			= 0;
+				$jum_kwi_byst	= 0;
+				
+			 	foreach($isi as $row) : $i++;
+				$st_kwitansi	= $row->id_status_kwitansi;
+				$jum_unduh		= $row->jum_unduh;
+				$id_spj_su		= $row->id_spj_su;
+				($st_kwitansi ==18 && $jum_unduh >0 ) || $st_kwitansi==2 ? $color='#0F0':$color='yellow';
+				$jum_unduh==0 ? $valid++ :'';
+				if($st_kwitansi==1 or $st_kwitansi==3)
+				{$jum_kwi_byst++;}
+				?>
+                <tr>
+                	<td align="center"><?php echo $i;?></td>
+                	<td align="center"><a href="javascript:void(0)" onclick="preview_kw(<?php echo $row->id_kwitansi;?>)" 
+                title='preview kwitansi'><?php echo $row->no_kwitansi; ?></td>
+                    <td align="center"><?php echo $row->jenis_kwitansi; ?> </td>
+                    <td align="center"><?php echo date("d-m-Y", strtotime($row->tgl_kwitansi)); ?> </td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,30)."...";?> </td>
+                    <td align="right"><?php echo $this->uang->angka($row->nominal); ?> </td>
+                    <td align="center" style="background-color:<?php echo $color;?>" >
+					<?php
+					if($st_kwitansi==2)
+					{?>
+						<a href="<?php echo site_url('kwitansi/edit/'.$row->id_kwitansi);?>"
+                        style="color:red">
+                        	<?php echo $row->status_kwitansi;?>
+                    	</a>
+					<?php }
+					else
+					{ 
+						echo $row->status_kwitansi;
+					}
+					?>
+                    </td>
+                    <td align="center">
+                         <?php if ($st_kwitansi==2 || $st_kwitansi==0 ){?>
+							<img onclick="hapus(<?php echo $row->id_kwitansi;?>)" 
+                            src='<?php echo base_url();?>asset/images/icn_alert_error.png' />
+                        <?php } else { echo " - ";}?>    
+					</td>
+                    <td align="center">
+                    	<?php if ($st_kwitansi==18){?>
+                        	<a href="javascript:void(0)" onclick="cetak(<?php echo $row->id_kwitansi;?>)" 
+                			class='icon2-printer' title='cetak kwitansi'/>
+                        <?php if ($row->jenis_kwitansi=='HONOR') {?>
+                        	<a href="javascript:void(0)" onclick="cetak_honor(<?php echo $row->id_kwitansi;?>)" 
+                			class='icon2-report' title='cetak rincian honor'/>
+                        <?php }?>
+                        <?php }else{echo " - ";}?>    
+					</td>
+                </tr>
+             <?php
+			 endforeach;?>  
+        </tbody>
+ </table>
+ <input type="hidden" value="<?php echo $jum_kwi_byst?>" name="jum_kwi_byst" id="jum_kwi_byst"/>
+ <input type="hidden" value="<?php echo $valid?>" name="jum_tidak_downlod" id="jum_tidak_downlod"/>
+ <br />
+ </div>
+               <?php }else{ ?>
+                 <tr>
+                 <td align='center' colspan="8" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td></tr>
+                 </tbody>
+ </table>
+ <br />
+ </div>
+             <?php } ?> 
+    
+<?php
+//end : jika sudah ada spj
+//===============================================================	
+}
+?>

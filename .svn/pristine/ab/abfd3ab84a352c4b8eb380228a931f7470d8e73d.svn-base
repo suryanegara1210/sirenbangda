@@ -1,0 +1,7 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2014-07-17 11:54:41 --> Severity: Notice  --> Undefined variable: nm_unit C:\xampp\htdocs\siaku\application\views\rekap\daftar_sp2dcair.php 56
+ERROR - 2014-07-17 11:54:41 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\system\helpers\form_helper.php 331
+ERROR - 2014-07-17 11:56:17 --> Severity: Notice  --> Undefined variable: nm_unit C:\xampp\htdocs\siaku\application\views\rekap\daftar_sp2dcair.php 56
+ERROR - 2014-07-17 11:56:17 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\system\helpers\form_helper.php 331
+ERROR - 2014-07-17 11:58:05 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\system\helpers\form_helper.php 331

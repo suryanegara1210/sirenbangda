@@ -1,0 +1,34 @@
+<script type="text/javascript">
+	
+</script>
+<article class="module width_full">
+	<header>
+	  <h3>Tabel Data RKA</h3>
+	</header>
+	<div style='float:right'><a href="<?php echo 'rka/cru_rka'?>">Tambah Data RKA</a></div><br>
+	<div class="module_content"; style="overflow:auto">
+		<table id="musrenbangdes" class="table-common tablesorter" style="width:100%">
+			<thead>
+				<tr>
+					<th rowspan="2" class="no-sort">No</th>	
+					<th rowspan="2">Kode</th>	
+					<th rowspan="2">Urusan / Bidang Urusan Pemerintahan Daerah Dan Program / Kegiatan</th>
+					<th rowspan="2">Target Capaian Kinerja</th>
+					<th rowspan="2">Jumlah Dana</th>
+					<th rowspan="2">Target Capaian Mendatang</th>
+					<th rowspan="2">Jumlah Dana Mendatang</th>
+					<th colspan="2">Kesesuaian</th>
+					<th rowspan="2">Hasil Pengendalian</th>
+					<th rowspan="2">Tindak Lanjut</th>
+					<th rowspan="2">Hasil Tindak Lanjut</th>
+					<th rowspan="2" class="no-sort">Action</th>
+				</tr>
+				<tr>
+					<th>Ya</th>
+					<th>Tidak</th>
+				</tr>				
+			</thead>
+			<tbody>			
+			</tbody>
+		</table>
+</article>

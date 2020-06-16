@@ -1,0 +1,592 @@
+<script language="javascript">
+function validasi(form){
+	var pembanding=<?php echo $pembanding;?>;
+	var nama_pembanding='<?php echo $nama_pembanding;?>';	
+    var totalJum=0;
+	var inp = document.getElementsByTagName('input');
+        for(var i in inp){
+            if(inp[i].type == "text"){
+                if (inp[i].value!=''){
+                    if(inp[i].id=='jumlah'){
+                        totalJum=totalJum + parseFloat(inp[i].value);
+                    }
+                } 
+            }
+         }
+  if (form.tgl_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian tanggal Kwitansi.");
+    form.tgl_kwitansi.focus();
+    return (false);
+  }
+  if (form.kdoutput.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Output.");
+    form.kdoutput.focus();
+    return (false);
+  }
+    if (form.kdkomponen.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Komponen.");
+    form.kdkomponen.focus();
+    return (false);
+  }
+    if (form.kdakun.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Akun.");
+    form.kdakun.focus();
+    return (false);
+  }
+    if (form.id_header.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan Header.");
+    form.id_header.focus();
+    return (false);
+  } 
+  if (form.tpt_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian Tempat Kwitansi.");
+    form.tpt_kwitansi.focus();
+    return (false);
+  }   
+    if (form.pp_sppd.value == "")
+  {
+    alert("Anda belum mengisikan Isian Pejabat pemberi perintah.");
+    form.pp_sppd.focus();
+    return (false);
+  }
+  if (form.tgl_spd.value == "")
+  {
+    alert("Anda belum mengisikan Isian tanggal perjalanan dinas.");
+    form.tgl_spd.focus();
+    return (false);
+  }
+  if (form.no_sk_spd.value == "")
+  {
+    alert("Anda belum mengisikan Isian Nomer SK Perintah.");
+    form.no_sk_spd.focus();
+    return (false);
+  }
+  if (form.dari.value == "")
+  {
+    alert("Anda belum mengisikan Isian dari.");
+    form.dari.focus();
+    return (false);
+  }
+  if (form.tujuan.value == "")
+  {
+    alert("Anda belum mengisikan Isian Tujuan.");
+    form.tujuan.focus();
+    return (false);
+  }
+  if (form.yg_bepergian.value == "")
+  {
+    alert("Anda belum mengisikan Isian Nama Orang yg melakukan Perjalanan.");
+    form.yg_bepergian.focus();
+    return (false);
+  }
+  if (form.nip.value == "")
+  {
+    alert("Anda belum mengisikan Isian NIP Orang yg melakukan Perjalanan.");
+    form.nip.focus();
+    return (false);
+  }
+  if (form.golongan.value == "0")
+  {
+    alert("Anda belum mengisikan Pilihan golongan.");
+    form.golongan.focus();
+    return (false);
+  }
+  if (form.maksud.value == "")
+  {
+    alert("Anda belum mengisikan Isian Maksuud Perjalanan Dinas.");
+    form.maksud.focus();
+    return (false);
+  }
+  if (form.tgl_b.value == "")
+  {
+    alert("Anda belum mengisikan Isian tanggal Berangkat.");
+    form.tgl_b.focus();
+    return (false);
+  }
+  if (form.tgl_k.value == "")
+  {
+    alert("Anda belum mengisikan Isian tanggal Kembali.");
+    form.tgl_k.focus();
+    return (false);
+  }
+  if (form.ket_spd.value == "0")
+  {
+    alert("Anda belum mengisikan Isian Keterangan Perjadin.");
+    form.ket_spd.focus();
+    return (false);
+  }
+    if (form.biaya.value > pembanding)
+  {
+    alert("Jumlah Nominal melebihi " + nama_pembanding);
+    form.input2.focus();
+    return (false);
+  }
+
+  return (true);
+}
+</script>
+
+
+<script>
+			$(function() {
+				$( "#tgl_kwitansi" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+				
+				$( "#tgl_spd" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+				$( "#tgl_b" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+				$( "#tgl_k" ).datepicker({
+					dateFormat:"yy-mm-dd",
+					changeMonth: true,
+					changeYear: true,
+				});
+			});
+</script>
+
+<form method="post" name='form' id='form' action="<?php echo base_url();?>index.php/ls/simpan_kwitansi" onSubmit='return validasi(this)'>
+  <div id="div_barang_gu" class="box">
+    <input type="hidden" name="darne" id="val" value=""/>
+    <table border="0" width="80%" style="margin-left:20px">
+      <tr>
+        <td>&nbsp;</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="380"></td>
+        <td width="110"><?php echo $nama_pembanding;?></td>
+        <td>:</td>
+        <td><input name='input' type='' value='<?php echo $this->uang->angka($pembanding);?>' id="input" style="width:135px;" disabled="disabled" /></td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+    <table border="0" width="90%" style="margin-left:20px">
+	<tr>
+          <td class="nm_col_hide" width="350" >Kwitansi</td>
+          <td >:</td>
+          <td><input name='jns_kwitansi' type='text' value="Kwitansi Belanja Perjalanan Dinas" disabled="disabled" id="jns_kwitansi" size="50" style="width:450px;"></td>
+  </tr>
+    <tr>
+    	<td>Kegiatan</td><td>:</td>
+        <td> 
+          <input name="kegiatan" type="text" disabled="disabled" style="width:450px;" value="Layanan Tridharma di Perguruan Tinggi" size="100px" >
+        </td>
+   </tr>  
+        <tr>
+          <td class="nm_col_hide" >Tanggal</td>
+          <td >:</td>
+          <td><input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="18" style="width:230px;" readonly="readonly" placeholder="Tanggal dari Kwitansi dibuat"/></td>
+        </tr>
+    <tr>
+    	<div id="propinsi2">
+            <td>Output</td>
+            <td>:</td>
+            <td><?php echo form_dropdown("kdoutput",$output,"","id='kdoutput' style='width:450px;'") ?></td>
+        </div>
+    </tr>  
+    <tr>
+    	<td>Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="komponen"><?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Output Dahulu'),'',"style='width:450px' disabled");?></div>
+        </td>
+    </tr>
+    <tr>
+    	<td>Sub Komponen</td>
+        <td>:</td>
+        <td>
+        	<div id="subkomponen">
+				<?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Komponen Dahulu'),'',"style='width:450px' disabled");?>
+            </div>
+        </td>
+    </tr>	
+    <tr>
+        <td>Akun</td>
+        <td>:</td>
+        <td>
+            <div id="akun"><?php echo form_dropdown("akun",array('Pilih Akun'=>'Pilih Komponen Dahulu'),'',' style= "width:450px;" disabled');?></div>
+        </td>
+    </tr>
+    <tr>
+        <td>Header</td>
+        <td>:</td>
+        <td>
+            <div id="heder">
+				<?php echo form_dropdown("hdr",array('Pilih Header'=>'Pilih Akun Dahulu'),'',' style="width:450px;" disabled');?>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Kode BAS</td>
+        <td>:</td>
+        <td>
+          <div id="kode_bas"> <?php echo form_dropdown("kode_bas",array('Pilih Bas'=>'Pilih Bas Dahulu'),'',' style="width:450px;" disabled');?>
+          </div>
+</td>
+    </tr>
+    <tr>
+        <td>Jenis Biaya</td>
+        <td>:</td>
+        <td>
+          <div id="jn_biaya"></div>
+</td>
+    </tr>
+        <tr>
+          <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+          <td >:</td>
+          <td><input name='tpt_kwitansi' type='text' value='' id="tpt_kwitansi" style="width:450px;" placeholder="Tempat Kwitansi dibuat" ></td>
+        </tr>
+
+        <tr>
+          <td width="272">Pejabat Pemberi Perintah</td>
+          <td width="12" >:</td><td width="865"><input name='pp_spd' type='text' value='' size="65" id="pp_sppd" style="width:450px;" placeholder="Nama Pejabat Pembuat perintah Perjalanan Dinas"/></td>
+         
+        </tr>
+<!--        <tr>
+          <td>No. SK Perintah</td>
+          <td >:</td><td><input name='no_sk_spd' type='text' value='' size="65" id="no_sk_spd" style="width:450px;" placeholder="No SK Perintah SPD"/></td>
+          
+        </tr>-->
+        <tr>
+          <td>Dari</td>
+          <td >:</td><td><input name='dari' type='text' value='' size="65" id="dari" style="width:450px;" placeholder="Kota Asal Perjalanan"/></td>
+        </tr>
+         <tr>
+          <td>Tujuan</td>
+          <td >:</td><td><input name='tujuan' type='text' value='' size="65" id="tujuan" style="width:450px;" placeholder="Kota Tujuan Perjalanan"/></td>
+         </tr> 
+        <tr>
+          <td>Yang Bepergian (Nama)</td>
+          <td >:</td><td><input name='yg_bepergian' type='text' value='' size="65" id="yg_bepergian" style="width:450px;" placeholder="Nama orang yang melakukan Perjalanan Dinas"/></td>
+          
+        </tr>
+        <tr>
+          <td>NIP / NIM</td>
+          <td >:</td><td><input name='nip' type='text' value='' size="65" id="nip" style="width:450px;" placeholder="NIP / NIM orang yang bepergian"/></td>
+          
+        </tr>
+         <tr>
+          <td>Golongan</td>
+          <td >:</td>
+           <td><?php echo form_dropdown("golongan_spd",$golongan,"","id='golongan' style='width:200px;'") ?></td>
+          
+        </tr>
+        
+        <tr>
+          <td>Maksud Perjalanan Dinas</td>
+          <td >:</td><td><input name='maksud' type='text' value='' size="65" id="maksud" style="width:450px;" placeholder="Tujuan dari dilakukan Pejalanan Dinas"/></td>
+          
+        </tr>
+        <tr>
+          <td>Tanggal Berangkat</td>
+          <td >:</td><td><input name='tgl_b' type='text' value='' size="65" id="tgl_b" style="width:230px;" readonly="readonly" placeholder="Tanggal Berangkat"/></td>
+          
+        </tr>
+        <tr>
+          <td>Tanggal Kembali</td>
+          <td >:</td><td><input name='tgl_k' type='text' value='' size="65" id="tgl_k" style="width:230px;" readonly="readonly" placeholder="Tanggal Kembali"/></td>
+          
+        </tr>
+          <tr>
+          <td></td>
+          <td></td>
+          <td>
+          	<span id="lama_hari">Lama keberangkatan = 0 Hari</span>
+          </td>
+          
+        </tr>
+        <tr>
+          <td>Keterangan SPD</td>
+          <td >:</td><td><textarea name="ket_spd" id="ket_spd" style="width:450px; height:100px;" placeholder="Keterangan Detail Mengenai Kwitansi SPD"></textarea></td>
+          
+        </tr>
+ 		<tr>
+          <td><p>&nbsp;</p></td>
+        </tr>
+        <tr><td><strong>Rincian Biaya</strong></td></tr>
+        <tr>
+          <td class="nm_col_hide">Biaya Tiket</td>
+          <td >:</td>
+          <td><input name='tiket' type='text' value='' id="tiket" style="width:450px;" placeholder="Nominal biaya tiket" ></td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide">Biaya Boarding Pass</td>
+          <td >:</td>
+          <td><input name='board' type='text' value='' id="board" style="width:450px;" placeholder="Nominal biaya boarding pass" ></td>
+        </tr>
+         <tr>
+          <td class="nm_col_hide">Biaya Taxi</td>
+          <td >:</td>
+          <td><input name='taxi' type='text' value='' id="taxi" style="width:450px;" placeholder="Nominal biaya taxi" ></td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide">Penginapan, UM, dan Transport</td>
+          <td >:</td>
+          <td><input name='dll' type='text' value='' id="dll" style="width:450px;" placeholder="Nominal Penginapan, UM, dan Transport" ></td>
+        </tr>
+        <tr>
+          <td class="nm_col_hide">Uang Saku</td>
+          <td >:</td>
+          <td>
+          	  <input name='uang_saku' type='text' value='' id="uang_saku" style="width:220px;" placeholder="Nominal uang Saku" >
+			 PPh. 21 : <input name='pph21' type='text' value='' id="pph21" style="width:175px;" placeholder="Nominal total PPh. 21" >
+          </td>
+        </tr> 
+        <tr>
+          <td class="nm_col_hide">Uang Representatif</td>
+          <td >:</td>
+          <td><input name='representatif' type='text' value='' id="representatif" style="width:450px;" placeholder="Nominal uang representatif" ></td>
+        </tr>  
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr> 
+        <tr>	
+          <td align="right"><strong>TOTAL BIAYA </strong></td>
+          <td><strong>:</strong></td>
+          <td><table width="450">
+            <tr>
+              <td width="184"><span id="jumlah_biaya">Rp. 0</span></td>	
+              <td width="74"><strong>Total PPh. 21</strong></td>
+              <td width="10">:</td>
+              <td width="162"><span id="pph_tampil">Rp. 0</span></td>
+            </tr>
+          </table></td>
+        </tr>  
+        <tr>
+          <td><p>&nbsp;</p>
+          <p></p></td>
+        </tr>  
+</table>
+</div>
+</div>     
+  <!--<table name="nama_rincian" class="table-common" id="nama_rincian" style="width: 780px; margin-left:20px" >  
+            <tr>
+                <th>Perincian Biaya</th>
+                <th>Jumlah(Rp)</th>
+                <th>Pph</th>
+                <th>Action</th>
+            </tr>
+        <tr>
+            <td><textarea name="perincian[0]" style="width:450px; height:50px;"></textarea></td>
+            <td><input name="jumlah[0]" type="text" style="width:175px"/></td>            
+            <td><input name="pph[0]" type="text" style="width:175px"/></td>      
+            <td align="center"><input type="button" value="   +   " onclick="addRow('nama_rincian')" /></td>
+        </tr>
+  </table>-->
+<script language="javascript">
+//                var counter=0;
+//            		function addRow(tableID) {
+//            		  
+//                      counter=counter+1;
+//                      
+//            			var table = document.getElementById(tableID);
+//            
+//            			var rowCount = table.rows.length;
+//            			var row = table.insertRow(rowCount);
+//            
+//            			var perincian = row.insertCell(0);
+//            			var inp_perincian = document.createElement("textarea");
+//            			inp_perincian.type="text";
+//						inp_perincian.style.width='450';
+//                        inp_perincian.name= "perincian["+counter+"]";
+//            			perincian.appendChild(inp_perincian);
+//                        
+//                        var jumlah = row.insertCell(1);
+//            			var inp_jumlah = document.createElement("input");
+//            			inp_jumlah.type="text";
+//						inp_jumlah.style.width='175';
+//                        inp_jumlah.name= "jumlah["+counter+"]";
+//            			jumlah.appendChild(inp_jumlah);
+//						
+//						var pph = row.insertCell(2);
+//            			var inp_pph = document.createElement("input");
+//            			inp_pph.type="text";
+//						inp_pph.style.width='175';
+//                        inp_pph.name= "pph["+counter+"]";
+//            			pph.appendChild(inp_pph);
+//                        
+//            			var cell4 = row.insertCell(3);
+//            			var element3 = document.createElement("input");
+//            			element3.type = "button";
+//            			element3.value = "del";
+//            			element3.onclick= function() {delRow(tableID,this);}
+//            			cell4.appendChild(element3);
+//            			
+//            			inp_nama.focus();
+//            		}
+//            
+//            		function delRow(tabeID,src){
+//            			var oRow = src.parentElement.parentElement;
+//            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+//            		}
+//					
+//            
+</script>
+
+     
+<script type="text/javascript">
+          $("#kdoutput").change(function(){
+                var selectValues = $("#kdoutput").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen').html(msg);
+                }else{
+                    var kdoutput = {kdoutput:$("#kdoutput").val(),jns_kwitansi:$("#jns_kwitansi").val()};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('ls/select_komponen')?>",
+                            data: kdoutput,
+                            success: function(msg){
+                                $('#komponen').html(msg);
+                            }
+                      });
+                }
+        });
+</script>
+        <script type="text/javascript">
+		/*===DROPDOWN UNTUK JENIS PAJAK===*/
+				  $("#jns_pajak").change(function(){
+					var jns_pajak1 = $("#jns_pajak").val();
+					var jns_pajak = {jns_pajak:$("#jns_pajak").val()};
+						if(jns_pajak1 != 0){
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('ls/select_pajak')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}else{
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo base_url('application/views/ls/buat_kwitansi/gu_select_ppn.php')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}
+				});
+		</script>
+         <script>
+	   $("#tgl_b").change(function(){
+		   rentang();
+		});
+		$("#tgl_k").change(function(){
+			rentang();
+		});
+		
+		function rentang(){
+			if($('#tgl_b').val()!=''){
+				var b=$('#tgl_b').datepicker('getDate');
+			}else{
+				var b='';
+			}
+			if($('#tgl_k').val()!=''){
+				var k=$('#tgl_k').datepicker('getDate');
+			}else{
+				var k='';
+			}
+			
+			if(b!='' && k!=''){
+				if(b >= k){
+					alert("Tanggal kembali < Tanggal berangkat");
+					$('#tgl_k').val('');
+				}else{
+					diff = Math.floor((k.getTime() - b.getTime()) / 86400000);
+					var lama="Lama Keberangkatan : " + diff + " hari";
+					$('#lama_hari').html(lama);
+					$('#lama').val(diff);
+				}
+				
+			}
+		}
+	   </script>
+       <script>
+	    Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) {
+			var n = this,
+			decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+			decSeparator = decSeparator == undefined ? "." : decSeparator,
+			thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
+			sign = n < 0 ? "-" : "",
+			i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
+			j = (j = i.length) > 3 ? j % 3 : 0;
+			return sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
+		};
+	   		
+	   		$('#taxi').keyup(function(){
+				jumlah_rincian();	
+			})
+			$('#tiket').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#board').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#dll').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#uang_saku').keyup(function(){
+				jumlah_rincian();
+			})
+			$('#representatif').keyup(function(){
+				jumlah_rincian();
+			})
+			
+				function jumlah_rincian(){
+					var taxi  = $('#taxi').val(); if(taxi ==''){taxi = 0};
+					var tiket = $('#tiket').val(); if(tiket ==''){tiket = 0};
+					var board = $('#board').val(); if(board ==''){board = 0};
+					var dll   = $('#dll').val(); if(dll ==''){dll = 0};
+					var saku  = $('#uang_saku').val(); if(saku ==''){saku = 0};
+					var repre = $('#representatif').val(); if(repre ==''){repre = 0};
+					
+						var jumlah = parseFloat(taxi) + parseFloat(tiket) + parseFloat(board) + parseFloat(dll) + parseFloat(saku) + parseFloat(repre);
+						var jumlah2 = 'Rp.' + jumlah.formatMoney(0,'.',',');
+						$('#jumlah_biaya').html(jumlah2);
+						$('#biaya').val(jumlah);		
+				}
+				
+				$('#pph21').keyup(function(){
+					var pph = parseFloat($('#pph21').val());
+					var nom_pph = 'Rp.'+pph.formatMoney(0,'.',','); 
+						$('#pph_tampil').html(nom_pph);
+				})	;	
+       </script>
+
+<div class="submit_link">  
+	  <input name='jenis_kwitansi' value='PERJADIN' id="yg_bepergian" type="hidden"/>
+	  <input name='biaya' value='' id="biaya" type="hidden"/>
+      <input name='lama_hari' id="lama" value='' type="hidden"/>
+      <input name="simpan" type='submit' id="simpan" value='Simpan'>
+      <input type=button value=Batal onclick=self.history.back()>
+</div>
+</form>

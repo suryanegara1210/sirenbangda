@@ -1,0 +1,114 @@
+ <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+ 
+<html>  
+      
+<head>
+    <meta charset="utf-8"/>
+    <title>SIAKU-UNUD</title>                                            
+    
+    <link rel="stylesheet" href="<?php echo base_url();?>asset_lama/css/cek_admin.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo base_url();?>asset_lama/css/style-portal-content.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo base_url();?>asset_lama/css/style-portal-table.css" type="text/css" media="screen" />
+    <link ilo-full-scr="images/favicon-unud.ico" rel="shortcut icon" href="images/favicon-unud.ico" type="image/x-icon">
+    <!--[if lt IE 9]>
+    <link rel="stylesheet" href="css/ie.css" type="text/css" media="screen" />
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+      <!-- jquery start -->
+    <style type="text/css">@import url("<?php echo base_url(); ?>asset/jquery/css/jquery-ui.css");</style> 
+    
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery-ui.min.js"></script>
+    <!-- jquery end -->
+    
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset_lama/js/stayput.js"></script> 
+    
+    <script src="<?php echo base_url();?>asset_lama/js/hideshow.js" type="text/javascript"></script>
+    <script src="<?php echo base_url();?>asset_lama/js/jquery.tablesorter.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="<?php echo base_url();?>asset_lama/js/jquery.equalHeight.js"></script>
+    
+    
+   
+    
+<!--jqGrid-->
+        
+<!-- CSS + JS PLUGIN - GRID //-->
+        <link rel="stylesheet" type="text/css" media="screen" href="<?php echo base_url(); ?>asset/jqgrid/css/ui.jqgrid.css"/>
+        <script type="text/javascript" src="<?php echo base_url(); ?>asset/jqgrid/js/i18n/grid.locale-id.js"></script>
+        <script type="text/javascript" src="<?php echo base_url(); ?>asset/jqgrid/js/jquery.jqGrid.min.js"></script>
+          
+
+</head>   
+<body> 
+      <header id="header">
+        <div id="logo">
+        <h1><a href="#">Sistem Informasi Akuntansi dan Keuangan </a></h1>
+        <p><em> universitas udayana</em></p> 
+        <?php /*<tgl><em>&nbsp;&nbsp;<img src="<?php echo base_url(); ?>asset/images/calendar_blue.gif" border="0" width="12" height="12"> <?php echo"$tgl"; ?></em></tgl>*/?> 
+            
+        </div>
+    </header> <!-- end of header bar -->
+       <?php include"admin/inc/menu.php"; 
+     
+?>
+        </div>
+        
+    </section><!-- end of secondary bar -->
+
+    <aside id="sidebar" class="column">
+        <form class="quick_search">
+            <input type="text" value="Quick Search" onFocus="if(!this._haschanged){this.value=''};this._haschanged=true;">
+        </form>
+        <hr/>
+        <h3>Master</h3>
+        <ul class="toggle"> 
+            <li class="icn_profile"><a href="<?php echo base_url()."index.php/admin/adminuser/";?>">User</a></li>       
+            <li class="icn_tags"><a href="<?php echo base_url()."index.php/admin/adminunit/";?>">Unit</a></li>
+            <li class="icn_tags"><a href="<?php echo base_url()."index.php/admin/subunit";?>">Subunit</a></li>       
+            <li class="icn_tags"><a href="<?php echo base_url()."index.php/admin/carabayar";?>">Cara Bayar</a></li>
+            <li class="icn_tags"><a href="<?php echo base_url()."index.php/admin/sifatpembayaran";?>">Sifat Pembayaran</a></li>         
+                     
+            
+        </ul>  
+        <?php /*include"unit/referensi.php"; */?> 
+         <br>
+         <h3>Setting</h3>
+        <ul class="toggle"> 
+            <li class="icn_profile"><a href="#">Penandatangan</a></li>       
+            <li class="icn_folder"><a href="#">Dipa</a></li>       
+            
+        </ul>  
+        <?php /*include"unit/referensi.php"; */?> 
+         <br>
+        <h3>User</h3>
+        <ul class="toggle2">
+            <li class="icn_profile"><a href="#">Profile</a></li>   
+            <li class="icn_jump_back"><?php echo anchor('login/logout','Logout');?></li>  
+        </ul>
+       
+        <footer>
+            <hr />
+            <p><strong>Copyright &copy; 2012 Ari Arjuna</strong></p> 
+        </footer>
+    </aside><!-- end of sidebar -->
+   
+    <section id="main" class="column">
+        <?php $nama_lengkap = $this->session->userdata('nama');
+                echo"<h4 class='alert_info'>Selamat Datang $nama_lengkap. </h4> ";   
+            
+            
+        ?>
+        
+
+      
+      <?php // dynamic content loaded here
+         echo $contents;
+      ?>
+ 
+      <div class="spacer"></div> 
+   </div>
+   
+   </div>
+</body>
+</html>
+

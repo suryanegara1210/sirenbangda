@@ -1,0 +1,27 @@
+  <h4>Riwayat Kwitansi</h4>
+  <table width="670px" border="1"  class="table-common" id="hasil" >  
+       <thead> 
+            <tr>
+            	<th width="20px">No.</th>
+                <th width="100px">Tanggal</th>
+                <th >Pembuat</th>
+                <th >Status</th>
+                <th width="*">Komentar</th>
+         </tr>
+      </thead>
+           <tbody>		 
+			 <?php if(!$histories){
+				 echo "<tr><td colspan='10' align='center'><strong>Kwitansi tidak ada</strong></td></tr>";
+			 }else{
+			 	$i=count($histories) + 1;
+			 	foreach($histories as $row) : $i--;?>
+                <tr>
+                	<td align="center" width="20px"><?php echo $i;?></td>
+                    <td width="100px"> <?php echo Formatting::date_format($row->tanggal_waktu);?> </td>
+                    <td width="80px"> <?php echo $row->created_by; ?> </td>
+                    <td width="150px"> <?php echo $row->status_waktu; ?> </td>
+                    <td> <?php echo $row->komentar; ?> </td>
+             </tr>
+			 <?php endforeach; }?>
+        </tbody>
+ </table>

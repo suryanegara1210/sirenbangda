@@ -1,0 +1,82 @@
+<style>
+.kdoutput_td
+{margin-left:50px;}
+</style>
+<article class="module width_full">
+            <header><h3>Buat SPTB</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/unit/verifikasi" onSubmit='return validasi(this)'> 
+            <table  class="table-common" style="margin-left: 20px; width: 450px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Kode Output / Kode Akun</th> 
+            </tr>
+            </thead>
+            
+            <?php $no = 1;
+            $output_lama ='';
+            $kegu=0;
+            foreach ($sptb as $row){
+                 $kdoutput = $row['kdoutput'];   
+                 $nmoutput = $row['nmoutput'];   
+                 $kdakun = $row['kdakun'];
+                 $nmakun = $row['nmakun'];
+            if ($output_lama!=$kdoutput){
+                 echo "
+                    <tr>
+                        <td align=\"center\"> $no </td>
+                        <td align=\"left\" style=\"padding-left:20px\">4078.".$kdoutput." ( $nmoutput ) </td>
+                    </tr>
+                 ";
+                 $no++;
+                 $output_lama=$kdoutput;
+             }  
+ 
+            ?>
+                <tr>
+                    <td align="center">&nbsp; </td> 
+                    <?php if ($jumgu[$kegu] < 1){ ?>
+                    <td align="left" style="padding-left:70px"> <?php echo"$kdakun ( $nmakun )"; ?> </td>
+                    
+                <?php } else{ ?>
+                <td align="left" style="font-size: 14px; padding-left:70px"><?php echo "<a href='".base_url()."index.php/gup/view_buat_sptb_gu/".$kdoutput."/".$kdakun."' > <blink>$kdakun ($jumgu[$kegu]) ( $nmakun ) </blink> </a>";?></td> 
+                <?php }   $kegu++; ?>
+                    
+
+                </tr> 
+                <?php }?>
+            <?php /*//echo $this->db->last_query();
+             
+              
+              
+            $no = 1; 
+            $kegu=0;
+              foreach($daftar_unit as $unit){
+                  $nama_subunit = $unit["nama_subunit"];
+                  $id_subunit = $unit["id_subunit"];
+                         
+            ?>
+             
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <?php if ($jumgu[$kegu] < 1){ ?>
+                <td align="left"> <?php echo "$nama_subunit";?> </td>
+                <?php } else{ ?>
+                <td align="left"><?php echo "<a href='".base_url()."index.php/unit/get_rincian_up/".$id_subunit."' >$nama_subunit ($jumgu[$kegu]) </a>";?></td> 
+                <?php }   $kegu++; ?> 
+              </tr>
+              
+            <?php $no++; }    
+            */?>     
+ </table>   
+ </div>
+<footer>         
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+</footer>
+</article>

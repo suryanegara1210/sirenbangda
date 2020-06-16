@@ -1,0 +1,36 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-06-20 14:33:09 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:33:09 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:33:09 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:33:09 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-06-20 14:33:26 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:33:26 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:33:26 --> Severity: Notice  --> Undefined variable: jum_nominal_spp C:\xampp\htdocs\siaku\application\models\m_spm.php 210
+ERROR - 2013-06-20 14:34:08 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:34:08 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:34:08 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:34:08 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-06-20 14:34:21 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:34:21 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:34:21 --> Severity: Notice  --> Undefined variable: jum_nominal_spp C:\xampp\htdocs\siaku\application\models\m_spm.php 210
+ERROR - 2013-06-20 14:34:36 --> 404 Page Not Found --> spm/siap_terotorisasi
+ERROR - 2013-06-20 14:53:39 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:53:39 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:53:39 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:53:39 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-06-20 14:53:55 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:53:55 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:53:55 --> Severity: Notice  --> Undefined variable: id_spp C:\xampp\htdocs\siaku\application\models\m_spm.php 212
+ERROR - 2013-06-20 14:55:55 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:55:55 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:55:55 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:55:55 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-06-20 14:56:06 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:56:06 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:57:34 --> Severity: Notice  --> Undefined variable: nomor C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:57:34 --> Severity: Notice  --> Undefined variable: kode_digit C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:57:35 --> Severity: Notice  --> Undefined variable: tahun C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 81
+ERROR - 2013-06-20 14:57:35 --> Severity: Notice  --> Undefined variable: id_dipa C:\xampp\htdocs\siaku\application\views\spm\pengisian_spm.php 136
+ERROR - 2013-06-20 14:57:43 --> Severity: Warning  --> Missing argument 6 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166
+ERROR - 2013-06-20 14:57:43 --> Severity: Warning  --> Missing argument 7 for M_spm::simpan_spm(), called in C:\xampp\htdocs\siaku\application\controllers\spm.php on line 129 and defined C:\xampp\htdocs\siaku\application\models\m_spm.php 166

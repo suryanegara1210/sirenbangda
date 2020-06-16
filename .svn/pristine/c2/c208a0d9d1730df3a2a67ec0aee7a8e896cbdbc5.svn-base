@@ -1,0 +1,27 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+<div class="form-actions form-horizontal">      
+  <select class="span2 m-wrap">
+    <option>A</option>
+    <option>A</option>
+    <option>A</option>
+  </select>
+  <select class="span4 m-wrap">
+    <option>A</option>
+    <option>A</option>
+    <option>A</option>
+  </select>
+    <button id="btn-search" class="btn" type="button">Search!</button>
+</div>      
+<div class="kendali shortcuts" style="margin-top: 10px;">
+  <a style="background: #D46A6A; border-radius: 50%; width: auto; height:auto; padding:0px;" class="shortcut"><div title="Target dibawah 60%" style="display: table-cell; text-align: center; vertical-align: middle;width:100px;height:100px;"><span id="kendali1" style="font-size: 28px;" class="shortcut-label"></span></div></a>
+  <a style="background: #D4CF6A; border-radius: 50%; width: auto; height:auto; padding:0px;" class="shortcut"><div title="Target antara 60% hingga 79%" style="display: table-cell; text-align: center; vertical-align: middle;width:100px;height:100px;"><span id="kendali2" style="font-size: 28px;" class="shortcut-label"></span></div></a>
+  <a style="background: #82B582; border-radius: 50%; width: auto; height:auto; padding:0px;" class="shortcut"><div title="Target antara 90% hingga 99%" style="display: table-cell; text-align: center; vertical-align: middle;width:100px;height:100px;"><span id="kendali3" style="font-size: 28px;" class="shortcut-label"></span></div></a>
+  <a style="background: #A597FF; border-radius: 50%; width: auto; height:auto; padding:0px;" class="shortcut"><div title="Target mencapai 100%%" style="display: table-cell; text-align: center; vertical-align: middle;width:100px;height:100px;"><span id="kendali4" style="font-size: 28px;" class="shortcut-label"></span></div></a>
+</div>
+<div style="padding-left: 10px;">
+  Target :
+  <i class="icon-sign-blank" style="color: #D46A6A;"><span style="padding-left:5px;" class="value">< 60%</span></i>
+  <i class="icon-sign-blank" style="color: #D4CF6A;"><span style="padding-left:5px;" class="value">60% - 79%</span></i>
+  <i class="icon-sign-blank" style="color: #82B582;"><span style="padding-left:5px;" class="value">90% - 99%</span></i>
+  <i class="icon-sign-blank" style="color: #A597FF;"><span style="padding-left:5px;" class="value">Mencapai 100%</span></i>
+</div>

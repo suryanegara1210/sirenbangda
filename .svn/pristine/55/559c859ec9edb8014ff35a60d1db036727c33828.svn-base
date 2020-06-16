@@ -1,0 +1,250 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.kdoutput.value == 0){
+    alert("Anda belum mengisikan Output.");
+    form.kdoutput.focus();
+    return (false);
+  }
+  if (form.kdkomponen.value == 0){
+    alert("Anda belum mengisikan komponen.");
+    form.kdkomponen.focus();
+    return (false);
+  } 
+                                                                                
+  if (form.kdakun.value == 0){
+    alert("Anda belum mengisikan Akun.");
+    form.kdakun.focus();
+    return (false);
+  }
+  if (form.hdr.value == 0){
+    alert("Anda belum mengisikan Header.");
+    form.hdr.focus();
+    return (false);
+  }
+  if (form.komponen.value == ""){
+    alert("Anda belum mengisikan komponen.");
+    form.komponen.focus();
+    return (false);
+  }
+  
+  return (true);
+}
+</script>
+
+<article class="module width_full">
+            <header><h3>Buat Pengajuan Tambahan Uang Persediaan (TUP)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>index.php/tup/simpan_up" onSubmit='return validasi(this)'> 
+                <table class="tablesorter" cellspacing="0" >
+    <!-- page content -->
+     
+    <tr><td>Kegiatan</td><td>:</td><td> <input size="100px" type="text" name="kegiatan" value="Layanan Tridharma di Perguruan Tinggi"></td></div></tr>  
+    <tr><div id="propinsi"><td>Output</td><td>:</td><td> <?php echo form_dropdown("kdoutput",$output,"","id='kdoutput'") ?></td></div></tr>  
+    <tr><td>Komponen</td><td>:</td><td><div id="komponen"><?php echo form_dropdown("komponen",array('Pilih Komponen'=>'Pilih Output Dahulu'),'','disabled');?></div></td></tr>
+    <tr><td>Sub Komponen</td><td>:</td><td><div id="subkomponen"><?php echo form_dropdown("subkomponen",array('Pilih Komponen'=>'Pilih Output Dahulu'),'','disabled');?></div></td></tr>
+    <tr><td>Akun</td><td>:</td><td><div id="akun"><?php echo form_dropdown("akun",array('Pilih Akun'=>'Pilih Komponen Dahulu'),'','disabled');?></div></td></tr>
+    <tr><td>Header</td><td>:</td><td><div id="heder"><?php echo form_dropdown("hdr",array('Pilih Header'=>'Pilih Akun Dahulu'),'','disabled');?></div></td></tr>
+      <input type="hidden" value="" id="val" name="validasi">
+   </table> 
+   <table><div id='tabel'></div> </table>
+   
+                 </div>    
+    
+            <footer>
+            
+                
+                <div class="submit_link">              
+                    <input type="submit" value="Simpan" onClick="return confirm('Apakah Anda yakin ingin menyimpan rincian TUP ini?')">  
+                    <input type="button" value="Batal" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+    
+    
+    
+    <table><br><h3>Daftar RINCIAN RENCANA PENGGUNAAN  Tambahan Uang Persediaan (TUP) yang telah dibuat</h3></table>
+    <p>
+      <?php $tot_pagu_rkakl = number_format($jum_tot_rkakl,0,",",".");  
+    //$tot_up2 = number_format($tot_up,0,",",".");
+   // echo"$total_tup";
+    if($total_tup =="NULL"){
+         $total_tup =0;
+    }
+    $ju_up = number_format($total_tup,0,",","."); 
+    $sisa_pagu = $tot_pagu_realisasi- $total_tup;
+       
+    //$sisa_up = number_format($selisih,0,",",".");
+    
+     
+    ?>
+      <?php /*<table class="table-list" style="margin-left: 20px;">
+               <tr >
+                  <th width='200px'>TOTAL PAGU</th><td>Rp.</td><td align="right"> <?php echo "$tot_pagu_rkakl";?></td>
+                  
+               </tr> 
+               <tr >  
+                  <th width='100px'>MAKSIMUM UP</th><td>Rp.</td><td align="right"> <?php echo "$tot_up2";?></td>
+                  
+               </tr>
+               <tr >  
+                  <th width='100px'>UP YANG DIUSULKAN</th><td>Rp.</td><td align="right"> <?php echo "$ju_up";?></td>
+                  
+               </tr>
+               <tr >  
+                  <th width='100px'>SISA PAGU UP</th><td>Rp.</td><td align="right"> <?php echo "$sisa_up";?></td>
+                  
+               </tr>
+    </table>*/?>  
+    <table class="table-list" style="margin-left: 20px;">
+      <tr >
+        <th width='200'>TOTAL PAGU POK</th>
+        <td>Rp.</td>
+        <td align="right"><?php echo "$tot_pagu_rkakl";?></td>
+      </tr>
+      <tr >
+        <th width='200'>TOTAL PAGU REALISASI</th>
+        <td>Rp.</td>
+        <td align="right"><?php echo number_format($tot_pagu_realisasi,0,",",".");?></td>
+      </tr>
+      <tr >
+        <th width='200'>TOTAL MAKSIMUM TUP</th>
+        <td>Rp.</td>
+        <td align="right"><?php echo number_format($maksimum_tup,0,",",".");?></td>
+      </tr>
+      <tr >
+        <th width='200'>TUP YANG DIUSULKAN</th>
+        <td>Rp.</td>
+        <td align="right"><?php echo "$ju_up";?></td>
+      </tr>
+      <tr >
+        <th>SISA PAGU REALISASI</th>
+        <td>Rp</td>
+        <td align="right"><?php echo number_format(($sisa_pagu),0,",",".");?></td>
+      </tr>
+    </table>
+    <p>    
+    <div id="sub-content"> 
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>Kode Output / Kode Komponen <br> / Kode Akun </th>
+                <th>Output / Komponen / Nama Akun / Header</th>
+                <th>Jumlah (Rp.)</th>
+                <th colspan="2">Aksi</th>
+                
+            </tr>
+            </thead>
+            <?php //print_r($spp->result_array());         
+            //echo $this->db->last_query();
+            if($banyak_up == 0 ){
+                echo"<tr>
+                <td style='height:50px; padding-top: 15px; text-align:center; font-size:12px;' colspan='5'>
+                <strong>Data Kosong</strong>    </td>
+                </tr>";
+            }else{
+            foreach ($spp->result_array() as $cek){      
+                $id =  $cek['id_transaksi'];
+                $th =  $cek['th_transaksi'];
+                $kd_output =  $cek['kdoutput'];
+                $nm_output =  $cek['nmoutput']; 
+                $nmkomponen =  $cek['nmkomponen']; 
+                $kdkomponen =  $cek['kdkomponen']; 
+                $kdakun =  $cek['kdakun']; 
+                $nmakun =  $cek['nmakun']; 
+                $nmheader =  $cek['nmheader']; 
+                $jumlah =  $cek['jumlah']; 
+                $id = $cek['id_transaksi'];
+                $jamilah = number_format($jumlah,0,",",".");
+                $id_url = 1;
+            ?>
+            
+              <tr>
+                <td align='left'><?php echo "$kd_output";?></td>
+                <td> <?php echo "$nm_output";?> </td>
+                <td>&nbsp;  </td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kdkomponen";?></td>
+                <td><?php echo "$nmkomponen";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kdkomponen.$kdakun";?></td>
+                <td><?php echo "$nmakun";?></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "Header";?></td>
+                <td><?php echo "$nmheader";?></td>
+                <td align="right"><?php echo "$jamilah";?></td>
+                <td align="center"><a href='<?php echo base_url();?>tup/edit_rincian_up2/<?php echo "$th";?>/<?php echo "$id";?>' title='Edit Rincian TUP'> <img src='<?php echo base_url();?>asset/images/edit.png'></a></td>
+                <td align="center"><a href='<?php echo base_url();?>tup/hapus_up/<?php echo "$id";?>' onClick="return confirm('Apakah Anda yakin ingin menghapus rincian TUP ?')" title='Hapus Rincian TUP'> <img src='<?php echo base_url();?>asset/images/delete.png'></a></td>
+              </tr> 
+              <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+            <?php } };   
+            ?>
+            
+ </table>
+ 
+ </div>
+ <table style="padding-left: 20px; " >
+ <tr><td style="font-size: 16px; color: black; " ><a href="javascript:Start('<?php echo base_url();?>tup/tampil_pagu_persubunit/<?php echo"$kode_subunit" ?>')">Detail Pagu</a></td></tr></table>
+  
+                               
+ <br>
+ <?php echo form_close(); ?>
+
+ <br>
+               <footer>  
+                <div class="submit_link">
+                <table>
+                <tr><td>
+                <input type="button" id="kirim_up" value="Kirim TUP">
+                </td></tr>
+                </table>
+                </div> 
+            </footer>
+</article> 
+<script type="text/javascript">
+        document.getElementById('kirim_up').onclick = function () {
+            if (confirm('Apakah anda yakin ingin mengirim rincian TUP ini ke verifikator unit?')) {
+                parent.location='<?php echo site_url('tup/kirim_up');?>';
+            }
+        };
+    </script>    
+    
+    <script type="text/javascript">
+          $("#kdoutput").change(function(){
+                var selectValues = $("#kdoutput").val();
+                if (selectValues == 0){
+                    var msg = "<select name=\"id_komponen\" disabled><option value=\"Pilih Komponen\">Pilih Output Dahulu</option></select>";
+                    $('#komponen').html(msg);
+                }else{
+                    var kdoutput = {kdoutput:$("#kdoutput").val()};
+                    $('#id_komponen').attr("disabled",true);
+                    $.ajax({
+                            type: "POST",
+                            url : "<?php echo site_url('tup/select_komponen')?>",
+                            data: kdoutput,
+                            success: function(msg){
+                                $('#komponen').html(msg);
+                            }
+                      });
+                }
+        });
+       </script>

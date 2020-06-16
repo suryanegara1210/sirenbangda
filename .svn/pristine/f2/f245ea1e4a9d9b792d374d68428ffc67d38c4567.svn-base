@@ -1,0 +1,79 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.sp.value == 0){
+    alert("Anda belum mengisikan Sifat Pembayaran.");
+    form.sp.focus();
+    return (false);
+  }
+    
+  return (true);
+}
+</script>
+<article class="module width_full">
+    <header><h3>Form Pengisian Surat Permintaan Pembayaran (SPP)</h3></header>
+                    
+    <div class="module_content">  
+    <form method="post" name='form-spp' action="<?php echo base_url();?>index.php/tup/simpan_spp" onSubmit='return validasi(this)'> 
+    <table border='0' width='730' > 
+
+    <?php // echo "$jumlah"; 
+    //print_r($asi);
+    $jumlah_spp = number_format($jumlah,0,",",".");
+    foreach($unit->result_array() as $u){    
+        $no_rek = $u['rekening'];
+        $nama_fak = $u['nama_unit'];   
+        $kode_digit = $u['kode_digit'];
+    }
+    foreach($dipa->result_array() as $d){
+        $id_dipa = $d['id_dipa']; 
+    }
+    foreach($sifatpembayaran->result_array() as $d){
+        $sifatpembayaran = $d['sifatpembayaran']; 
+    }
+    
+    ?>           
+        <tr><td>Nomor SPP</td><td >:</td><td><input name='nomor_spp' type='' value='<?php echo "$nomor/UP/$kode_digit/$tahun" ?>' size=80 disabled></td></tr>
+        <tr><td>Sifat Pembayaran </td><td >:</td><td><input name='kpa' type='' value='<?php echo "$sifatpembayaran" ?>' size=65 disabled></td></tr>
+        <tr><td>Jenis Pembayaran </td><td >:</td><td><input name='kpa' type='' value='Pengeluaran Anggaran' size=65 disabled></td></tr>
+        <tr><td>Kementerian/Lembaga </td><td >:</td><td><input name='kpa' type='' value='023' size=5 disabled></td></tr>
+        <tr><td>Unit Organisasi </td><td >:</td><td><input name='kpa' type='' value='04' size=5 disabled></td></tr>
+        <tr><td>Satuan Kerja/SKS </td><td >:</td><td><input name='kpa' type='' value='415253' size=5 disabled></td></tr>
+        <tr><td>Lokasi</td><td >:</td><td><input name='kpa' type='' value='2200' size=5 disabled></td></tr>
+        <tr><td>Kode Kota Satker</td><td >:</td><td><input name='kpa' type='' value='15' size=5 disabled></td></tr>
+        <tr><td>Alamat Satker</td><td >:</td><td><input name='kpa' type='' value='Denpasar' size=80 disabled></td></tr>
+        <tr><td>Kode Kegiatan</td><td >:</td><td><input name='kpa' type='' value='4078' size=80 disabled></td></tr>
+        <tr><td>Kegiatan</td><td >:</td><td><input name='kpa' type='' value='Layanan Tridharma di Perguruan Tinggi' size=80 disabled></td></tr>
+        <tr><td>Kode Fungsi/Sub Fungsi/ Program</td><td >:</td><td><input name='kpa' type='' value='023/04/08' size=80 disabled></td></tr>
+        <tr><td>Kewenangan Pelaksana</td><td >:</td><td><input name='kpa' type='' value='Kantor Daerah' size=80 disabled></td></tr>
+          
+        <tr><td>Jumlah Uang (Rp)</td><td >:</td><td><input name='jumlah_uang' type='text' value='<?php echo "$jumlah_spp,-";?>' disabled></td></tr>
+        <input type='hidden' name='no_spp' value='<?php echo "$nomor/UP/$kode_digit/$tahun" ?>'>
+        <input type='hidden' name='jum' value='<?php echo "$jumlah" ?>'>
+        <input type='hidden' name='jum_huruf' value='<?php echo "$terbilang" ?>'>
+        <input type='hidden' name='id_dipa' value='<?php echo "$id_dipa" ?>'>
+        <input type='hidden' name='keperluan' value='<?php echo "Operasional Perkantoran" ?>'>
+        <input type='hidden' name='kdoutput' value='<?php echo "$kdoutput" ?>'> 
+        <input type='hidden' name='kdkomponen' value='<?php echo "$kdkomponen" ?>'> 
+        <input type='hidden' name='kdakun' value='<?php echo "$kdakun" ?>'> 
+        <tr><td>Terbilang</td><td >:</td><td><textarea name='terbilang' rows=2 cols=65 wrap='virtual' disabled><?php echo "$terbilang";?> rupiah</textarea></td></tr>
+        <tr><td>Untuk Keperluan</td><td >:</td><td><input name='keperluan' type='' value='Operasional Perkantoran' size=80 disabled></td></tr>
+        <tr><td>Jenis Belanja</td><td >:</td><td><input name='penerima1' type='' value='Belanja Barang' size=80 disabled></td></tr>
+        <tr><td>Atas Nama</td><td >:</td><td><input name='penerima' type='' value='<?php echo "$nama_fak";?>' size=80 disabled></td></tr>
+        <tr><td>Alamat</td><td >:</td><td><input name='ppn' type='text' value='Bukit' size=80 disabled></td></tr>
+        <tr><td>Mempunyai Rekening</td><td >:</td><td><input name='pph' type='text' value='<?php echo"$no_rek"; ?>' size=80 disabled></td></tr>
+        <tr></tr><tr><td><br /></td></tr> 
+
+    </table>    
+    </div>
+    <footer>
+                
+    <div class="submit_link">  
+        <input type='submit' value='Simpan'>
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+    </form>
+
+
+</article>  

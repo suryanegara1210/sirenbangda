@@ -1,0 +1,4198 @@
+<?php /**
+    * @brief Model Class yang terkait dengan Sub Bisnis Proses belanja
+    * ganti uang persediaan (GUP) pada Bisnis Proses Belanja
+    *
+    * Class Model ini untuk mengelola proses ganti uang persediaan (GUP)
+    * yang merupakan bagian dari Bisnis Proses Belanja
+    *
+    * @author Dwi Adi Jaya Antika
+    * @author Putu Ari Arjana
+    * @author I Wayan Sudharmika
+    * @author I Wayan Shandyasa
+    */
+
+    class m_tup_spj extends CI_Model {
+       
+    public function __construct()
+    {
+        parent::__construct();
+        $this->table_name = 't_kwitansi';
+    }
+/**
+* Fungsi untuk mendapatkan jumlah UP
+* @return object
+*/    
+function get_sum_up(){
+        $id_subunit = $this->session->userdata('id_subunit');
+        $this->db->select('sum(jumlah) as sum_up ');
+        $this->db->from('t_uraian');
+        $this->db->where('id_subunit',$id_subunit); 
+        $this->db->where('id_jenisbelanja','1'); 
+        return $this->db->get(); 
+    }
+
+/**
+* Fungsi untuk mendapatkan nama unit
+* @return object
+*/    
+function get_nama_unit(){
+        $id_unit = $this->session->userdata('id_unit');
+        $this->db->select('nama_unit');
+        $this->db->from('m_unit');
+        $this->db->where('id_unit',$id_unit); 
+
+        return $this->db->get(); 
+    }
+
+/**
+* Fungsi untuk mendapatkan data nama sub unit
+* @param id_kwitansi is integer id kwitansi sebagai acuan mencari nama subunit pembuat kwitansi
+* @return object
+*/    
+function get_nm_subunit(){
+        $id_subunit = $this->session->userdata('id_subunit');
+        $this->db->select('nama_subunit');
+        $this->db->from('m_subunit');
+        $this->db->where('id_subunit',$id_subunit); 
+        return $this->db->get(); 
+    }
+/**
+* Fungsi untuk mendapatkan data nama sub unit
+* @param id_kwitansi is integer id kwitansi sebagai acuan mencari nama subunit pembuat kwitansi
+* @return object
+*/    
+function get_nama_subunit($id_kwitansi){
+        $id_subunit = $this->session->userdata('id_subunit');
+        $this->db->select('nama_subunit');
+        $this->db->from('m_subunit');
+        $this->db->join("t_kwitansi",'t_kwitansi.id_subunit=m_subunit.id_subunit','inner');         
+        $this->db->where('id_kwitansi',$id_kwitansi); 
+        return $this->db->get(); 
+    }
+
+
+
+/**
+* Fungsi untuk mendapatkan data golongan
+* @return list of object
+*/    
+function getGolongan() {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('tb_golongan');
+            $this->db->order_by('id_golongan','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '<<-Pilih Output->>';
+                $result[$row->id_golongan]= ("$row->golongan");
+            }
+            
+            return $result;
+        }
+
+/**
+* Fungsi untuk mendapatkan data output
+* @return list of object
+*/    
+ function getOutputList($jns_kwitansi)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('kdoutput','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Output-';
+                $result[$row->kdoutput]= ("$row->kdoutput - $row->nmoutput");
+            }
+            
+            return $result;
+           
+        }
+
+/**
+* Fungsi untuk mendapatkan data komponen
+* @return list of object
+*/    
+ function getKomponenList($jns_kwitansi,$kdoutput)
+        {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('kdoutput',$kdoutput); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('nmkomponen','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Komponen-';
+                $result[$row->kdkomponen]= ("$row->kdkomponen - $row->nmkomponen");
+            }
+            
+            return $result; 
+        }   
+        
+/**
+* Fungsi untuk mendapatkan data sub komponen
+* @return list of object
+*/    
+ function getSubKomponenList($jns_kwitansi,$kdoutput,$kdkomponen)
+        {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('kdoutput',$kdoutput); 
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdskomponen IS NOT NULL');
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('nmkomponen','ASC');
+            $array_keys_values = $this->db->get();
+            
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Sub Komponen-';
+                $result[$row->kdskomponen]= ("$row->kdskomponen - $row->nmskomponen");
+            }
+            
+            return $result; 
+        } 
+/**
+* Fungsi untuk menghitung data sub komponen
+* @return list of object
+*/    
+ function getCountSubKomponen($jns_kwitansi,$kdoutput,$kdkomponen)
+        {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('kdoutput',$kdoutput); 
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->where('kdskomponen IS NOT NULL'); 
+            $this->db->order_by('nmkomponen','ASC');
+            return $this->db->count_all_results();
+            
+        } 
+/**
+* Fungsi untuk mendapatkan data akun
+* @return list of object
+*/            
+    function getAkunList($jns_kwitansi,$kdoutput,$kdkomponen)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit);  
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('kdakun','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Akun-';
+                $result[$row->kdakun]= ("$row->kdakun - $row->nmakun"); 
+            }
+            
+            return $result;
+        }
+/**
+* Fungsi untuk mendapatkan data akun
+* @return list of object
+*/            
+    function getAkunList_test($jns_kwitansi,$kdoutput,$kdkomponen,$kdskomponen)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit);  
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdskomponen',$kdskomponen);
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('kdakun','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Akun-';
+                $result[$row->kdakun]= ("$row->kdakun - $row->nmakun"); 
+            }
+            
+            return $result;
+        }
+/**
+* Fungsi untuk mendapatkan data akun
+* @return list of object
+*/            
+    function getAkunList_test2($jns_kwitansi,$kdoutput,$kdkomponen,$kdskomponen)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit);  
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdskomponen',$kdskomponen);
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('kdakun','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Akun-';
+                $result[$row->kdakun]= ("$row->kdakun - $row->nmakun"); 
+            }
+            
+            return $result;
+        }
+/**
+* Fungsi untuk mendapatkan data header
+* @param kdakun is integer kode akun
+* @param kdkomponen is integer kode komponen
+* @param kdoutput is integer kode output
+* @return list of object
+*/            
+    function getHeaderList($jns_kwitansi,$kdoutput,$kdkomponen,$kdakun)
+        {
+            
+            $kode_unit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_unit);  
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdakun',$kdakun); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            
+            { 
+                $result[0]= '-Pilih Header-';
+                $result[$row->id_header]= ("$row->hdr");
+            }
+            
+            return $result;
+        }
+        
+        function getHeaderList_test($jns_kwitansi,$kdoutput,$kdkomponen,$kdskomponen,$kdakun)
+        {
+            
+            $kode_unit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_unit);  
+            $this->db->where('kdoutput',$kdoutput);
+            $this->db->where('kdkomponen',$kdkomponen);
+            $this->db->where('kdskomponen',$kdskomponen);
+            $this->db->where('kdakun',$kdakun); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            
+            { 
+                $result[0]= '-Pilih Header-';
+                $result[$row->id_header]= ("$row->hdr");
+            }
+            
+            return $result;
+        } 
+
+/**
+* Fungsi untuk mendapatkan data output
+* @return list of object
+*/    
+function getOutputList2($jns_kwitansi)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('kdoutput','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Output-';
+                $result[$row->kdoutput]= ("$row->kdoutput - $row->nmoutput");
+            }
+            
+            return $result;
+           
+        }
+
+/**
+* Fungsi untuk mendapatkan data komponen
+* @return list of object
+*/    
+function getKomponenList2($jns_kwitansi,$kdoutput2)
+        {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_subunit); 
+            $this->db->where('kdoutput',$kdoutput2); 
+            $this->db->where('type_kwitansi',$jns_kwitansi); 
+            $this->db->order_by('nmkomponen','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Komponen-';
+                $result[$row->kdkomponen]= ("$row->kdkomponen - $row->nmkomponen");
+            }
+            
+            return $result; 
+        }   
+
+/**
+* Fungsi untuk mendapatkan data akun
+* @return list of object
+*/                    
+    function getAkunList2()
+       {
+            $output_id = $this->input->post('kdoutput2');
+            $komponen_id = $this->input->post('kdkomponen2');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_rba');
+            $this->db->join("m_output_rba",'m_rba.rba_outputid=m_output_rba.output_id','inner');      
+            $this->db->join("m_komponen_rba",'m_rba.rba_komponenid=m_komponen_rba.komponen_id','inner'); 
+            $this->db->join("m_akun_rba",'m_rba.rba_akunid=m_akun_rba.akun_id','inner'); 
+            $this->db->where('m_output_rba.output_kode',$output_id); 
+            $this->db->where('m_komponen_rba.komponen_kode',$komponen_id); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Akun-';
+                $result[$row->akun_kode]= ("$row->akun_kode - $row->akun_nama"); 
+            }
+            
+            return $result;
+        }
+        
+        
+
+/**
+* Fungsi untuk mendapatkan data header
+* @param kdakun2 is integer kode akun 2
+* @param kdkomponen2 is integer kode komponen 2
+* @param kdoutput2 is integer kode outpu 2
+* @return list of object
+*/                    
+    function getHeaderList2($kdakun2, $kdkomponen2,$kdoutput2)
+        {
+            
+            $kode_unit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_unit);  
+            $this->db->where('kdoutput',$kdoutput2);
+            $this->db->where('kdkomponen',$kdkomponen2);
+            $this->db->where('kdakun',$kdakun2); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            
+            { 
+                $result[0]= '-Pilih Header-';
+                $result[$row->id_header]= ("$row->hdr");
+            }
+            
+            return $result;
+        } 
+
+        function getHeaderList_test2($jns_kwitansi,$kdoutput2,$kdkomponen2,$kdakun2,$kdskomponen2)
+        {
+            
+            $kode_unit = $this->session->userdata('kode_subunit');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_unit);  
+            $this->db->where('kdoutput',$kdoutput2);
+            $this->db->where('kdkomponen',$kdkomponen2);
+            $this->db->where('kdskomponen',$kdskomponen2);
+            $this->db->where('kdakun',$kdakun2); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            
+            { 
+                $result[0]= '-Pilih Header-';
+                $result[$row->id_header]= ("$row->hdr");
+            }
+            
+            return $result;
+        } 
+
+/**
+* Fungsi untuk mendapatkan data output
+* @return list of object
+*/    
+ function getOutputList3()
+       {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_output_rba');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Output-';
+                $result[$row->output_kode]= ("$row->output_kode - $row->output_nama");
+            }
+            
+            return $result;
+        }
+
+/**
+* Fungsi untuk mendapatkan data komponen
+* @return list of object
+*/    
+ function getKomponenList3()
+        {
+            $output_id = $this->input->post('kdoutput3');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_rba');
+            $this->db->join("m_output_rba",'m_rba.rba_outputid=m_output_rba.output_id','inner');      
+            $this->db->join("m_komponen_rba",'m_rba.rba_komponenid=m_komponen_rba.komponen_id','inner');      
+            $this->db->where('m_output_rba.output_kode',$output_id); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Komponen-';
+                $result[$row->komponen_kode]= ("$row->komponen_kode - $row->komponen_nama");
+            }
+            
+            return $result; 
+        }   
+
+/**
+* Fungsi untuk mendapatkan data akun
+* @return list of object
+*/                            
+    function getAkunList3()
+       {
+            $output_id = $this->input->post('kdoutput3');
+            $komponen_id = $this->input->post('kdkomponen3');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_rba');
+            $this->db->join("m_output_rba",'m_rba.rba_outputid=m_output_rba.output_id','inner');      
+            $this->db->join("m_komponen_rba",'m_rba.rba_komponenid=m_komponen_rba.komponen_id','inner'); 
+            $this->db->join("m_akun_rba",'m_rba.rba_akunid=m_akun_rba.akun_id','inner'); 
+            $this->db->where('m_output_rba.output_kode',$output_id); 
+            $this->db->where('m_komponen_rba.komponen_kode',$komponen_id); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Akun-';
+                $result[$row->akun_kode]= ("$row->akun_kode - $row->akun_nama"); 
+            }
+            
+            return $result;
+        }
+
+/**
+* Fungsi untuk mendapatkan data header
+* @param kdakun3 is integer kode akun 3
+* @param kdkomponen3 is integer kode komponen 3
+* @param kdoutput3 is integer kode outpu 3
+* @return list of object
+*/                            
+    function getHeaderList3($kdakun3, $kdkomponen3,$kdoutput3)
+        {
+            
+            $kode_unit = $this->session->userdata('kode_subunit');
+            $id_akun3 = $this->input->post('id_akun3');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->where('kode_unit',$kode_unit);  
+            $this->db->where('kdoutput',$kdoutput3);
+            $this->db->where('kdkomponen',$kdkomponen3);
+            $this->db->where('kdakun',$kdakun3); 
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            
+            { 
+                $result[0]= '-Pilih Header-';
+                $result[$row->id_header]= ("$row->hdr");
+            }
+            
+            return $result;
+        }   
+
+/**
+* Fungsi untuk mendapatkan data jenis pajak
+* @return list of object
+*/                            
+function get_jenis_pajak()
+        {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('tb_pajak');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Jenis Pajak-';
+                $result[$row->id_pajak]= (" [PPN : $row->ppn % ] - [PPH : $row->pph% ] - $row->ket");
+            }
+            
+            return $result;
+        }
+
+/**
+* Fungsi untuk mendapatkan nilai pajak
+* @param jns_pajak is integer kode jenis pajak
+* @return of object
+*/                            
+function get_nilai_pajak($jns_pajak)
+        {
+            $this->db->select('*');
+            $this->db->from('tb_pajak');
+            $this->db->where('id_pajak',$jns_pajak);
+            return $this->db->get();
+        }        
+
+/**
+* Fungsi untuk mendapatkan list nama 
+* @param kode_subunit is integer kode subunit
+* @param kdoutput is integer kode output
+* @param kdkomponen is integer kode komponen
+* @param kdakun is integer kode akun
+* @param hdr is integer kode header
+* @return list of object
+*/    
+function getnamaList($kode_subunit,$kdoutput,$komponen,$akun,$header)
+        { 
+        $q=$this->db->query("  SELECT * FROM (`t_rkakl`) WHERE `kdakun` = '$akun' AND `kdoutput` = '$kdoutput' AND `kdkomponen` = '$komponen' AND `id_header` = '$header' AND kdskomponen IS NULL GROUP BY kdgiat");              
+        return $q;
+        }
+function getnamaListSub($kode_subunit,$kdoutput,$komponen,$kdskomponen,$akun,$header)
+        { 
+        $q=$this->db->query("  SELECT * FROM (`t_rkakl`) WHERE `kdakun` = '$akun' AND `kdoutput` = '$kdoutput' AND `kdkomponen` = '$komponen' AND `id_header` = '$header' AND kdskomponen = '$kdskomponen' GROUP BY kdgiat");              
+        return $q;
+        }
+/**
+* Fungsi untuk menyimpan data belaja barang
+* @param jns_kwitansi is integer kode jenis kwitansi
+* @param subunit is integer kode subunit
+* @param unit_kerja is varchar kode unit
+* @param tgl_kwitansi is date tanggal kwitansi 
+* @param tpt_kwitansi is varchar tempat kwitansi
+* @param kegiatan is integer kegiata (4078)
+* @param akun is ineger akun
+* @param ket_kwitansi is varchar keterangan kwitansi
+* @param nominal is integer nominal angka kwitansi
+* @param j_pajak is integer kode jenis pajak
+* @param ppn is integer nilai pajak ppn
+* @param pph is integer nilai pajak pph
+* @param pengambil is varchar nama pengambil uang kwitansi
+* @param penerima is varchar nama penerima uang kwitansi
+* @param kdoutput is integer kode output
+* @param komponen is varchar komponen
+* @param header is varchar header
+* @param nip_pengambil is integer nip pengambil uang kwitansi
+* @param nmoutput is varchar nama output
+* @param nmkomponen is varchar nama komponen
+* @param nmakun is varchar nama akun
+* @param id_header is integer id header
+* @param nmheader isvarchar nama header
+*/    
+function simpan_bb(
+                    $jns_kwitansi, 
+                    $subunit, 
+                    $unit_kerja, 
+                    $tgl_kwitansi,  
+                    $tpt_kwitansi, 
+                    $kegiatan,  
+                    $akun, 
+                    $ket_kwitansi, 
+     
+                    $nominal, 
+                    $j_pajak,
+                    $ppn, 
+                    $pph, 
+                    $pengambil, 
+                    $penerima,
+                    $kdoutput,
+                    $kdkomponen,
+                    $nip_pengambil,
+                    $nmoutput,$nmkomponen,$nmakun,$header,$nmheader,$nmsubkomponen,$subkomponen,
+                    $kode_bas1,$id_sp2d
+                 )
+{
+    
+    //hitungan ppn dan pph
+    $ppn=($ppn/100)*$nominal;
+    $pph=($pph/100)*$nominal;
+    
+    
+    $this->db->trans_strict(FALSE);
+    $this->db->trans_start();
+
+     $id=$this->nomer->no_baru2('t_kwitansi','kwitansi','id_subunit',$subunit, date('y')); 
+     
+     $this->db->set('jenis_kwitansi',$jns_kwitansi);
+     
+     $this->db->set('id_sifatpembayaran','2');
+     $this->db->set('id_unit',$unit_kerja);
+     
+      
+     $this->db->set('tgl_kwitansi',$tgl_kwitansi);
+     $this->db->set('tpt_kwitansi',$tpt_kwitansi);
+     $this->db->set('kegiatan','4078');
+     $this->db->set('kdoutput',$kdoutput);
+     $this->db->set('nmoutput',$nmoutput);
+     $this->db->set('kdkomponen',$kdkomponen);
+     $this->db->set('nmkomponen',$nmkomponen);
+      $this->db->set('kdskomponen',$subkomponen);
+     $this->db->set('nmskomponen',$nmsubkomponen);
+     $this->db->set('kdakun',$akun);
+     $this->db->set('nmakun',$nmakun);
+     $this->db->set('hdr',$header);
+     $this->db->set('nmheader',$nmheader);
+     $this->db->set('ket_kwitansi',$ket_kwitansi);
+     $this->db->set('nominal',$nominal);
+     $this->db->set('id_pajak',$j_pajak);
+     $this->db->set('ppn',$ppn);
+     $this->db->set('pph',$pph);
+     $this->db->set('pengambil',$pengambil);
+     $this->db->set('nip_pengambil',$nip_pengambil);
+     $this->db->set('penerima',$penerima);
+     $this->db->set('akun_kode',$kode_bas1);
+     $this->db->set('id_sp2d',$id_sp2d);
+     //$this->db->set('status',0);
+         
+        $this->db->where('id_kwitansi', $id['id_kwitansi']);
+        $this->db->where('th_kwitansi', $id['th_kwitansi']);
+        $this->db->where('id_subunit', $id['id_subunit']);
+    
+    if(isset($namazz) && $namazz[0]!=''){
+    $this->db->update('t_kwitansi'); 
+        $uang=0;
+        $pajak=0;
+            foreach ($namazz as $no=>$nam){
+                $golongan2=substr($golongan[$no],-4);
+                  $pph_honor=strstr($golongan[$no],'--',true);
+                $pph_pajak=$pph_honor*$bruto[$no]/100;
+                
+                $uang=($uang + $bruto[$no]);
+                $pajak=($pajak + $pph_pajak);
+                
+                $id_honor = $this->nomer->no_baru('tb_honor_gu','honor','id_subunit',$subunit, date('y'));
+                
+                 $this->db->set('id_kwitansi',$id['id_kwitansi']);
+                 $this->db->set('nama',$nam);
+                 $this->db->set('jabatan',$jabatan[$no]);
+                 $this->db->set('golongan',$golongan2);
+                 $this->db->set('bruto',$bruto[$no]);
+                 $this->db->set('pph', $pph_pajak);
+                    
+                    $this->db->where('id_honor', $id_honor['id_honor']);
+                    $this->db->where('th_honor', $id_honor['th_honor']);
+                    $this->db->where('id_subunit', $id_honor['id_subunit']);
+                    $this->db->update('tb_honor_gu');     
+                    
+                    //==============================
+                    $this->db->set('nominal',$uang);
+                    $this->db->set('pph',$pajak);
+                    $this->db->where('id_kwitansi', $id['id_kwitansi']);
+                    $this->db->where('th_kwitansi', $id['th_kwitansi']);
+                    $this->db->where('id_subunit', $id['id_subunit']);
+                    $this->db->update('t_kwitansi');
+                           
+            }
+    }
+        
+    else
+    {
+                    
+                    $this->db->update('t_kwitansi');    
+    }
+    
+    
+    
+     
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === FALSE){
+        ?>    
+            <script type="text/javascript" language="javascript">
+            alert(" Data Gagal di simpan");
+            </script>             
+        <?php echo "<meta http-equiv='refresh' content='0; url=".site_url()."tup_spj/buat_gu'>";
+    }else{
+        ?>    
+            <script type="text/javascript" language="javascript">
+            alert(" Data Berhasil di simpan");
+            </script>             
+        <?php echo "<meta http-equiv='refresh' content='0; url=".site_url()."tup_spj/daftar_kuitansi_gu'>";
+    }
+}
+
+/**
+* Fungsi untuk menyimpan data kwitansi spd
+* @param subunit is varchar kode subunit pembuat kwitansi
+* @param jns_kwitansi is integer kode jenis kwitansi
+* @param unit_kerja is integer kode unit pembuat kwitansi
+* @param tgl_kwitansi is date tanggal kwitansi
+* @param pp_spd is varchar panitia pelaksana perjalanan dinas
+* @param no_spd is varchar nomer surat perjalan dinas
+* @param dari is varchar daerah asal perjalan dinas
+* @param tujuan is varchar daerah tujuan perjalanan dians
+* @param yg_bepergian is varchar nama orang yang bepergian
+* @param nip is integer nip orang yang bepergian
+* @param maksud is varchar tujuan diadakan perjalanan dinas
+* @param tgl_b is date tanggal berangkat
+* @param tgl_k is date tanggal kembali
+* @param ket_spd is varchar keterangan perjalanan dianas
+* @param kdoutput2 is integer kode output 
+* @param komponen2 is varchar nama komponen
+* @param akun2 is varchar kode akun
+* @param header2 is varchar kode header
+* @param golongan2 is varchar  kode golongan
+* @param perincian is varchar rincian perjalanan dinas
+* @param jumlah is integer jumlah nominal pengluaran untuk perjalanan dians
+* @param pph is integer nilai pajak pph
+* @param nmoutput2 is varchar nama output
+* @param nmkomponen2 is varchar nama komponen
+* @param nmakun2 is varchar nama akun
+* @param id_header2 is integer kode header
+* @param nmheader2 is varchar nama header
+*/    
+function simpan_spd(
+                $subunit, 
+                $jns_kwitansi,  
+                $unit_kerja, 
+                $tgl_kwitansi, 
+                $pp_spd, 
+                $no_spd, 
+                $dari, 
+                $tujuan, 
+                $yg_bepergian, 
+                $nip, 
+                $maksud, 
+                $tgl_b, 
+                $tgl_k,
+                $tempat, 
+                $ket_spd, 
+                $kdoutput2,
+                $komponen2,
+                $akun2, 
+                $golongan2,
+                $perincian,
+                $jumlah,
+                $pph,$nmoutput2,$nmkomponen2,$nmakun2,$id_header2,$nmheader2,$nmsubkomponen2,$subkomponen2,
+                $kode_bas2,$id_sp2d
+    )
+{
+         
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        $id=$this->nomer->no_baru2('t_kwitansi','kwitansi','id_subunit',$subunit, date('y')); 
+
+         $this->db->set('id_sifatpembayaran','2');
+         $this->db->set('jenis_kwitansi',$jns_kwitansi); 
+         $this->db->set('id_unit',$unit_kerja); 
+         $this->db->set('tgl_kwitansi',$tgl_kwitansi);
+         $this->db->set('kegiatan','4078');
+         $this->db->set('kdoutput',$kdoutput2);
+         $this->db->set('nmoutput',$nmoutput2);
+         $this->db->set('kdkomponen',$komponen2);
+         $this->db->set('nmkomponen',$nmkomponen2);
+         $this->db->set('kdskomponen',$subkomponen2);
+         $this->db->set('nmskomponen',$nmsubkomponen2);
+         $this->db->set('kdakun',$akun2);
+         $this->db->set('nmakun',$nmakun2);
+         $this->db->set('hdr',$id_header2);
+         $this->db->set('nmheader',$nmheader2);
+         $this->db->set('ket_kwitansi',$ket_spd);
+         $this->db->set('ket_spd',$ket_spd);
+         $this->db->set('id_pajak','0');
+         $this->db->set('ppn','0');
+         $this->db->set('pph','0');
+         $this->db->set('pp_spd',$pp_spd);
+        // $this->db->set('tgl_spd',$tgl_spd);
+         $this->db->set('dari',$dari);
+         $this->db->set('tujuan',$tujuan);
+         $this->db->set('yg_bepergian',$yg_bepergian);
+         $this->db->set('nip',$nip);
+         $this->db->set('gol',$golongan2);
+         $this->db->set('maksud',$maksud);
+         $this->db->set('tgl_b',$tgl_b);
+         $this->db->set('tgl_k',$tgl_k);
+         $this->db->set('tpt_kwitansi',$tempat);
+         $this->db->set('ket_spd',$ket_spd);
+         $this->db->set('akun_kode',$kode_bas2);
+         $this->db->set('id_sp2d',$id_sp2d);
+         //$this->db->set('status',0);
+            
+            $this->db->where('id_kwitansi', $id['id_kwitansi']);
+            $this->db->where('th_kwitansi', $id['th_kwitansi']);
+            $this->db->where('id_subunit', $id['id_subunit']);
+            $this->db->update('t_kwitansi');
+        
+        
+        if(isset($perincian) && $perincian[0]!=''){
+            $uang=0;
+            $pajak=0;
+                foreach ($perincian as $no=>$nam){
+                    $uang=($uang + $jumlah[$no]);
+                    $pajak=($pajak + $pph[$no]);
+                    $id_honor = $this->nomer->no_baru('tb_spd','spd','id_subunit',$subunit, date('y'));
+                    
+                     $this->db->set('id_kwitansi',$id['id_kwitansi']);
+                     $this->db->set('rincian',$nam);
+                     $this->db->set('jumlah',$jumlah[$no]);
+                     $this->db->set('pph', $pph[$no]);
+                        
+                        $this->db->where('id_spd', $id_honor['id_spd']);
+                        $this->db->where('th_spd', $id_honor['th_spd']);
+                        $this->db->where('id_subunit', $id_honor['id_subunit']);
+                        $this->db->update('tb_spd');            
+                }
+                    $this->db->set('nominal',$uang);
+                    $this->db->set('pph',$pajak);
+                    $this->db->where('id_kwitansi', $id['id_kwitansi']);
+                    $this->db->where('th_kwitansi', $id['th_kwitansi']);
+                    $this->db->where('id_subunit', $id['id_subunit']);
+                    $this->db->update('t_kwitansi');
+        }
+         
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE){
+            ?>    
+                <script type="text/javascript" language="javascript">
+                alert(" Data Gagal di simpan");
+                </script>             
+            <?php echo "<meta http-equiv='refresh' content='0; url=".site_url()."tup_spj/buat_gu'>";
+        }else{
+            ?>    
+                <script type="text/javascript" language="javascript">
+                alert(" Data Berhasil di simpan");
+                </script>             
+            <?php echo "<meta http-equiv='refresh' content='0; url=".site_url()."tup_spj/daftar_kuitansi_gu'>";
+        }    
+        
+}
+
+/**
+* Fungsi untuk menyimpan data kwitansi honor
+* @param subunit is integer kode subunit pembuat kwitansi
+* @param jns_kwitansi is integer kode jenis kwitansi
+* @param unit_kerja is integer  kode unit pembuat kwitansi
+* @param tgl_kwitansi is date tanggal dibuat kwitansi
+* @param tpt_kwitansi3 is varchar tempat kwitansi
+* @param output_kode3 is integer kode output
+* @param komponen_kode3 is integer kode komponen
+* @param akun_kode3 is integer kode akun
+* @param id_header3 is integer kode header
+* @param ket_kwitansi3 is varchar keterangan kwitansi
+* @param ket_sptb3 is varchar keterangan sptb
+* @param pelaksana_honor is varchar nama panitia pelaksana honor
+* @param nip_pelaksana_honor is integer nip panitia pelaksana
+* @param penerima_honor is varchar nama penerima honor
+* @param no_sk is varchar  nomer sk honor
+* @param tgl_sk is date tanggal sk honor
+* @param kop_honor is varchar kop surat daftar penerima honor
+* @param jns_honor is integer kode jenis honor
+* @param namazz is varhcar array nama penerima honor
+* @param jabatan is varchar jabata penerima honor
+* @param golongan is varchar golongan penerima honor
+* @param jum_org is integer jumlah orang penerima honor
+* @param h_naskah is integer honor naskah
+* @param nama_mhs is varchar nama mahasiswa
+* @param nim_mhs is integer nim mahasiswa
+* @param kd_mk is integer kode mata kuliah
+* @param m_kul is varchar nama mata kuliah
+* @param kls is varchar nama kelas mahasiswa
+* @param jum_hadir is integer jumlah kehadiran dalam kegiatan
+* @param jum_bln is integer jumlah bulan kegiatan
+* @param ptkp is integer 
+* @param pkp is integer
+* @param jum_hari is integer jumlah hari kegiatan
+* @param bruto is integer jumla bruto honor
+* @param nmoutput3 is varchar nama output
+* @param nmkomponen3 is varchar nama komponen
+* @param nmakun3 is varchar nama akun
+* @param id_header3 isinteger kode header
+* @param nmheader3 is varchar nama header
+* @param nip_penerima_honor is integer nip orang penerima honor
+
+*/    
+function simpan_honor_gup(
+                        $subunit, 
+                        $jns_kwitansi, 
+                        $unit_kerja, 
+                        $tgl_kwitansi, 
+                        $tpt_kwitansi3, 
+                        $kdoutput3, 
+                        $kdkomponen3, 
+                        $kdakun3, 
+                        $id_header3, 
+                        $ket_kwitansi3, 
+                        $ket_sptb3, 
+                        $pelaksana_honor, 
+                        $nip_pelaksana_honor, 
+                        $penerima_honor, 
+                        $no_sk,
+                        $tgl_sk, 
+                        $kop_honor, 
+                        $jns_honor, 
+                        $namazz, 
+                        $jabatan, 
+                        $golongan, 
+                        $jml_org, 
+                        $h_naskah, 
+                        $nama_mhs, 
+                        $nim_mhs, 
+                        $kd_mk,     
+                        $m_kul,     
+                        $kls,     
+                        $jml_hadir,     
+                        $jml_bln,     
+                        $ptkp, 
+                        $pkp,     
+                        $jml_hari,     
+                        $bruto,
+                        $nmoutput3,$nmkomponen3,$nmakun3,$id_header3,$nmheader3,$nmsubkomponen3,$subkomponen3,
+                        $nip_penerima_honor,$kode_bas3,$id_sp2d
+                        )
+{
+         
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        $id=$this->nomer->no_baru2('t_kwitansi','kwitansi','id_subunit',$subunit, date('y')); 
+
+         $this->db->set('id_sifatpembayaran','2');
+         $this->db->set('tpt_kwitansi',$tpt_kwitansi3);
+         $this->db->set('jenis_kwitansi',$jns_kwitansi); 
+         $this->db->set('id_unit',$unit_kerja); 
+         $this->db->set('tgl_kwitansi',$tgl_kwitansi);
+         $this->db->set('kegiatan','4078');
+         $this->db->set('kdoutput',$kdoutput3);
+         $this->db->set('nmoutput',$nmoutput3);
+         $this->db->set('kdkomponen',$kdkomponen3);
+         $this->db->set('nmkomponen',$nmkomponen3);
+         $this->db->set('kdskomponen',$subkomponen3);
+         $this->db->set('nmskomponen',$nmsubkomponen3);
+         $this->db->set('kdakun',$kdakun3);
+         $this->db->set('nmakun',$nmakun3);
+         $this->db->set('hdr',$id_header3);
+         $this->db->set('nmheader',$nmheader3);
+         $this->db->set('ket_kwitansi',$ket_kwitansi3);
+         $this->db->set('id_pajak','0');
+         $this->db->set('ppn','0');
+         $this->db->set('pph','0');
+         $this->db->set('pengambil',$pelaksana_honor);
+         $this->db->set('nip_pengambil',$nip_pelaksana_honor);
+         $this->db->set('penerima',$penerima_honor);
+         $this->db->set('nip_penerima',$nip_penerima_honor);
+         $this->db->set('no_sk_rektor',$no_sk);
+         $this->db->set('tgl_sk_rektor',$tgl_sk);
+         $this->db->set('kop_honor',$kop_honor);
+         $this->db->set('akun_kode',$kode_bas3);
+         $this->db->set('id_sp2d',$id_sp2d);
+         
+            $this->db->where('id_kwitansi', $id['id_kwitansi']);
+            $this->db->where('th_kwitansi', $id['th_kwitansi']);
+            $this->db->where('id_subunit', $id['id_subunit']);
+            $this->db->update('t_kwitansi');
+            
+    if(isset($namazz) && $namazz[0]!=''){
+        $nominal=0;
+        $pajak=0;
+            foreach ($namazz as $no=>$nam){
+                    $this->db->select("pph_honor");
+                    $this->db->from('tb_pajak_golongan');
+                    $this->db->join("tb_golongan",'tb_golongan.id_golongan=tb_pajak_golongan.id_golongan','inner');   
+                    $this->db->where('tb_golongan.golongan', $golongan[$no]);
+                    $result = $this->db->get();
+                    $row = $result->row();    
+                $pphx = $row->pph_honor;        
+                                    
+
+                if($jns_honor=='1')
+                {
+                    $jum_bruto=$jml_bln[$no]*$bruto[$no];
+                    $pph=$pphx*$jum_bruto/100;
+                    }
+                 else
+                if($jns_honor=='2')
+                {
+                    $jum_bruto=$jml_hadir[$no]*$bruto[$no];
+                    $pph=$pphx*$jum_bruto/100;
+                    }
+                 else
+                if($jns_honor=='3')
+                {
+                    $jum_bruto=$jml_org[$no]*$bruto[$no];
+                    $pph=$pphx*($jum_bruto + $h_naskah[$no])/100;
+                    }
+                 else
+                if($jns_honor=='4' or $jns_honor=='7' or $jns_honor=='8' or $jns_honor=='5')
+                {
+                    $jum_bruto=$bruto[$no];
+                    $pph=$pphx*($jum_bruto)/100;
+                    }
+                 else
+                if($jns_honor=='6')
+                {
+                    $jum_bruto=$jml_hari[$no]*$bruto[$no];
+                    $pph=$pphx*$jum_bruto/100;
+                    }
+                //=====================================================
+                //=====================================================
+                if($jns_honor=='3')
+                {
+                    $nominal=($nominal + $jum_bruto + $h_naskah[$no]);
+                    }
+                    else
+                {
+                    $nominal=($nominal + $jum_bruto);
+                }
+                
+                $pajak=($pajak + $pph);
+
+                $id_honor = $this->nomer->no_baru('tb_honor_gu','honor','id_subunit',$subunit, date('y'));
+                 
+                 $this->db->set('id_kwitansi',$id['id_kwitansi']);
+                 $this->db->set('jns_honor',$jns_honor);
+                 $this->db->set('nama',$nam);
+                 $this->db->set('jabatan',$jabatan[$no]);
+                 $this->db->set('golongan',$golongan[$no]);
+                 $this->db->set('nama_mhs',$nama_mhs[$no]);
+                 $this->db->set('nim_mhs',$nim_mhs[$no]);
+                 $this->db->set('kd_mk',$kd_mk[$no]);
+                 $this->db->set('m_kul',$m_kul[$no]);
+                 $this->db->set('kls',$kls[$no]);
+                 $this->db->set('jum_hadir',$jml_hadir[$no]);
+                 $this->db->set('jum_org',$jml_org[$no]);
+                 $this->db->set('jum_hari',$jml_hari[$no]);
+                 $this->db->set('jum_bln',$jml_bln[$no]);                 
+                 $this->db->set('honor_naskah',$h_naskah[$no]);
+                 $this->db->set('bruto',$bruto[$no]);
+                 $this->db->set('jum_bruto',$jum_bruto);
+                 $this->db->set('pph',$pph);
+                 $this->db->set('ptkp',$ptkp[$no]);
+                 $this->db->set('pkp',$pkp[$no]);
+                    
+                    $this->db->where('id_honor', $id_honor['id_honor']);
+                    $this->db->where('th_honor', $id_honor['th_honor']);
+                    $this->db->where('id_subunit', $id_honor['id_subunit']);
+                    $this->db->update('tb_honor_gu');     
+                    
+                    //==============================
+                    $this->db->set('nominal',$nominal);
+                    $this->db->set('pph',$pajak);
+                    $this->db->where('id_kwitansi', $id['id_kwitansi']);
+                    $this->db->where('th_kwitansi', $id['th_kwitansi']);
+                    $this->db->where('id_subunit', $id['id_subunit']);
+                    $this->db->update('t_kwitansi');
+                           
+            }
+    }
+    
+    
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE){
+            ?>    
+                <script type="text/javascript" language="javascript">
+                alert(" Data Gagal di simpan");
+                </script>             
+            <?php echo "<meta http-equiv='refresh' content='0; url=".site_url()."tup_spj/buat_gu'>";
+        }else{
+            ?>    
+                <script type="text/javascript" language="javascript">
+                alert(" Data Berhasil di simpan");
+                </script>             
+            <?php echo "<meta http-equiv='refresh' content='0; url=".site_url()."tup_spj/daftar_kuitansi_gu'>";
+        }    
+        
+}
+
+/**
+* Fungsi untuk mendapatkan nilai banyaknya da ta kwitansi
+* @return integer 
+*/    
+     function banyak_dt_kwitansi()
+        {  
+           $this->db->select('*');
+           $this->db->from('t_kwitansi');           
+           $query = $this->db->get();   
+           return $query->num_rows() ; 
+        }
+
+/**
+* Fungsi untuk mendapatkan nilai banyaknya da ta kwitansi
+* @return integer 
+*/    
+    function data_kuitansi2(){    
+    $kode_subunit = $this->session->userdata('id_subunit');        
+            $sql= $this->db->query("SELECT DISTINCT `id_kwitansi`, `tgl_kwitansi`,`jenis_kwitansi`,`kegiatan`, `nominal`, `t_kwitansi`.`kdakun`,`t_kwitansi`.`kdoutput`, no_kwitansi, 
+                                     `ket_kwitansi`, `pengambil`,`nip_pengambil`, `penerima` FROM (`t_kwitansi`,`t_rkakl`) WHERE `status` = '0' AND
+                                    id_subunit= '".$kode_subunit."' AND `t_kwitansi`.`kdoutput` = `t_rkakl`.`kdoutput`AND `t_kwitansi`.`th_kwitansi`='".date('y')."'");
+            return $sql->num_rows();
+    }
+
+/**
+* Fungsi untuk mendapatkan nilai banyaknya data kwitansi
+* @return list of object 
+*/        
+    function data_kuitansi(){    
+    $id_subunit = $this->session->userdata('id_subunit');        
+    $sql= $this->db->query("SELECT DISTINCT  *, `id_kwitansi`,`id_jk`,`jk`,`th_kwitansi`,`status`,`nip_pengambil`,
+                         `tgl_kwitansi`,`jenis_kwitansi`,`kegiatan`, `nominal`, no_kwitansi, `t_kwitansi`.`kdakun`, `t_kwitansi`.`kdoutput`,
+                          `ket_kwitansi`, `pengambil`, `penerima` ,`id_status_kwitansi` 
+                            FROM (`t_kwitansi`,`m_jeniskwitansi`) 
+                            WHERE `t_kwitansi`.`jenis_kwitansi` = `m_jeniskwitansi`.`id_jk` 
+                            AND t_kwitansi.id_sifatpembayaran=m_jeniskwitansi.id_sifat_pembayaran
+                            AND `id_status_kwitansi` = '0' 
+                            AND `t_kwitansi`.`id_sifatpembayaran` = '2' 
+                            AND t_kwitansi.id_subunit= '$id_subunit' 
+                            AND `t_kwitansi`.`th_kwitansi`='".date('y')."' 
+                        " );
+            return $sql; 
+    }
+
+/**
+* Fungsi untuk mendapatkan nilai banyaknya data kwitansi
+* @return list of object 
+*/        
+    function semua_data_kuitansi(){    
+    $id_subunit = $this->session->userdata('id_subunit');        
+            $sql= $this->db->query("SELECT *, jk as jenis_kwitansi FROM t_kwitansi AS k, m_status_kwitansi AS ms, m_jeniskwitansi AS mj
+                                    WHERE k.id_status_kwitansi=ms.id_status_kwitansi
+                                    AND k.jenis_kwitansi=mj.id_jk
+                                    AND k.id_sifatpembayaran=mj.id_sifat_pembayaran
+                                    AND k.th_kwitansi='".date('y')."' 
+                                    AND k.id_subunit='$id_subunit'
+                                    AND k.id_sifatpembayaran='2' " );
+            return $sql; 
+    }
+
+    function info_jum_kwitansi()
+        {
+            $th_kwitansi = date('y');
+            $id_subunit = $this->session->userdata('id_subunit');
+            $this->db->query(" SELECT * FROM t_kwitansi AS k, m_status_kwitansi AS m
+                                WHERE k.id_status_kwitansi=m.id_status_kwitansi
+                                AND k.th_kwitansi='$th_kwitansi' AND k.id_subunit='$id_subunit' "); 
+            return $this->db->count_all_results();
+        }
+
+    
+    function jum_kwitansi()
+        {
+            $th_kwitansi = date('y');
+            $id_subunit = $this->session->userdata('id_subunit');
+            $this->db->select('*'); 
+            $this->db->from("t_kwitansi");      
+            $this->db->where('id_subunit',$id_subunit); 
+            $this->db->where('th_kwitansi',$th_kwitansi);
+            $this->db->where('id_sifatpembayaran',2); 
+            $this->db->where('id_status_kwitansi',0); 
+            $result = $this->db->get();
+            return $result->num_rows() ;  
+        }
+
+/**
+* Fungsi untuk mendapatkan data kwitansi
+* @param id is integer id kwitansi
+* @param th is integer tahun kwitansi
+* @return list of object 
+*/            
+    function getKuitansi($id,$th){
+        $kode_subunit = $this->session->userdata('id_subunit');    
+                $sql= $this->db->query("SELECT `id_kwitansi`,jenis_kwitansi,pph,ppn, YEAR(tgl_kwitansi) AS 'tahun',`tgl_kwitansi`, `tpt_kwitansi`, th_kwitansi, no_kwitansi, akun_kode,       `kegiatan`, `nominal`,`t_kwitansi`.`kdakun`, `t_kwitansi`.`kdoutput`, `ket_kwitansi`, `pengambil`,`nip_pengambil`, `penerima`, nip_penerima, nip  
+                                        ,yg_bepergian FROM (`t_kwitansi`, `t_rkakl`) WHERE id_kwitansi='$id' AND th_kwitansi='$th' AND id_subunit='$kode_subunit'
+                                        GROUP BY id_kwitansi;");
+            return $sql; 
+    
+    }
+
+/** 
+* Fungsi untuk mengubah status kwitansi cetak
+* @param id is integer merupakan id dari kwitansi yang dipilih
+* @param th is integer merupakan tahun dari kwitansi yang dipilih
+*/   
+     function ubah_status_kwi_cetak($th,$id)
+        { 
+                 
+            $this->db->set('id_status_kwitansi',19);       
+            $this->db->where('id_kwitansi',$id);
+            $this->db->where('th_kwitansi',$th);
+            $this->db->where('id_sifatpembayaran = 2');
+            $this->db->update('t_kwitansi'); 
+        }
+
+
+/**
+* Fungsi untuk mendapatkan nama penandatanganan
+* @return list of object 
+*/            
+    function getNamattd(){
+        $id_unit = $this->session->userdata('id_unit');
+        $sql= $this->db->query("SELECT nama_bpp,nip_bpp,nama_ppk,nip_ppk FROM m_bpp ,m_ppk, m_unit
+                                WHERE 
+                                m_unit.id_bpp=m_bpp.id_bpp
+                                AND m_unit.id_ppk=m_ppk.id_ppk
+                                AND m_unit.id_unit=$id_unit"
+                              );
+            return $sql; 
+    }
+
+/**
+* Fungsi untuk menyimpan honor
+* @param id is integer id kwitansi
+* @param nama is varchar nama penerima honor
+* @param golongan2 is varchar golongan penerima honor
+* @param jabatan is varchar jabatan penerima honor
+* @param bruto is integer jumlah bruto honor
+* @param pph is integer jumlah pajak pph honor
+* @return list of object 
+*/                
+function simpan_honor($id,$nama,$golongan2,$jabatan,$bruto,$pph){
+     $ssql = $this->db->query(" insert into tb_honor_gu(id_kwitansi,nama,jabatan,golongan,bruto,pph) values
+                             ('$id','$nama','$jabatan','$golongan2','$bruto','$pph')");
+     return $ssql;
+}
+
+/**
+* Fungsi untuk menampilkan honor
+* @param id is integer id kwitansi
+* @return list of object
+*/                
+function tampil_honor($id){
+        $this->db->select('*,tb_jabatan.jabatan as jab');
+        $this->db->from('tb_honor_gu');
+        $this->db->from('tb_jabatan');
+        $this->db->where('id_kwitansi',$id);
+        $this->db->where('tb_jabatan.id_jabatan = tb_honor_gu.jabatan');
+        return $this->db->get(); 
+    }
+
+/**
+* Fungsi untuk menampilkan jumlah honor
+* @param id is integer id kwitasi
+* @return integer
+*/                    
+function cek_honor($id){
+        $this->db->select('*');
+        $this->db->from('tb_honor_gu');
+        $this->db->where('id_kwitansi',$id);
+        $result = $this->db->get();
+            return $result->num_rows(); 
+    }
+
+/**
+* Fungsi untuk menampilkan kode dan nama unit
+* @return list of object 
+*/                   
+    function daftar_unit()
+        {   
+            $kode_unit = $this->session->userdata('kode_unit'); 
+            $q=$this->db->query("SELECT kode_unit, nama_unit, jumlah FROM m_unit_pengisi 
+                                LEFT JOIN
+                                (SELECT *, COUNT(*) AS jumlah FROM t_kwitansi) AS xx
+                                ON m_unit_pengisi.kode_unit=xx.unit_kerja
+                                WHERE kode_uplevel='".$kode_unit."'
+                                ");
+            return $q; 
+        }
+
+/**
+* Fungsi untuk menampilkan list unit
+* @param id_unit is integer id dari unit 
+* @return array(2 dimensi)
+*/                        
+ function getUnitList($id_unit)
+         {
+            $this->db->select('*');
+            $this->db->from('m_subunit');
+            $this->db->where('id_unit',$id_unit);    
+            $result = $this->db->get();  
+            return $result->result_array();
+        }
+
+/**
+* Fungsi untuk menampilkan semua unit
+* @return array(2 dimensi)
+*/                        
+ function semua_unit()
+         {     
+            $this->db->select('*');
+            $this->db->from('m_unit_pengisi');
+            $this->db->group_by('group_unit');  
+            $result = $this->db->get();  
+            return $result->result_array();
+        }    
+
+/**
+* Fungsi untuk menampilkan jumlah kwitansi
+* @param id_subunit is integer id dari subunit
+* @return integer
+*/                        
+ function banyak_kwitansi($id_subunit)
+    {           
+            $result=$this->db->query("SELECT * 
+                FROM t_kwitansi 
+                WHERE 
+                id_subunit=$id_subunit and 
+                ( id_status_kwitansi=1 or id_status_kwitansi=3 or id_status_kwitansi=19 or id_status_kwitansi=21  )
+                and id_sifatpembayaran=2 and th_kwitansi='".date('y')."'
+                GROUP BY id_kwitansi
+                                ");
+            return $result->num_rows() ;            
+    }
+
+/**
+* Fungsi untuk menampilkan data kwitansi
+* @param id_subunit is integer id dari subunit
+* @return list of object  
+*/                    
+ function data_kuitansi3($id_subunit)
+     {            
+            $result=$this->db->query("SELECT * 
+                FROM t_kwitansi, m_jeniskwitansi 
+                WHERE t_kwitansi.jenis_kwitansi=m_jeniskwitansi.id_jk and 
+                id_subunit=$id_subunit and 
+                ( id_status_kwitansi=1 or id_status_kwitansi=3 or id_status_kwitansi=19 or id_status_kwitansi=21 )
+                and id_sifatpembayaran=2  and t_kwitansi.th_kwitansi='".date('y')."'
+                GROUP BY t_kwitansi.id_kwitansi 
+                                ");
+            return $result; 
+    } 
+
+/**
+* Fungsi untuk menampilkan nama subunit
+* @param id_subunit is integer id dari subunit
+* @return menghasilkan 1 buah object
+*/                    
+ function nama_subunit($id_subunit)
+     {            
+            $this->db->select('*');
+            $this->db->from('m_subunit');
+            $this->db->where('id_subunit',$id_subunit);
+            $nama_subunit = $this->db->get(); 
+            return $nama_subunit->row();
+    }            
+
+/**
+* Fungsi untuk menampilkan data kwitansi yang di verifikasi
+* @param id is integer id kwitansi
+* @param th is varchar tahun kwitansi
+* @return list of object
+*/                
+ function getKuitansi_veri($id,$th){
+            $this->db->select('id_kwitansi,th_kwitansi,YEAR(tgl_kwitansi) AS "tahun",tgl_kwitansi,tpt_kwitansi, nip, nip_penerima, nip_pengambil 
+            ,jenis_kwitansi,id_unit,kegiatan,nominal,kdakun,kdoutput,ket_kwitansi, yg_bepergian, id_status_kwitansi, id_sifatpembayaran,  
+            pengambil,penerima,status,ppn,pph,id_pajak,st_kwitansi,st_ssp,st_bukti, akun_kode ');
+            $this->db->from('t_kwitansi');
+            $this->db->where('id_kwitansi',$id);
+            $this->db->where('th_kwitansi',$th);
+            return $this->db->get(); 
+    
+    }
+
+/**
+* Fungsi untuk menampilkan nama pemberi tanda tangan
+* @return list of object
+*/                
+ function getNamattd2(){
+        $kode_unit = $this->session->userdata('kode_unit');
+        $this->db->select('nama_ppk,nip_ppk');
+        $this->db->from('m_unit');
+        $this->db->where('kode_unit',$kode_unit);
+        return $this->db->get(); 
+    }
+
+/**
+* Fungsi untuk menampilkan jenis pajak
+* @param id is integer id kwitansi
+* @return list of object
+*/                    
+ function get_jenis_pajak_veri($id){
+        
+        $result=$this->db->query("
+                SELECT tb_pajak.ppn AS ppn,tb_pajak.pph AS pph,tb_pajak.ket AS ket  
+                FROM tb_pajak, t_kwitansi 
+                WHERE t_kwitansi.id_pajak=tb_pajak.id_pajak AND t_kwitansi.id_kwitansi = '".$id."' 
+                                ");
+        return $result;
+    }
+    
+/**
+* Fungsi untuk menampilkan verifikasi subunit
+* @param object is array data isian yang akan di update ke tabel kwitansi
+* @param id is integer id kwitansi
+* @param th is integer tahun kwitansi
+* @return boolean 
+*/                    
+ function ver_subunit($objek,$id,$th){
+    $this->db->where('id_kwitansi', $id);
+    $this->db->where('th_kwitansi', $th);
+    $this->db->update('t_kwitansi', $objek);
+    if ($this->db->affected_rows()>0){
+        return true;
+    }else{
+        return false;    
+    }
+  }    
+
+/**
+* Fungsi untuk menyimpan komentar
+* @param id is integer id kwitansi
+* @param comment is varchar isian komentar
+*/                  
+  function simpan_histori_komen($comment,$id){
+    $user=$this->session->userdata('username');
+    $data = array(
+      'id_kwitansi'=>$id,
+      'tanggal'=>date('Y-m-d'),
+      'comment'=>$comment
+    );
+    $this->db->insert('tb_gu_riwayat',$data);
+  }    
+
+/**
+* Fungsi untuk menampilkan histori
+* @param id is integer id kwitansi
+* @return list of object
+*/                  
+ function get_history($id, $th)
+        {            
+            $this->db->select('*');
+            $this->db->from('tb_waktu_kwitansi');
+            $this->db->where('id_kwitansi',$id);
+            $this->db->where('th_kwitansi',$th);
+            $this->db->where('komentar <>""');
+            $this->db->order_by('tanggal_waktu', 'asc');   
+            return $this->db->get(); 
+        }
+
+/**
+* Fungsi untuk menampilkan honor
+* @param id is integer id kwitansi
+* @return list of object
+*/                
+ function view_honor($id)
+        {            
+            $this->db->select('*, year(t_kwitansi.tgl_kwitansi) as tahun, tb_honor_gu.pph as pph_honor');
+            $this->db->from('tb_honor_gu');
+            $this->db->join("t_kwitansi",'t_kwitansi.id_kwitansi=tb_honor_gu.id_kwitansi','inner');         
+            $this->db->where('tb_honor_gu.id_kwitansi',$id);
+            return $this->db->get(); 
+        }
+
+/**
+* Fungsi untuk menampilkan honor
+* @param id is integer id kwitansi
+* @return list of object
+*/                        
+ function view_honor_print($id)
+        {            
+            $this->db->select('*, year(t_kwitansi.tgl_kwitansi) as tahun, tb_honor_gu.pph as pph_honor');
+            $this->db->from('tb_honor_gu');
+            $this->db->join("t_kwitansi",'t_kwitansi.id_kwitansi=tb_honor_gu.id_kwitansi','inner');  
+            $this->db->join("m_subunit",'t_kwitansi.id_subunit=m_subunit.id_subunit','inner');         
+            $this->db->where('tb_honor_gu.id_kwitansi',$id);
+            $hasil=$this->db->get(); 
+            return $hasil->result();
+        }
+
+/**
+* Fungsi untuk menampilkan ada/tidak kwitansi
+* @param id is_subunit integer id sub unit pembuat kwitansi
+* @param th is integer tahun kwitansi 
+* @param bl is integer bulan pembuatan kwitansi
+* @return boolean 
+*/                        
+ function cek_ada_kwitansi($id_subunit,$th,$bl)
+        {     
+            $this->db->select('*');
+            $this->db->from('t_kwitansi');     
+            $this->db->where('id_subunit',$id_subunit);     
+            $this->db->where('th_kwitansi',$th);
+            $this->db->where('MONTH(tgl_kwitansi)',$bl);     
+            $this->db->where('id_sifatpembayaran',2); 
+            $this->db->where('id_status_kwitansi',0); 
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {      
+                return false;
+            }
+            else    
+            {     
+                return true;
+            }
+        }
+
+/**
+* Fungsi untuk menampilkan id dan tahunkwitansi
+* @param id_subunit is integer id kwitansi
+* @param th is integer tahun kwitansi
+* @param bl is integer bulan pembuatan kwitansi
+* @return list of object 
+*/                        
+ function daftar_gu_subunit($id_subunit,$th,$bl)
+        {   
+            
+            $this->db->select("t_kwitansi.id_kwitansi, t_kwitansi.th_kwitansi"); 
+            $this->db->from('t_kwitansi');     
+            $this->db->where('id_subunit',$id_subunit);     
+            $this->db->where('th_kwitansi',$th);
+            $this->db->where('MONTH(tgl_kwitansi)',$bl);     
+            $this->db->where('id_sifatpembayaran',2); 
+            $this->db->where('id_status_kwitansi',0);
+            $this->db->group_by('t_kwitansi.id_kwitansi');
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk mengubah status pengajuan kwitansi
+* @param id_subunit is integer id subunit pembuat kwitansi
+* @param th is integer tahun kwitansi
+* @param id_kwitansi is integer
+*/                                
+ function ubah_status_gu_ajukan($id_subunit,$id_kwitansi,$th)
+        { 
+                 
+            $this->db->set('id_status_kwitansi',1);       
+            $this->db->where('id_kwitansi',$id_kwitansi);
+            $this->db->where('id_subunit',$id_subunit);     
+            $this->db->where('th_kwitansi',$th);
+            $this->db->update('t_kwitansi'); 
+        }
+
+/**
+* Fungsi untuk menyimpan waktu pengajuan kwitansi
+* @param id_kwitansi is integer id kwitansi
+* @param th is integer tahun kwitansi
+*/                                
+ function masuk_waktu_pengajuan($id_kwitansi,$th)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi, th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th', '$tgl_skrg $jam_skrg','diajukan','1')");
+
+  }
+  
+/**
+* Fungsi untuk menyimpan waktu revisi verifikasi 
+* @param id_kwitansi is integer id kwitansi
+* @param th_kwitansi is integer tahun kwitansi
+* @param level_terkini is integer
+*/                                    
+ function masuk_kirim_hasil_revisi($id_kwitansi,$th_kwitansi,$level_terkini)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi, th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_kwitansi', '$tgl_skrg $jam_skrg','kirim hasil revisi','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menyimpan waktu kwitansi terverifikasi
+* @param id_kwitansi is integer id kwitansi
+* @param th_kwitansi is integer tahun kwitansi
+* @param level_terkini is integer
+*/                                              
+function masuk_waktu_terverifikasi_kwitansi($id_kwitansi,$th_kwitansi,$level_terkini)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi, th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_kwitansi', '$tgl_skrg $jam_skrg','terverifikasi verifikator unit','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menyimpan waktu revisi kwitansi dan komentar 
+* @param comment is varchar isian komentar
+* @param id is integer id kwitansi
+* @param th is integer tahun kwitansi
+* @param level_terkini is integer level terkini dari revisi kwitansi
+* @return boolean 
+*/                                              
+ function masuk_waktu_revisi_kwitansi($comment,$id,$th,$level_terkini)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi, th_kwitansi, tanggal_waktu,status_waktu,level,komentar) values('$id','$th', '$tgl_skrg $jam_skrg','revisi ke subunit','$level_terkini','$comment')");
+            if($w)
+            {
+                return true;
+                }
+            else
+            {
+                return false;
+                }    
+        }
+
+/**
+* Fungsi untuk menyimpan data revisi kwitansi
+* @return list of object 
+*/                                              
+ function data_rev_kuitansi()
+     {        
+    $id_subunit = $this->session->userdata('id_subunit');    
+            $result=$this->db->query("SELECT * 
+                FROM t_kwitansi, m_jeniskwitansi 
+                WHERE t_kwitansi.jenis_kwitansi=m_jeniskwitansi.id_jk and
+                id_subunit='".$id_subunit."' and 
+                t_kwitansi.th_kwitansi='".date('y')."' and 
+                ( id_status_kwitansi=2 or id_status_kwitansi=20 )
+                GROUP BY id_kwitansi 
+                                ");
+            return $result; 
+    }
+    
+/**
+* Fungsi untuk menampilkan jenis pajak
+* @return list of object 
+*/                                              
+ function edit_jenis_pajak()
+        {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('tb_pajak');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Jenis Pajak-';
+                $result[$row->id_pajak]= (" [PPN : $row->ppn % ] - [PPH : $row->pph% ] - $row->ket");
+            }
+            
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan pph
+* @param id_pajak is integer id pajak untuk memperoleh pph
+* @return menghasilkan 1 buah object 
+*/                                              
+ function get_pph($id_pajak)
+        {
+            $this->db->select('pph');
+            $this->db->from('tb_pajak');   
+            $this->db->where('id_pajak',$id_pajak);     
+            $hasil = $this->db->get();
+            $result=$hasil->row();
+            return $result->pph;
+        } 
+
+/**
+* Fungsi untuk menampilkan ppn
+* @param id_pajak is integer id pajak untuk memperoleh ppn
+* @return menghasilkan 1 buah object 
+*/                                              
+ function get_ppn($id_pajak)
+        {
+            $this->db->select('ppn');
+            $this->db->from('tb_pajak');   
+            $this->db->where('id_pajak',$id_pajak);     
+            $hasil = $this->db->get();
+            $result=$hasil->row();
+            return $result->ppn;
+        } 
+        
+/**
+* Fungsi untuk mengedit data kwitansi
+* @param object is array data array yang berisi data-data yang akan di update
+* @param id_kwitansi is integer id kwitansi
+* @return boolean 
+*/                                              
+ function edit_kwitansi($objek,$id_kwitansi){
+    $this->db->where('id_kwitansi', $id_kwitansi);
+    $this->db->update('t_kwitansi', $objek);
+    if ($this->db->affected_rows()>0){
+        return true;
+    }else{
+        return false;    
+    }
+  } 
+
+/** 
+* Fungsi untuk membuat data kuitansi cetak
+* @return list of object
+*/ 
+    function data_kuitansi_cetak(){    
+    $kode_subunit = $this->session->userdata('id_subunit');        
+            $sql= $this->db->query("SELECT DISTINCT `id_kwitansi`,`th_kwitansi`,`status`,`nip_pengambil`, no_kwitansi,  `tgl_kwitansi`,`jenis_kwitansi`,`kegiatan`, `nominal`, `t_kwitansi`.`kdakun`, `t_kwitansi`.`kdoutput`, `ket_kwitansi`, `pengambil`, `penerima` ,id_status_kwitansi 
+                                    FROM (`t_kwitansi`) 
+                                    WHERE `id_status_kwitansi` = '18' 
+                                    AND id_subunit= '$kode_subunit' 
+                                    AND `t_kwitansi`.`id_sifatpembayaran`='2' 
+                                    AND `t_kwitansi`.`th_kwitansi`='".date('y')."' 
+                                    ");
+            return $sql; 
+    }
+
+ 
+/**
+* Fungsi untuk mengupdate status kwitansi
+* @param id_kwitansi is integer id kwitansi
+* @return boolean 
+*/                                                
+  function update_status_gu($id_kwitansi)
+    {
+            $q=$this->db->query("UPDATE t_kwitansi SET status_sptb = 'sudah' WHERE id_kwitansi='".$id_kwitansi."'");
+            return $q;
+    
+    }
+    
+/**
+* Fungsi untuk menampilkan list data output
+* @param id_unit is integer id unit untuk mencari output pada unit bersangkutan
+* @param tahun is integer  tahun 
+* @return array (2 dimensi)
+*/                                                      
+    function output_list($id_unit,$tahun)
+    {      
+            $q=$this->db->query( "SELECT DISTINCT * FROM t_rkakl WHERE kode_unit='U003' GROUP BY kdoutput, kdakun" );
+            return $q->result_array();
+    }
+
+/**
+* Fungsi untuk menyimpan waktu revisi kwitansi dan komentar 
+* @param kdoutput is integer kode output
+* @param kdakun is integer kode akun 
+* @param th is integer tahun
+* @param bulan is integer bulan
+* @return integer 
+*/                                                  
+    function banyak_kwitansi_sptb($kdouput, $kdakun,$th,$bulan)
+    {
+            $this->db->select('*'); 
+            $this->db->from("t_kwitansi");           
+            $this->db->where('kdoutput',$kdouput);
+            $this->db->where('kdakun',$kdakun);
+            $this->db->where('th_kwitansi',$th);
+            $this->db->where('id_sifatpembayaran',2);
+            $this->db->where('id_status_kwitansi',4);
+            $this->db->where('MONTH(tgl_kwitansi)',$bulan);
+            $this->db->group_by('t_kwitansi.id_kwitansi'); 
+            $result = $this->db->get();
+            return $result->num_rows() ;
+    }
+
+/**
+* Fungsi untuk menampilkan data kwitansi sptb
+* @param kdoutput is varchar kode output
+* @param id_akun is integer id dari akun
+* @param bulan is integer bulan
+* @return list of object 
+*/                                                  
+    function data_kuitansi_sptb($kdoutput,$id_akun,$bulan){    
+            $id_unit = $this->session->userdata('id_unit');    
+            $q=$this->db->query("SELECT* FROM t_kwitansi JOIN (SELECT id_subunit FROM m_subunit WHERE id_unit=$id_unit) AS subunit ON t_kwitansi.id_subunit=subunit.id_subunit WHERE `id_status_kwitansi` = '4' AND id_sifatpembayaran = '2' AND MONTH(tgl_kwitansi) = $bulan AND th_kwitansi = '".date('y')."' AND `kdoutput` = $kdoutput AND `kdakun` = $id_akun ;");
+            return $q;
+    }
+
+/**
+* Fungsi untuk menampilkan kwitansi
+* @param kdoutput is varchar kode output 
+* @param id_akun is integer id akun
+* @param bulan is integer bulan
+* @return list of object 
+*/                                                      
+    function ambil_id($kdoutput,$id_akun,$bulan){
+            $id_unit = $this->session->userdata('id_unit');            
+            $q=$this->db->query("SELECT* FROM t_kwitansi JOIN (SELECT id_subunit FROM m_subunit WHERE id_unit='".$id_unit."') AS subunit ON t_kwitansi.id_subunit=subunit.id_subunit WHERE `id_status_kwitansi` = '4' AND id_sifatpembayaran ='2' AND MONTH(tgl_kwitansi) = $bulan AND `kdoutput` = $kdoutput AND `kdakun` ='".$id_akun."' ;");
+            return $q;
+    }
+
+/**
+* Fungsi untuk mencari nilai maksimal no sptb
+* @return menghasilkan 1 buah object 
+*/                                                  
+function max_num_sptb(){
+            $id_unit = $this->session->userdata('id_unit');            
+            $q=$this->db->query("SELECT MAX(no_sptb) as maks FROM t_sptb where th_sptb='".date('y')."' and id_unit='".$id_unit."'");
+            $hasil=$q->row();
+            return $hasil->maks;
+    }
+
+/**
+* Fungsi untuk mencari nilai maksimal id sptb
+* @return menghasilkan 1 buah object 
+*/                                                      
+function max_id_sptb(){
+            $id_unit = $this->session->userdata('id_unit');            
+            $q=$this->db->query("SELECT MAX(id_sptb) as maks FROM t_sptb where th_sptb='".date('y')."' and id_unit='".$id_unit."'");
+            $hasil=$q->row();
+            return $hasil->maks;
+    }
+
+/**
+* Fungsi untuk menghasilkan nama unit
+* @param id_unit is integer id unit
+* @return menghasilkan 1 buah object 
+*/                                                  
+function nama_unit($id_unit){            
+            $q=$this->db->query("SELECT nama_unit_singkat as maks FROM m_unit where id_unit='".$id_unit."'");
+            $hasil=$q->row();
+            return $hasil->maks;
+    }    
+
+/**
+* Fungsi untuk menghasilkan nama unit
+* @param id_sptb is integer id sptb yang akan di update
+* @param id is integer id kwitansi
+* @param th is integer tahun kwitansi
+* @return boolean
+*/                                                  
+function update_sptb($id_sptb,$id,$th){            
+            $q=$this->db->query("UPDATE t_kwitansi SET id_status_kwitansi = '5' ,  
+            id_sptb='$id_sptb' 
+            WHERE id_kwitansi='$id' and th_kwitansi=$th");
+            return $q;
+    }
+
+/**
+* Fungsi untuk meyimpan sptb
+*/                                                      
+function simpan_sptb(){    
+            $id_unit = $this->session->userdata('id_unit');            
+            $id_output = $this->input->post('id_output');
+            $id_akun = $this->input->post('id_akun');
+            if($id_output=="" or $id_akun=="")
+            {
+              $this->session->set_userdata('msg_typ','err');
+              $this->session->set_userdata('msg', 'Maaf data SPTB yang anda maksudkan tidak ada');
+              redirect('tup_spj/daftar_sptb_gu'); 
+              exit;
+            }
+            $bulan = date('m');
+            $kwitansi = $this->m_tup_spj->ambil_id($id_output,$id_akun,$bulan);
+            
+            $id=$this->nomer->no_baru2('t_sptb','sptb','id_unit',$id_unit, date('y')); 
+            $tgl_skrg = date("Y-m-d");
+            $this->db->set('id_sifatpembayaran','2'); 
+            $this->db->set('tgl_sptb',$tgl_skrg);
+            $this->db->where('id_sptb', $id['id_sptb']);
+            $this->db->where('th_sptb', $id['th_sptb']);
+            $this->db->where('id_unit', $id['id_unit']);
+            $this->db->update('t_sptb'); 
+            
+            $th  =date ('y');
+            
+            foreach($kwitansi->result_array() as $row)
+                     {  
+                        $id_k = $row ['id_kwitansi'];
+                        $this->m_tup_spj->update_sptb($id['id_sptb'],$id_k,$th);
+                        //echo $this->db->last_query();
+                        $get_id = $this->m_tup_spj->ambil_level_tertinggi($id_k,$th);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->m_tup_spj->masuk_waktu_dibuatkan_sptb($id_k,$level_terkini,$th);
+                     } 
+            
+            
+    }
+
+/**
+* Fungsi untuk menyimpan waktu buat sptb
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level terkini
+* @param th is integer tahun
+* @param terkini is integer
+*/                                                  
+function masuk_waktu_dibuatkan_sptb($id_kwitansi,$level_terkini,$th)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th','$tgl_skrg $jam_skrg','dibuatkan sptb','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan data sptb
+* @param th is integer tahun
+* @param bulan is integer bulan
+* @return list of object
+*/                                                              
+function data_sptb($th,$bulan,$id_unit){            
+            $this->db->select('*, year(tgl_sptb) as thn');
+            $this->db->from('t_kwitansi');
+            $this->db->join("t_sptb",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');
+            $this->db->join("m_status_sptb",'m_status_sptb.id_status_sptb=t_sptb.id_status_sptb','inner');
+            $this->db->where('t_sptb.id_sifatpembayaran','2');
+            $this->db->where('MONTH(tgl_sptb)',$bulan);
+            $this->db->where('th_sptb',$th);
+            $this->db->where('t_sptb.id_status_sptb <> 11 ');
+            $this->db->where('t_kwitansi.id_unit', $id_unit);
+            $this->db->group_by('t_sptb.id_sptb');
+            return $this->db->get(); 
+    }
+
+/**
+* Fungsi untuk mencari data sptb
+* @param id is integer id sptb
+* @param th is integer tahun pembuatan sptb
+* @return list of object
+*/                                                                  
+function get_sptb_kwitansi($id,$th){
+            $q=$this->db->query("SELECT *, SUBSTRING(akun_kode,7,2) AS jenis_belanja, year(tgl_sptb) as thn, `t_kwitansi`.`kdoutput` as kd_out FROM (`t_kwitansi`) INNER JOIN `t_sptb` as m ON `t_kwitansi`.`id_sptb`=`m`.`id_sptb` INNER JOIN `t_rkakl` as n ON `t_kwitansi`.`kdakun`=`n`.`kdakun` WHERE `m`.`id_sptb` = '$id' AND `m`.`th_sptb` = '$th' GROUP BY `m`.`id_sptb` ");
+            return $q; 
+    }
+
+/**
+* Fungsi untuk menampilkan detail sptb
+* @param th is integer tahun kwitansi
+* @param id is integer id sptb
+* @return list of object
+*/                                                                  
+    function get_sptb_kwitansi_detail($id,$th){
+            $this->db->select('*','SUBSTRING(t_kwitansi.akun_kode,7,2) as jenis_belanja');
+            $this->db->from('t_kwitansi, m_subunit');
+            $this->db->where('id_sptb',$id);
+            $this->db->where('th_kwitansi',$th);
+            $this->db->where('t_kwitansi.id_subunit = m_subunit.id_subunit');
+            $kueri=$this->db->get();
+            return $kueri->result();
+    }
+
+/**
+* Fungsi untuk menampilkan nama unit 
+* @param id_unit is integer id unit
+* @return menghasilkan 1 buah object
+*/                                                                  
+function nama_unit_sptb($id_unit){            
+            $q=$this->db->query("SELECT id_pd2,id_bpp,nama_unit FROM m_unit where id_unit='".$id_unit."'");
+            return $hasil=$q->row();
+    }
+
+/**
+* Fungsi untuk menampilkan nama kode akun
+* @param id_unit is integer id unit
+* @return menghasilkan 1 buah object
+*/                                                                  
+function get_namakdakun($id_unit){
+            $this->db->select('*');
+            $this->db->from('t_rkakl');
+            $this->db->join("t_kwitansi as m",'m_unit.id_unit=m.id_unit','inner');
+            $this->db->join("t_rkakl as n",'m_unit._akun=n.kdakun','inner');
+            $this->db->where('id_unit',$id_unit);
+            $q= $this->db->get();  
+            $hasil=$q->row();
+            return $hasil->nmakun;
+    }
+
+/**
+* Fungsi untuk menampilkan data dari suatu tabel
+* @param tabel is varchar nama tabel
+* @param field_id is varchar nama field
+* @param id is integer isian id
+* @return menghasilkan 1 buah object
+*/                                                                  
+function ambil_nama_nip($tabel,$field_id,$id){
+            $this->db->select('*');
+            $this->db->from($tabel);
+            $this->db->where($field_id,$id);
+            $q= $this->db->get();  
+            return $q->row();
+    }
+
+/**
+* Fungsi untuk menampilkan data spp
+* @param id is integer id sptb
+* @param id_unit is integer id unit
+* @param th is integer tahun sptb
+* @return boolean
+*/                                                                  
+    function sptb_diajukan($id,$id_unit,$th)
+        {           
+            $this->db->select('*');
+            $this->db->from("t_spp");
+            $this->db->join("m_unit",'t_spp.id_unit=m_unit.id_unit','inner');
+            $this->db->where('m_unit.id_unit',$id_unit); 
+            $this->db->where('t_spp.th_spp',$th); 
+            $this->db->where('t_spp.id_sptb',$id);   
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {
+                return false;
+            }
+            else    
+            {
+                
+                return true;
+            }
+        } 
+
+/**
+* Fungsi untuk menampilkan data sptb
+* @param id is integer id sptb
+* @param id_unit is integer id unit
+* @param th is integer tahun sptb
+* @return list of object
+*/                                                                          
+    function cek_sptb($id,$id_unit,$th)
+        {  
+            $this->db->select('*');
+            $this->db->from("t_sptb");
+            $this->db->join("t_kwitansi as m",'m.id_sptb=t_sptb.id_sptb','inner');
+            $this->db->join("m_unit as n",'t_sptb.id_unit=n.id_unit','inner');
+            $this->db->where('n.id_unit',$id_unit); 
+            $this->db->where('t_sptb.th_sptb',$th); 
+            $this->db->where('t_sptb.id_sptb',$id);  
+            $this->db->group_by('t_sptb.id_sptb');
+            $result = $this->db->get();
+            return $result;
+        } 
+
+/**
+* Fungsi untuk menyimpan data spp
+* @param id_unit is integer id unit
+* @param sptb is varchar 
+* @param id_s is integer id sptb
+*/                                                                          
+       function simpan_spp($id_unit,$sptb, $id_s)
+        {         
+            
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");      
+            
+            $dipa = $this->m_tup_spj->ambil_level_tertinggi_dipa();
+            foreach($dipa->result_array() as $row){
+                            $dipa = $row['id_dipa'];  
+            } 
+            
+            
+            $id=$this->nomer->no_baru2('t_spp','spp','id_unit',$id_unit, date('y')); 
+            
+            $this->db->set('id_sifatpembayaran','2'); 
+            $this->db->set('id_jenispembayaran','1'); 
+            $this->db->set('id_sptb',$id_s); 
+            $this->db->set('id_kegiatan','1'); 
+            $this->db->set('tgl_dibuat',$tgl_skrg);  
+            $this->db->set('id_unit',$id_unit); 
+            $this->db->set('id_dipa',$dipa); 
+            $this->db->where('id_spp', $id['id_spp']);
+            $this->db->where('th_spp', $id['th_spp']);
+            $this->db->where('id_unit', $id['id_unit']);
+            $this->db->update('t_spp'); 
+            
+            $th  =date ('y');
+            foreach($sptb->result_array() as $row){
+            $id_sptb = $row['id_sptb'];     
+            $id_kwitansi = $row['id_kwitansi'];     
+            $th_sptb = $row['th_sptb'];     
+            $this->m_tup_spj->update_sptb_spp($id_sptb,$th_sptb);
+            $this->m_tup_spj->update_kwitansi($id_kwitansi,$th_sptb,$id['id_spp']);
+            }
+        }
+
+/**
+* Fungsi untuk mengupdate data sptb
+* @param id_sptb is integer id sptb
+* @param th_sptb is integer tahun sptb
+*/                                                                                  
+     function update_sptb_spp($id_sptb,$th_sptb)
+        {     
+             $this->db->set('id_status_sptb',2);  
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_sptb); 
+             $this->db->update('t_sptb'); 
+        } 
+
+/**
+* Fungsi untuk menampilkan level maz
+* @return list of object
+*/                                                                                          
+     function ambil_level_tertinggi_dipa()
+        {  
+           $this->db->select_max('id_dipa');
+           $this->db->from('m_dipa');    
+           $this->db->where('aktif',1);  
+           $query = $this->db->get(); 
+           return $query;
+        }
+
+/**
+* Fungsi untuk update data kwitansi
+* @param id_kwitansi is integer id kwitansi
+* @param th_kwitansi is integer tahun kwitansi
+*/                                                                                                  
+    function update_kwitansi($id_kwitansi,$th_kwitansi,$id_spp)
+        {  
+             $this->db->set('id_status_kwitansi',5); 
+             $this->db->set('id_spp',$id_spp); 
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_kwitansi); 
+             $this->db->update('t_kwitansi'); 
+        } 
+
+/**
+* Fungsi untuk menampilkan data spp
+* @param id_unit is integer id unit spp di buat
+* @return list of object
+*/                                                                                                  
+    function spp_gu($id_unit)
+        {   
+            $q=$this->db->query("SELECT t_spp.id_spp, t_spp.no_spp,t_spp.th_spp,m_status_spp.status_spp,m_unit.nama_unit, sum(nominal) as jumlah FROM t_kwitansi, t_sptb, t_spp, m_status_spp, m_unit WHERE t_spp.id_unit=m_unit.id_unit and m_status_spp.id_status_spp=t_spp.id_status_spp and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit ='$id_unit' and t_spp.id_sifatpembayaran ='2' group by t_spp.id_spp;");
+            return $q;    
+        } 
+
+/**
+* Fungsi untuk menampilkan data detail spp
+* @param id_unit is integer id unit spp pembuat 
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun pembuatan spp
+* @return list of object
+*/                                                                                                          
+    function detail_spp($id_unit,$id_spp,$th_spp)
+        {      
+            $this->db->from("t_spp"); 
+            $this->db->join("m_dipa",'t_spp.id_dipa=m_dipa.id_dipa','inner');
+            $this->db->join("m_sifatpembayaran",'t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran','inner');
+            $this->db->join("m_jenispembayaran",'t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran','inner');
+            $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');  
+            $this->db->join("t_kwitansi",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');  
+            $this->db->join("m_unit",'t_spp.id_unit=m_unit.id_unit','inner');
+            $this->db->join("m_pd2",'m_pd2.id_pd2=m_unit.id_pd2','inner');
+            $this->db->join("m_status_spp",'m_status_spp.id_status_spp=t_spp.id_status_spp','inner'); 
+            $this->db->where('t_spp.id_unit',$id_unit);
+            $this->db->where('t_spp.id_spp',$id_spp);
+            $this->db->where('t_spp.th_spp',$th_spp);
+            $this->db->group_by('t_spp.id_spp');
+            $result = $this->db->get();
+            return $result;
+        } 
+
+/**
+* Fungsi untuk menampilkan jumlah
+* @param id_unit is integer id unit
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                          
+       function jum ($id_unit,$id_spp,$th_spp)
+        {
+            $q=$this->db->query("select t_rkakl.kdoutput, t_rkakl.kdkomponen,t_rkakl.kdakun,sum(jumlah) as jumlah from t_rkakl join
+            (SELECT t_kwitansi.kdoutput as output,t_kwitansi.kdkomponen as komponen, t_kwitansi.kdakun as akun FROM (`t_spp`) INNER JOIN `m_dipa` ON `t_spp`.`id_dipa`=`m_dipa`.`id_dipa` INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb` INNER JOIN `m_sifatpembayaran` ON `t_spp`.`id_sifatpembayaran`=`m_sifatpembayaran`.`id_sifatpembayaran` INNER JOIN `m_jenispembayaran` ON `t_spp`.`id_jenispembayaran`=`m_jenispembayaran`.`id_jenispembayaran` INNER JOIN `m_unit` ON `t_spp`.`id_unit`=`m_unit`.`id_unit` WHERE `t_spp`.`id_unit` = '$id_unit' AND `t_spp`.`th_spp` = '$th_spp' AND `t_spp`.`id_spp` = '$id_spp' GROUP BY `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun`) as apa on t_rkakl.kdoutput=apa.output and t_rkakl.kdkomponen=apa.komponen and t_rkakl.kdakun=apa.akun join 
+            (SELECT kode_unit from m_unit where id_unit=$id_unit) as total_unit on t_rkakl.kode_unit=total_unit.kode_unit
+            group by t_rkakl.kdoutput,t_rkakl.kdkomponen, t_rkakl.kdakun");
+            return $q->result();
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah sebagian
+* @param id_unit is integer id unit
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun pembuatan spp
+* @return list of object
+*/                                                                                                                  
+        function jum_sebagian ($id_unit,$id_spp,$th_spp)
+        {
+            $q=$this->db->query("select t_rkakl.kdoutput, t_rkakl.kdkomponen,t_rkakl.kdakun,sum(jumlah) as jumlah from t_rkakl join
+            (SELECT t_kwitansi.kdoutput as output,t_kwitansi.kdkomponen as komponen, t_kwitansi.kdakun as akun FROM (`t_spp`) INNER JOIN `m_dipa` ON `t_spp`.`id_dipa`=`m_dipa`.`id_dipa` INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb` INNER JOIN `m_sifatpembayaran` ON `t_spp`.`id_sifatpembayaran`=`m_sifatpembayaran`.`id_sifatpembayaran` INNER JOIN `m_jenispembayaran` ON `t_spp`.`id_jenispembayaran`=`m_jenispembayaran`.`id_jenispembayaran` INNER JOIN `m_unit` ON `t_spp`.`id_unit`=`m_unit`.`id_unit` WHERE `t_spp`.`id_unit` = '$id_unit' AND `t_spp`.`th_spp` = '$th_spp' AND `t_spp`.`id_spp` = '$id_spp' GROUP BY `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun`) as apa on t_rkakl.kdoutput=apa.output and t_rkakl.kdkomponen=apa.komponen and t_rkakl.kdakun=apa.akun join 
+            (SELECT kode_unit from m_unit where id_unit=$id_unit) as total_unit on t_rkakl.kode_unit=total_unit.kode_unit
+            group by t_rkakl.kdoutput,t_rkakl.kdkomponen, t_rkakl.kdakun");
+            return $q->result();
+        } 
+
+/**
+* Fungsi untuk menampilkan jumlah spp sebelumnya
+* @param id_unit is integer id unit
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                                  
+        function jum_spp_terdahulu ($id_unit,$th_spp)
+        {
+            $q=$this->db->query("select t_kwitansi.kdoutput, t_kwitansi.kdkomponen, t_kwitansi.kdakun,sum(nominal) as jumlah from t_kwitansi join
+            ( SELECT t_kwitansi.kdoutput as output, t_kwitansi.kdkomponen as komponen, t_kwitansi.kdakun as akun FROM (`t_spp`) INNER JOIN `m_dipa` ON `t_spp`.`id_dipa`=`m_dipa`.`id_dipa` INNER JOIN `m_sifatpembayaran` ON `t_spp`.`id_sifatpembayaran`=`m_sifatpembayaran`.`id_sifatpembayaran` INNER JOIN `m_jenispembayaran` ON `t_spp`.`id_jenispembayaran`=`m_jenispembayaran`.`id_jenispembayaran` INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb`  INNER JOIN `m_unit` ON `t_spp`.`id_unit`=`m_unit`.`id_unit`  WHERE id_status_spp='12' and `t_spp`.`id_unit` = '$id_unit' and `t_spp`.`th_spp` = '$th_spp' GROUP BY `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun` ) 
+            as apa on t_kwitansi.kdoutput=apa.output and t_kwitansi.kdkomponen=apa.komponen and t_kwitansi.kdakun=apa.akun join 
+            (SELECT id_unit from m_unit where id_unit=$id_unit) as total_unit on t_kwitansi.id_unit=total_unit.id_unit
+            group by `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun`");
+            return $q->result();
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah spp sekarang
+* @param id_unit is integer id unit
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun pembuatan spp
+* @return list of object
+*/                                                                                                                  
+        function jum_kini ($id_unit,$id_spp,$th_spp)
+        {
+            $q=$this->db->query("select t_kwitansi.kdoutput, t_kwitansi.kdkomponen, t_kwitansi.kdakun,sum(nominal) as jumlah from t_kwitansi join
+            ( SELECT t_kwitansi.kdoutput as output, t_kwitansi.kdkomponen as komponen, t_kwitansi.kdakun as akun FROM (`t_spp`) INNER JOIN `m_dipa` ON `t_spp`.`id_dipa`=`m_dipa`.`id_dipa` INNER JOIN `m_sifatpembayaran` ON `t_spp`.`id_sifatpembayaran`=`m_sifatpembayaran`.`id_sifatpembayaran` INNER JOIN `m_jenispembayaran` ON `t_spp`.`id_jenispembayaran`=`m_jenispembayaran`.`id_jenispembayaran` INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb`  INNER JOIN `m_unit` ON `t_spp`.`id_unit`=`m_unit`.`id_unit`  WHERE `t_spp`.`id_unit` = '$id_unit' and `t_spp`.`th_spp` = '$th_spp' and `t_spp`.`id_spp` = '$id_spp' GROUP BY `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun` ) 
+            as apa on t_kwitansi.kdoutput=apa.output and t_kwitansi.kdkomponen=apa.komponen and t_kwitansi.kdakun=apa.akun join 
+            (SELECT id_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_kwitansi.id_subunit=total_unit.id_subunit
+            group by `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun`");
+            return $q->result();
+        }
+
+/**
+* Fungsi untuk menampilkan total pagu
+* @param id_unit is integer id unit
+* @return list of object
+*/                                                                                                                  
+        function pagu_tot_dipa ($id_unit)
+        {
+            $tahun = date('Y');
+            $q=$this->db->query("select sum(jumlah) from t_rkakl  join (SELECT kode_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_rkakl.kode_unit=total_unit.kode_subunit where tahun='$tahun' ;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah total spp terbayar
+* @param id_unit is integer id unit
+* @param th_spp is integer tahun pembuatan spp
+* @return list of object
+*/                                                                                                                  
+        function total_spp_terbayar ($id_unit,$th_spp)
+        {
+            $q=$this->db->query("select sum(nominal) from t_spp INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb` where t_spp.id_sifatpembayaran = 2 and th_spp=$th_spp and id_status_spp='12' ;");
+            return $q;
+        } 
+
+/**
+* Fungsi untuk menampilkan total spp diajukan
+* @param id_unit is integer id unit 
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                                  
+        function total_spp_diajukan ($id_unit,$id_spp,$th_spp)
+        {
+            $q=$this->db->query("select sum(nominal) from t_kwitansi,t_sptb,t_spp WHERE `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` AND `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb`  AND  `t_spp`.`id_spp` = '$id_spp' AND  `t_spp`.`th_spp` = '$th_spp' ;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan semua
+* @param id_unit is integer id unit
+* @param id_spp is integer id spp
+* @return list of object
+*/                                                                                                                  
+        function all ($id_unit,$id_spp)
+        {
+            $tahun = date('Y');
+            $q=$this->db->query("select t_rkakl.kdkomponen, t_rkakl.kdakun, sum(jumlah) as jumlah from t_rkakl join (SELECT kode_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_rkakl.kode_unit=total_unit.kode_subunit where tahun=$tahun group by t_rkakl.kdkomponen, t_rkakl.kdakun ");
+            return $q->result();
+        }
+
+/**
+* Fungsi untuk menampilkan total spp terbayar perunit
+* @param id_unit is integer id unit
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                                  
+        function total_spp_terbayar_perunit ($id_unit,$th_spp)
+        {
+            $q=$this->db->query("select sum(nominal) from t_spp INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb` where t_spp.id_sifatpembayaran = 2 and id_status_spp='12' and t_spp.id_unit=$id_unit and th_spp=$th_spp ;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan total spp diajukan
+* @param id_unit is integer id unit
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                                  
+        function total_spp_diajukan_perunit ($id_unit,$th_spp)
+        {
+            $q=$this->db->query("select sum(nominal) from t_spp INNER  JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb` where t_spp.id_sifatpembayaran = 3 and id_status_spp='1' and t_spp.id_unit=$id_unit and th_spp=$th_spp ;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan total spp semua diajukan perunit
+* @param id_unit is integer id unit
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                                  
+        function total_spp_semua_diajukan_perunit ($id_unit,$th_spp)
+        {
+            $q=$this->db->query("select sum(nominal) from t_spp INNER JOIN  `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_sptb`.`id_sptb`=`t_kwitansi`.`id_sptb` where t_spp.id_sifatpembayaran = 2 and t_spp.id_unit=$id_unit and th_spp=$th_spp;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengupdate otorisasi spp
+* @param id is integer id spp
+* @param th is integer tahun spp
+*/                                                                                                                  
+        function otorisasi_spp_up($id,$th)
+        {  
+             $this->db->set('id_status_spp',2);
+             $this->db->where('id_spp',$id); 
+             $this->db->where('th_spp',$th); 
+             $this->db->update('t_spp'); 
+        }
+
+/**
+* Fungsi untuk menampilkan spp
+* @param id is integer id spp
+* @param th is integer tahun spp
+* @return list of object
+*/                                                                                                                  
+        function selek_kwitansi($id,$th)
+        {  
+           $this->db->select('*');
+           $this->db->from('t_spp');
+           $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');     
+           $this->db->join("t_kwitansi",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');     
+           $this->db->where('t_spp.id_spp',$id);
+           $this->db->where('t_spp.th_spp',$th);
+           $query = $this->db->get(); 
+           return $query;
+        } 
+
+/**
+* Fungsi untuk mengupdate status sptb telah terotorisasi
+* @param id_sptb is integer id sptb
+* @param th is integer tahun sptb
+*/                                                                                                                          
+        function otorisasi_sptb_ppk($id_sptb,$th)
+        {  
+             $this->db->set('id_status_sptb',3);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status kwitansi yang telah terotorisasi
+* @param id_kwitansi is integer id kwitansi
+* @param th is integer tahun kwitansi
+*/                                                                                                                          
+        function otorisasi_kwitansi_ppk($id_kwitansi,$th)
+        {  
+             $this->db->set('id_status_kwitansi',6);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th); 
+             $this->db->update('t_kwitansi'); 
+        }
+
+/**
+* Fungsi untuk menampilkan nilai max level
+* @param id_kwitansi is integer id kwitansi
+* @param th is integer tahun kwitansi
+* @return list of object
+*/                                                                                                                                  
+        function ambil_level_tertinggi($id_kwitansi,$th)
+        {  
+           $this->db->select_max('level');
+           $this->db->from('tb_waktu_kwitansi');    
+           $this->db->where('id_kwitansi',$id_kwitansi);  
+           $this->db->where('th_kwitansi',$th);  
+           $query = $this->db->get(); 
+           return $query;
+        }
+
+/**
+* Fungsi untuk menyimpan waktu otorisasi
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th is integer tahun otorisasi
+* @return list of object
+*/                                                                                                                                          
+        function masuk_waktu_otorisasi_ppk($id_kwitansi,$level_terkini,$th)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th','$tgl_skrg $jam_skrg','terotorisasi ppk','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan data spp
+* @param id_unit is integer id unit pembuat spp
+* @return list of object
+*/                                                                                                                                                      
+        function spp_up_keu($id_unit)
+        {      
+            $q=$this->db->query("SELECT t_spp.id_spp, t_spp.no_spp,t_spp.th_spp,m_status_spp.status_spp,m_unit.nama_unit, sum(nominal) as jumlah FROM t_kwitansi, t_sptb, t_spp, m_status_spp, m_unit WHERE t_spp.id_unit=m_unit.id_unit and m_status_spp.id_status_spp=t_spp.id_status_spp and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit ='$id_unit' and t_spp.id_sifatpembayaran ='2' group by t_spp.id_spp;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan jenis cara bayar
+* @return list of object
+*/                                                                                                                                                  
+        function get_carabayar()
+        {       
+            $this->db->select('*');
+            $this->db->from('m_carabayar');   
+            $this->db->order_by('id_carabayar','ASC');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Cara Bayar-';
+                $result[$row->id_carabayar]= ("$row->kode_carabayar - $row->carabayar"); 
+            }  
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan data list spp
+* @param id_unit is integer id unit 
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun spp
+* @return list of object
+*/                                                                                                                                                  
+        function spp($id_unit,$id_spp,$th_spp)
+        {   
+            $q=$this->db->query("SELECT *, SUBSTRING(akun_kode,7,2) as j_belanja, sum(nominal) as jumlah FROM m_kegiatan,m_sifatpembayaran,m_jenispembayaran,t_kwitansi, t_sptb, t_spp, m_status_spp, m_unit WHERE t_spp.id_unit=m_unit.id_unit and m_status_spp.id_status_spp=t_spp.id_status_spp and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_unit ='$id_unit' and t_spp.id_spp ='$id_spp' and th_spp ='$th_spp' and t_spp.id_sifatpembayaran ='2' group by t_spp.id_spp;");
+            return $q;  
+        }
+
+/**
+* Fungsi untuk mengecek ada/tidaknya spm
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun spp
+* @return boolean
+*/                                                                                                                                                          
+        function cek_spp_spm($id_spp,$th_spp)
+        {
+            $this->db->select('*');
+            $this->db->from("t_spm");
+            $this->db->join("t_spp",'t_spm.id_spp=t_spp.id_spp','inner');    
+            $this->db->where('t_spm.id_spp',$id_spp);  
+            $this->db->where('t_spp.th_spp',$th_spp);  
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {      
+                return false;
+            }
+            else    
+            {   
+                return true;
+            }
+        } 
+
+/**
+* Fungsi untuk menyimpan data spm
+* @param id_spp is integer id spp
+* @param kwitansi is varchar kwitansi
+* @param id_unit is integer id unit
+* @param th_spp is integer tahun spp
+*/                                                                                                                                                                  
+        function simpan_spm($id_spp,$kwitansi,$id_unit,$th_spp)
+        {      
+            $tgl_skrg = date("Y-m-d");         
+            $cb = $this->input->post('cb');     
+            $kepada = $this->input->post('kepada'); 
+            $npwp = $this->input->post('npwp'); 
+            $no_rek = $this->input->post('no_rek'); 
+            $bank= $this->input->post('bank'); 
+            $uraian = $this->input->post('uraian');    
+            
+            $id=$this->nomer->no_baru2('t_spm','spm','id_unit',$id_unit, date('y')); 
+            
+            $this->db->set('id_spp',$id_spp); 
+            $this->db->set('tgl_spm',$tgl_skrg); 
+            $this->db->set('id_carabayar',$cb); 
+            $this->db->set('kepada',$kepada); 
+            $this->db->set('npwp',$npwp);  
+            $this->db->set('bank',$bank);  
+            $this->db->set('nomor_rekening',$id_unit); 
+            $this->db->set('uraian_spm',$uraian); 
+            $this->db->where('id_spm', $id['id_spm']);
+            $this->db->where('th_spm', $id['th_spm']);
+            $this->db->where('id_unit', $id['id_unit']);
+            $this->db->update('t_spm');
+            
+            $this->m_tup_spj->update_status_spp($id_spp,$th_spp); 
+            foreach($kwitansi->result_array() as $row){
+              $id_sptb = $row['id_sptb'];
+              $id_kwitansi = $row['id_kwitansi'];
+              $this->m_tup_spj->update_sptb_spm($id_sptb,$th_spp);
+              $this->m_tup_spj->update_kwitansi_spm($id_kwitansi,$th_spp);
+              $get_id = $this->m_tup_spj->ambil_level_tertinggi($id_kwitansi,$th_spp);
+                            foreach($get_id->result_array() as $row){
+                            $level = $row['level'];  
+                            }
+                            $level_terkini =  $level+1;           
+                            $this->m_tup_spj->masuk_waktu_dibuatkan_spm($id_kwitansi,$level_terkini,$th_spp);
+          } 
+        }
+
+/**
+* Fungsi untuk mengupdate status spp
+* @param id_spp is integer id spp
+* @param th_spp is integer tahun spp
+*/                                                                                                                                                                  
+        function update_status_spp($id_spp,$th_spp)
+        {    
+            $this->db->set('id_status_spp',3);   
+            $this->db->where('id_spp', $id_spp);
+            $this->db->where('th_spp', $th_spp);
+            $this->db->update('t_spp');
+        }
+
+/**
+* Fungsi untuk update data sptb yag udah jadi spm
+* @param id_sptb is integer id sptb
+* @param th_spp is integer tahun sptb
+* @return boolean
+*/                                                                                                                                                                  
+        function update_sptb_spm($id_sptb,$th_spp)
+        {    
+            $this->db->set('id_status_sptb',4);   
+            $this->db->where('id_sptb', $id_sptb);
+            $this->db->where('th_sptb', $th_spp);
+            $this->db->update('t_sptb');
+        }
+
+/**
+* Fungsi untuk mengupdate data kwitansi
+* @param id_kwitansi is integer id id_kwitansi
+* @param th_spp is integer tahun kwitansi
+*/                                                                                                                                                                  
+        function update_kwitansi_spm($id_kwitansi,$th_spp)
+        {    
+            $this->db->set('id_status_kwitansi',7);   
+            $this->db->where('id_kwitansi', $id_kwitansi);
+            $this->db->where('th_kwitansi', $th_spp);
+            $this->db->update('t_kwitansi');
+        }
+
+/**
+* Fungsi untuk menyimpan waktu spm dibuatkan
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th is integer tahun
+*/                                                                                                                                                 
+        function masuk_waktu_dibuatkan_spm($id_kwitansi,$level_terkini,$th)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th','$tgl_skrg $jam_skrg','dibuatkan spm','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan jumlah nominal spm
+* @param id_unit is integer id unit
+* @return list of object
+*/                                                                                                                                                  
+        function spm_gu_jum($id_unit)
+        {      
+            $q=$this->db->query("SELECT sum(nominal) FROM t_kwitansi, t_sptb, t_spp, t_spm, m_status_spm, m_unit WHERE t_spp.id_spp=t_spm.id_spp and t_spp.id_unit=m_unit.id_unit and m_status_spm.id_status_spm=t_spm.id_status_spm and t_sptb.id_sptb=t_spp.id_sptb and t_sptb.id_sptb=t_kwitansi.id_sptb and t_spp.id_unit ='$id_unit' and t_spp.id_sifatpembayaran ='2' group by t_spp.id_spp;");
+            return $q; 
+        }
+
+/**
+* Fungsi untuk menampilkan data spm
+* @param id_unit is integer id unit
+* @return list of object
+*/                                                                                                                                                         
+        function spm_gu($id_unit)
+        {      
+           $this->db->select('*, sum(nominal) as jumlah');
+           $this->db->from('t_spm');
+           $this->db->join("t_spp",'t_spp.id_spp=t_spm.id_spp','inner');     
+           $this->db->join("t_kwitansi",'t_kwitansi.id_spp=t_spp.id_spp','inner');     
+           $this->db->join("m_status_spm",'m_status_spm.id_status_spm=t_spm.id_status_spm','inner');    
+           $this->db->join("m_unit",'t_spm.id_unit=m_unit.id_unit','inner');    
+           $this->db->join("m_sifatpembayaran",'m_sifatpembayaran.id_sifatpembayaran=t_spp.id_sifatpembayaran','inner');    
+           $this->db->where('t_spp.id_sifatpembayaran',2);
+           $this->db->where('t_spm.id_unit',$id_unit);
+           $this->db->group_by('t_spm.id_spm');
+           $query = $this->db->get(); 
+           return $query;
+        }
+
+/**
+* Fungsi untuk menampilkan data detail spm
+* @param id_unit is integer id unit
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+* @return list of object
+*/                                                                                                                                                         
+        function detail_spm($id_unit,$id_spm,$th_spm)
+        {    
+        
+        $q=$this->db->query("SELECT SUBSTRING(akun_kode,7,2) as j_belanja,kdkeg, t_spm.*,t_kwitansi.*, m_unit.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat, sum(nominal) as jumlah FROM t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spm.id_spm =$id_spm and t_spm.th_spm =$th_spm and t_spp.id_sifatpembayaran =2 group by t_spm.id_spm;");
+            return $q; 
+
+
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah data spm terkini
+* @param id_unit is integer id unit
+* @param id_spm is integer id spm 
+* @param th_spm is integer tahun spm
+* @resullt list of object
+*/                                                                                                                                                         
+        function jum_kini_spm ($id_unit,$id_spm,$th_spm)
+        {
+            $q=$this->db->query("select t_kwitansi.kdoutput, t_kwitansi.kdkomponen, t_kwitansi.kdakun,sum(nominal) as jumlah from t_kwitansi join
+            ( SELECT t_kwitansi.kdoutput as output,t_kwitansi.kdkomponen as komponen,t_kwitansi.kdakun as akun FROM (`t_spm`) INNER JOIN `t_spp` ON `t_spp`.`id_spp`=`t_spm`.`id_spp` INNER JOIN `m_dipa` ON `t_spp`.`id_dipa`=`m_dipa`.`id_dipa` INNER JOIN `m_sifatpembayaran` ON `t_spp`.`id_sifatpembayaran`=`m_sifatpembayaran`.`id_sifatpembayaran` INNER JOIN `m_jenispembayaran` ON `t_spp`.`id_jenispembayaran`=`m_jenispembayaran`.`id_jenispembayaran` INNER JOIN `t_sptb` ON `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `t_kwitansi` ON `t_kwitansi`.`id_sptb`=`t_sptb`.`id_sptb` INNER JOIN `m_unit` ON `t_spp`.`id_unit`=`m_unit`.`id_unit` WHERE `t_spp`.`id_unit` = '$id_unit' AND `t_spm`.`th_spm` = '$th_spm' AND `t_spm`.`id_spm` = '$id_spm' GROUP BY `t_kwitansi`.`kdoutput`,`t_kwitansi`.`kdkomponen`, `t_kwitansi`.`kdakun` ) 
+            as apa on t_kwitansi.kdoutput=apa.output and t_kwitansi.kdkomponen=apa.komponen and t_kwitansi.kdakun=apa.akun join 
+            (SELECT id_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_kwitansi.id_subunit=total_unit.id_subunit
+            group by t_kwitansi.kdoutput,t_kwitansi.kdkomponen,t_kwitansi.kdakun");
+            return $q->result();
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah nominal
+* @param id_unit is integer id unit
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+* @result list of object
+*/                                                                                                                                                         
+        function total_spm_diajukan ($id_unit,$id_spm,$th_spm)
+        {
+            $q=$this->db->query("select sum(nominal) as jumlah from t_kwitansi,t_sptb,t_spp, t_spm WHERE `t_spp`.`id_sptb`=`t_sptb`.`id_sptb` AND `t_kwitansi`.`id_sptb`=`t_sptb`.`id_sptb` AND `t_spm`.`id_spp`=`t_spp`.`id_spp` AND  `t_spm`.`id_unit` = '$id_unit' AND  `t_spm`.`id_spm` = '$id_spm' AND  `t_spm`.`th_spm` = '$th_spm' and t_spp.id_sifatpembayaran='2' ;");
+            return $q;
+        } 
+
+/**
+* Fungsi untuk mengupdate data spm
+* @param id_unit is integer id unit
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                         
+        function update_spm($id_unit,$id_spm,$th_spm)
+        {      
+                
+            $kepada = $this->input->post('kepada'); 
+            $npwp = $this->input->post('npwp'); 
+            $no_rek = $this->input->post('no_rek'); 
+            $bank= $this->input->post('bank'); 
+            $uraian = $this->input->post('uraian');     
+             $this->db->set('kepada',$kepada); 
+             $this->db->set('npwp',$npwp); 
+             $this->db->set('nomor_rekening',$no_rek); 
+             $this->db->set('bank',$bank); 
+             $this->db->set('uraian_spm',$uraian); 
+             $this->db->where('id_spm', $id_spm);
+             $this->db->where('th_spm', $th_spm);
+             $this->db->where('id_unit', $id_unit);
+             $this->db->update('t_spm');
+        }
+
+/**
+* Fungsi untuk mengupdate status otorisasi spm
+* @param id is integer id spm
+* @param th is integer tahun spm
+*/                                                                                                                                                         
+        function otorisasi_spm_up($id,$th)
+        {  
+             $this->db->set('id_status_spm',2);
+             $this->db->where('id_spm',$id); 
+             $this->db->where('th_spm',$th); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk menampilkan data spm
+* @param id is integer is spp
+* @param th is integer tahun spp
+* @return list of object
+*/                                                                                                                                                         
+        function selek_kwitansi_spm($id,$th)
+        {  
+           $this->db->select('*');
+           $this->db->from('t_spm');
+           $this->db->join("t_spp",'t_spm.id_spp=t_spp.id_spp','inner');     
+           $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');     
+           $this->db->join("t_kwitansi",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');     
+           $this->db->where('t_spp.id_spp',$id);
+           $this->db->where('t_spp.th_spp',$th);
+           $query = $this->db->get(); 
+           return $query;
+        }
+
+/**
+* Fungsi untuk mengupdate status otorasasi kwitansi
+* @param id_kwitansi is integer id kwitansi
+* @param th is integer tahun kwitansi
+*/                                                                                                                                                         
+        function otorisasi_kwitansi_up2($id_kwitansi,$th)
+        {  
+             $this->db->set('id_status_kwitansi',8);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th); 
+             $this->db->update('t_kwitansi'); 
+        } 
+
+/**
+* Fungsi untuk mengupdate status otorisasi sptb 
+* @param id_sptb is integerid sptb
+* @param th is integer tahun sptb
+*/                                                                                                                                                         
+        function otorisasi_sptb_up2($id_sptb,$th)
+        {  
+             $this->db->set('id_status_sptb',5);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status otorisasi spp
+* @param id_spp is integer id spp
+* @param th is integer tahun spp
+*/                                                                                                                                                         
+        function otorisasi_spp_up2($id_spp,$th)
+        {  
+             $this->db->set('id_status_spp',4);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th); 
+             $this->db->update('t_spp'); 
+        }
+
+/**
+* Fungsi untuk menyimpan waktu otorisasi dekan
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th is integer tahun
+*/                                                                                                                                                         
+        function masuk_waktu_otorisasi_dekan($id_kwitansi,$level_terkini,$th)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th','$tgl_skrg $jam_skrg','terotorisasi dekan','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan jumlah nominal 
+* @param id_unit is integer id unit
+* @param th_spm is integer tahun spm
+* @return array(2 dimensi)
+*/                                                                                                                                                             
+        function jum_rekap_up($id_unit,$th_spm)
+        {   
+            
+            $qf=$this->db->query("select sum(nominal) as jumlah from t_kwitansi join (SELECT * FROM t_sptb where id_sifatpembayaran='2' and id_status_sptb=4 and th_sptb=$th_spm) as apa on t_kwitansi.id_kwitansi=apa.id_kwitansi join 
+            (SELECT id_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_kwitansi.id_subunit=total_unit.id_subunit;");
+            return $qf->result_array();
+        }
+
+/**
+* Fungsi untuk menampilkan nama fakultas
+* @param id_unit is integer id unit
+* @return list of object
+*/                                                                                                                                                  
+        function nama_fakultas($id_unit)
+        {   
+            $this->db->select("*"); 
+            $this->db->from("m_unit"); 
+            $this->db->join("m_dekan",'m_dekan.id_dekan=m_unit.id_dekan','inner'); 
+            $this->db->where('id_unit',$id_unit);   
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan dipa
+* @return list of object
+*/                                                                                                                                                         
+        function dipa()
+        {   
+            $this->db->select("*"); 
+            $this->db->from("m_dipa");   
+            $this->db->where('aktif',1);   
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan jumlah mp pengeluaran
+* @param id_unit is integer id unit
+* @return list of object
+*/                                                                                                                                                         
+        function mp_pengeluaran($id_unit)
+        {     
+            $q=$this->db->query("select sum(jumlah) as jumlah from t_rkakl join (SELECT kode_subunit from m_subunit where id_unit=$id_unit) as total_unit on t_rkakl.kode_unit=total_unit.kode_subunit;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan spm
+* @param th is integer tahun spm
+* @return list of object
+*/                                                                                                                                                                 
+        function spm_up_pen($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$th group by t_spm.id_spm;");
+            return $q;
+        }
+        function jum_spm_up_pen($th)
+        {      
+                        $q=$this->db->query("SELECT kdkeg, t_spm.*, m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(jumlah) as jumlah FROM t_spm,t_rekap,m_status_spm,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_transaksi,t_uraian,m_unit WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and m_kegiatan.id_keg=t_rekap.id_kegiatan and t_rekap.id_dipa=m_dipa.id_dipa and t_rekap.id_jenis_belanja=m_sifatpembayaran.id_sifatpembayaran and t_rekap.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spm.id_spm=t_rekap.id_spm and t_rekap.id_rekap=t_transaksi.id_rekap and t_transaksi.id_transaksi=t_uraian.id_transaksi and t_spm.id_unit=m_unit.id_unit and t_rekap.id_jenis_belanja =2 and t_spm.th_spm =13 group by t_spm.id_spm;");
+            return $q->num_rows();
+        }
+        function cek_detail_kelengkapan($id,$th)
+        {   
+            $this->db->select('*');
+            $this->db->from('t_detail_veri');   
+            $this->db->where('id_spm',$id);  
+            $this->db->where('th_spm',$th);  
+            $result = $this->db->get(); 
+            return $result->num_rows();
+        }
+        function cek_ada_veri_komplit($id,$th)
+        {   
+            $this->db->select('*');
+            $this->db->from('t_detail_veri');   
+            $this->db->where('id_spm',$id);  
+            $this->db->where('th_spm',$th);  
+            $this->db->where('flag_cek',0);  
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {     
+                return false;
+            }
+            else    
+            {     
+                return true;
+            }
+        } 
+
+/**
+* Fungsi untuk mengetahui ada/tidak verifikasi
+* @param id is integer id spm
+* @param th is integer tahun pembuatan spm
+* @return boolean
+*/                                                                                                                                                                 
+        function cek_ada_veri($id,$th)
+        {   
+            $this->db->select('*');
+            $this->db->from('t_detail_veri');   
+            $this->db->where('id_spm',$id);  
+            $this->db->where('th_spm',$th);  
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {     
+                return false;
+            }
+            else    
+            {
+                
+                return true;
+            }
+        }
+
+/**
+* Fungsi untuk menampilkan verifikasi
+* @return list of object
+*/                                                                                                                                                                         
+        function getSyaratUmum_up()
+        {  
+           $result = array();
+           $this->db->select('*');
+           $this->db->from('m_verifikasi');   
+           $this->db->where('id_jenis',8);   
+           $this->db->where('id_persyaratan',1);   
+           $query = $this->db->get();   
+           return $query;
+        }
+
+/**
+* Fungsi untuk menampilkan iist jenis khusus
+* @return list of object
+*/                                                                                                                                                                         
+        function getKhususList()
+           {
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_jenis_khusus');
+            $array_keys_values = $this->db->get();
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Unit-';
+                $result[$row->id_jenis_khusus]= ("$row->id_jenis_khusus - $row->nama_jenis");
+            }
+            
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan data spm
+* @param id is integer id spm
+* @param th is integer th spm
+* @return list of object
+*/                                                                                                                                                                         
+        function spm_up_pen4($id,$th)
+        {      
+            $this->db->from("t_spm"); 
+            $this->db->join("t_spp",'t_spp.id_spp=t_spm.id_spp','inner'); 
+            $this->db->join("m_sifatpembayaran",'t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran','inner'); 
+            $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');
+            $this->db->join("t_kwitansi",'t_sptb.id_sptb=t_kwitansi.id_sptb','inner');  
+            $this->db->join("m_unit",'t_spm.id_unit=m_unit.id_unit','inner');
+            $this->db->where('t_spm.id_spm',$id);
+            $this->db->where('t_spm.th_spm',$th);
+            $this->db->group_by('t_spm.id_spm');
+            $result = $this->db->get();
+            return $result;
+        } 
+
+/**
+* Fungsi untuk menampilkan verifikasi
+* @return list of object
+*/                                                                                                                                                                         
+        function select_khusus()
+         {
+            $id_jenis_khusus = $this->input->post('id_jenis_khusus');
+            $result = array();
+            $this->db->select('*');
+            $this->db->from('m_verifikasi');
+            $this->db->where('id_jenis',$id_jenis_khusus);
+            $result = $this->db->get();    
+            return $result;
+        }
+        
+/**
+* Fungsi untuk mengupdate data spm
+* @param id is integer id spm
+* @param th is integer tahun spm
+*/                                                                                                                                                                         
+        function update_penyerah($id,$th)
+        {
+            $nm = $this->input->post('nmpenyerah');     
+            $nip = $this->input->post('nippenyerah');     
+            $this->db->set('nama_penyerah',$nm); 
+            $this->db->set('nip_penyerah',$nip); 
+            $this->db->set('sudah_dicek',1); 
+            $this->db->where('id_spm', $id);    
+            $this->db->where('th_spm', $th);    
+            $this->db->update('t_spm');
+             
+        } 
+
+/**
+* Fungsi untuk menyimpan detail verifikasi
+* @param id is integer id spm
+* @param th is integer tahun spm
+*/                                                                                                                                                                         
+        function insert_detail($id,$th)
+        {   
+
+            $cek = $this->input->post('cek');  
+                for($i=0;$i<count($_POST['cek']);$i++){
+                    $q = $this->db->query("insert into t_detail_veri(id_spm,th_spm,id_uraian) values ('$id','$th',$cek[$i])");
+                } 
+                
+        } 
+
+/**
+* Fungsi untuk mengupdate status detail verifikasi
+* @param id is integer id spm
+* @param th is integer tahun spm
+*/                                                                                                                                                                         
+        function update_detail($id,$th)
+        {
+        // cek di database, ada ga?  
+        $tes = $this->input->post('tes'); 
+        for($i=0;$i<count($_POST['tes']);$i++){
+             $this->db->set('flag_cek',1); 
+             $this->db->where('id_spm', $id);
+             $this->db->where('th_spm', $th);
+             $this->db->where('id_uraian', $tes[$i]);
+             $this->db->update('t_detail_veri');
+             
+        }
+        }
+
+/**
+* Fungsi untuk menampilkandata spm
+* @param id is integer id spm
+* @param th is integer tahun spm
+* @return list of object
+*/                                                                                                                                                                         
+        function ceklist_umum($id,$th)
+         {   
+            $this->db->select('*');
+            $this->db->from('t_spm');
+            $this->db->join("t_detail_veri",'t_detail_veri.id_spm=t_spm.id_spm','inner'); 
+            $this->db->join("m_verifikasi",'m_verifikasi.id_uraian=t_detail_veri.id_uraian','inner'); 
+            $this->db->where('id_persyaratan',1); 
+            $this->db->where('t_detail_veri.id_spm', $id); 
+            $this->db->where('t_detail_veri.th_spm', $th); 
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan chekc list spm
+* @param id is integer id spm
+* @param th is integer tahun spm
+* @return list of object
+*/                                                                                                                                                                         
+        function ceklist_khusus($id,$th)
+         {   
+            $this->db->select('*');
+            $this->db->from('t_spm');
+            $this->db->join("t_detail_veri",'t_detail_veri.id_spm=t_spm.id_spm','inner'); 
+            $this->db->join("m_verifikasi",'m_verifikasi.id_uraian=t_detail_veri.id_uraian','inner');  
+            $this->db->join("m_jenis_khusus",'m_jenis_khusus.id_jenis_khusus=m_verifikasi.id_jenis','inner');  
+            $this->db->where('id_persyaratan',2); 
+            $this->db->where('t_detail_veri.id_spm', $id); 
+            $this->db->where('t_detail_veri.th_spm', $th);
+            $result = $this->db->get();
+            return $result;
+        } 
+
+/**
+* Fungsi untuk menampilkandata seting
+* @return list of object
+*/                                                                                                                                                                         
+        function select_setting()
+         {   
+            $this->db->select('*');
+            $this->db->from('m_setting'); 
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan data detail daftar
+* @param id is integer id spm
+* @param th is integer tahun spm
+* @return list of object
+*/                                                                                                                                                                         
+        function detail_daftar($id,$th)
+        {      
+            $this->db->from("t_spm"); 
+            $this->db->join("t_spp",'t_spp.id_spp=t_spm.id_spp','inner');  
+            $this->db->join("m_sifatpembayaran",'t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran','inner');  
+            $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');
+            $this->db->join("t_kwitansi",'t_sptb.id_sptb=t_kwitansi.id_sptb','inner');  
+            $this->db->join("m_unit",'t_spm.id_unit=m_unit.id_unit','inner');  
+            $this->db->join("m_kegiatan",'m_kegiatan.id_keg=t_spp.id_kegiatan','inner');     
+            $this->db->where('t_spm.id_spm',$id);
+            $this->db->where('t_spm.th_spm',$th);
+            $this->db->group_by('t_spm.id_spm');
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk mengupdate data kelengkapan detail verifikasi
+* @param id is integer id spm
+* @param th is integer tahun spm
+* @param tes is varchar jumlah data kelengkapan
+*/                                                                                                                                                 
+        function update_kelengkapan($id,$th,$tes)
+        {
+        for($i=0;$i<count($tes);$i++){
+             $this->db->set('flag_cek',1); 
+             $this->db->where('id_spm', $id);
+             $this->db->where('th_spm', $th);
+             $this->db->where('id_uraian', $tes[$i]);
+             $this->db->update('t_detail_veri');
+             
+        }
+        }
+
+/**
+* Fungsi untuk menampilkan data detail verifikasi
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+* @return boolean
+*/                                                                                                                                                         
+        function ada_flag_cek($id_spm,$th_spm)
+        {
+            $this->db->select('*'); 
+            $this->db->from('t_detail_veri');
+            $this->db->where('flag_cek',0); 
+            $this->db->where('id_spm',$id_spm); 
+            $this->db->where('th_spm',$th_spm); 
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {
+                return false;
+            }
+            else    
+            {   
+                return true;
+            }
+        }
+
+/**
+* Fungsi untuk mengupdate data spm
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                         
+        function setuju_bak($id_spm,$th_spm)
+        {  
+             $this->db->set('id_status_spm',3);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_spm); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk mengupdate data kelengkapan detail verifikasi
+* @param id is integer id spm
+* @param th is integer tahun spm
+*/                                                                                                                                                         
+        function selek_spp_trans($th_spm,$id_spm)
+        {  
+           $this->db->select('*');
+           $this->db->from('t_spm');    
+           $this->db->join("t_spp",'t_spp.id_spp=t_spm.id_spp','inner'); 
+           $this->db->join("t_sptb",'t_sptb.id_sptb=t_spp.id_sptb','inner');     
+           $this->db->join("t_kwitansi",'t_kwitansi.id_sptb=t_sptb.id_sptb','inner');     
+           $this->db->where('t_spm.id_spm',$id_spm);
+           $this->db->where('t_spm.th_spm',$th_spm);
+           $query = $this->db->get(); 
+           return $query;
+        }
+
+/**
+* Fungsi untuk mengupdate status status kwitansi sudah diverifikasi blu
+* @param id_kwitansi is integer id kwitansi
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                 
+        function trans_stat_veri_blu($id_kwitansi,$th_spm)
+        {  
+             $this->db->set('id_status_kwitansi',10);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status spp sudah diverifikasi blu
+* @param id_spp is integer id spp
+* @param th_spm is integer tahun spp
+*/                                                                                                                                                                 
+        function spp_stat_veri_blu($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',5);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp'); 
+        }
+
+/**
+* Fungsi untuk mengupdate data status sptb sudah diverifikasi blu
+* @param id_sptb is integer id sptb
+* @param th_spm is integer tahun sptb
+*/                                                                                                                                                                 
+        function sptb_stat_veri_blu($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',6);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk menyimpan waktu cek pwtugas penerima
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                 
+        function masuk_waktu_dicek_petugas_penerima($id_kwitansi,$level_terkini,$th_spm)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_spm','$tgl_skrg $jam_skrg','diotorisasi petugas penerima','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan data spm yang sudah diverifikasi
+* @param th is integer tahun spm
+* @return list of object
+*/                                                                                                                                                                     
+        function spm_up_veri($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$th group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan detail spm
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+* @return list of object
+*/                                                                                                                                                                 
+        function detail_spm2($id_spm,$th_spm)
+        {     
+            $q=$this->db->query("SELECT tgl_sptb, t_kwitansi.id_kwitansi,t_sptb.id_sptb, m_subunit.nama_subunit, sum(nominal) as jumlah FROM t_spp, t_spm, t_sptb, t_kwitansi,m_subunit WHERE t_spm.id_spp=t_spp.id_spp and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_kwitansi.id_subunit = m_subunit.id_subunit and t_spm.id_spm = '$id_spm' and t_spm.th_spm = '$th_spm' group by t_kwitansi.id_subunit;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengupdate staus spm disetujui
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                         
+        function setuju_veri($id_spm,$th_spm)
+        {  
+             $this->db->set('id_status_spm',4);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_spm); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status kwitansi sudah disetujui kasubag
+* @param id_kwitansi is integer id kwitansi
+* @param th_spm is integer tahun kwitansi
+*/                                                                                                                                                                         
+        function trans_stat_subag_dm($id_kwitansi,$th_spm)
+        {  
+             $this->db->set('id_status_kwitansi',11);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status sptb disetujui subag
+* @param id_sptb is integer id sptb
+* @param th_spm is integer tahun sptb
+*/                                                                                                                                                                         
+        function sptb_stat_subag_dm($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',7);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status spp sudah disetujui subag
+* @param id_spp is integer id spp
+* @param th_spm is integer tahun spp
+*/                                                                                                                                                                         
+        function spp_stat_subag_dm($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',6);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp'); 
+        }
+
+/**
+* Fungsi untuk menyimpan waktu verifikasi
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                         
+        function masuk_waktu_otorisasi_verifikator_pusat($id_kwitansi,$level_terkini,$th_spm)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_spm','$tgl_skrg $jam_skrg','terotorisasi verifikator pusat','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan data spm
+* @param th is integer tahun
+* @return list of object
+*/                                                                                                                                                                                     
+        function spm_up_dm($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$th group by t_spm.id_spm;");
+            return $q;
+        }
+        function jum_spm_up_dm($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(jumlah) as jumlah FROM t_spm,m_status_spm,t_rekap,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_transaksi,t_uraian,m_unit WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_rekap.id_spm=t_spm.id_spm and m_kegiatan.id_keg=t_rekap.id_kegiatan and t_rekap.id_dipa=m_dipa.id_dipa and t_rekap.id_jenis_belanja=m_sifatpembayaran.id_sifatpembayaran and t_rekap.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_transaksi.id_rekap=t_rekap.id_rekap and t_transaksi.id_transaksi=t_uraian.id_transaksi and t_spm.id_unit=m_unit.id_unit and t_rekap.id_jenis_belanja =2 and t_spm.th_spm= '$th' group by t_spm.id_spm;");
+            return $q->num_rows();
+        }
+        function jum_spm_up_kabag($th)
+        {      
+           $q=$this->db->query("SELECT kdkeg, t_spm.*, m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(jumlah) as jumlah FROM t_spm,m_status_spm,t_rekap,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_transaksi,t_uraian,m_unit WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_rekap.id_spm=t_spm.id_spm and m_kegiatan.id_keg=t_rekap.id_kegiatan and t_rekap.id_dipa=m_dipa.id_dipa and t_rekap.id_jenis_belanja=m_sifatpembayaran.id_sifatpembayaran and t_rekap.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_transaksi.id_rekap=t_rekap.id_rekap and t_transaksi.id_transaksi=t_uraian.id_transaksi and t_spm.id_unit=m_unit.id_unit and t_rekap.id_jenis_belanja =2 and t_spm.th_spm= '$th' group by t_spm.id_spm;");
+           return $q->num_rows();
+        } 
+        function jum_spm_up_sp2d($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(jumlah) as jumlah FROM t_spm,m_status_spm,t_rekap,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_transaksi,t_uraian,m_unit WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_rekap.id_spm=t_spm.id_spm and m_kegiatan.id_keg=t_rekap.id_kegiatan and t_rekap.id_dipa=m_dipa.id_dipa and t_rekap.id_jenis_belanja=m_sifatpembayaran.id_sifatpembayaran and t_rekap.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_transaksi.id_rekap=t_rekap.id_rekap and t_transaksi.id_transaksi=t_uraian.id_transaksi and t_spm.id_unit=m_unit.id_unit and t_rekap.id_jenis_belanja =2 and t_spm.th_spm= '$th' group by t_spm.id_spm;");
+            return $q->num_rows();
+        }
+
+/**
+* Fungsi untuk mengupdate status spm disetujui
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                 
+        function setuju_dm($id_spm,$th_spm)
+        {  
+             $this->db->set('id_status_spm',5);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_spm); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status kwitansi kabag keuangan
+* @param id_kwitansi is integer id kwitansi
+* @param th_spm is integer tahun kwitansi
+*/                                                                                                                                                                                 
+        function trans_stat_kabag_keu($id_kwitansi,$th_spm)
+        {  
+             $this->db->set('id_status_kwitansi',12);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi');
+        }
+
+/**
+* Fungsi untuk mengupdate status sptb kabag keuangan
+* @param id_sptb is integer id sptb
+* @param th_spm is integer tahun sptb
+*/                                                                                                                                                                                 
+        function sptb_stat_kabag_keu($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',8);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status spp setuju kabag keuangan
+* @param id_spp is integer id spp
+* @param th_spm is integer tahun spp
+*/                                                                                                                                                                                 
+        function spp_stat_kabag_keu($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',7);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp'); 
+        }
+
+/**
+* Fungsi untuk menyimpan waktu otorisasi kasubag
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                 
+        function masuk_waktu_otorisasi_subag_dm($id_kwitansi,$level_terkini,$th_spm)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_spm','$tgl_skrg $jam_skrg','terotorisasi kasubag dana masyarakat','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan spm kabag
+* @param th is integer tahun 
+* @return list of object
+*/                                                                                                                                                                                     
+        function spm_up_kabag($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$th group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengupdate status spm disetujui kabag
+* @param id_spm is integer id spm
+\* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                 
+        function setuju_kabag($id_spm,$th_spm)
+        {  
+             $this->db->set('id_status_spm',6);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_spm); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status kwitansi menjadi sp2d
+* @param id_kwitansi is integer id kwitansi
+* @param th_spm is integer tahun kwitansi
+*/                                                                                                                                                                                 
+        function trans_stat_ppsp2d($id_kwitansi,$th_spm)
+        {  
+             $this->db->set('id_status_kwitansi',13);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi');
+        }
+
+/**
+* Fungsi untuk mengupdate status sptb sudah menjadi sp2d
+* @param id_sptb is integer id sptb
+* @param th_spm is integer tahun sptb
+*/                                                                                                                                                                                 
+        function sptb_stat_ppsp2d($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',9);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk menupdate status spp menjadi sp2d
+* @param id_spp is integer id spp
+* @param th_spm is integer tahun spp
+*/                                                                                                                                                                                 
+        function spp_stat_ppsp2d($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',8);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp');
+        }
+
+/**
+* Fungsi untuk menyimpan waktu otorisasi kabag keuangan
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                 
+        function masuk_waktu_otorisasi_kabag_keu($id_kwitansi,$level_terkini,$th_spm)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_spm','$tgl_skrg $jam_skrg','terotorisasi kabag keuangan','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan spm
+* @param th is integer tahun
+* @return list of object
+*/                                                                                                                                                                                     
+        function spm_up_sp2d($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$th group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengecek ada/tidak sp2d
+* @param th_spm is integer tahun spm
+* @param id_spm is integer tahun sp2d
+* @return boolean
+*/                                                                                                                                                                                 
+        function cek_adasp2d($th_spm,$id_spm)
+        {
+            
+            $this->db->select('*');
+            $this->db->from('t_sp2d');   
+            $this->db->where('id_spm',$id_spm);  
+            $this->db->where('th_sp2d',$th_spm);  
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {    
+                return false;
+            }
+            else    
+            {return true; }
+        }
+
+/**
+* Fungsi untuk menyimpan sp2d
+* @param id_spm is integer id spm
+* @param trans is integer 
+* @param th_spm is integer tahun spm
+* @return boolean
+*/                                                                                                                                                                                         
+        function buat_sp2d($id_spm,$trans,$th_spm)
+        {
+            $tahun = date("Y");
+            $tgl_skrg = date("Y-m-d");    
+            $id=$this->nomer->id_baru('t_sp2d','sp2d', date('y')); 
+            
+            $no = sprintf("%04d", $id['id_sp2d']);
+            $nomor_sp2d = ''.$no.'/TUP/BLU/'.$tahun; 
+            
+            $this->db->set('id_spm',$id_spm);
+            $this->db->set('no_sp2d',$nomor_sp2d);
+            $this->db->set('tgl_buat',$tgl_skrg);
+            $this->db->where('id_sp2d', $id['id_sp2d']);
+            $this->db->where('th_sp2d', $id['th_sp2d']);
+            $this->db->update('t_sp2d'); 
+            
+            foreach($trans->result_array() as $row){
+                    $id_kwitansi = $row['id_kwitansi'];
+                    $id_sptb = $row['id_sptb'];
+                    $id_spp = $row['id_spp'];
+                    $this->m_tup_spj->trans_stat_telah_sp2d($id_kwitansi,$th_spm);
+                    $this->m_tup_spj->sptb_stat_telah_sp2d($id_sptb,$th_spm);
+                    $this->m_tup_spj->spp_stat_telah_sp2d($id_spp,$th_spm);
+                    
+                    $get_id = $this->m_tup_spj->ambil_level_tertinggi($id_kwitansi,$th_spm);
+                    foreach($get_id->result_array() as $row){
+                    $level = $row['level'];  
+                    }
+                    $level_terkini =  $level+1;           
+                    $this->m_tup_spj->masuk_waktu_dibuatkan_sp2d($id_kwitansi,$level_terkini,$th_spm);
+            }
+        }
+
+/**
+* Fungsi untuk mengupdate status kwitansi telah jadi sp2d
+* @param id_kwitansi is integer id kwitansi
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                                 
+        function trans_stat_telah_sp2d($id_kwitansi,$th_spm)
+        {  
+             $this->db->set('id_status_kwitansi',14);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status sptb sudah jadi sp2d
+* @param id_sptb is integer id sptb 
+* @param th_spm is integer tahun sptb
+*/                                                                                                                                                                                                 
+        function sptb_stat_telah_sp2d($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',10);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status spp sudah menjadi sp2d
+* @param id_spp is integer id spp
+* @param th_spm is integer tahun spp
+*/                                                                                                                                                                                                 
+        function spp_stat_telah_sp2d($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',9);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp');
+        }
+
+/**
+* Fungsi untuk menyimpan waktu masuk kwitansi
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                                 
+        function masuk_waktu_dibuatkan_sp2d($id_kwitansi,$level_terkini,$th_spm)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_spm','$tgl_skrg $jam_skrg','dibuatkan sp2d','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk mengupdate status spm setujui sp2d
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                                     
+        function setuju_sp2d($id_spm,$th_spm)
+        {  
+             $this->db->set('id_status_spm',7);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_spm); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk menampilkan detail sp2d
+* @param id_spm is integer id spm
+* @return list of object
+*/                                                                                                                                                                                                 
+        function detail_sp2d($id_spm)
+        {      
+            $q=$this->db->query("SELECT nmakun,t_sp2d.*,kdkeg, t_spm.*, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_sp2d,t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE t_spm.id_spm=t_sp2d.id_spm and m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengupdate status spm otorisasi pr2
+* @param id_spm is integer id spm
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                                 
+        function otorisasi_pr2($th_spm,$id_spm)
+        {  
+             $this->db->set('id_status_spm',8);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_spm); 
+             $this->db->update('t_spm'); 
+        } 
+
+/**
+* Fungsi untuk mengupdate status data kwitansi otorisasi pr2 
+* @param id_kwitansi is integer id kwitansi
+* @param th_spm is integer tahun kwitansi
+*/                                                                                                                                                                                                 
+        function trans_stat_pr2($id_kwitansi,$th_spm)
+        {  
+             $this->db->set('id_status_kwitansi',15);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status sptb otorisasi pr2
+* @param id_sptb is integer id sptb
+* @param th_spm is integer tahun sptb
+*/                                                                                                                                                                                                 
+        function sptb_stat_pr2($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',10);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb');  
+        }
+
+/**
+* Fungsi untuk mengupdate status data spp otorisasi pr2
+* @param id spp is integer id spp
+* @param th_spm is integer tahun spp
+*/                                                                                                                                                                                                 
+        function spp_stat_pr2($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',9);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp');
+        }
+
+/**
+* Fungsi untuk menyimpan waktu otorisasi pr2
+* @param id_kwitansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                                 
+        function masuk_waktu_otorisasi_pr2($id_kwitansi,$level_terkini,$th_spm)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_spm','$tgl_skrg $jam_skrg','terotorisasi pr2','$level_terkini')");
+            }
+
+/**
+* Fungsi untuk menampilkan list sp2d
+* @param th is integer tahun
+* @return list of object
+*/                                                                                                                                                                                                     
+        function list_sp2d($th)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*,t_sp2d.id_sp2d,t_sp2d.th_sp2d,t_sp2d.no_sp2d, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_sp2d,t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE t_sp2d.id_spm=t_spm.id_spm and m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and t_spm.th_spm= '$th' group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan list sp2d
+* @param th is integer tahun
+* @return list of object
+*/                                                                                                                                                                                                             
+        function list_sp2d2($id_sp2d,$th_sp2d)
+        {      
+            $q=$this->db->query("SELECT kdkeg, t_spm.*,t_sp2d.id_sp2d,t_sp2d.tgl_buat, t_sp2d.th_sp2d,t_sp2d.no_sp2d, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM t_sp2d,t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE t_sp2d.id_spm=t_spm.id_spm and m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and  t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and id_sp2d=$id_sp2d and th_sp2d=$th_sp2d group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk menampilkan nomor bg
+* @param th_sp2d is integer tahun sp2d
+* @return list of object
+*/                                                                                                                                                                                                             
+        function ambil_nomor_bg($th_sp2d)
+        {  
+           $q=$this->db->query("select m_bg.id_bg,m_bg.nomor_bg from m_bg join (SELECT MIN(`id_bg`) AS id_bg FROM (`m_bg`) WHERE `status_bg` = 'baru' ) as nomor on m_bg.id_bg = nomor.id_bg where th_bg='$th_sp2d';");
+           return $q->result();
+        }
+
+/**
+* Fungsi untuk mengupdate id bg 
+* @param id_sp2d is integerid sp2d 
+* @param id_bg is integer id bg
+* @param th_sp2d is integer tahun sp2d
+*/                                                                                                                                                                                                             
+        function buat_bg_sp2d($id_sp2d,$id_bg,$th_sp2d)
+        {                  
+             $this->db->set('id_bg',$id_bg);
+             $this->db->where('id_sp2d',$id_sp2d); 
+             $this->db->where('th_sp2d',$th_sp2d); 
+             $this->db->update('t_sp2d'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status bg
+* @param id_bg is integer id bg
+* @param th_sp2d is integer tahun bg
+*/                                                                                                                                                                                                                     
+        function update_bg($id_bg,$th_sp2d)
+        {  
+             $this->db->set('status_bg','terpakai'); 
+             $this->db->where('id_bg',$id_bg); 
+             $this->db->where('th_bg',$th_sp2d); 
+             $this->db->update('m_bg'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status spm yang telah dibuat bg
+* @param id_spm is integer id spm
+* @param th_sp2d is integer tahun spm
+*/                                                                                                                                                                                                                             
+        function buat_bg($id_spm,$th_sp2d)
+        {  
+             $this->db->set('id_status_spm',9);
+             $this->db->where('id_spm',$id_spm); 
+             $this->db->where('th_spm',$th_sp2d); 
+             $this->db->update('t_spm'); 
+        }
+
+/**
+* Fungsi untuk mengupdate status kwitansi telah menjadi bg
+* @param id_kwtansi is integer id kwitansi
+* @param th_sp2d is integer id kwitansi
+*/                                                                                                                                                                                                                                     
+        function trans_stat_telah_bg($id_kwitansi,$th_sp2d)
+        {  
+             $this->db->set('id_status_kwitansi',16);
+             $this->db->where('id_kwitansi',$id_kwitansi); 
+             $this->db->where('th_kwitansi',$th_spm); 
+             $this->db->update('t_kwitansi');
+        }
+
+/**
+* Fungsi untuk mengupdate status sptb yang telah menjadi bg
+* @param id_sptb is integer id sptb
+* @param th_spm is integer tahun spm
+*/                                                                                                                                                                                                                                             
+        function sptb_stat_telah_bg($id_sptb,$th_spm)
+        {  
+             $this->db->set('id_status_sptb',11);
+             $this->db->where('id_sptb',$id_sptb); 
+             $this->db->where('th_sptb',$th_spm); 
+             $this->db->update('t_sptb');  
+        }
+
+/**
+* Fungsi untuk mengupdate status spp telah menjadi bg
+* @param id_spp is integer id spp
+* @param th_spm is integer tahun spp 
+*/                                                                                                                                                                                                                                             
+        function spp_stat_telah_bg($id_spp,$th_spm)
+        {  
+             $this->db->set('id_status_spp',10);
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spm); 
+             $this->db->update('t_spp');
+        }
+
+/**
+* Fungsi untuk menyimpan waktu dibuatkan bg
+* @param id_kwtansi is integer id kwitansi
+* @param level_terkini is integer level otorisasi terkini
+* @param th_sp2d is integer tahun sp2d
+*/                                                                                                                                                                                                                                             
+        function masuk_waktu_dibuatkan_bg($id_kwitansi,$level_terkini,$th_sp2d)
+        {
+            $tgl_skrg = date("Y-m-d"); 
+            $jam_skrg = date("H:i:s");
+            $w = $this->db->query("insert into tb_waktu_kwitansi(id_kwitansi,th_kwitansi, tanggal_waktu,status_waktu,level) values('$id_kwitansi','$th_sp2d','$tgl_skrg $jam_skrg','dibuatkan bg','$level_terkini')");
+        }
+
+/**
+* Fungsi untuk menampilkan detail list detail sp2d
+* @param id_sp2d is integer id sp2d
+* @param th_sp2d is integer tahun sp2d
+* @return list of object
+*/                                                                                                                                                                                                                                             
+        function list_sp2d3($id_sp2d,$th_sp2d)
+        {      
+            $q=$this->db->query("SELECT m_bg.nomor_bg,kdkeg, t_spm.*,t_sp2d.id_sp2d,t_sp2d.tgl_buat, t_sp2d.th_sp2d,t_sp2d.no_sp2d, m_dekan.*,m_status_spm.*, kode_digit, carabayar, singkat, sifatpembayaran, jenispembayaran,singkat,nama_unit, sum(nominal) as jumlah FROM m_bg,t_sp2d,t_spm,m_status_spm,t_spp,m_kegiatan,m_dipa,m_sifatpembayaran,m_jenispembayaran,m_carabayar,t_sptb,t_kwitansi,m_unit,m_dekan WHERE t_sp2d.id_bg=m_bg.id_bg and t_sp2d.id_spm=t_spm.id_spm and m_status_spm.id_status_spm=t_spm.id_status_spm and t_spp.id_spp=t_spm.id_spp and m_kegiatan.id_keg=t_spp.id_kegiatan and t_spp.id_dipa=m_dipa.id_dipa and t_spp.id_sifatpembayaran=m_sifatpembayaran.id_sifatpembayaran and t_spp.id_jenispembayaran=m_jenispembayaran.id_jenispembayaran and t_spm.id_carabayar=m_carabayar.id_carabayar and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_unit=m_unit.id_unit and m_dekan.id_dekan=m_unit.id_dekan and t_spp.id_sifatpembayaran =2 and id_sp2d=$id_sp2d and th_sp2d=$th_sp2d group by t_spm.id_spm;");
+            return $q;
+        }
+
+/**
+* Fungsi untuk mengecek ada/tidak bg
+* @param nomor_bg is integer nomer bg
+* @return boolean
+*/                                                                                                                                                                                                                                             
+        function cek_adabg($nomor_bg)
+        {
+            // cek di database, ada ga?
+            $this->db->from('m_bg');
+            $this->db->where('nomor_bg',$nomor_bg);       
+            $this->db->where('status_bg','baru');       
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {
+                 
+                return false;
+            }
+            else    
+            {
+                
+                return true;
+            }
+        } 
+
+/**
+* Fungsi untuk menampilkan data istory transaksi
+* @param id_transaksi is integer id transaksi
+* @param th_transaksi is integer tahun transaksi
+* @return list of object
+*/                                                                                                                                                                                                                                             
+   function history($id_transaksi,$th_transaksi)
+        {      
+            $this->db->select('*');
+            $this->db->from("tb_waktu_transaksi");  
+            $this->db->where('tb_waktu_transaksi.id_transaksi',$id_transaksi); 
+            $this->db->where('tb_waktu_transaksi.th_transaksi',$th_transaksi); 
+            $result = $this->db->get();
+            return $result;
+        }
+
+/**
+* Fungsi untuk menampilkan data pegawai
+* @param keyword is varchar search auto complete
+* @return list of object
+*/                                                                                                                                                                                                                                     
+function lookup($keyword){
+        $id_unit = $this->session->userdata('id_unit');
+        $this->db->select('*');
+        $this->db->from("m_pegawai");  
+        $this->db->join("m_unit",'m_pegawai.kode_unit=m_unit.kode_unit','inner');         
+        $this->db->like('m_pegawai.nama_pegawai',$keyword);
+        $this->db->where('m_unit.id_unit',$id_unit); 
+        $query = $this->db->get();    
+        
+        return $query->result();
+}
+
+/**
+* Fungsi untuk menampilkan jesnis honor
+* @param id is integer id kwitansi
+* @param th is integer 
+* @return list of object
+*/                                                                                                                                                                                                                                     
+function ambil_jenis_honor($id,$th)
+        {  
+           $this->db->select('jns_honor');
+           $this->db->from('tb_honor_gu');    
+           $this->db->where('id_kwitansi',$id);  
+           $query = $this->db->get(); 
+           return $query;
+        }
+
+   function jumlahGup_revisi($id_subunit){
+           $this->db->select('*');
+        $this->db->from("t_kwitansi");  
+        $this->db->where('id_subunit',$id_subunit); 
+        $this->db->where('id_sifatpembayaran','2'); 
+        $this->db->where('id_status_kwitansi = 2 or id_status_kwitansi = 20');
+        return $this->db->count_all_results();
+       }
+    function jumlahGup_cetak($id_subunit){
+           $this->db->select('*');
+        $this->db->from("t_kwitansi");  
+        $this->db->where('id_subunit',$id_subunit); 
+        $this->db->where('id_sifatpembayaran','2'); 
+        $this->db->where('id_status_kwitansi = 18');
+        return $this->db->count_all_results();
+       }
+
+   function jumlahGupVeri($id_unit){
+           $this->db->select('*');
+        $this->db->from("t_kwitansi");  
+        $this->db->where('id_unit',$id_unit); 
+        $this->db->where('id_sifatpembayaran','2');  
+        $this->db->where('( id_status_kwitansi = 1 or id_status_kwitansi = 3 or id_status_kwitansi = 19 )');
+        return $this->db->count_all_results();
+       }
+   function jumlahSppGupBk($id_unit){
+        $this->db->from('t_spp');
+        $this->db->where('id_status_spp','2');
+        $this->db->where('id_sifatpembayaran','2');
+        $this->db->where('id_unit',$id_unit);  
+        return $this->db->count_all_results();
+   }
+   function jumlahSpmGupBk($id_unit){
+        $this->db->from('t_spm');
+        $this->db->join('t_spp','t_spp.id_spp = t_spm.id_spp');
+        $this->db->where('id_status_spm','1');
+        $this->db->where('id_sifatpembayaran','2');
+        $this->db->where('t_spp.id_unit',$id_unit);
+        return $this->db->count_all_results();
+   }       
+   function jumlahSpmGupPenerima(){
+        $this->db->from('t_spm');
+        $this->db->join('t_spp','t_spp.id_spp = t_spm.id_spp');
+        $this->db->where('id_status_spm','2');
+        $this->db->where('id_sifatpembayaran','2');
+        return $this->db->count_all_results();
+   }
+   function jumlahSpmGupVeri(){
+        $this->db->from('t_spm');
+        $this->db->join('t_spp','t_spp.id_spp = t_spm.id_spp');
+        $this->db->where('id_status_spm','3');
+        $this->db->where('id_sifatpembayaran','2');
+        return $this->db->count_all_results();
+    }
+    function jumlahSpmGupSubag(){
+        $this->db->from('t_spm');
+        $this->db->join('t_spp','t_spp.id_spp = t_spm.id_spp');
+        $this->db->where('id_status_spm','4');
+        $this->db->where('id_sifatpembayaran','2');
+        return $this->db->count_all_results();
+       }
+    function jumlahSpmGupKabag(){
+        $this->db->from('t_spm');
+        $this->db->join('t_spp','t_spp.id_spp = t_spm.id_spp');
+        $this->db->where('id_status_spm','5');
+        $this->db->where('id_sifatpembayaran','2');
+        return $this->db->count_all_results();
+       }
+    function jumlahSpmGupPpsp2d(){
+        $this->db->from('t_spm');
+        $this->db->join('t_spp','t_spp.id_spp = t_spm.id_spp');
+        $this->db->where('id_status_spm','6');
+        $this->db->where('id_sifatpembayaran','2');
+        return $this->db->count_all_results();
+       }
+    function upJumUnduh($id,$th){
+        $result=$this->db->query(" UPDATE t_kwitansi SET jum_unduh=jum_unduh+1 WHERE id_kwitansi=$id AND th_kwitansi=$th AND id_sifatpembayaran='2' ");
+        return $result;
+       }
+    function jumUnduh($th,$id){
+        $result = $this->db->query(" select jum_unduh from t_kwitansi WHERE id_kwitansi=$id AND th_kwitansi=$th AND id_sifatpembayaran='2' ");
+        $row = $result->row();    
+        $jum_unduh = $row->jum_unduh;        
+        return $jum_unduh;
+       }
+    function jum_paguMP(){
+           $id_subunit = $this->session->userdata('id_subunit');
+           $tahun = date("Y");       
+           $this->db->select('(alokasi_pnbp-spp_up-spp_tup-spp_gu-spp_ls-spp_ini) AS selisih');
+           $this->db->from('t_mp');
+           $this->db->where('id_subunit',$id_subunit);
+           $this->db->where('bulan_mp = (SELECT MAX(bulan_mp) FROM t_mp where tahun_mp='.$tahun.')');
+           $hasil = $this->db->get();
+           $result=$hasil->row();
+           if(isset($result->selisih))
+            {return $result->selisih;}
+           else
+           {return 0;}
+           
+       }
+    function jum_summKwitansi(){
+        $id_subunit = $this->session->userdata('id_subunit');
+           $this->db->select('sum(nominal) AS jumlah');
+           $this->db->from('t_kwitansi');
+           $this->db->where('id_subunit',$id_subunit);
+           $this->db->where('id_sifatpembayaran',2);
+           $hasil = $this->db->get();
+           $result=$hasil->row();
+           if(isset($result->jumlah))
+           {return $result->jumlah;}
+           else
+           {return 0;}
+       }
+
+/**
+* Fungsi untuk menampilkan data pegawai
+* @param keyword is varchar search auto complete
+* @return list of object
+*/                                                                                                                                                                                                                                     
+function lookup_bas($keyword, $kdakun){
+        $this->db->select('*');
+        $this->db->from("m_bas"); 
+        $this->db->like('akun_kode',$keyword);
+        $this->db->like('akun_kode',$kdakun);
+        $this->db->where('level',8); 
+        $query = $this->db->get();            
+        return $query->result();
+}
+
+function cek_sp2d_up()
+        {
+            $id_subunit = $this->session->userdata('id_subunit');
+            $tahun = date('y'); 
+            $this->db->select("*"); 
+            $this->db->from("t_transaksi");
+            $this->db->where('th_transaksi',$tahun);
+            $this->db->where('id_status_transaksi',15);
+            $result = $this->db->get();
+            return $result->num_rows() ;  
+        }
+
+function cek_ketersediaan_mp()
+        {
+           $id_subunit = $this->session->userdata('id_subunit');
+           $tahun = date("Y");       
+           $this->db->select('(alokasi_pnbp-spp_up-spp_tup-spp_gu-spp_ls-spp_ini) AS selisih');
+           $this->db->from('t_mp');
+           $this->db->where('id_subunit',$id_subunit);
+           $this->db->where('bulan_mp = (SELECT MAX(bulan_mp) FROM t_mp where tahun_mp='.$tahun.')');
+           $result = $this->db->get();
+           return $result->num_rows() ;  
+           
+        }
+
+function nilai_up()
+        {
+           $id_subunit = $this->session->userdata('id_subunit');
+            $th = date("y");  
+            $q=$this->db->query("select sum(jumlah) as jumlah from t_sp2d,t_spm,t_rekap,t_transaksi,t_uraian where t_sp2d.id_spm=t_spm.id_spm and t_spm.id_spm=t_rekap.id_spm and t_rekap.id_rekap=t_transaksi.id_rekap and t_transaksi.id_transaksi=t_uraian.id_uraian and t_uraian.id_subunit=$id_subunit and t_uraian.id_jenisbelanja=1 and t_spm.id_status_spm=8 and t_spm.th_spm=$th  ;");
+           $result=$q->row();
+           if(isset($result->jumlah))
+           {return $result->jumlah;}
+           else
+           {return 0;}
+            
+        }
+        
+    function pagu_real(){
+        $id_subunit = $this->session->userdata('id_subunit');
+           $this->db->select('pagu_real');
+           $this->db->from('t_pagu_real');
+           $this->db->where('subunit',$id_subunit);
+           $this->db->where('tahun',date("Y"));
+           $hasil = $this->db->get();
+           $result=$hasil->row();
+           if(isset($result->pagu_real))
+           {return $result->pagu_real;}
+           else
+           {return 0;}
+       }
+       
+    function max_up(){
+        $id_subunit = $this->session->userdata('id_subunit');
+           $this->db->select('nilai_max');
+           $this->db->from('t_max_up');
+           $this->db->where('id_subunit',$id_subunit);
+           $this->db->where('tahun',date("Y"));
+           $hasil = $this->db->get();
+           $result=$hasil->row();
+           if(isset($result->nilai_max))
+           {return $result->nilai_max;}
+           else
+           {return 0;}
+       }
+    function getBas($kdoutput,$kdakun)
+       {
+            $kode_subunit = $this->session->userdata('kode_subunit');
+            $kegiatan='4078.'.$kdoutput;
+            $result = array();
+            $q=$this->db->query("SELECT * FROM m_bas
+                WHERE SUBSTRING(akun_kode,1,6) = $kdakun
+                AND LEVEL = 8
+                AND (kegiatan=$kegiatan OR kegiatan='') 
+                            ;");
+            // penambahan querry where AND  aktif='Ya'                
+           $array_keys_values=$q;
+            foreach ($array_keys_values->result() as $row)
+            {
+                $result[0]= '-Pilih Bas-';
+                $result[$row->akun_kode]= ("$row->akun_kode - $row->akun_nama"); 
+            }
+            
+            return $result;
+        }
+    function max_tup(){
+        $id_subunit = $this->session->userdata('id_subunit');
+            $hasil=$this->db->query("SELECT SUM(t_uraian.jumlah) as nilai_max  FROM t_uraian, t_transaksi
+								where t_transaksi.id_status_transaksi=15
+								AND t_transaksi.id_transaksi=t_uraian.id_transaksi
+								AND t_transaksi.id_subunit=$id_subunit
+								AND t_transaksi.id_jenis_belanja=2 ");
+           return $hasil;
+       }
+    function ada_sp2d_spj($id_subunit,$th)
+        {     
+           $q=$this->db->query("SELECT * FROM t_sp2d,t_spm, t_rekap, t_uraian, t_transaksi WHERE t_sp2d.id_spm=t_spm.id_spm and t_spm.id_spm=t_rekap.id_spm and t_transaksi.id_rekap=t_rekap.id_rekap and t_uraian.id_transaksi=t_transaksi.id_transaksi and t_transaksi.id_subunit =$id_subunit and t_transaksi.id_status_transaksi =15 and t_sp2d.spj =0 and t_spm.th_spm = '$th';");
+           return $q->num_rows() ; 
+        }
+    function jumlah_tup_spj($id_subunit,$th)
+        {     
+           $q=$this->db->query("SELECT id_sp2d,sum(jumlah) as nilai_max FROM t_sp2d,t_spm, t_rekap, t_uraian, t_transaksi WHERE t_sp2d.id_spm=t_spm.id_spm and t_spm.id_spm=t_rekap.id_spm and t_transaksi.id_rekap=t_rekap.id_rekap and t_uraian.id_transaksi=t_transaksi.id_transaksi and t_transaksi.id_subunit =$id_subunit and t_transaksi.id_status_transaksi =15 and t_sp2d.spj =0 and t_spm.th_spm = '$th';");
+           return $q ; 
+        }
+     function update_jum_print_spp($id_spp,$th_spp)
+        {  
+             $this->db->set('jum_print',1);   
+             $this->db->where('id_spp',$id_spp); 
+             $this->db->where('th_spp',$th_spp); 
+             $this->db->update('t_spp'); 
+        }
+    function cek_jum_print_spp($id,$th)
+        {  
+           $this->db->select('*');
+           $this->db->from('t_spp'); 
+           $this->db->where('id_spp',$id);          
+           $this->db->where('th_spp',$th);          
+           $this->db->where('jum_print',0);          
+           $query = $this->db->get();   
+           return $query->num_rows() ; 
+        }
+        function update_print_kelengkapan_spm($id_spm,$th_spm){           
+             $this->db->set('jum_kelengkapan',1); 
+             $this->db->where('id_spm', $id_spm);
+             $this->db->where('th_spm', $th_spm);
+             $this->db->update('t_spm');
+    }  
+    function sudah_cek_kelengkapan($id_spm,$th_spm)
+        {
+            $this->db->select('*'); 
+            $this->db->from('t_detail_veri'); 
+            $this->db->where('id_spm',$id_spm); 
+            $this->db->where('th_spm',$th_spm); 
+            $result = $this->db->get();
+            if($result->num_rows() == 0) 
+            {
+                return false;
+            }
+            else    
+            {   
+                return true;
+            }
+        }
+     function revisi_spm_kelengkapan($id,$th)
+        {                    
+             $this->db->set('id_status_spm',10); 
+             $this->db->where('id_spm', $id);
+             $this->db->where('th_spm', $th);
+             $this->db->update('t_spm');
+        }
+     function jum_spm_up_veri($th)
+        {         
+            $this->db->from("t_spm"); 
+            $this->db->join("t_spp",'t_spp.id_spp=t_spm.id_spp','inner'); 
+            $this->db->join("t_kwitansi",'t_spp.id_spp=t_kwitansi.id_spp','inner'); 
+            $this->db->where('t_kwitansi.id_sifatpembayaran',2);
+            $this->db->where('t_spm.th_spm',$th);
+            //$this->db->where('t_spm.id_status_spm',3);  
+            $this->db->group_by('t_spm.id_spm');
+            $result = $this->db->get();
+            return $result->num_rows();
+        } 
+     function ambil_id_sp2d_spj($tahun)
+        {         
+            $q=$this->db->query("SELECT t_sp2d.id_sp2d FROM t_sp2d,t_spm,t_spp,t_sptb,t_kwitansi WHERE t_sp2d.id_sp2d=t_kwitansi.id_sp2d and t_spp.id_spp=t_spm.id_spp and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$tahun and t_sp2d.spj=0 group by t_sp2d.id_sp2d;");
+            return $q ;
+        }  
+      function ubah_status_spj_sp2d($id_sp2d,$tahun)
+        { 
+                 
+            $this->db->set('spj',1);       
+            $this->db->where('id_sp2d',$id_sp2d);
+            $this->db->where('th_sp2d',$tahun);    
+            $this->db->update('t_sp2d'); 
+        }
+      function cek_status_spm_spj($id_sp2d,$tahun)
+        {     
+           $q=$this->db->query("SELECT t_kwitansi.id_kwitansi,t_sp2d.id_sp2d FROM t_sp2d,t_spm,t_spp,t_sptb,t_kwitansi WHERE t_sp2d.id_sp2d=t_kwitansi.id_sp2d and t_spp.id_spp=t_spm.id_spp and t_spp.id_sptb=t_sptb.id_sptb and t_kwitansi.id_sptb=t_sptb.id_sptb and t_spp.id_sifatpembayaran =2 and t_spm.th_spm =$tahun and t_kwitansi.id_sp2d=$id_sp2d and id_status_spm <=7;");
+           return $q->num_rows() ; 
+        }
+}
+
+

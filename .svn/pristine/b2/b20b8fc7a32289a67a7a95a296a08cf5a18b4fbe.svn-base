@@ -1,0 +1,83 @@
+<article class="module width_full">
+            <header><h3>Daftar SPM TUP (Tambahan Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="4">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            if($jum_daftar_spm > 0){ 
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th=$row['th_spm'];
+            //$nomor=$row['nomor_spp']; 
+            $nama_unit=$row['nama_unit'];   
+            $id_unit=$row['id_unit'];   
+            $status_spm=$row['status_spm'];
+            $id_status_spm=$row['id_status_spm'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");
+            
+            $nmr=$row['no_spm']; 
+            $tahun=$row['th_spm']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat'];
+            $thn = '20'.$tahun;   
+            $nomor = sprintf("%04d", $nmr);     
+            ?>
+              <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>">   
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$thn";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                
+                <?php if($id_status_spm ==1 or $id_status_spm ==2){?>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <td align="center"> <a href='<?php echo base_url()."tup_spj/preview_spm_pusat/".$th."/".$id."/".$id_unit;?>' title='Preview SPM' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/detail_spm/".$th."/".$id;?>' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' onclick="return alert('Belum terimplementasi')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/setuju_spm_veri/".$th."/".$id;?>' title='Kirim ke Kasubag Dana Masyarakat' onclick="return confirm('SPM ini belom disiap divalidasi')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }elseif($id_status_spm ==3) {?> 
+                <td align="center"><?php echo"$status_spm";?></td>
+                <td align="center"> <a href='<?php echo base_url()."tup_spj/preview_spm_pusat/".$th."/".$id."/".$id_unit;?>' title='Preview SPM' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/detail_spm/".$th."/".$id;?>' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' onclick="return alert('Belum terimplementasi')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/setuju_spm_veri/".$th."/".$id;?>' title='Kirim ke Kasubag Dana Masyarakat' onclick="return confirm('Apakah anda yakin ingin mengirim SPM ini ke Kasubag Dana Masyarakat?')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                 <?php }else {?>
+                <td align="center" style="background-color:#99ff33"><?php echo"$status_spm";?></td>
+                <td align="center"> <a href='<?php echo base_url()."tup_spj/preview_spm_pusat/".$th."/".$id."/".$id_unit;?>' title='Preview SPM' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup_spj/detail_spm/".$th."/".$id;?>' title='Detail SPM' ><img src='<?php echo base_url();?>asset/images/detail.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' onclick="return alert('Belum terimplementasi')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='#' title='Kirim ke Kasubag Dana Masyarakat' onclick="return alert('Maaf SPM ini sudah dikirim ke Kepala Sub Bagian Dana Masyarakat')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+               
+                <?php }?>
+              </tr>
+              
+            <?php $no++;}?>
+            <?php }else{?>
+                  <tr>
+                  <td align='center' colspan="9" style="padding-top: 20px; padding-bottom: 20px;">Data Kosong</td></tr>
+            <? } ?>         
+            
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer>  
+</article>

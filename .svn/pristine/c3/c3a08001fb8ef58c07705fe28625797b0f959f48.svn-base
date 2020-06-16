@@ -1,0 +1,184 @@
+<article class="module width_full">
+<header>
+  <h3>Daftar Ajuan Belanja Kontraktual</h3>
+<script language="javascript">
+function validasi(form){
+  if (form.tgl_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian tanggal Kwitansi.");
+    form.tgl_kwitansi.focus();
+    return (false);
+  }
+  if (form.tpt_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian Tempat Kwitansi.");
+    form.tpt_kwitansi.focus();
+    return (false);
+  }  
+  if (form.ket_kwitansi.value == "")
+  {
+    alert("Anda belum mengisikan Isian Keterangan Kwitansi.");
+    form.ket_kwitansi.focus();
+    return (false);
+  }
+  if (form.pengambil.value == "")
+  {
+    alert("Anda belum mengisikan Isian Pengambil Kwitansi.");
+    form.pengambil.focus();
+    return (false);
+  }
+  if (form.nip_pengambil.value =="")
+  {
+    alert("Anda belum mengisikan Isian NIP Pengambil Kwitansi");
+    form.nip_pengambil.focus();
+    return (false);
+  }
+  if (form.penerima.value == "")
+  {
+    alert("Anda belum mengisikan Isian Penerima.");
+    form.penerima.focus();
+    return (false);
+  }
+  if (form.jns_pajak.value == "0")
+  {
+    alert("Anda belum mengisikan Pelaksana Kegiatan.");
+    form.jns_pajak.focus();
+    return (false);
+  }
+  return (true);
+}
+
+</script>
+
+</header>
+   
+
+  <div id="sub-content"> 
+  <form method="post" name='formName4'action="<?php echo site_url();?>ls/simpan_kwitansi_kontrak" onSubmit='return validasi(this)'>
+    <table border="0" width="80%" style="margin-left:20px">
+      <tr>
+        <td class="nm_col_hide" >Kwitansi</td>
+        <td >:</td>
+        <td><input name='jns_kwitansi' type='text' value="Kwitansi Belanja Barang Kontraktual" disabled="disabled" id="jns_kwitansi" size="50" style="width:450px;" /></td>
+      </tr>
+      <tr>
+        <td class="nm_col_hide" >Tanggal</td>
+        <td >:</td>
+        <td><input name='tgl_kwitansi' type='text' id="tgl_kwitansi"  size="18" style="width:450px;" readonly="readonly"/></td>
+      </tr>
+      <tr>
+        <td class="nm_col_hide" >Tempat Pembuatan Kwitansi</td>
+        <td >:</td>
+        <td><input name='tpt_kwitansi' type='text' value='' id="tpt_kwitansi" style="width:450px;" /></td>
+      </tr>
+      <tr>
+        <td>Keterangan Kwitansi</td>
+        <td >:</td>
+        <td><textarea name="ket_kwitansi" id="ket_kwitansi" class="input1" style="width:450px;"></textarea></td>
+      </tr>
+      <tr>
+        <td>Pelaksana Kegiatan</td>
+        <td >:</td>
+        <td><input name='pengambil' type='' value='' size="65" id="pengambil" style="width:450px;"/></td>
+      </tr>
+      <tr>
+        <td>NIP Pelaksana Kegiatan</td>
+        <td >:</td>
+        <td><input name='nip_pengambil' type='' value='' size="65" id="nip_pengambil" style="width:450px;"/></td>
+      </tr>
+      <tr>
+        <td>Penerima</td>
+        <td >:</td>
+        <td><input name='penerima' type='' value='' size="65" id="penerima" style="width:450px;"/></td>
+      </tr>
+		<tr>
+          <td>Jenis Pajak</td>
+          <td >:</td><td colspan="5"><?php echo form_dropdown("jns_pajak",$jns_pajak,"","id='jns_pajak' style='width : 450px'") ?></td>
+        </tr>
+        
+        <tr>
+          <td>PPN</td>
+          <td >:</td><td colspan="5"><div id="ppn">
+           <input name='p_ppn' type='' value='' size="31" id="p_ppn" readonly="readonly" />
+             PPH : 
+           <input name='p_pph' type='' value='' size="31" id="p_pph" readonly="readonly" />
+        </tr>
+</table>
+<br />
+    <table width="80%"  class="table-common" id="hasil" style="margin-left: 20px; width: 830px;" >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>Kd. MAK</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th> 
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil ==""){
+                 echo "<tr><td colspan='7' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+				 $sum_nominal =0;
+                 foreach($hasil->result() as $row) : $i++;?>
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td><?php echo $row->kegiatan;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+                    <td><?php echo $row->nominal; 
+					$sum_nominal = $sum_nominal + $row->nominal;
+					?> 
+                    </td>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+ </table>
+    </div>
+
+             <footer>         
+                <div class="submit_link"> 
+                <input name="sum_nominal" id="sum_nominal" value='<?php echo $sum_nominal; ?>' type="hidden" > 
+                <input name="kdoutput" id="kdoutput" value='<?php echo $row->kdoutput;?>' type="hidden" > 
+                <input name="kdkomponen" id="kdkomponen" value='<?php echo $row->kdkomponen;?>' type="hidden" > 
+                <input name="kdakun" id="kdakun" value='<?php echo $row->kdakun;?>' type="hidden" > 
+                <input name="hdr" id="hdr" value='<?php echo $row->hdr;?>' type="hidden"> 
+                <input name="nmoutput" id="nmoutput" value='<?php echo $row->nmoutput;?>' type="hidden" >
+                <input name="nmkomponen" id="nmkomponen" value='<?php echo $row->nmkomponen;?>' type="hidden" > 
+                <input name="nmakun" id="nmakun" value='<?php echo $row->nmakun;?>' type="hidden" >
+                <input name="nmheader" id="nmheader" value='<?php echo $row->nmheader;?>' type="hidden" > 
+                <input name="simpan" type='submit' id="simpan" value=' Buatkan Kwitansi'> 
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+    </footer>
+        </article>
+</form>
+
+        <script type="text/javascript">
+		/*===DROPDOWN UNTUK JENIS PAJAK===*/
+				  $("#jns_pajak").change(function(){
+					var jns_pajak1 = $("#jns_pajak").val();
+					var jns_pajak = {jns_pajak:$("#jns_pajak").val()};
+						if(jns_pajak1 != 0){
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo site_url('ls/select_pajak')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}else{
+							$('#id_komponen').attr("disabled",true);
+							$.ajax({
+									type: "POST",
+									url : "<?php echo base_url('application/views/ls/buat_kwitansi/gu_select_ppn.php')?>",
+									data: jns_pajak,
+									success: function(msg){
+										$('#ppn').html(msg);
+									}
+							  });
+						}
+				});
+		</script>

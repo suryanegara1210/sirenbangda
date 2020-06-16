@@ -1,0 +1,205 @@
+<style>
+.selisih_dk
+{
+	text-align:center;
+	font-size:16px;
+	font-weight:bold;
+	width:150px;
+}
+</style>
+
+ <script type="text/javascript">
+	    $(this).ready( function() {
+			/*
+			=========================================================
+			===========================KODE AKUN DEBET===============
+			*/
+    		$("#kd_akun_debet").autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>akuntansi/lookup",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+	 	         		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+            		$("#kd_akun_debet").append(
+            			"<li>"+ ui.item.id + "</li>"
+            		);           		
+         		},		
+    		});
+			
+			/*
+			=========================================================
+			===========================KODE AKUN KREDIT===============
+			*/
+    		$("#kd_akun_kredit").autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>akuntansi/lookup",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+		          		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+            		$("#kd_akun_kredit").append(
+            			"<li>"+ ui.item.id + "</li>"
+            		);           		
+         		},		
+    		});
+	    });
+	    </script>
+
+
+
+<table width="100%" border="0">
+  <tr>
+    <td valign="top">
+            <h1>Akun Debet</h1>
+            <table width="300" border="0">
+              <tr>
+                <td>Akun</td>
+                <td>: <?php echo form_input('kd_akun_debet','','id="kd_akun_debet" style="width:200px"');?>
+                </td>
+                <td rowspan="2"><input name="tambah_debet" type="button"  value=" + " id="tambah_debet" /></td>
+              </tr>
+              <tr>
+                <td>Nilai</td>
+                <td>: 
+                  <input name="nilai_debet" type="text" id="nilai_debet" style='width:200px'/></td>
+              </tr>
+              <tr>
+                <td colspan="3" width="300px">
+                <table width="300" border="1" >
+                  <tr >
+                    <th>No</th>
+                    <th>Kode Akun</th>
+                    <th>Debet</th>
+                    <th>Act</th>
+                  </tr>
+                  <?php $i=0;
+             foreach ($query_deb as $row){
+             $i++;
+             echo "<tr class=\"record\">";
+             echo    "<td>$i</td>";
+             echo    "<td>$row->kode_akun</td>";
+             echo    "<td>$row->debet</td>";
+             //echo    "<td><a href=\"#\" class=\"edit\" id=\"$row->id\" date=\"$row->date\" name=\"$row->name\" amount=\"$row->amount\">Edit</a></td>";
+             echo    "<td><a class=\"delbutton_deb\" id=\"$row->id\" href=\"#\" >Delete</a></td>";
+             echo  "</tr>";
+             }
+             
+             ?>
+                </table></td>
+              </tr>
+            </table>
+            <input type="hidden" value='' id="del_id" name="del_id">
+            </div> 
+
+    
+    </td>
+    <td>&nbsp;</td>
+    <td valign="top" >
+    
+				<?php $jum_deb=$query_jum_deb->jum_deb; 
+            $jum_kre=$query_jum_kre->jum_kre;
+            if($jum_deb > $jum_kre)
+            {
+                $selisih=$jum_deb - $jum_kre;
+                $tanda='>';
+            }
+            else if($jum_deb < $jum_kre)
+                {
+                $selisih=$jum_kre - $jum_deb;
+                $tanda='<';
+                }
+            else
+                {
+                $selisih=0;
+                $tanda='BALANCE';
+                }	
+            ?>             
+                          <p style="margin-top:100px;">
+                            <input type="text" name="textfield" id="textfield" readonly class="selisih_dk" value="<?php echo $tanda;?>" />
+                          </p>
+                          <p>
+                            <input type="text" name="selisih" id="selisih" readonly class="selisih_dk" value="<?php echo $selisih;?>" />
+                          </p></td>
+    
+    </td>
+    <td>&nbsp;</td>
+    <td valign="top">
+    
+    
+            <h1> Akun kredit</h1>
+            <table width="300" border="0">
+              <tr>
+                <td>Akun</td>
+                <td>: <?php echo form_input('kd_akun_kredit','','id="kd_akun_kredit" autocomplete="on" style="width:200px"');?>
+                </td>
+                <td rowspan="2"><input name="tambah_kredit" type="button"  value=" + " id="tambah_kredit"/></td>
+              </tr>
+              <tr>
+                <td>Nilai</td>
+                <td>: 
+                  <input name="nilai_kredit" type="text" id="nilai_kredit" style='width:200px' /></td>
+              </tr>
+              <tr>
+                <td colspan="3" width="300px">
+                <table width="300" border="1" >
+                  <tr >
+                    <th>No</th>
+                    <th>Kode Akun</th>
+                    <th>kredit</th>
+                    <th>Act</th>
+                  </tr>
+                  <?php $i=0;
+             foreach ($query_kre as $row){
+             $i++;
+             echo "<tr class=\"record\">";
+             echo    "<td>$i</td>";
+             echo    "<td>$row->kode_akun</td>";
+             echo    "<td>$row->kredit</td>";
+             //echo    "<td><a href=\"#\" class=\"edit\" id=\"$row->id\" date=\"$row->date\" name=\"$row->name\" amount=\"$row->amount\">Edit</a></td>";
+             echo    "<td><a class=\"delbutton_kre\" id=\"$row->id\" href=\"#\" >Delete</a></td>";
+             echo  "</tr>";
+             }
+             
+             ?>
+                </table></td>
+              </tr>
+            </table>
+            <input type="hidden" value='' id="del_id_kre" name="del_id_kre">
+            </div> 
+
+    
+    </td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+</table>

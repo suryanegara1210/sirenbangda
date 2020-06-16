@@ -1,0 +1,34 @@
+<script type="text/javascript">
+	
+</script>
+<article class="module width_full">
+	<header>
+	  <h3>Tabel Data CIK</h3>
+	</header>
+	<div style='float:right'><a href="<?php echo 'rka/cru_rka'?>">Tambah Data CIK</a></div><br>
+	<div class="module_content"; style="overflow:auto">
+		<table id="musrenbangdes" class="table-common tablesorter" style="width:100%">
+			<thead>
+				<tr>
+					<th rowspan="2" class="no-sort">No</th>	
+					<th rowspan="2">Kode</th>	
+					<th rowspan="2">Urusan / Organisasi Program / Kegiatan Belanja Langsung</th>
+					<th colspan="3">Anggaran</th>
+					<th colspan="4">Kelompok Indikator Kinerja Program (Outcome) / Indikator Kinerja Kegiatan (Output)</th>
+					<th rowspan="2">Keterangan</th>
+					<th rowspan="2" class="no-sort">Action</th>
+				</tr>
+				<tr>
+					<th>Rencana</th>
+					<th>Realisasi</th>
+					<th>Capaian IK</th>
+					<th>Indikator/Satuan</th>
+					<th>Rencana</th>
+					<th>Realisasi</th>
+					<th>Capaian IK</th>
+				</tr>				
+			</thead>
+			<tbody>			
+			</tbody>
+		</table>
+</article>

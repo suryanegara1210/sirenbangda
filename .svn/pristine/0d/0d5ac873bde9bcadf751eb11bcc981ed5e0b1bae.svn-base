@@ -1,0 +1,68 @@
+<article class="module width_full">
+    <header><h3>Form Pengisian Maksimum UP</h3></header>
+                    
+    <div class="module_content">     
+    <form method="post" name='form-spp' > 
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama Subunit</th>   
+                <th>Pagu_real</th>   
+                <th>Maksimum UP (Rp.)</th>   
+                <th>Aksi</th>
+            </tr>
+    </thead>
+             
+    <?php 
+     $no = 1;                  
+                        
+     foreach ($subunit as $tes){        
+                   if(isset($spp2[$tes->id_subunit])){
+                            $dulu=$spp2[$tes->id_subunit]; 
+                        } else{
+                            $dulu=0;  
+                        }
+                        
+                   if(isset($spp3_1[$tes->id_subunit])){
+                            $pagu_real=$spp3_1[$tes->id_subunit]; 
+                        } else{
+                            $pagu_real=0;  
+                        }  
+                                
+               $nama = $tes->nama_subunit;
+               $id = $tes->id_subunit;
+               $dulu_angka = number_format($dulu,0,",","."); 
+               $pagu_real_angka = number_format($pagu_real,0,",","."); 
+     ?>
+                   
+    <tr>
+                <?php if($pagu_real==0) {?>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="left"><?php echo "$nama";?></td>   
+                <td align="right"><?php echo "$pagu_real_angka";?></td> 
+                <td align="right"><?php echo "$dulu_angka";?></td> 
+                <td align="center"><a href='' title='Tambah Maksimum UP' onclick="return alert('Maaf Subunit ini belum mempunyai pagu realisasi')"><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                <?php }else{ ?>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="left"><?php echo "$nama";?></td>   
+                <td align="right"><?php echo "$pagu_real_angka";?></td> 
+                <td align="right"><?php echo "$dulu_angka";?></td> 
+                <td align="center"><a href='<?php echo base_url()."unit/tambah_maks/".$id;?>' title='Tambah Maksimum UP' ><img src='<?php echo base_url();?>asset/images/add.png'></a></td>
+                    
+                <?php } ?>
+                <?php $no++ ?>
+      <?php } ?>        
+              </tr>
+    </table>       
+    </div>                                                                              
+    <footer>
+                
+    <div class="submit_link">  
+        <input type=button value=Kembali onclick=self.history.back()>
+    </div> 
+    </footer>  
+       </form>
+
+
+</article>  

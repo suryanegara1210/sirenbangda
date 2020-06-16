@@ -1,0 +1,104 @@
+<article class="module width_full">
+<header>
+<h3>List SP2D SPM dan Surat Pertanggung Jawaban (SPJ)</h3>
+</header>
+
+<div class="module_content">
+                   
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="<?php echo base_url();?>spj/spj_pusat" onSubmit='return validasi(this)'>
+
+<table id="spj-list" class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>Nama Unit</th>
+                <th>Nominal SPM</th>
+                <th>Nominal SP2D</th>
+            </tr>
+      </thead>
+           <tbody>
+          
+           <?php if ( COUNT ($hasil)<=0){
+                        echo "<tr><td colspan=\"4\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=0;
+						$sum_nomspm=0;
+						$sum_nomsp2d=0;
+						foreach($hasil as $row) 
+						: $i++;
+						$sum_nomspm=$sum_nomspm+$row->nom_spm;
+						$sum_nomsp2d=$sum_nomsp2d+$row->nom_sp2d;
+						?>
+		                <tr class='accordion'>
+                            <td align="center"><?php echo $i; $row->id_unit ?></td>
+                            <td align="left"><?php echo $row->nama_unit; ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->nom_spm,0,false); ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->nom_sp2d,0,false); ?> </td>
+                        </tr>
+                        <tr class='detail' id="<?php echo $row->id_unit?>">
+                    	<td></td>
+                		<td colspan="6" style="padding: 0px; margin: 0px;"></td> 
+                		</tr>
+                        <?php endforeach; } ?>
+                        <tr>
+                        	<td></td>
+                            <td align="center"><strong>JUMLAH</strong></td>
+                            <td align="right"><?php echo Formatting::currency($sum_nomspm,0,false); ?> </td>
+                            <td align="right"><?php echo Formatting::currency($sum_nomsp2d,0,false); ?> </td>
+                        </tr>
+        </tbody>
+</table>
+
+<p><strong><em>*** Klik Pada Kolom Untuk dapat melihat detail SPJ dari masing-masing Unit</em></strong>
+<br /><br />
+Untuk Nominal SPM dan SP2D diatas hanya menjumlahkan nominal total GUP dan LS dari masing-masing Unit
+</p>
+</form>
+</div>
+<script type="text/javascript">
+	$(function () {
+		var table = $('#spj-list');
+		table.find('tr.detail').hide();
+		
+		table.find('tr.accordion').click( function() {
+			var td = $(this).next().find("td").next();
+			$.ajax({
+				type: 	"POST",
+				url:	"<?php echo site_url('spj/ajax_get_pusat')?>",
+				data:	{id_unit: $(this).next().attr("id")},
+				success: function (msg) {
+					td.html(msg);									
+				}
+			});
+			$(this).next().toggle();
+            if($(this).next().is(':visible')){
+                $(this).css({ 'background-color': 'lightgrey', 'font-weight' : 'bold'});                
+            } else {
+                $(this).css({ 'background-color': 'white', 'font-weight' : 'normal'});
+            }
+		});
+		
+	});
+	
+</script>
+
+</div>
+</article> 
+
+<script>
+function shows(){
+	var jenis_belanja = $("#jenis_belanja").val();
+		var data = {jenis_belanja:$("#jenis_belanja").val()};
+			$.ajax({
+				type: "POST",
+				url : "<?php echo site_url('spj/select_tahun_')?>",
+				data: {jenis_belanja: jenis_belanja},
+				success: function(msg){
+					$('#tabel').html(msg);
+				}
+			});
+	}
+
+</script>
+

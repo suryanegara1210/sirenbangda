@@ -1,0 +1,151 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-15 13:54:14 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 13:54:14 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 13:54:14 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 13:54:14 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 13:54:14 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 15:12:22 --> Severity: Notice  --> Undefined variable: idu C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 381
+ERROR - 2013-07-15 15:12:22 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 15:12:22 --> Severity: Notice  --> Undefined variable: su C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 382
+ERROR - 2013-07-15 15:13:32 --> Severity: Notice  --> Undefined variable: idu C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 381
+ERROR - 2013-07-15 15:13:32 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 15:13:32 --> Severity: Notice  --> Undefined variable: su C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 382
+ERROR - 2013-07-15 15:15:55 --> Severity: Notice  --> Undefined variable: idu C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 381
+ERROR - 2013-07-15 15:15:55 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 15:15:55 --> Severity: Notice  --> Undefined variable: su C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 382
+ERROR - 2013-07-15 15:16:44 --> Severity: Notice  --> Undefined variable: idu C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 381
+ERROR - 2013-07-15 15:16:44 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 15:16:44 --> Severity: Notice  --> Undefined variable: su C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 382
+ERROR - 2013-07-15 15:16:46 --> Severity: Notice  --> Undefined property: stdClass::$nama_unit C:\xampp\htdocs\siaku\application\views\kwitansi\verifikasi\daftar_verifikasi_pusat.php 52
+ERROR - 2013-07-15 15:23:33 --> Severity: Notice  --> Undefined variable: idu C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 381
+ERROR - 2013-07-15 15:23:33 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 15:23:33 --> Severity: Notice  --> Undefined variable: su C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 382
+ERROR - 2013-07-15 15:24:06 --> Severity: Notice  --> Undefined variable: idu C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 381
+ERROR - 2013-07-15 15:24:06 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 15:24:06 --> Severity: Notice  --> Undefined variable: su C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 382
+ERROR - 2013-07-15 15:28:08 --> Severity: Notice  --> Undefined property: stdClass::$nama_unit C:\xampp\htdocs\siaku\application\views\kwitansi\verifikasi\daftar_verifikasi_pusat.php 52
+ERROR - 2013-07-15 15:28:08 --> Severity: Notice  --> Undefined property: stdClass::$nama_unit C:\xampp\htdocs\siaku\application\views\kwitansi\verifikasi\daftar_verifikasi_pusat.php 52
+ERROR - 2013-07-15 15:28:52 --> Severity: Notice  --> Undefined property: stdClass::$nama_unit C:\xampp\htdocs\siaku\application\views\kwitansi\verifikasi\daftar_verifikasi_pusat.php 52
+ERROR - 2013-07-15 15:28:52 --> Severity: Notice  --> Undefined property: stdClass::$nama_unit C:\xampp\htdocs\siaku\application\views\kwitansi\verifikasi\daftar_verifikasi_pusat.php 52
+ERROR - 2013-07-15 15:36:23 --> Severity: Warning  --> Missing argument 5 for M_kwitansi::get_view_kwitansi_verifikasi(), called in C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php on line 415 and defined C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 519
+ERROR - 2013-07-15 15:36:23 --> Severity: Notice  --> Undefined variable: where C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 526
+ERROR - 2013-07-15 15:36:23 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 't_kwitansi`.`sifat_bayar`  LIKE '%%'
+AND  `t_kwitansi`.`jenis_kwitansi`  LIKE '%' at line 6
+ERROR - 2013-07-15 15:37:17 --> Severity: Notice  --> Undefined variable: idU C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 542
+ERROR - 2013-07-15 10:15:55 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-07-15 10:16:02 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-07-15 10:16:13 --> 404 Page Not Found --> rbac_user_role/icon_warning.gif
+ERROR - 2013-07-15 10:20:18 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-07-15 10:20:29 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-07-15 10:20:33 --> 404 Page Not Found --> rbac/icon_warning.gif
+ERROR - 2013-07-15 10:20:40 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-07-15 10:20:55 --> 404 Page Not Found --> rbac_role_permission/icon_warning.gif
+ERROR - 2013-07-15 16:22:13 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 16:22:13 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 16:22:13 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 16:22:13 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 16:22:13 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 16:22:25 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 16:22:25 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 16:22:25 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 16:22:25 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 16:22:25 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 16:33:20 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:33:20 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:34:06 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:34:06 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:35:06 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 424
+ERROR - 2013-07-15 16:35:06 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:35:06 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:36:00 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 424
+ERROR - 2013-07-15 16:36:00 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:36:00 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:36:55 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:36:55 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:38:03 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:38:03 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:38:03 --> Query error: Not unique table/alias: 'm_unit'
+ERROR - 2013-07-15 16:39:35 --> Query error: Not unique table/alias: 't_kwitansi'
+ERROR - 2013-07-15 16:40:46 --> Query error: Not unique table/alias: 't_kwitansi'
+ERROR - 2013-07-15 16:41:44 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:41:44 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:44:02 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:44:02 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:44:08 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:44:08 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:44:55 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 16:44:55 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:44:55 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:45:26 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 16:45:26 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:45:26 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:46:05 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:46:05 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:48:01 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 16:48:01 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:48:01 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:53:31 --> Query error: Table 'siaku_db_nonpenerimaan.id_unit' doesn't exist
+ERROR - 2013-07-15 16:54:05 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 16:54:05 --> Severity: 4096  --> Object of class CI_DB_mysqli_result could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:54:05 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 16:56:39 --> Severity: Notice  --> Undefined property: CI_DB_mysqli_result::$result C:\xampp\htdocs\siaku\application\models\m_kwitansi.php 558
+ERROR - 2013-07-15 16:56:39 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 16:56:39 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 16:56:39 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 16:56:39 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 16:56:39 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 16:59:54 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 16:59:54 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 16:59:54 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 17:01:38 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 17:01:38 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 17:01:38 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 17:01:42 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 425
+ERROR - 2013-07-15 17:01:42 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 17:01:42 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 17:02:13 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 17:02:13 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 17:03:36 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:03:36 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:03:36 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:03:36 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:03:36 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:04:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:04:46 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:04:46 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:04:46 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:04:46 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:05:03 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:05:03 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:05:03 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:05:03 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:05:03 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:06:12 --> Severity: 4096  --> Object of class stdClass could not be converted to string C:\xampp\htdocs\siaku\system\database\DB_active_rec.php 427
+ERROR - 2013-07-15 17:06:12 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 3
+ERROR - 2013-07-15 17:09:11 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:09:11 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:09:11 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:09:11 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:09:11 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:10:04 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:10:04 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:10:04 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:10:04 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:10:04 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:17:59 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:17:59 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:17:59 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:17:59 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:17:59 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:18:46 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:18:46 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:18:46 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:18:46 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:18:46 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:20:47 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89
+ERROR - 2013-07-15 17:20:47 --> Severity: Notice  --> Undefined variable: nama_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 252
+ERROR - 2013-07-15 17:20:47 --> Severity: Notice  --> Undefined variable: nama_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 254
+ERROR - 2013-07-15 17:20:47 --> Severity: Notice  --> Undefined variable: nip_ppk C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 262
+ERROR - 2013-07-15 17:20:47 --> Severity: Notice  --> Undefined variable: nip_bpp C:\xampp\htdocs\siaku\application\views\kwitansi\preview\kwitansi_veri.php 264
+ERROR - 2013-07-15 17:24:37 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\models\m_umum.php 89

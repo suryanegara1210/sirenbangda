@@ -1,0 +1,184 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Evaluasi_renja extends CI_controller
+{
+	var $CI = NULL;
+	public $triwulan = array(
+								"1" => array(
+												"nama" => "Triwulan 1",
+												"awal" => 1,
+												"akhir" => 3
+											),
+								"2" => array(
+												"nama" => "Triwulan 2",
+												"awal" => 4,
+												"akhir" => 6
+											),
+								"3" => array(
+												"nama" => "Triwulan 3",
+												"awal" => 7,
+												"akhir" => 9
+											),
+								"4" => array(
+												"nama" => "Triwulan 4",
+												"awal" => 10,
+												"akhir" => 12
+											),
+							);
+
+	public function __construct()
+	{
+		$this->CI =& get_instance(); 
+        parent::__construct();        
+        $this->load->database();        
+        $this->load->model(array('m_urusan', 'm_bidang', 'm_program', 'm_kegiatan','m_evaluasi_renja','m_skpd'));
+	}
+
+	function index()
+	{
+		$this->auth->restrict();		
+
+		$this->template->load('template','evaluasi/renja/evaluasi_renja_view');
+	}
+	
+	function cru_evaluasi_renja(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+		$det_tahun = $this->m_evaluasi_renja->get_tahun_now($tahun);
+
+		$data['kolom_now'] = array(
+									"nominal" => "nominal_".$det_tahun->id,
+									"target" => "target_".$det_tahun->id,
+								);		
+
+		$id_renja = $this->input->post("idr");
+		$id_indikator = $this->input->post("idi");
+		$tw = $this->input->post("tw");
+
+		$data['tahun_terakhir'] = $this->m_evaluasi_renja->get_max_tahun();		
+		$tahun_sebelum = $this->m_evaluasi_renja->get_less_tahun($tahun);
+		if (empty($tahun_sebelum)) {
+			$tahun_sebelum = $tahun;			
+		}		
+		$data['tahun_sebelum'] = $tahun_sebelum;
+
+		$data['indikator_renstra'] = $this->m_evaluasi_renja->get_indikator_renstra($id_indikator);
+		$data['renstra'] = $this->m_evaluasi_renja->get_renstra($id_renja);
+
+		$indikator_cik = $this->m_evaluasi_renja->get_indikator_cik($id_indikator);
+		$cik = $this->m_evaluasi_renja->get_cik($id_renja);		
+		$nominal_pengurang = 0;
+		$real_pengurang = 0;
+		for ($i=1; $i <= 4; $i++) { 
+			$realisasi = "realisasi_".$this->triwulan[$i]["akhir"];
+			$real = "real_".$this->triwulan[$i]["akhir"];
+						
+			$nominal = $cik->$realisasi - $nominal_pengurang;
+			$real_persen = $indikator_cik->$real - $real_pengurang;
+			$nominal_pengurang = $cik->$realisasi;
+			$real_pengurang = $indikator_cik->$real;
+			$tw_cik[$i] = array(
+								"nominal" => $nominal,
+								"target" => $real_persen,
+							);
+		}
+		$realisasi = "realisasi_".$this->triwulan[4]["akhir"];
+		$real = "real_".$this->triwulan[4]["akhir"];
+					
+		$nominal = $cik->$realisasi;
+		$real_persen = (float)$indikator_cik->$real;		
+		$tw_cik["ak"] = array(
+							"nominal" => $nominal,
+							"target" => $real_persen,
+						);
+
+		$data['cik'] = $tw_cik;
+
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array("id_skpd" => $id_skpd));
+		$data['tahun'] = $tahun;
+		$data['id_indikator'] = $id_indikator;
+		$data['tw'] = $tw;
+		$data['data'] = $this->m_evaluasi_renja->get_one_renja($id_renja);
+		$data['periode'] = $this->triwulan[$tw]['nama'];
+		$last_year = $this->m_evaluasi_renja->get_last_evaluasi_renja($id_indikator, $tahun);
+		$data['realisasi_capaian_tahun_lalu'] = array(
+														"target" => (!empty($last_year))?$last_year->realisasi_kinerja_k:0,
+														"nominal" => (!empty($last_year))?$last_year->realisasi_kinerja_rp:0
+													);
+
+		$html = $this->load->view("evaluasi/renja/cru_evaluasi_renja", $data, TRUE);
+		echo json_encode(array("html" => $html));
+	}
+	
+	private function cetak_evaluasi_renja_func($id_skpd){
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data['evaluasi_type'] = "EVALUASI RENJA";		
+		$data['ta'] = $tahun;
+		$data['skpd'] = $this->m_skpd->get_one_skpd(array('id_skpd' => $id_skpd));
+
+		$data['evaluasi'] = $this->load->view('evaluasi/renja/cetak/isi_evaluasi_renja', $data, TRUE);
+		return $data;
+	}
+
+	function preview_evaluasi_renja(){
+		$this->auth->restrict();
+		$id_skpd = $this->session->userdata('id_skpd');
+		
+		$data = $this->cetak_evaluasi_renja_func($id_skpd);
+		$this->template->load('template', 'evaluasi/renja/preview_evaluasi_renja',$data);
+	}
+
+	function get_table_data(){
+		$this->auth->restrict_ajax_login();
+
+		$id_skpd = $this->session->userdata('id_skpd');
+		$tahun = $this->session->userdata('t_anggaran_aktif');
+
+		$data['renja'] = $this->m_evaluasi_renja->get_renja_all($tahun, $id_skpd);
+
+		$html = $this->load->view('evaluasi/renja/table_renja', $data, TRUE);	
+		echo json_encode(array("html" => $html));
+	}
+
+	function save(){
+		$input = $this->input->post();
+		$realisasi['k'] = $this->input->post("realisasi_k");
+		$realisasi['rp'] = $this->input->post("realisasi_rp");
+
+		$data_evaluasi = array(
+								"tahun" => $input["tahun"],
+								"id_indikator_prog_keg" => $input["id_indikator_prog_keg"],
+								"satuan" => $input["satuan"],
+								"target_akhir_renstra_k" => $input["target_akhir_renstra_k"],
+								"target_akhir_renstra_rp" => $input["target_akhir_renstra_rp"],
+								"realisasi_kinerja_sebelum_k" => $input["realisasi_kinerja_sebelum_k"],
+								"realisasi_kinerja_sebelum_rp" => $input["realisasi_kinerja_sebelum_rp"],
+								"target_anggaran_berjalan_k" => $input["target_anggaran_berjalan_k"],
+								"target_anggaran_berjalan_rp" => $input["target_anggaran_berjalan_rp"],
+								"realisasi_kinerja_berjalan_k" => $input["realisasi_kinerja_berjalan_k"],
+								"realisasi_kinerja_berjalan_rp" => $input["realisasi_kinerja_berjalan_rp"]
+							);
+
+		$data_evaluasi_det = array(
+									"triwulan" => $input["triwulan_berjalan"],
+									"tingkat_capaian_k" => $input["tingkat_capaian_k"],
+									"tingkat_capaian_rp" => $input["tingkat_capaian_rp"],
+									"realisasi_kinerja_k" => $input["realisasi_kinerja_k"],
+									"realisasi_kinerja_rp" => $input["realisasi_kinerja_rp"],
+									"tingkat_capaian_total_k" => $input["tingkat_capaian_total_k"],
+									"tingkat_capaian_total_rp" => $input["tingkat_capaian_total_rp"]
+								);
+
+		$result = $this->m_evaluasi_renja->save($data_evaluasi, $realisasi, $data_evaluasi_det);
+
+		if ($result) {
+			$msg = array('success' => '1', 'msg' => 'Evaluasi renja berhasil simpan.');
+			echo json_encode($msg);			
+		}else{
+			$msg = array('success' => '0', 'msg' => 'ERROR! Kegiatan gagal dibuat, mohon menghubungi administrator.');
+			echo json_encode($msg);			
+		}
+	}
+}

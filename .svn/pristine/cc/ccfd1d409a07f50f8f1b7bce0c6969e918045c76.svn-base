@@ -1,0 +1,5 @@
+<ul> <li> <a>Pendapatan</a> <ul> <li> <a>Layanan Pendidikan Lain</a> <ul> <li> <a href="http://localhost/siaku/ladik_lain/mou_input">Input Resume MOU
+</a> </li> <li> <a href="http://localhost/siaku/ladik_lain/mou_daftar_all">Daftar Resume MOU</a> </li> </ul> </li> <li> <a>Hibah
+ Terencana</a> <ul> <li> <a href="http://localhost/siaku/hibah/mou_input">Input Resume MOU
+</a> </li> <li> <a href="http://localhost/siaku/hibah/mou_daftar_all">Daftar Resume MOU</a> </li> </ul> </li> <li> <a>Layanan Masyarakat</a> <ul> <li> <a href="http://localhost/siaku/pppmas/mou_input">Input Resume MOU
+</a> </li> <li> <a href="http://localhost/siaku/pppmas/mou_daftar_all">Daftar Resume MOU</a> </li> </ul> </li> <li> <a>Hibah Tak Terencana</a> <ul> <li> <a href="http://localhost/siaku/hibah_takter/mou_input">Input Resume MOU</a> </li> <li> <a href="http://localhost/siaku/hibah_takter/mou_daftar_all">Daftar Resume MOU</a> </li> <li> <a href="http://localhost/siaku/hibah_takter/inputBM">Input Bukti Memorial</a> </li> <li> <a href="http://localhost/siaku/bm/semua/HIBAH_TAKTER">Daftar Bukti Memorial</a> </li> </ul> </li> </ul> </li> </ul>

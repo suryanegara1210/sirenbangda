@@ -1,0 +1,62 @@
+<script>
+prepare_facebox();
+
+function preview_kw(id) {
+    console.log('preview',id);
+    $.facebox({ajax: '<?php echo site_url('kwitansi/preview')?>/'+id})
+  } 
+  
+</script>
+
+<article class="module width_full">
+<header>
+
+  <h3>Daftar Kwitansi Per MAK</h3></header>
+   
+
+  <div id="sub-content"> 
+  <form method="post" name='formName4'action="<?php echo site_url();?>sptb/simpan_sptb">  
+    <table  class="table-common" id="hasil" style="margin-left: 20px; width:95%;" >  
+       <thead> 
+            <tr>
+                <th>No.</th>
+                <th>No. Kwitansi</th>
+                <th>Nama Subunit</th>
+                <th>Jenis Kwitansi</th>
+                <th>Tanggal</th>
+                <th>Kd. MAK</th>
+                <th>Keterangan</th>
+                <th>Jumlah</th>
+            </tr>
+      </thead>
+           <tbody>         
+             <?php if($hasil ==""){
+                 echo "<tr><td colspan='8' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+             }else{
+                 $i=0;
+                 foreach($hasil->result() as $row) : $i++;?>
+                 <input type="hidden" name="id_output" value="<?php echo $row->kdoutput; ?>"> 
+                 <input type="hidden" name="id_akun" value="<?php echo $row->kdakun; ?>">
+                 <input type="hidden" name="jb" value="<?php echo $jb; ?>">
+                <tr>
+                    <td align="center"><?php echo $i;?></td>
+                    <td align="center"><a href="javascript:void(0)" onclick="preview_kw(<?php echo $row->id_kwitansi;?>)" 
+                title='preview kwitansi'><?php echo $row->no_kwitansi; ?></a></td>
+                    <td align="center"><?php echo $row->nama_subunit; ?></td>   
+                    <td align="center"><?php echo $row->jenis_kwitansi; ?> </td>
+                    <td align="center"><?php echo $row->tgl_kwitansi; ?> </td>
+                    <td align="center"><?php echo $row->kdgiat;?>.<?php echo $row->kdoutput;?>.<?php echo $row->kdakun;?></td>
+                    <td align="center"><?php echo "".substr($row->ket_kwitansi,0,25)."...";?> </td>
+                    <td><?php echo $this->uang->angka($row->jumlah); ?> </td>
+                </tr>
+             <?php endforeach; }?>
+        </tbody>
+ </table>
+ </div>
+             <footer>         
+                <div class="submit_link"> 
+                <input name="simpan" type='submit' id="simpan" value=' Buatkan SPTB' onclick="return confirm('Apakah Anda Yakin untuk Membuat SPTB ... ?')">
+                <input type="button" value="Kembali" onclick=self.history.back() >
+                </div>
+            </footer>
+        </article>

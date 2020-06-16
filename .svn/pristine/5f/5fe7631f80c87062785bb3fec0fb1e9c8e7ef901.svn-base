@@ -1,0 +1,309 @@
+<script>
+$(document).on("focus keyup","input#nama_peg",function(event){
+
+    $(this).autocomplete({
+      			minLength: 1,
+      			source: 
+        		function(req, add){
+          			$.ajax({
+		        		url: "<?php echo site_url(); ?>kwitansi/lookup",
+		          		dataType: 'json',
+		          		type: 'POST',
+		          		data: req,
+		          		success:    
+		            	function(data){
+		              		if(data.response =="true"){
+		                 		add(data.message);
+		              		}
+		            	},
+              		});
+         		},
+         	select: 
+         		function(event, ui) {
+					event.preventDefault();
+            		this.value = ui.item.label;
+            		//$(this).next().val(ui.item.value);
+					//$("#golongan0" ).val( ui.item.value );
+					//=========
+					var nama_baris=this.name;
+					var id_baris=nama_baris.split('[');
+					id_baris=id_baris[1].split(']');
+					id_baris=id_baris[0];
+					var nama_field= '#golongan'+id_baris;
+					$( nama_field ).val( ui.item.value );
+					//===========
+					
+         		},		
+    		});
+    
+});
+</script>
+
+    <script type="text/javascript">
+    //load file
+		var reader = new FileReader();
+		function readText(that){
+
+			if(that.files && that.files[0]){
+				var reader = new FileReader();
+				reader.onload = function (e) {  
+					var output=e.target.result;
+					//alert (output);
+					//process text to show only lines with "@":				
+					//output=output.split("\n").filter(/./.test, /\@/).join("\n");
+					output=output.split("\n");
+					var hasil='';
+					var has = new Array();
+					var hasCount=0;
+						output.forEach(function(out) {
+						  var batas=document.getElementById('batas').value;
+							if(hasCount>=batas-1){
+							    	baris=out.split("<?php echo constant::CSV_SEPARATOR ; ?>");
+								var has2Count=0;
+								var has2 = new Array();
+								baris.forEach(function(kolom) {						
+									has2[has2Count]=kolom;
+									//hasil=hasil+kolom+"<--->";
+									has2Count++;
+								});
+								//hasil=hasil+"<br>";
+								has[hasCount-batas+1]=has2;
+							}
+							hasCount++;
+						});					    
+                        //masukan ke row
+                        masukkan(has);
+						//alert(has[3][0]);
+						//document.getElementById('main').innerHTML=hasil;
+				};//end onload()
+				
+				reader.readAsText(that.files[0]);
+			}//end if html5 filelist support
+			
+		} 
+        //input ke tabel
+        function masukkan(ambilan){
+            if (ambilan.length>0){
+                for(var i=0;i<ambilan.length;i++){
+                    if (i==0){
+                        form_barang = document.forms['form_barang'];
+                        form_barang.elements["nama[0]"].value=ambilan[i][0];
+                        form_barang.elements["golongan[0]"].value=ambilan[i][1];
+                        form_barang.elements["kd_mk[0]"].value=ambilan[i][2];
+                        form_barang.elements["m_kul[0]"].value=ambilan[i][3];
+                        form_barang.elements["jml_org[0]"].value=ambilan[i][4];
+                        form_barang.elements["bruto[0]"].value=ambilan[i][5];
+                        form_barang.elements["h_naskah[0]"].value=ambilan[i][6];
+                        form_barang.elements["jumlah0"].value=(ambilan[i][4])*(ambilan[i][5])+(ambilan[i][6]);
+						form_barang.elements["grand_total"].value=(ambilan[i][4])*(ambilan[i][5])+(ambilan[i][6]);
+
+						
+                    }else{
+                        addRow('nama_honor',ambilan[i]);
+                    }
+                }
+            }  
+        }
+    </script>
+<div><strong>RINCIAN HONOR NASKAH DAN KOREKSI UJIAN</strong><br />
+  <br/>
+<?php echo $form_import ?>
+</div>
+    
+<table class="table-common" id="nama_honor" style="width: 99.9%;" name="nama_honor" >  
+            <tr>
+                <th>Nama Dosen</th>
+                <th>Gol</th>
+                <th>Kode MK</th>
+                <th>Mata Kuliah</th>
+                <th>Jml Peserta</th>
+                <th>Honor Bruto / peserta</th>
+                <th>Honor Naskah</th>
+                <th>Total Semua</th>
+                <th>Action</th>       
+            </tr>
+        <tr>
+            <td><input name="nama[0]" type="text" id="nama_peg" autocomplete="on" value=""/></td>
+            <td>
+                <input name="golongan[0]" type="text" id="golongan0" size="3" readonly />
+            </td>
+            <td><input name="kd_mk[0]" type="text" id="bruto3" size="10"/></td>
+            <td><input name="m_kul[0]" type="text" id="bruto2"/></td>
+            <td><input name="jml_org[0]" type="text" id="jml_org0" size="2" onkeyup="myFunction3()"/></td>
+            <td><input name="bruto[0]" type="text" id="bruto0" onkeyup="myFunction3()" size="12"></td>
+            <td><input name="h_naskah[0]" type="text" id="h_naskah0" onkeyup="myFunction3()" size="12"/></td>
+            <td><input name="jumlah0" type="text" id="jumlah" onkeyup="myFunction3()" size="12" class="jumlah" /></td>
+            <td>&nbsp;</td>
+        </tr>
+            <tr>
+                <th colspan="6">Jumlah Total Nilai Rincian honor</th>
+                <th colspan="2"><input type="text" name="grand_total" id="grand_total" readonly="readonly" /></th>
+                <th><input type="button" value="   +   " onclick="addRow('nama_honor')" /></th>       
+            </tr>
+  </table>
+  
+ 
+  <script language="javascript">
+                var counter=0;
+            		function addRow(tableID,inputan) {
+			         inputan = typeof(inputan) !== 'undefined' ? inputan : '';
+                      counter=counter+1;
+                      
+            			var table = document.getElementById(tableID);
+            			var rowCount = table.rows.length;
+            			var row = table.insertRow(rowCount-1);
+            
+            			var nama = row.insertCell(0);
+            			var inp_nama = document.createElement("input");
+            			inp_nama.type="text";
+            			inp_nama.id="nama_peg";
+            			inp_nama.autocomplete="on";
+            			if (inputan!=''){
+                	       inp_nama.value=inputan[0];
+                	    }
+                        inp_nama.name= "nama["+counter+"]";
+            			nama.appendChild(inp_nama);
+                        
+						
+						var golongan = row.insertCell(1);
+            			var inp_gol = document.createElement("input");
+            			inp_gol.type="text";
+            			inp_gol.size="3";
+                        inp_gol.name= "golongan["+counter+"]";
+						inp_gol.id= "golongan"+counter;
+            			if (inputan!=''){
+                	       inp_gol.value=inputan[1];
+                	    }
+						inp_gol.readOnly = "readonly" ;
+            			golongan.appendChild(inp_gol);
+
+                        var kd_mk = row.insertCell(2);
+            			var inp_kd_mk = document.createElement("input");
+            			inp_kd_mk.type="text";
+            			inp_kd_mk.size="10";
+                        inp_kd_mk.name= "kd_mk["+counter+"]";
+            			if (inputan!=''){
+                	       inp_kd_mk.value=inputan[2];
+                	    }
+            			kd_mk.appendChild(inp_kd_mk);
+
+                        var m_k = row.insertCell(3);
+            			var inp_mk = document.createElement("input");
+            			inp_mk.type="text";
+                        inp_mk.name= "m_kul["+counter+"]";
+            			if (inputan!=''){
+                	       inp_mk.value=inputan[3];
+                	    }
+            			m_k.appendChild(inp_mk);
+						
+
+						var jml_org = row.insertCell(4);
+            			var inp_jml_org = document.createElement("input");
+            			inp_jml_org.type="text";
+            			inp_jml_org.size="2";
+                        inp_jml_org.name= "jml_org["+counter+"]";
+                        inp_jml_org.id= "jml_org"+counter;
+            			if (inputan!=''){
+                	       inp_jml_org.value=inputan[4];
+                	    }
+						inp_jml_org.setAttribute('onkeyup','myFunction3(this)');
+            			jml_org.appendChild(inp_jml_org);
+
+						
+                        var bruto = row.insertCell(5);
+            			var inp_bruto = document.createElement("input");
+            			inp_bruto.type="text";
+            			inp_bruto.size="12";
+                        inp_bruto.name= "bruto["+counter+"]";
+                        inp_bruto.id= "bruto"+counter;
+            			if (inputan!=''){
+                	       inp_bruto.value=inputan[5];
+                	    }
+						inp_bruto.setAttribute('onkeyup','myFunction3(this)');
+            			bruto.appendChild(inp_bruto);
+
+                        var h_naskah = row.insertCell(6);
+            			var inp_h_naskah = document.createElement("input");
+            			inp_h_naskah.type="text";
+            			inp_h_naskah.size="12";
+                        inp_h_naskah.name= "h_naskah["+counter+"]";
+                        inp_h_naskah.id= "h_naskah"+counter;
+            			if (inputan!=''){
+                	       inp_h_naskah.value=inputan[6];
+                	    }
+						inp_h_naskah.setAttribute('onkeyup','myFunction3(this)');
+            			h_naskah.appendChild(inp_h_naskah);
+                       
+                        var bruto = row.insertCell(7);
+            			var inp_bruto = document.createElement("input");
+            			inp_bruto.type="text";
+            			inp_bruto.size="12";
+                        inp_bruto.name= "jumlah"+counter;
+                        inp_bruto.id= "jumlah";
+						inp_bruto.setAttribute('class', 'jumlah');
+            			if (inputan!=''){
+                	       inp_h_naskah.value=(inputan[4])*(inputan[5])+(inputan[6]);
+						   
+						    var nilai = parseFloat(form_barang.elements["grand_total"].value);
+							form_barang.elements["grand_total"].value=nilai + ((inputan[4])*(inputan[5])+(inputan[6]));
+
+                	    }
+						inp_bruto.setAttribute('onkeyup','myFunction3(this)');
+                        //inp_bruto.setAttribute('readonly','true');
+            			bruto.appendChild(inp_bruto);
+					    
+            			var cell4 = row.insertCell(8);
+            			var element3 = document.createElement("input");
+            			element3.type = "button";
+            			element3.value = "del";
+            			element3.onclick= function() {delRow(tableID,this);}
+            			cell4.appendChild(element3);
+            			
+            			inp_nama.focus();
+            		}
+            
+            		function delRow(tabeID,src){
+            			var oRow = src.parentElement.parentElement;
+            			document.getElementById(tabeID).deleteRow(oRow.rowIndex);
+            		}
+                    function deleteAll(tabeID) {
+                      var obj = document.getElementById(tabeID);
+					  var i;
+                      if(!obj && !obj.rows)
+                        return;
+                      var limit = 1;
+                      var rows = obj.rows; 
+					  var len=rows.length;
+                      if(limit > len)
+                        return;
+                      for(i=1; i<len-1;i++) {
+                        obj.deleteRow(limit);
+                      }
+                      $('#jns_honor').change();
+                    }
+function myFunction3()
+{
+        var x = parseFloat(document.getElementById("jml_org"+counter).value);
+		var y = parseFloat(document.getElementById("bruto"+counter).value);
+		var v = parseFloat(document.getElementById("h_naskah"+counter).value);
+        var inp = document.getElementsByTagName('input');
+		
+		var totalJum=0;
+		var z=parseFloat((x*y)+v);
+		var name="jumlah"+counter;
+		$("input[name="+name+"]").val(z);
+		
+        $(".jumlah").each(function() {
+		totalJum=totalJum + parseFloat($(this).val());
+		});
+		$("#grand_total").val(totalJum);
+		
+}		
+ $( function() {
+        //var numOptions = {aSep: '.', aDec: ',', vMin: '0', vMax: '999999999999.99', mDec: 0};
+        //var numOptionsPersen = {aSign: ' %', mDec: 0, pSign: 's'};
+		$("#grand_total").autoNumeric(window.numOptions);
+
+});					
+</script>
+ 

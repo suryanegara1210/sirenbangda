@@ -1,0 +1,56 @@
+<?php
+
+/**
+ *
+ */
+
+class Pok extends CI_Controller {
+
+    function __construct() {
+
+		$this->CI =& get_instance();
+		parent::__construct();
+
+		$this->load->model(array('m_pok','m_umum'));
+
+    }
+
+	function daftar_pok()
+	{
+		$this->auth->restrict();
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+		if(!empty($cdsu)) {
+			$data['lists'] = $this->m_pok->get_daftar_pok($ta, $cdsu);
+			$data['unit']  = $this->m_umum->get_nama_sunit_by_code($cdsu);
+			$this->load->view('pok/list_dipa',$data);
+			return;
+		}
+
+		echo "No Data";
+	}
+
+	function daftar_pok_detail()
+	{
+		$this->auth->restrict();
+
+        //prepare session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+		$kdgiat       = $this->input->post('kdgiat');
+		$kdoutput     = $this->input->post('kdoutput');
+		$kdkomponen   = $this->input->post('kdkomponen');
+		$kdakun       = $this->input->post('kdakun');
+		$hdr          = $this->input->post('hdr');		
+
+		$hdr = str_replace(";", "", $hdr);		
+		$data['lists'] = $this->m_pok->get_daftar_pok_detail($ta, $cdsu, $kdgiat, $kdoutput,
+						$kdkomponen, $kdakun, $hdr);		
+		$this->load->view('pok/list_belanja', $data);
+	} 
+}

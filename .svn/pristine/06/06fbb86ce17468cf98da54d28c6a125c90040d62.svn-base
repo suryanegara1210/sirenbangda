@@ -1,0 +1,48 @@
+<?php
+/**
+ *
+ * Class ini digunakan untuk menghandle data bas di m_bas
+ *
+ * @author I Made Agus Setiawan <madeagus@gmail.com>
+ * 
+ */
+class M_bas extends CI_Model {
+    
+    function get_list_bas_by_akun_detail($kdgiat, $kdoutput, $kdakun){
+        
+        $sql = "
+            SELECT akun_kode, akun_nama
+            FROM m_bas
+            WHERE aktif = 'YA'
+                AND level = 8
+                AND
+                (
+                    (
+                        SUBSTR(akun_kode,1,6) LIKE ?
+                        AND (kegiatan LIKE ? OR kegiatan = '')
+                    )
+                    OR
+                    (
+                        kegiatan LIKE ?
+                        OR kegiatan LIKE ?
+                    )
+                 )
+        ";
+        
+        $giat1 = "%$kdgiat.$kdoutput%";
+        $giat2 = "$kdgiat.$kdoutput.$kdakun";
+        $giat3 = "$kdakun";
+        
+        $query = $this->db->query($sql, array($kdakun, $giat1, $giat2, $giat3));
+
+        if($query) {
+            if($query->num_rows > 0) {
+                return $query->result();
+            }
+        }
+        
+        return NULL;             
+    }
+}
+
+?>

@@ -1,0 +1,136 @@
+
+<table width="100%" border="1"  class="table-common" id="hasil" style="margin-left: 20px; width:850px;" >  
+       <thead> 
+            <tr>
+            	<th >Kode akun</th>
+                <th >Nama Akun</th>
+                <th >Saldo Bulan Lalu</th>
+                <th >Saldo Bulan Sekarang</th>
+                <th >Saldo s/d Sekarang</th>
+
+         </tr>
+         
+      </thead>
+           <tbody>		 
+			 <?php $i=0;
+			 if($hasil_pendapatan ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl=0;
+				 $sum_ss=0;
+				 $sum_sd=0;
+			 	foreach($hasil_pendapatan->result() as $row) : $i++;
+					
+                    if (isset($saldo_akhir_tahun_arr[$row->kd])){
+                        $saldo_akhir_tahun=$saldo_akhir_tahun_arr[$row->kd];
+                    } else{
+                        $saldo_akhir_tahun=0;
+                    }
+                    
+					$saldo_lalu=$saldo_akhir_tahun + ($row->sum_kredit_l)-($row->sum_debet_l);
+				 	$saldo_sekarang=($row->sum_kredit_s)-($row->sum_debet_s);
+				 	$saldo_sd = $saldo_lalu + $saldo_sekarang;
+				?>                 
+                <tr>
+                  <td width="80px"><?php echo $row->kd; ?></td>
+                  <td><?php echo $row->nama_akun; ?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $sum_sl=$sum_sl+$saldo_lalu;?></td>
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $sum_ss=$sum_ss+$saldo_sekarang;?></td>                  
+                  <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sd); $sum_sd=$sum_sd+$saldo_sd;?></td>
+                </tr>
+			 <?php endforeach; }?>
+             <tr>
+                  <th>&nbsp;</th>
+                  <th >Jumlah Pendapatan</th>
+                  <th ><?php echo $this->uang->angka($sum_sl); ?></th>
+                  <th ><?php echo $this->uang->angka($sum_ss); ?></th>
+                  <th ><?php echo $this->uang->angka($sum_sd); ?></th>
+             </tr>
+        </tbody>
+ </table>
+ <br />
+ <br />
+<table width="100%" border="1"  class="table-common" id="hasil2" style="margin-left: 20px; width:850px;" >
+  <thead>
+    <tr>
+      <th >Kode akun</th>
+      <th >Nama Akun</th>
+      <th >Saldo Bulan Lalu</th>
+      <th >Saldo Bulan Sekarang</th>
+      <th >Saldo s/d Sekarang</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php $i=0;
+			 if($hasil_biaya ==""){
+				 echo "<tr><td colspan='10' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+			 }else{
+				 $sum_sl_b=0;
+				 $sum_ss_b=0;
+				 $sum_sd_b=0;
+			 	foreach($hasil_biaya->result() as $row) : $i++;
+					
+					$saldo_lalu=($row->sum_debet_l)-($row->sum_kredit_l);
+				 	$saldo_sekarang=($row->sum_debet_s)-($row->sum_kredit_s);
+				 	$saldo_sd = $saldo_lalu + $saldo_sekarang;
+				?>
+    <tr>
+      <td width="80px"><?php echo $row->kd; ?></td>
+      <td><?php echo $row->nama_akun; ?></td>
+      <td align="right" width="120px"><?php echo $this->uang->angka($saldo_lalu); $sum_sl_b=$sum_sl_b+$saldo_lalu;?></td>
+      <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sekarang); $sum_ss_b=$sum_ss_b+$saldo_sekarang;?></td>
+      <td align="right" width="120px"><?php echo $this->uang->angka($saldo_sd); $sum_sd_b=$sum_sd_b+$saldo_sd;?></td>
+    </tr>
+    <?php endforeach; }?>
+    <tr>
+      <th>&nbsp;</th>
+      <th >Jumlah Biaya</th>
+      <th ><?php echo $this->uang->angka($sum_sl_b); ?></th>
+      <th ><?php echo $this->uang->angka($sum_ss_b); ?></th>
+      <th ><?php echo $this->uang->angka($sum_sd_b); ?></th>
+    </tr>
+  </tbody>
+</table>
+<br />
+<table width="100%" border="1"  class="table-common" id="hasil3" style="margin-left: 20px; width:850px;" >
+  <thead>
+    <tr>
+      <th width="80" >&nbsp;</th>
+      <th >Laba Bersih</th>
+      <th align="right" width="120px">
+      <?php if($sum_sl >= $sum_sl_b)
+	  {
+		  echo $this->uang->angka($sum_sl-$sum_sl_b);
+		}
+		else
+		{
+			echo '<a style="color:#F00">( '.$this->uang->angka($sum_sl_b-$sum_sl).' )</a>';
+		}
+	  ?>
+      </th>
+      <th align="right" width="120px">
+      <?php if($sum_ss >= $sum_ss_b)
+	  {
+		  echo $this->uang->angka($sum_ss-$sum_ss_b);
+		}
+		else
+		{
+			echo '<a style="color:#F00">( '.$this->uang->angka($sum_ss_b-$sum_ss).' )</a>';
+		}
+	  ?>
+      </th>
+      <th align="right" width="120px">
+      <?php if($sum_sd >= $sum_sd_b )
+	  {
+		  echo $this->uang->angka($sum_sd-$sum_sd_b);
+		}
+		else
+		{
+			echo '<a style="color:#F00">( '.$this->uang->angka($sum_sd_b-$sum_sd).' )</a>';
+		}
+	  ?>
+      </th>
+    </tr>
+  </thead>
+</table>
+<p>&nbsp;</p>

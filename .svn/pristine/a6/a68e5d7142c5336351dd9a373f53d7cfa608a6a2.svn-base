@@ -1,0 +1,97 @@
+<script type="text/javascript">
+</script>
+
+<div class="module_content">
+	<table class="fcari" width="100%">
+		<tbody>
+			<tr>
+				<td width="20%">SKPD</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Tujuan</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Sasaran</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td>Kode Urusan</td>
+				<td>
+					<input type="text">           
+    			</td>
+			</tr>
+			<tr>
+				<td>Kode Bidang Urusan</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Kode Program</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Nama Kegiatan</td>
+				<td>
+				</td>
+			</tr>
+			<tr>
+				<td>Indikator Kerja</td>
+				<td>
+					<textarea class="common" name="indikator"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td>Satuan Target</td>
+				<td>
+				</td>
+			</tr>
+			<tr>
+				<td>Kondisi Awal</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Target Tahun 1</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Target Tahun 2</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Target Tahun 3</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Target Tahun 4</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Target Tahun 5</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+			<tr>
+				<td>Target Kondisi Akhir</td>
+				<td>
+					<input type="text">
+				</td>
+			</tr>
+		</tbody>
+	</table>	
+</div>

@@ -1,0 +1,68 @@
+<div style="width: 100%; margin-top:20px">
+<form method="post" id="form_simpan" name='form_simpan' action="<?php echo base_url();?>report/simpan_spj" onSubmit='return validasi(this)'>
+
+<table id="spj-list" class="table-common" style="width: 99.5%;" >  
+       <thead> 
+            <tr>
+                <th>No</th>
+                <th>No SPJ</th>
+                <th>Sub Unit</th>
+                <th>Sifat Bayar</th>
+                <th>Status</th>
+                <th>Total SPJ</th>
+            </tr>
+      </thead>
+           <tbody>
+          
+           <?php if ( COUNT ($data_spj)<=0){
+                        echo "<tr><td colspan=\"6\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        $i=0;
+						foreach($data_spj as $row) : $i++;
+						?>
+		                <tr class='accordion'>
+                            <td align="center"><?php echo $i; $row->id_spj ?></td>
+                            <td align="left"><?php echo $row->no_spj; ?> </td>
+                            <td align="left"><?php echo $row->nama_subunit; ?> </td>
+                            <td align="left"><?php echo $row->sifat_bayar; ?> </td>
+                            <td align="left"><?php echo $row->status_spj; ?> </td>
+                            <td align="right"><?php echo Formatting::currency($row->jumlah,0,false); ?> </td>
+                        </tr>
+                        <tr class='detail' id="<?php echo $row->id_spj?>">
+                    	<td></td>
+                		<td colspan="6" style="padding: 0px; margin: 0px;"></td> 
+                		</tr>
+                        <?php endforeach; } ?>
+        </tbody>
+</table>
+</form>
+</div>
+<script type="text/javascript">
+	$(function () {
+		var table = $('#spj-list');
+		table.find('tr.detail').hide();
+		
+		table.find('tr.accordion').click( function() {
+			var bulan = $("#bulan").val();
+			var jenis_belanja = $("#jenis_belanja").val();
+			var td = $(this).next().find("td").next();
+			$.ajax({
+				type: 	"POST",
+				url:	"<?php echo site_url('spj/ajax_get_spm')?>",
+				data:	{id_spj: $(this).next().attr("id"), bulan: bulan, jenis_belanja: jenis_belanja},
+				success: function (msg) {
+					td.html(msg);									
+				}
+			});
+			$(this).next().toggle();
+            if($(this).next().is(':visible')){
+                $(this).css({ 'background-color': 'lightgrey', 'font-weight' : 'bold'});                
+            } else {
+                $(this).css({ 'background-color': 'white', 'font-weight' : 'normal'});
+            }
+		});
+		
+	});
+	
+</script>
+

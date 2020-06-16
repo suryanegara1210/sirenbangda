@@ -1,0 +1,41 @@
+	    <article class="module width_full">
+    		<header><h3>Daftar Surat Setor Yang Belum Diotorisasi</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <center>
+                <table id="tbl_display">
+                    <tr>
+                        <th>No MOU</th>
+                        <th>Nilai Total</th>
+                        <th>Jangka Waktu</th>
+                        <th>Pihak yg Bekerjasama</th>
+                        <th>Nilai Dasar</th>
+                        <th>Persentase</th>
+                        <th>Nama (NPWP)</th>
+                        <th>Aksi</th>
+                    </tr>
+                    
+                    <?php if (!$mou_veri){
+                        echo "<tr><td colspan=\"8\"><center>Tidak Ada Data...</center></td></tr>";
+                    }else{
+                        foreach($mou_veri as $mou){
+                            echo "
+                                <tr>
+                                    <td>$mou->no_mou</td>
+                                    <td>".$this->uang->angka($mou->nilai_total)."</td>
+                                    <td>$mou->jangka_waktu</td>
+                                    <td>$mou->mitra</td>
+                                    <td>".$this->uang->angka($mou->nila_dasar)."</td>
+                                    <td>$mou->persentase</td>
+                                    <td>$mou->nama<br/>($mou->npwp)</td>
+                            ";
+                            echo "<td><a href=".site_url('surat_setor/mou_veri/'.$mou->th_mou."/".$mou->id_mou)."/1>Verifikasi</a></td>";
+                            echo "</tr>";
+                        }
+                    }
+                    ?>
+                </table>
+                </center>
+            </div>
+        </article>
+        <!-- end of styles article -->

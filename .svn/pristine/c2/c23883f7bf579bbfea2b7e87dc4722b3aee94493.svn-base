@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+    <table table border="1" width="1000" style="border-style:ridge; font-size:10px">
+	  <tr><td colspan="16" align="center"><strong>DAFTAR NOMINATIF PERJALANAN DINAS KANTOR PUSAT UNIVERSITAS UDAYANA</strong></td></tr>    
+      <tr>
+        <td width="3%"rowspan="2"  align="center">NO</td>
+        <td width="5%"rowspan="2" align="center">NAMA</td>
+        <td width="3%"rowspan="2" align="center">GOL</td>
+        <td colspan="2" align="center">TEMPAT</td>
+        <td width="13%"rowspan="2" align="center">TANGGAL KEBERANGKATAN</td>
+        <td width="5%"rowspan="2"  align="center">LAMA HARI</td>
+        <td colspan="5"  align="center">BIAYA</td>
+        <td width="11%"rowspan="2"  align="center">UANG REPRESENTATIF</td>
+        <td width="6%"rowspan="2"  align="center">JUMLAH</td>
+        <td width="5%"rowspan="2"  align="center">PPH PS. 21 FINAL ATAS UANG SAKU</td>
+        <td width="7%"rowspan="2"  align="center">JUMLAH SETELAH PAJAK</td>
+      </tr>
+      <tr>
+        <td width="5%" align="center">DARI </td>
+        <td width="6%" align="center">TUJUAN</td>
+        <td width="4%" align="center">TIKET</td>
+        <td width="8%" align="center">BOARDING PASS</td>
+        <td width="4%" align="center">TAXI</td>
+        <td width="10%" align="center">PENGINAPAN, UM, DAN TRANSPORT</td>
+        <td width="5%" align="center">UANG SAKU</td>
+      </tr>
+       
+    <?php 
+        $i=0;
+        foreach($hasil->result() as $row) : $i++;
+    ?>
+      <tr>
+        <td width="5%"  align="center"><?php echo $i; ?></td>
+        <td width="6%"  align="center"><?php echo $row->yg_bepergian; ?></td>
+        <td width="4%"  align="center"><?php echo $row->golongan; ?></td>
+        <td width="8%"  align="center"><?php echo $row->dari; ?></td>
+        <td width="4%"  align="center"><?php echo $row->tujuan; ?></td>
+        <td width="10%" align="center"><?php echo $row->tgl_b; ?></td>
+        <td width="5%"  align="center"><?php echo $row->lama; ?></td>
+        <td width="5%"  align="center"><?php echo $row->tiket; ?></td>
+        <td width="6%"  align="center"><?php echo $row->board; ?></td>
+        <td width="4%"  align="center"><?php echo $row->taxi; ?></td>
+        <td width="8%"  align="center"><?php echo $row->dll; ?></td>
+        <td width="4%"  align="center"><?php echo $row->uang_saku; ?></td>
+        <td width="10%" align="center"><?php echo $row->represent; ?></td>
+        <td width="5%"  align="center"><?php echo $row->nominal; ?></td>
+        <td width="10%" align="center"><?php echo $row->pph ?></td>
+        <td width="5%"  align="center"><?php echo $row->nominal-$row->pph; ?></td>
+      </tr>
+    <?php endforeach;?>   
+    </table>
+    <table style="font-size:10px">
+    <tr><td colspan="16">&nbsp;</td></tr>
+    <tr><td colspan="16">&nbsp;</td></tr>
+    <tr><td colspan="16">&nbsp;</td></tr>
+    <tr><td colspan="16">&nbsp;</td></tr>
+    <tr>
+        <td width="35">&nbsp;</td>
+        <td width="207">Mengetahui.</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">&nbsp;</td>
+        <td width="77">&nbsp;</td>
+        <td width="488"> Denpasar, </td>
+        <td width="130">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="35">&nbsp;</td>
+        <td width="207">Pejabat Pembuat Komitnen</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">Bendahara Pengeluaran</td>
+        <td width="77">&nbsp;</td>
+        <td width="488">Pembuat Daftar</td>
+    </tr>
+	<tr>
+        <td width="35">&nbsp;</td>
+        <td width="207">&nbsp;</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">&nbsp;</td>
+        <td width="77">&nbsp;</td>
+        <td width="488">&nbsp;</td>
+        <td width="130">&nbsp;</td>
+    </tr>
+	<tr>
+        <td width="35">&nbsp;</td>
+        <td width="207">&nbsp;</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">&nbsp;</td>
+        <td width="77">&nbsp;</td>
+        <td width="488">&nbsp;</td>
+        <td width="130">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="35">&nbsp;</td>
+        <td width="207">Mr. X</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">Mrs. Y</td>
+        <td width="77">&nbsp;</td>
+        <td width="488">Mr. Z</td>
+        <td width="130">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="35">&nbsp;</td>
+        <td width="207">NIP. Mr. X</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">NIP. Mr. Y</td>
+        <td width="77">&nbsp;</td>
+        <td width="488">NIP. Mr. Z</td>
+        <td width="130">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="35" height="14">&nbsp;</td>
+        <td width="207">&nbsp;</td>
+        <td width="23">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="1">&nbsp;</td>
+        <td width="180">&nbsp;</td>
+        <td width="77">&nbsp;</td>
+        <td width="488">&nbsp;</td>
+        <td width="130">&nbsp;</td>
+    </tr>
+    
+  </table>
+</body>
+</html>

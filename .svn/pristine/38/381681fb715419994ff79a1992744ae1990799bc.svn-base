@@ -1,0 +1,120 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_cik extends CI_Model
+{
+	var $table_cik = 't_cik';
+	var $primary_cik = 'id_cik';
+
+	function add_cik()
+	{
+		$data = $this->global_function->add_array($data, $add);		
+
+		$result = $this->db->insert($this->table_cik, $data);
+		return $result;
+	}
+
+	function get_data($data,$table){
+        $this->db->where($data);
+        $query = $this->db->get($this->$table);
+        return $query->row();
+    }
+
+    function get_cik_by_id($id_cik)
+	{
+		$sql = "
+				SELECT *
+				FROM t_cik
+				WHERE id_cik = ?
+			";
+
+		$query = $this->db->query($sql, array($id_cik));
+		var_dump($this->query);
+		if($query) {
+			if($query->num_rows() > 0) {
+				return $query->row();
+			}
+		}
+
+		return NULL;
+	}
+
+	function simpan_cik($data_cik)			
+	{
+		$this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+		
+
+		$data_cik->created_date		= Formatting::get_datetime();
+		$data_cik->created_by		= $this->session->userdata('username');
+		
+		$this->db->set($data_cik);
+    	$this->db->insert('t_cik');
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();		
+	}
+
+	function get_data_table($search, $start, $length, $order)
+	{
+		$order_arr = array('id_bulan','id_cik','kd_urusan','kd_bidang','kd_program','kd_kegiatan');
+		$sql="
+			SELECT *,bulan.nm_bulan AS nm_bulan FROM ".$this->table_cik." AS cik
+			INNER JOIN m_bulan AS bulan ON bulan.id_bulan = cik.id_bulan
+			WHERE kd_urusan LIKE '%".$search['value']."%' 
+            OR kd_bidang LIKE '%".$search['value']."%' 
+            OR kd_program LIKE '%".$search['value']."%' 
+            OR kd_kegiatan LIKE '%".$search['value']."%' 
+		";
+
+		$result = $this->db->query($sql);
+		return $result->result();
+	}
+
+	function count_data_table($search, $start, $length, $order)
+	{
+		$this->db->from($this->table_cik);
+		
+		$this->db->like("kd_urusan", $search['value']);
+		$this->db->or_like("kd_bidang", $search['value']);
+		$this->db->or_like("kd_program", $search['value']);
+		$this->db->or_like("kd_kegiatan", $search['value']);
+				
+		$result = $this->db->count_all_results();
+		return $result;
+	}
+
+	function get_data_with_rincian($id_cik,$table)
+	{
+		$sql="
+			SELECT * FROM ".$this->$table."
+			WHERE id_cik = ?
+		";
+
+		$query = $this->db->query($sql, array($id_cik));
+
+		if($query) {
+				if($query->num_rows() > 0) {
+					return $query->row();
+				}
+			}
+
+			return NULL;
+	}
+
+	function delete_cik($id){
+   	    $this->db->trans_strict(FALSE);
+		$this->db->trans_start();
+	    
+		$this->db->where('id_cik',$id);
+        $this->db->delete('t_cik');
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+    }
+
+    function update_cik($data,$id,$table,$primary) {
+        $this->db->where($this->$primary,$id);
+        return $this->db->update($this->$table,$data);
+    }
+}

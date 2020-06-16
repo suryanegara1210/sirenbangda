@@ -1,0 +1,1389 @@
+<?php
+
+class Kwitansi extends CI_Controller
+{
+    var $CI = NULL;
+    public function __construct()
+    {
+        $this->CI =& get_instance();
+        parent::__construct();
+        $this->load->helper(array('form','url', 'text_helper','date'));
+        $this->load->database();
+
+        $this->load->model(array('m_settings', 'm_logic', 'm_umum', 'm_gup', 'm_unit',
+                                 'm_lov', 'm_pok', 'm_kwitansi', 'm_bas', 'm_status',
+                                 'm_pajak_golongan'));
+
+        date_default_timezone_set('Etc/GMT-8');
+    }
+
+    function create(){
+	    //Pembuatan kwitansi menggunakan sistem Pooling, jadi tidak membutuhkan
+	    //pengecekan dana awal kecuali pengecekan per POK
+
+		//TO DO : JGN LUPA HILANGKAN COMMENT UNTUK VALIDASI
+        //jika belum login, otomatis di redirect
+		$this->auth->restrict();
+		//$this->output->enable_profiler();
+
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$limit_spjup = $this->m_logic->get_limit_spjup($ta,$su);
+
+        $data['nama_unit']  = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array(
+        		Constant::JB_UP,
+        		Constant::JB_NHL,
+        		Constant::JB_SAH,
+        		Constant::JB_TUP
+        	);
+
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR, $non_kw);
+
+        $this->template->load('template','kwitansi/buat_kwitansi',$data);
+
+    }//END Create
+
+
+    function get_view_jenis_kwitansi(){
+        //jika belum login, otomatis di redirect
+		if(!$this->auth->restrict_ajax_login()) return;
+
+		$this->auth->restrict();
+
+		$idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$jns_kwitansi 	= $this->input->post('jns_kwitansi');
+        $jns_belanja 	= $this->input->post('jns_belanja');
+
+
+		//syarat pengajuan awal tidak perlu dihalangi, karena menggunakan sistem
+		//pooling
+		$data['nama_unit'] 		= $this->session->userdata('nama_unit');
+		$data['nama_sunit'] 	= $this->session->userdata('nama_subunit');
+		$data['jns_kwitansi'] 	= $jns_kwitansi;
+
+		//ambil jenis belanja dari post parameter
+		$data['jns_belanja'] 	= $jns_belanja;
+        $data['kegiatans']  	= $this->m_pok->get_list_kegiatan($ta, $cdsu,
+                                                              $jns_kwitansi);
+		$data['jns_pajak'] 		= $this->m_kwitansi->get_jenis_pajak();
+        $data['list_golongan'] 	= $this->m_kwitansi->get_golongan();
+        $data['pajak_pph'] 		= json_encode($this->m_pajak_golongan->get_list_pajak_honor(true));
+		
+		switch($jns_kwitansi){			
+			case "HONOR":
+				//clear session cache honor
+				for($i=1;$i<=8;$i++) $this->session->unset_userdata('cache_honor'.$i);
+
+				$data['jenis_pajak'] 	= 13; //Tidak kena pajak
+				$data['list_honor']		= $this->m_lov->get_list_lov(Constant::KAP_JENIS_HONOR);
+
+				$this->load->view('kwitansi/kwitansi_honor',$data);
+				break;
+			case "KONTRAK":
+				$data['jenis_pajak'] 	= 13; //Tidak kena pajak				
+				$this->load->view('kwitansi/kwitansi_kontrak_ppm', $data);
+				break;
+			case "PERJADIN":
+				$data['jenis_pajak'] 	= 13; //Tidak kena pajak				
+				$this->load->view('kwitansi/kwitansi_perjadin',$data);
+				break;
+			case "BANSOS":
+			case "MODAL":
+			default:		
+				$data['max_belanja']	= $this->m_settings->get_max_nominal_belanja_barang();		
+				
+				//if ($jns_kwitansi=="BARANG" && $jns_belanja=="LS") {
+				//	$this->load->view('kwitansi/kwitansi_barang_ls',$data);
+				//}else{
+					$this->load->view('kwitansi/kwitansi_barang',$data);
+				//}				
+		}
+    }
+
+    function view()
+    {
+    	$this->auth->restrict();
+
+		$idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$data['nama_unit'] 	= $this->session->userdata('nama_unit');
+		$data['nama_sunit'] = $this->session->userdata('nama_subunit');
+
+        $non_kw 	= array(Constant::JB_UP,
+					Constant::JB_TUP,
+					Constant::JB_NHL,
+					Constant::JB_SAH);
+
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR, $non_kw);
+        $data['jenis_kwitansi']= $this->m_lov->get_list_lov(Constant::KAP_KW_TYPE);
+        $data['status_kwitansi']= $this->m_status->get_list_status('kwitansi');
+        
+    	$this->template->load('template','kwitansi/kwitansi_view', $data);
+    }
+
+    function search()
+    {
+    	//$this->output->enable_profiler(TRUE);
+		if(!$this->auth->restrict_ajax_login() ) return;
+		
+		$idsu  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$no_kwitansi		= $this->input->post('param_no');
+		$mata_anggaran		= $this->input->post('param_ma');
+		$jenis_kwitansi 	= $this->input->post('param_jk');
+        $sifat_bayar 		= $this->input->post('param_sb');
+        $status_kwitansi 	= $this->input->post('param_sk');;
+        
+        $no_kwitansi	= empty($no_kwitansi) ? '%' : $no_kwitansi;
+        $mata_anggaran	= empty($mata_anggaran) ? '%' : $mata_anggaran;
+        $jenis_kwitansi = $jenis_kwitansi === FALSE ? '%' : $jenis_kwitansi;
+		$sifat_bayar 	= $sifat_bayar === FALSE ? '%' : $sifat_bayar;
+		$status_kwitansi= $status_kwitansi === FALSE ? '%' : $status_kwitansi;
+
+		$data['rows']	= $this->m_kwitansi->get_kwitansi_search($ta, $idsu, $no_kwitansi,
+							$mata_anggaran, $sifat_bayar, $jenis_kwitansi, $status_kwitansi);
+		
+		//echo $this->db->last_query();
+		$this->load->view('kwitansi/kwitansi_search',$data);
+    }
+
+    function edit()
+    {
+    	$this->auth->restrict();
+
+		$idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$id_kwitansi = $this->uri->segment(3);
+
+		//cek apakah kwitansi tsb ada
+		$kwitansi = $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+		if(empty($kwitansi)) {
+			$this->session->set_userdata('msg_typ','err');
+          	$this->session->set_userdata('msg', 'Kwitansi tidak ada');
+
+			redirect('kwitansi/view');			
+		}
+
+		//cek apakah kwitansi tsb bisa diedit
+		//yg bisa diedit hanya dengan status Constant::KWITANSI_BARU atau Constant::KWITANSI_REVISI
+		if(!in_array($kwitansi->id_status_kwitansi, 
+					array(Constant::KWITANSI_BARU, Constant::KWITANSI_REVISI))) {
+			//TODO: tidak bisa bisa diedit
+			$this->session->set_userdata('msg_typ','err');
+          	$this->session->set_userdata('msg', 'Kwitansi tidak bisa diedit');
+
+			redirect('kwitansi/view');
+		}
+
+		//load data
+		$data = (array) $kwitansi;
+		$data['nama_unit'] 		= $this->session->userdata('nama_unit');
+		$data['nama_sunit'] 	= $this->session->userdata('nama_subunit');
+		$data['jns_kwitansi'] 	= $kwitansi->jenis_kwitansi;
+
+		//ambil jenis belanja dari post parameter
+		$data['jenis'] 			= $kwitansi->jenis_kwitansi;
+		$data['jns_belanja'] 	= $kwitansi->sifat_bayar;
+        $data['kegiatans']  	= $this->m_pok->get_list_kegiatan($ta, $cdsu,
+                                                              $kwitansi->jenis_kwitansi);
+		$data['jenis_pajak'] 	= $kwitansi->id_pajak;
+		$data['jns_pajak'] 		= $this->m_kwitansi->get_jenis_pajak();
+        $data['list_golongan'] 	= $this->m_kwitansi->get_golongan();
+        $data['max_belanja']	= $this->m_settings->get_max_nominal_belanja_barang();
+		$data['pajak_pph'] 		= json_encode($this->m_pajak_golongan->get_list_pajak_honor(true));
+
+		switch($kwitansi->jenis_kwitansi){
+			case "HONOR":
+				//clear session cache honor
+				for($i=1;$i<=8;$i++) $this->session->unset_userdata('cache_honor'.$i);
+
+				$data['jenis_pajak'] 	= 13; //Tidak kena pajak
+				$data['list_honor']		= $this->m_lov->get_list_lov(Constant::KAP_JENIS_HONOR);
+
+				//get jenis honor (1-8)
+				$data['jns_honor'] = $this->m_kwitansi->get_jenis_honor_by_id_kwitansi($kwitansi->id_kwitansi);				
+				$content['form_kwitansi'] = $this->load->view('kwitansi/kwitansi_honor', $data, TRUE);
+				//echo $this->db->last_query();
+				$this->template->load('template','kwitansi/kwitansi_edit',$content);
+				break;
+			case "KONTRAK":
+				$content['form_kwitansi'] = $this->load->view('kwitansi/kwitansi_kontrak_ppm', $data, TRUE);
+				$this->template->load('template','kwitansi/kwitansi_edit',$content);
+				break;
+			case "PERJADIN":
+				$content['form_kwitansi'] = $this->load->view('kwitansi/kwitansi_perjadin', $data, TRUE);
+				$this->template->load('template','kwitansi/kwitansi_edit',$content);
+				break;
+			case "BANSOS":
+			case "MODAL":
+			default:
+				$content['form_kwitansi'] = $this->load->view('kwitansi/kwitansi_barang', $data, TRUE);
+				$this->template->load('template','kwitansi/kwitansi_edit',$content);
+		}		
+    }
+
+    function delete() {
+    	if(!$this->auth->restrict_ajax_login()) return;
+
+		$idu = $this->session->userdata('id_unit');
+		$idsu  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		$cdsu= $this->session->userdata('kode_subunit');
+
+		$id_kwitansi = $this->input->post('id_kwitansi');
+
+		//cek apakah kwitansi tsb ada
+		$kwitansi = $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+		if(empty($kwitansi)) {
+			$this->session->set_userdata('msg_typ','err');
+          	$this->session->set_userdata('msg', 'Kwitansi tidak ada');
+
+			redirect('kwitansi/view');			
+		}
+
+		//cek apakah kwitansi tsb bisa dihapus
+		//yg bisa dihapus hanya dengan status Constant::KWITANSI_BARU atau Constant::KWITANSI_REVISI
+		if(!in_array($kwitansi->id_status_kwitansi, 
+					array(Constant::KWITANSI_BARU, Constant::KWITANSI_REVISI))) {
+			//TODO: tidak bisa bisa diedit
+			$this->session->set_userdata('msg_typ','err');
+          	$this->session->set_userdata('msg', 'Kwitansi tidak bisa dihapus. Hanya kwitansi baru dan revisi yang boleh dihapus');
+
+			redirect('kwitansi/view');
+		}
+
+		//hapus kwitansi
+		$result = $this->m_kwitansi->hapus_kwitansi($id_kwitansi);
+		if($result) {
+			$response['errno'] = 0;
+			$response['message'] = 'Kwitansi berhasil dihapus';
+		} else {
+			$response['errno'] = 1;
+			$response['message'] = 'Kwitansi gagal dihapus';			
+		}
+
+		echo json_encode($response);
+    }
+
+
+    function save(){
+    	
+    	$this->auth->restrict();
+
+        //action save kwitansi di table t_kwitansi
+	 	$idsu 			= $this->session->userdata('id_subunit');
+		$idu 			= $this->session->userdata('id_unit');
+		$cdsu	 		= $this->session->userdata('kode_subunit');
+		$ta 			= $this->m_settings->get_tahun_anggaran();
+		$jns_kwitansi	= $this->input->post('jns_kwitansi');
+		$sifat_bayar	= $this->input->post('jns_belanja');
+		$tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+
+		$id_kwitansi 	= $this->input->post('id_kwitansi');
+		$call_from		= $this->input->post('call_from');
+		$simpan_n_baru	= $this->input->post('simpan_n_baru');
+
+		if(strpos($call_from, 'kwitansi/create') != FALSE) {
+			$call_from = '';
+		}
+
+		//cek apakah kwitansi tsb ada
+		$kwitansi = $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+		if(empty($kwitansi)) {
+			//kwitansi baru
+			$kwitansi = new stdClass();
+			$id_kwitansi = '';
+		} else {
+			//kwitansi sudah ada
+			//cek apakah kwitansi tsb bisa diedit
+			//yg bisa diedit hanya dengan status Constant::KWITANSI_BARU atau Constant::KWITANSI_REVISI
+			if(!in_array($kwitansi->id_status_kwitansi, 
+						array(Constant::KWITANSI_BARU, Constant::KWITANSI_REVISI))) {
+				
+				//TODO: tidak bisa bisa diedit
+				$this->session->set_userdata('msg_typ','err');
+              	$this->session->set_userdata('msg', 'Kwitansi tidak boleh diubah');
+
+				redirect('kwitansi/view');
+			}
+
+			//unset karena akan diupdate berdasarkan object kwitansi
+			unset($kwitansi->id_kwitansi);
+		}
+
+		//all
+		$kwitansi->id_unit        = $idu;
+		$kwitansi->id_subunit	  = $idsu;
+		$kwitansi->jenis_kwitansi = $jns_kwitansi;
+		$kwitansi->sifat_bayar	  = $this->input->post('jns_belanja');
+		$kwitansi->tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		$kwitansi->tpt_kwitansi   = $this->input->post('tempat_kwitansi');
+		$kwitansi->akun_kode      = $this->input->post('kd_bas');
+		$kwitansi->ket_kwitansi   = $this->input->post('ket_kwitansi');
+
+		//barang, bansos, modal
+		$kwitansi->penerima       = $this->input->post('penerima');
+		$kwitansi->nip_penerima   = $this->input->post('nip_penerima');				
+		$kwitansi->id_pajak       = $this->input->post('jenis_pajak');
+
+		//kontrak lppm
+		$kwitansi->judul_p        = $this->input->post('judul_p'); 		//judul penelitian/pengabdian
+		$kwitansi->no_kontrak     = $this->input->post('no_kontrak');
+		$kwitansi->jangka_waktu_kontrak = $this->input->post('jangka_waktu');
+		$kwitansi->pengambil      = $this->input->post('pengambil');	//ketua peneliti/pengabdian
+		$kwitansi->nip_pengambil  = $this->input->post('nip_pengambil');
+
+		//honor
+		//$kwitansi->ket_sptb       = $this->input->post('ket_sptb');
+		$kwitansi->no_sk_rektor   = $this->input->post('no_sk');
+		$kwitansi->tgl_sk_rektor  = $this->input->post('tgl_sk');
+		$kwitansi->kop_honor      = $this->input->post('kop_honor');
+
+		//perjadin
+		$kwitansi->pp_spd         = $this->input->post('pp_spd');
+		$kwitansi->dari           = $this->input->post('dari');
+		$kwitansi->tujuan         = $this->input->post('tujuan');
+		$kwitansi->yg_bepergian   = $this->input->post('yg_bepergian');
+		$kwitansi->nip            = $this->input->post('nip');
+		$kwitansi->gol            = $this->input->post('golongan');
+		$kwitansi->maksud         = $this->input->post('maksud');
+		$kwitansi->tgl_b          = $this->input->post('tgl_b');
+		$kwitansi->tgl_k          = $this->input->post('tgl_k');
+		$kwitansi->ket_spd        = $this->input->post('ket_spd');
+		$kwitansi->tiket          = $this->input->post('tiket');
+		$kwitansi->board          = $this->input->post('board');
+		$kwitansi->taxi           = $this->input->post('taxi');
+		$kwitansi->uang_saku      = $this->input->post('uang_saku');
+		$kwitansi->lama           = $this->input->post('lama_hari');
+		$kwitansi->dll            = $this->input->post('dll');
+		$kwitansi->represent      = $this->input->post('representatif');
+
+		//jika edit, tidak perlu diubah
+		if(empty($id_kwitansi)) {
+			$kwitansi->kdgiat         = $this->input->post('kd_giat');
+			$kwitansi->kdoutput       = $this->input->post('kd_output');
+			$kwitansi->kdkomponen     = $this->input->post('kd_komponen');
+			$kwitansi->kdakun         = $this->input->post('kd_akun');
+			$kwitansi->hdr            = $this->input->post('kd_hdr');
+			$kwitansi->nmheader       = $this->input->post('kd_hdr');
+
+			//get naama pada rkakl
+			$item_rkakl = $this->m_pok->get_pok_detail ($ta, $cdsu, $kwitansi->kdgiat,
+										$kwitansi->kdoutput, $kwitansi->kdkomponen,
+										$kwitansi->kdakun, $kwitansi->hdr);
+
+			if(!empty($item_rkakl)) {
+		    	$kwitansi->nmgiat       = $item_rkakl->nmgiat;
+				$kwitansi->nmoutput     = $item_rkakl->nmoutput;
+				$kwitansi->nmkomponen   = $item_rkakl->nmkomponen;
+				$kwitansi->nmakun      	= $item_rkakl->nmakun;			
+			} else {
+		    	$kwitansi->nmgiat       = '';
+				$kwitansi->nmoutput     = '';
+				$kwitansi->nmkomponen   = '';
+				$kwitansi->nmakun      	= '';
+			}
+		}
+
+		//nilai kwitansi
+		$kwitansi->nominal 	= $this->input->post('nominal');
+		$kwitansi->ppn 		= $this->input->post('nilai_ppn');
+		$kwitansi->pph 		= $this->input->post('nilai_pph');		
+		
+		//Persiapan folder berdasarkan unit
+		$dir_file_upload='file_upload/'.$idu;
+		if (!file_exists($dir_file_upload)) {
+		    mkdir($dir_file_upload, 0766, true);
+		}
+
+		if ($jns_kwitansi=="BARANG" && $sifat_bayar=="LS"){						
+			$kwitansi->no_bast		= $this->input->post('bast');
+			$kwitansi->no_bap      	= $this->input->post('bap');			
+
+			$kwitansi->pph_21 		= $this->input->post('nilai_pph21');
+			$kwitansi->pph_22 		= $this->input->post('nilai_pph22');
+			$kwitansi->pph_23 		= $this->input->post('nilai_pph23');			
+			
+			$file_name="BAST_". $sifat_bayar ."_". $idsu ."_".date("Ymd_His");
+			// File BAST
+		    $config = array();
+		    $config['file_name'] = $file_name;
+		    $config['upload_path'] = dirname($_SERVER["SCRIPT_FILENAME"]).'/file_upload/'.$idu;
+		    $config['allowed_types'] = 'pdf';
+		    $config['max_size'] = '1024';		    
+		    $config['overwrite'] = TRUE;
+		    $this->load->library('upload', $config, 'file_bast'); // Create custom object for cover upload
+		    $this->file_bast->initialize($config);
+		    $file_bast = $this->file_bast->do_upload('file_bast');
+		    
+		    if ($file_bast) {
+		    	$file_bast = $this->file_bast->data();
+				$file_bast = $file_bast['file_name'];
+				$kwitansi->file_bast = $file_bast;				
+			} else {				
+				// Error Occured in one of the uploads				
+				if (empty($id_kwitansi) || (!empty($_FILES['file_bast']['name']) && !empty($id_kwitansi))) {
+					$error_upload	= "Kwitansi gagal disimpan, terdapat kesalahan pada upload file atau tidak sesuai dengan ketentuan.";
+					$this->session->set_userdata('msg_typ','err');
+	            	$this->session->set_userdata('msg', $error_upload);				
+					redirect('home');			
+				}
+			}
+
+			$file_name="BAP_". $sifat_bayar ."_". $idsu ."_".date("Ymd_His");
+			// File BAST
+		    $config = array();
+		    $config['file_name'] = $file_name;
+		    $config['upload_path'] = dirname($_SERVER["SCRIPT_FILENAME"]).'/file_upload/'.$idu;
+		    $config['allowed_types'] = 'pdf';
+		    $config['max_size'] = '1024';		    
+		    $config['overwrite'] = TRUE;
+		    $this->load->library('upload', $config, 'file_bap'); // Create custom object for cover upload
+		    $this->file_bap->initialize($config);
+		    $file_bap = $this->file_bap->do_upload('file_bap');
+
+		    if ($file_bap) {
+				$file_bap = $this->file_bap->data();
+				$file_bap = $file_bap['file_name'];	
+				$kwitansi->file_bap = $file_bap;				
+			} else {
+				// Error Occured in one of the uploads				
+				if (empty($id_kwitansi) || (!empty($_FILES['file_bast']['name']) && !empty($id_kwitansi))) {
+					$error_upload	= "Kwitansi gagal disimpan, terdapat kesalahan pada upload file atau tidak sesuai dengan ketentuan.";
+					$this->session->set_userdata('msg_typ','err');
+	            	$this->session->set_userdata('msg', $error_upload);				
+					redirect('home');
+				}
+			}
+
+			//Kalau edit file lama d hapus				
+	    	if ($file_bast && !empty($id_kwitansi)) {
+	    		$file_bast_old = $this->input->post('file_bast_old');		    		
+		    	$location_file='file_upload/'. $idu .'/'.$file_bast_old;
+				unlink($location_file);    	
+	    	}
+
+	    	//Kalau edit file lama d hapus				
+	    	if ($file_bap && !empty($id_kwitansi)) {
+	    		$file_bap_old = $this->input->post('file_bap_old');		    		
+		    	$location_file='file_upload/'. $idu .'/'.$file_bap_old;
+				unlink($location_file);    	
+	    	}
+		}elseif ($jns_kwitansi=="HONOR") {
+		//Jika GU dan Honor
+			$file_name="DaftarHonor_". $sifat_bayar ."_". $idsu ."_".date("Ymd_His");
+			// Daftar Honor / SK
+		    $config = array();
+		    $config['file_name'] = $file_name;
+		    $config['upload_path'] = dirname($_SERVER["SCRIPT_FILENAME"]).'/file_upload/'.$idu;
+		    $config['allowed_types'] = 'pdf';
+		    $config['max_size'] = '1024';		    
+		    $config['overwrite'] = TRUE;
+		    $this->load->library('upload', $config, 'daftar_honor'); // Create custom object for cover upload
+		    $this->daftar_honor->initialize($config);
+		    $daftar_honor = $this->daftar_honor->do_upload('daftar_honor');
+		    
+		    if ($daftar_honor) {
+		    	$daftar_honor = $this->daftar_honor->data();
+				$daftar_honor = $daftar_honor['file_name'];
+				$kwitansi->file_daftar_honor = $daftar_honor;				
+			} else {				
+				// Error Occured in one of the uploads				
+				if (empty($id_kwitansi) || (!empty($_FILES['daftar_honor']['name']) && !empty($id_kwitansi))) {
+					$error_upload	= "Kwitansi gagal disimpan, terdapat kesalahan pada upload file atau tidak sesuai dengan ketentuan.";
+					$this->session->set_userdata('msg_typ','err');
+	            	$this->session->set_userdata('msg', $error_upload);				
+					redirect('home');			
+				}
+			}
+
+			$file_name="SK_". $sifat_bayar ."_". $idsu ."_".date("Ymd_His");
+			// Daftar Honor / SK
+		    $config = array();
+		    $config['file_name'] = $file_name;
+		    $config['upload_path'] = dirname($_SERVER["SCRIPT_FILENAME"]).'/file_upload/'.$idu;
+		    $config['allowed_types'] = 'pdf';
+		    $config['max_size'] = '1024';		    
+		    $config['overwrite'] = TRUE;
+		    $this->load->library('upload', $config, 'sk'); // Create custom object for cover upload
+		    $this->sk->initialize($config);
+		    $sk = $this->sk->do_upload('sk');
+		    
+		    if ($sk) {
+		    	$sk = $this->sk->data();
+				$sk = $sk['file_name'];
+				$kwitansi->file_sk = $sk;				
+			} else {				
+				// Error Occured in one of the uploads				
+				if (empty($id_kwitansi) || (!empty($_FILES['sk']['name']) && !empty($id_kwitansi))) {
+					$error_upload	= "Kwitansi gagal disimpan, terdapat kesalahan pada upload file atau tidak sesuai dengan ketentuan.";
+					$this->session->set_userdata('msg_typ','err');
+	            	$this->session->set_userdata('msg', $error_upload);				
+					redirect('home');			
+				}
+			}
+
+			//Kalau edit file lama d hapus				
+	    	if ($daftar_honor && !empty($id_kwitansi)) {
+	    		$file_daftar_honor_old = $this->input->post('file_daftar_honor_old');		    		
+		    	$location_file='file_upload/'. $idu .'/'.$file_daftar_honor_old;
+				unlink($location_file);    	
+	    	}
+
+	    	//Kalau edit file lama d hapus				
+	    	if ($sk && !empty($id_kwitansi)) {
+	    		$file_sk_old = $this->input->post('file_sk_old');		    		
+		    	$location_file='file_upload/'. $idu .'/'.$file_sk_old;
+				unlink($location_file);    	
+	    	}
+		}elseif ($jns_kwitansi=="PERJADIN") {
+			$file_name="DaftarNominatif_". $sifat_bayar ."_". $idsu ."_".date("Ymd_His");
+			// Daftar Nominatif
+		    $config = array();
+		    $config['file_name'] = $file_name;
+		    $config['upload_path'] = dirname($_SERVER["SCRIPT_FILENAME"]).'/file_upload/'.$idu;
+		    $config['allowed_types'] = 'pdf';
+		    $config['max_size'] = '1024';		    
+		    $config['overwrite'] = TRUE;
+		    $this->load->library('upload', $config, 'daftar_nominatif'); // Create custom object for cover upload
+		    $this->daftar_nominatif->initialize($config);
+		    $daftar_nominatif = $this->daftar_nominatif->do_upload('daftar_nominatif');
+		    
+		    if ($daftar_nominatif) {
+		    	$daftar_nominatif = $this->daftar_nominatif->data();
+				$daftar_nominatif = $daftar_nominatif['file_name'];
+				$kwitansi->file_daftar_nominatif = $daftar_nominatif;				
+
+				//Kalau edit file lama d hapus				
+		    	if (!empty($id_kwitansi)) {
+		    		$daftar_nominatif_old = $this->input->post('daftar_nominatif_old');		    		
+			    	$location_file='file_upload/'. $idu .'/'.$daftar_nominatif_old;
+					unlink($location_file);    	
+		    	}
+			} else {				
+				// Error Occured in one of the uploads				
+				if (empty($id_kwitansi) || (!empty($_FILES['daftar_nominatif']['name']) && !empty($id_kwitansi))) {
+					$error_upload	= "Kwitansi gagal disimpan, terdapat kesalahan pada upload file atau tidak sesuai dengan ketentuan.";
+					$this->session->set_userdata('msg_typ','err');
+	            	$this->session->set_userdata('msg', $error_upload);				
+					redirect('home');			
+				}
+			}			
+		}
+
+        $ret = TRUE;
+
+		switch($jns_kwitansi){
+			case "HONOR":
+				// rincian honor
+				$jns_honor  			= $this->input->post('jns_honor');
+				$cache_honor 			= $this->session->userdata($this->get_cache_name($jns_honor));
+
+				if(empty($id_kwitansi)) {
+					//insert honor
+					$ret = $this->m_kwitansi->simpan_kwitansi_honor($kwitansi, $cache_honor);
+
+				} else {
+					//update honor
+					$ret = $this->m_kwitansi->update_kwitansi_honor($id_kwitansi, $kwitansi, $cache_honor);
+				}
+				echo $this->db->last_query();
+				break;
+			case "PERJADIN":
+			case "KONTRAK":
+			case "BANSOS":
+			case "MODAL":
+			default:
+				if(empty($id_kwitansi)) {
+					//insert bmbk=barang, modal, bansos
+					$ret = $this->m_kwitansi->simpan_kwitansi_bmbk($kwitansi);
+				} else {
+					//update barang modal bansos kontrak
+					$ret = $this->m_kwitansi->update_kwitansi_bmbk($kwitansi, $id_kwitansi);
+				}
+		}		
+
+		if ($ret === FALSE){
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Kwitansi gagal disimpan');						  
+		} else {
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Kwitansi Berhasil disimpan');
+		}
+
+		if(!empty($call_from))
+			redirect($call_from);
+
+		if(!empty($simpan_n_baru))
+			redirect('kwitansi/create');
+
+        redirect('kwitansi/view');
+    }
+
+    function cetak($id_kwitansi=NULL)
+    {
+        //get kwitansi
+        $kwitansi 		= $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+
+        if(!$kwitansi) {
+			$this->session->set_userdata('msg_typ','err');
+			$this->session->set_userdata('msg', 'Maaf Kwitansi yang anda cari tidak ada');
+			redirect('kwitansi');
+        } else {        	
+        	$data['kwitansi_exist'] = true;
+        	$unit_data		= $this->m_unit->get_unit_by_id($kwitansi->id_unit);
+
+        	$data['unit']	= $unit_data;
+        	$data['row']	= $kwitansi;
+        	
+        	$now=DATE('Ymd_Hi');
+        	$no_4name=str_replace('/', '-', $kwitansi->no_kwitansi);        	
+        	$filename= $no_4name .'_'. $unit_data->kode_unit .'_'. $now .'.pdf';
+        	
+
+    		$output = $this->template->load('doc_template', 'kwitansi/kwitansi_preview', $data, TRUE);
+    		generate_pdf_A4($output,$filename);
+        }        
+    }
+
+    function get_tabel_honor() 
+    {
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+		//$jns_honor = $this->input->post('jns_honor');        
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $jns_honor 	= $this->input->post('jns_honor');
+        $cache_name	= $this->get_cache_name($jns_honor);
+        $cache 		= $this->session->userdata($cache_name);
+        
+
+        if(empty($cache)) {
+        	//create cache
+	        $cache  = new stdClass();
+	        $cache->id_subunit  = $idsu;
+	        $cache->id_kwitansi = $this->input->post('id_kwitansi');
+	        $cache->jns_honor 	= $jns_honor;
+	        $cache->del_stack   = array();
+        }
+
+        //jika id kwitansi ada dan rows masih belum terset
+    	if(!empty($cache->id_kwitansi) && !isset($cache->rows)) {
+    		//cek kwitansi
+    		$kwitansi = $this->m_kwitansi->get_kwitansi_by_id($cache->id_kwitansi);      
+    		if($kwitansi) {
+    			//load honor
+    			$honors = $this->m_kwitansi->get_list_honor_by_id_kwitansi($cache->id_kwitansi, $cache->jns_honor);
+
+    			if(empty($honors))
+    				$rows = array();
+    			else {
+		            $i = 0;
+		            $rows = array();
+		            foreach($honors as $row){
+		                $id = $row->id_honor;
+		                $label = $i+1;
+		                $array = array();
+		                $array['label']		= $label;
+		                $array['nama']		= $row->nama;
+		                $array['golongan']	= $row->golongan;
+		                $array['volume']	= $row->volume;
+		                $array['satuan']	= $row->satuan;
+		                $array['subtotal']	= $row->subtotal;
+		                $array['pph']		= $row->pph;
+
+	    				switch($jns_honor) {
+	    					case '3':	    						
+	    						$array['h_naskah']	= $row->honor_naskah;
+	    					case '2':    					
+	    						$array['kd_mk']	= $row->kd_mk;
+	    						$array['m_kul']	= $row->m_kul;
+	    						$array['h_naskah']	= $row->honor_naskah;
+					            break;
+					        case '4':
+					        case '5':
+					        	$array['nim_mhs']	= $row->nim_mhs;
+					        	$array['nama_mhs']	= $row->nama_mhs;
+								$array['jabatan']	= $row->jabatan;
+					        
+					        case '6':
+								$array['m_kul']	= $row->m_kul;
+								break;					        	
+					        case '1': case '7':
+					        	$array['jabatan']	= $row->jabatan;
+					        	break;
+	    					case '8': 
+	    						$array['jabatan']	= $row->jabatan;
+	    						break;
+							case '9':
+					        	$array['jabatan']	= $row->jabatan;
+					        	break;
+							case '10':
+					        	$array['jabatan']	= $row->jabatan;
+					        	break;
+				        	case '11':    					
+	    						$array['kd_mk']	= $row->kd_mk;
+	    						$array['m_kul']	= $row->m_kul;	    						
+					            break;
+	    				}//end switch	
+
+				        $rows[$id] = $array;
+	    				$i++;
+	    			}
+    				
+    			}//end if
+
+				$cache->rows = $rows;
+    		} else {
+    			$cache->id_kwitansi = NULL;
+    			$cache->rows = array();
+    		}  	
+    	} else if(empty($cache->id_kwitansi) && !isset($cache->rows)) {
+    		//jika id_kwitansi kosong dan row tidak ada
+			$cache->id_kwitansi = NULL;
+			$cache->rows = array();    		
+    	}
+
+        $this->session->unset_userdata($cache_name);
+        $this->session->set_userdata($cache_name, $cache);
+
+        $data['honors'] = $cache->rows;
+		//tabel pajak honor
+		$pajak_honor = $this->m_pajak_golongan->get_list_pajak_honor(true);
+		$data['pajak_pph']	 = json_encode($pajak_honor);
+
+		switch($jns_honor){
+			case '1' : 
+				$data['honor_title'] = 'RINCIAN HONOR PANITIA TETAP'; 
+				$data['list_jabatan']= $this->m_lov->get_list_lov(Constant::KAP_HONOR_JABATAN_PANITIA);
+				break;
+			case '2' : $data['honor_title'] = 'RINCIAN HONOR MENGAJAR'; break;
+			case '3' : $data['honor_title'] = 'RINCIAN HONOR NASKAH'; break;
+			case '4' : $data['honor_title'] = 'RINCIAN HONOR DOSEN PEMBIMBING TUGAS AKHIR'; break;
+			case '5' : 
+				$data['honor_title'] = 'RINCIAN HONOR PENGUJI TUGAS AKHIR'; 
+				$data['list_jabatan']= $this->m_lov->get_list_lov(Constant::KAP_HONOR_JABATAN_PENGUJI);
+				break;
+			case '6' : $data['honor_title'] = 'RINCIAN HONOR PENGAWAS'; break;
+			case '7' : 
+				$data['honor_title'] = 'RINCIAN HONOR PANITIA AD HOC'; 
+				$data['list_jabatan']= $this->m_lov->get_list_lov(Constant::KAP_HONOR_JABATAN_PANITIA);
+				break;
+			case '8' : $data['honor_title'] = 'RINCIAN HONOR PEMBIMBING AKADEMIK'; break;
+			case '9' : $data['honor_title'] = 'RINCIAN HONOR PENGELOLA';
+				$data['list_jabatan']= $this->m_lov->get_list_lov(Constant::KAP_HONOR_JABATAN_PENGELOLA);
+				break;
+			case '10' : $data['honor_title'] = 'RINCIAN HONOR PEGAWAI KONTRAK';
+				$data['list_jabatan']= $this->m_lov->get_list_lov(Constant::KAP_HONOR_JABATAN_KONTRAK);	
+				break;
+			case '11' : $data['honor_title'] = 'RINCIAN HONOR KOREKSI UJIAN'; break;
+		}		
+
+		//$data['honor_js'] 		= $this->load->view('kwitansi/rincian_honor/honor_js', $subdata, TRUE);
+		//$data['form_import'] 	= $this->load->view('kwitansi/rincian_honor/form_import_honor', array(), TRUE);
+        $this->load->view('kwitansi/rincian_honor/fhonor_'.$jns_honor, $data);
+    }
+
+    function get_cache_name($idhonor) {
+    	return 'cache_honor'.$idhonor;
+    }
+
+    function cache_honor() 
+    {
+    	//must login
+        if ( !$this->auth->restrict_ajax_login() ) return;
+
+        //get session data
+        $idsu   = $this->session->userdata('id_subunit');
+        $ta     = $this->m_settings->get_tahun_anggaran();
+        $cdsu   = $this->session->userdata('kode_subunit');
+
+        $jns_honor 	= $this->input->post('jns_honor');
+        $cache_name	= $this->get_cache_name($jns_honor);
+        $cache 		= $this->session->userdata($cache_name);
+
+        if(empty($cache) || !isset($cache->rows) ) {
+            $response['errno'] 		= 1;
+            $response['message'] 	= 'caching error';
+            echo json_encode($response);                
+            return;
+        }
+
+        switch($this->input->post('oper')){
+        	case "get":
+        		$id = $this->input->post('id');
+        		$row = $cache->rows[$id];
+        		echo json_encode($row);
+        		return; 
+
+            case "add": 
+
+            	$row = $this->input->post('row');
+        		
+        		if(!empty($row)) {
+	        		switch($jns_honor) {
+	        			case '1': case '7': case '9': case '10':
+	        				$keys = array('nama', 'golongan', 'jabatan', 'volume', 'satuan');
+	        				break;
+						case '6':
+	        				$keys = array('nama', 'golongan', 'm_kul', 'volume', 'satuan');
+	        				break;
+	        			case '2':
+	        				$keys = array('nama', 'golongan', 'kd_mk', 'm_kul', 'volume', 'satuan', 'h_naskah');
+	        				break;
+	        			case '3':
+	        				$keys = array('nama', 'golongan', 'kd_mk', 'm_kul', 'h_naskah');
+	        				break;
+	        			case '4': 
+	        				$keys = array('nama', 'golongan', 'jabatan', 'nim_mhs', 'nama_mhs', 'volume', 'satuan');
+	        				break;
+	        			case '5':
+	        				$keys = array('nim_mhs', 'nama_mhs', 'nama', 'golongan', 'jabatan', 'volume', 'satuan');
+	        				break;
+	        			case '8':
+	        				$keys = array('nama', 'golongan', 'jabatan', 'volume', 'satuan');
+	        				break;
+        				case '11':
+	        				$keys = array('nama', 'golongan', 'kd_mk', 'm_kul', 'volume', 'satuan');
+	        				break;
+	        		}
+
+	        		//jumlah kolom harus sesuai
+	        		if (count($row) < count($keys)) {
+		                $response['errno'] 		= 1;
+		                $response['message'] 	= 'data tidak lengkap. Kolom: {' . implode('-', $keys). '}'; 
+            			echo json_encode($response);
+            			return;	        			
+	        		} else if (count($row) > count($keys)) {
+	        			for($i=0;$i < (count($row) - count($keys));$i++){
+	        				array_pop($row);
+	        			}
+	        		}
+
+	        		//jika dar import, data tidak boleh kosong
+	        		for($i=0;$i < count($keys);$i++) {
+	        			if(empty($row[$i])){
+			                $response['errno'] 		= 2;
+			                $response['message'] 	= 'data tidak boleh kosong'.implode('#', $row); 
+	            			echo json_encode($response);
+	            			return;                				
+	        			}
+	        		}            		
+
+	        		//hitung dan pastikan subtotal & pajak benar
+	        		$row = (object) array_combine($keys, $row);
+
+        			$row->subtotal = doubleval($row->volume) * doubleval($row->satuan);
+
+        			if($jns_honor == '3') $row->subtotal = $row->h_naskah;
+        			if($jns_honor == '2') $row->subtotal = $row->subtotal*$row->h_naskah;
+        		}
+
+        		//tabel pajak
+            	$tabel_pajak_pph = $this->m_pajak_golongan->get_list_pajak_honor(true);
+
+        		$gol = strtoupper(!empty($row) ? $row->golongan : $this->input->post('golongan'));
+
+        		if(!in_array($gol, array_keys($tabel_pajak_pph))) {
+	                $response['errno'] 		= 2;
+	                $response['message'] 	= 'golongan pegawai tidak ada'; 
+        			echo json_encode($response);
+        			return;
+        		}
+
+        		if(!empty($row)) {
+        			$row->pph = doubleval($tabel_pajak_pph[$gol]['pph_honor'] * $row->subtotal)/100;        			
+        		}
+
+            	//TODO: cari cara teruniq untuk menamakan id cache
+
+                $id = 'cache'.count($cache->rows); //_empty
+                
+                $cell = array();
+                $cell['label']		= 'N';
+                $cell['nama']		= !empty($row) ? $row->nama : $this->input->post('nama');
+                $cell['golongan']	= $gol;
+                $cell['volume']		= !empty($row) ? doubleval($row->volume) : $this->input->post('volume');
+                $cell['satuan']		= !empty($row) ? doubleval($row->satuan) : $this->input->post('satuan');
+                $cell['subtotal']	= !empty($row) ? $row->subtotal : $this->input->post('subtotal');
+                $cell['pph']		= !empty($row) ? $row->pph : $this->input->post('pph');
+
+				switch($jns_honor) {
+					case '3':
+						$cell['h_naskah']	= !empty($row) ? $row->h_naskah : $this->input->post('h_naskah');
+					case '2':    					
+						$cell['kd_mk']		= !empty($row) ? $row->kd_mk : $this->input->post('kd_mk');
+						$cell['m_kul']		= !empty($row) ? $row->m_kul : $this->input->post('m_kul');
+						$cell['h_naskah']	= !empty($row) ? $row->h_naskah : $this->input->post('h_naskah');
+			            break;
+			        case '4': case '5':
+			        	$cell['nim_mhs']	= !empty($row) ? $row->nim_mhs : $this->input->post('nim_mhs');
+			        	$cell['nama_mhs']	= !empty($row) ? $row->nama_mhs : $this->input->post('nama_mhs');
+						$cell['jabatan']	= !empty($row) ? $row->jabatan : $this->input->post('jabatan');
+			        case '1': case '7': case '9': case '10':
+			        	$cell['jabatan']	= !empty($row) ? $row->jabatan : $this->input->post('jabatan');
+			        	break;
+					case '6':
+						$cell['m_kul']		= !empty($row) ? $row->m_kul : $this->input->post('m_kul');
+			            break;
+					case '8': 
+						$cell['jabatan']	= !empty($row) ? $row->jabatan : $this->input->post('jabatan');
+						break;
+					case '11':    					
+						$cell['kd_mk']		= !empty($row) ? $row->kd_mk : $this->input->post('kd_mk');
+						$cell['m_kul']		= !empty($row) ? $row->m_kul : $this->input->post('m_kul');						
+			            break;
+				}//end switch	
+
+                
+                $cache->rows[$id] = $cell;                	
+                $response['errno'] 		= 0;
+                $response['message'] 	= 'data berhasil disimpan';
+                echo json_encode($response);                
+                break;
+            case "edit":
+                $id = $this->input->post('id');
+                if(array_key_exists($id, $cache->rows)) 
+                {
+	                $cell = array();
+	                $cell['label']		= strpos($id, 'cache') === FALSE ? 'E' : 'N';
+	                $cell['nama']		= $this->input->post('nama');
+	                $cell['golongan']	= $this->input->post('golongan');
+	                $cell['volume']		= $this->input->post('volume');
+	                $cell['satuan']		= $this->input->post('satuan');
+	                $cell['subtotal']	= $this->input->post('subtotal');
+	                $cell['pph']		= $this->input->post('pph');
+
+					switch($jns_honor) {
+						case '3':
+							$cell['h_naskah']	= $this->input->post('h_naskah');
+						case '2':    					
+							$cell['kd_mk']		= $this->input->post('kd_mk');
+							$cell['m_kul']		= $this->input->post('m_kul');
+							$cell['h_naskah']	= $this->input->post('h_naskah');
+				            break;
+				        case '4': case '5':
+				        	$cell['nim_mhs']	= $this->input->post('nim_mhs');
+				        	$cell['nama_mhs']	= $this->input->post('nama_mhs');
+							$cell['jabatan']	= $this->input->post('jabatan');
+				        case '1': case '7': case '9': case '10':
+				        	$cell['jabatan']	= $this->input->post('jabatan');
+				        	break;
+						case '6':
+							$cell['m_kul']		= $this->input->post('m_kul');			        	
+						case '8': 
+							$cell['jabatan']	= $this->input->post('jabatan');
+							break;
+						case '11':    					
+							$cell['kd_mk']		= $this->input->post('kd_mk');
+							$cell['m_kul']		= $this->input->post('m_kul');							
+				            break;
+					}//end switch
+
+                    $cache->rows[$id] = $cell;                	
+
+                    $response['errno'] 		= 0;
+                    $response['message'] 	= 'data berhasil disimpan';
+                    echo json_encode($response);
+                }
+                break;
+            case "del":
+                $id = $this->input->post('id');
+                
+                if(array_key_exists($id, $cache->rows)) {
+                    if(strpos($id, 'cache') === FALSE) {
+                        //jika bukan temporary dan bukan data baru, simpan di stack
+                        array_push($cache->del_stack, $id);
+                    }
+
+                    unset($cache->rows[$id]);
+                    $response['errno'] 		= 0;
+                    $response['message'] 	= 'data berhasil dihapus';
+                    echo json_encode($response);
+                }
+
+                break;
+        }
+
+        $this->session->set_userdata($cache_name, $cache);
+    }
+
+
+    function preview()
+    {
+    	//if($this->auth->restrict_ajax_login()) return;
+
+        $id_kwitansi 	= $this->uri->segment(3); 
+
+        //get kwitansi
+        $kwitansi 		= $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+
+        if(!$kwitansi) {
+        	$data['kwitansi_exist'] = false;
+        } else {
+        	$data['kwitansi_exist'] = true;
+        	$data['unit']	= $this->m_unit->get_unit_by_id($kwitansi->id_unit);
+        	$data['row']	= $kwitansi;
+        	
+        	$this->template->load('doc_template', 'kwitansi/kwitansi_preview', $data);
+        }
+    }
+
+	function preview_honor()
+	{
+		//$this->auth->restrict();
+
+        $id_kwitansi 		= $this->uri->segment(3); 
+        $kwitansi 			= $this->m_kwitansi->get_kwitansi_by_id($id_kwitansi);
+
+        if(empty($kwitansi)) {
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'Kwitansi tidak ada');						  
+            return;
+        }
+
+        $jns_honor 				= $this->m_kwitansi->get_jenis_honor_by_id_kwitansi($kwitansi->id_kwitansi);
+        $data['hasil'] 			= $this->m_kwitansi->view_honor($kwitansi->id_kwitansi);
+        $data['nama_unit'] 		= $this->m_umum->get_nama_unit_by_id($kwitansi->id_unit); 
+        $data['nama_subunit'] 	= $this->m_umum->get_nama_sunit_by_id($kwitansi->id_subunit); 
+        $data['munit'] 			= $this->m_kwitansi->get_munit_by_id($kwitansi->id_unit);
+        $this->template->load('doc_template', 'kwitansi/rincian_honor/rincian_honor_'.$jns_honor, $data); 
+	}    
+
+    function find_pegawai()
+    {
+    	$keyword = $this->input->get('keyword');
+    	echo file_get_contents('http://localhost/siaku/services/pegawai/'.$keyword);
+    }
+
+
+
+    function get_list_honor()
+    {
+    	//$id_kwitansi 		= $this->input->
+    }
+
+/**
+*
+FUNGSI INI DIGUNAKAN UNTUK FUNGSI AUTO COMPLETE
+*/
+function lookup(){
+		// process posted form data (the requested items like province)
+		// Note : matikan CI profiler agar bisa bekerja
+        $keyword = $this->input->post('term');
+        $data['response'] = 'false'; //Set default response
+        $query = $this->m_kwitansi->lookup($keyword); //Search DB
+		//echo $this->db->last_query();
+        if( ! empty($query) )
+        {
+            $data['response'] = 'true'; //Set response
+            $data['message'] = array(); //Create array
+            foreach( $query as $row )
+            {
+                $data['message'][] = array(
+                                        'id'=>$row->id_pegawai,
+										'label'=>$row->nama_pegawai,
+										'value'=>$row->golongan,
+										'desc'=>$row->jabatan,
+                                        ''
+                                     );  //Add a row to array
+            }
+        }
+        if('IS_AJAX')
+        {
+            //echo $this->db->last_query();
+            echo json_encode($data); //echo json string if ajax request
+        }
+        else
+        {
+             $this->template->load('template','kwitansi/kwitansi_honor',$data);
+        }
+	}
+
+    function kirim_verunit() {
+		$this->auth->restrict();
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$jenis_kwitansi 	= $this->input->post('jns_kwitansi');
+        $sifat_bayar 		= $this->input->post('jns_belanja');
+
+        $status_kwitansi 	= 0;
+        $jenis_kwitansi 	= $jenis_kwitansi ==='' ? '%' : $jenis_kwitansi;
+        $sifat_bayar 		= $sifat_bayar ==='' ? '%' : $sifat_bayar;
+
+		//TODO : MENGGUNAKAN TRANSACTION (SUDAH)
+		$this->m_kwitansi->kirim_verunit($ta, $su, $sifat_bayar, $status_kwitansi, $jenis_kwitansi);
+    }
+
+ 	function view_history()
+     {       
+     	$this->auth->restrict();
+
+        $id_kwitansi 		= $this->uri->segment(3);
+        $data['histories'] 	= $this->m_kwitansi->get_history($id_kwitansi);
+        $this->load->view('kwitansi/kwitansi_history',$data);   
+    }
+
+    function update(){
+        //action save kwitansi di table t_kwitansi
+	 	$idsu 			= $this->session->userdata('id_subunit');
+		$idu 			= $this->session->userdata('id_unit');
+		$kode_unit 		= $this->session->userdata('kode_unit');
+		$ta 			= $this->m_settings->get_tahun_anggaran();
+		$jns_kwitansi	= $this->input->post('jns_kwitansi');
+		$sifat_bayar	= $this->input->post('jns_belanja');
+		$tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		$id_kwitansi    = $this->input->post('id_kwitansi');
+		$id_status_kwi  = $this->input->post('id_status_kwitansi');
+		//$id_status_kwitansi 	= $id_status_kwi =='0' ? '0' : $id_status_kwi+1;
+		$id_status_kwitansi 	= $id_status_kwi;
+
+
+        $object = new stdClass();
+		$object->id_unit        = $idu;
+		$object->jenis_kwitansi = $jns_kwitansi;
+		$object->sifat_bayar	= $this->input->post('jns_belanja');
+		$object->tgl_kwitansi   = $this->input->post('tgl_kwitansi');
+		$object->tpt_kwitansi   = $this->input->post('tempat_kwitansi');
+		$object->kdgiat       	= $this->input->post('kd_giat');
+		$object->kdoutput       = $this->input->post('kd_output');
+		$object->kdkomponen     = $this->input->post('kd_komponen');
+		$object->kdakun         = $this->input->post('kd_akun');
+		$object->hdr            = $this->input->post('kd_hdr');
+		$object->nmheader       = $this->input->post('kd_hdr');
+		$object->akun_kode      = $this->input->post('kd_bas');
+		$object->ket_kwitansi   = $this->input->post('ket_kwitansi');
+		$object->judul_p        = $this->input->post('judul_p');
+		$object->no_kontrak     = $this->input->post('no_kontrak');
+		$object->jangka_waktu_kontrak = $this->input->post('jangka_waktu');
+		$object->pengambil      = $this->input->post('pengambil');
+		$object->nip_pengambil  = $this->input->post('nip_pengambil');
+		$object->penerima       = $this->input->post('penerima');
+		$object->nip_penerima   = $this->input->post('nip_penerima');
+		$object->id_pajak       = $this->input->post('jenis_pajak');
+
+		$object->ket_sptb       = $this->input->post('ket_sptb');
+		$object->no_sk_rektor   = $this->input->post('no_sk');
+		$object->tgl_sk_rektor  = $this->input->post('tgl_sk');
+		$object->kop_honor      = $this->input->post('kop_honor');
+
+		$object->pp_spd         = $this->input->post('pp_spd');
+		$object->dari           = $this->input->post('dari');
+		$object->tujuan         = $this->input->post('tujuan');
+		$object->yg_bepergian   = $this->input->post('yg_bepergian');
+		$object->nip            = $this->input->post('nip');
+		$object->gol            = $this->input->post('golongan');
+		$object->maksud         = $this->input->post('maksud');
+		$object->tgl_b          = $this->input->post('tgl_b');
+		$object->tgl_k          = $this->input->post('tgl_k');
+		$object->ket_spd        = $this->input->post('ket_spd');
+		$object->tiket          = $this->input->post('tiket');
+		$object->board          = $this->input->post('board');
+		$object->taxi           = $this->input->post('taxi');
+		$object->uang_saku      = $this->input->post('uang_saku');
+		$object->lama           = $this->input->post('lama_hari');
+		$object->id_status_kwitansi = $id_status_kwitansi;
+		$object->dll            = $this->input->post('dll');
+		$object->represent      = $this->input->post('representatif');
+		$object->changed_by     = $this->session->userdata('username');
+
+		//get naama pada rkakl
+		$nama = $this->m_kwitansi->getnamaList_t_rkakl($kode_unit,
+														$this->input->post('kd_output'),
+														$this->input->post('kd_komponen'),
+														$this->input->post('kd_akun')
+														);
+    	foreach($nama->result_array() as $row){
+    		$nmoutput = $row['nmoutput'];
+    		$nmkomponen = $row['nmkomponen'];
+    		$nmakun = $row['nmakun'];
+    		$nmsubkomponen = $row['nmskomponen'];
+    		$nmheader = $row['hdr'];
+    	}
+		$object->nmoutput       = $nmoutput;
+		$object->nmkomponen     = $nmkomponen;
+		$object->nmskomponen	= $nmsubkomponen;
+		$object->nmakun       	= $nmakun;
+
+		//var_dump($object);
+		//exit;
+        $biaya  = $this->input->post('biaya');
+        $pph21  = $this->input->post('pph21');
+
+		$ppn    = $this->input->post('nilai_ppn');
+		$pph    = $this->input->post('nilai_pph');
+		$nominal=$this->input->post('nominal');
+
+		//perjadin
+		$biaya  = $this->input->post('biaya');
+		$pph21  = $this->input->post('pph21');
+
+		// rincian honor
+		$jns_honor  = $this->input->post('jns_honor');
+		$honor_param['nama']=$this->input->post('nama');
+		$honor_param['jabatan']=$this->input->post('jabatan');
+		$honor_param['golongan']=$this->input->post('golongan');
+		$honor_param['jml_org']=$this->input->post('jml_org');
+		$honor_param['h_naskah']=$this->input->post('h_naskah');
+		$honor_param['nama_mhs']=$this->input->post('nama_mhs');
+		$honor_param['nim_mhs']=$this->input->post('nim_mhs');
+		$honor_param['kd_mk']=$this->input->post('kd_mk');
+		$honor_param['m_kul']=$this->input->post('m_kul');
+		$honor_param['kls']=$this->input->post('kls');
+		$honor_param['jml_hadir']=$this->input->post('jml_hadir');
+		$honor_param['jml_bln']=$this->input->post('jml_bln');
+		$honor_param['ptkp']=$this->input->post('ptkp');
+		$honor_param['pkp']=$this->input->post('pkp');
+		$honor_param['jml_hari']=$this->input->post('jml_hari');
+		$honor_param['bruto']=$this->input->post('bruto');
+
+        $result = TRUE;
+
+		switch($jns_kwitansi){
+			case "HONOR":
+				$result = $this->m_kwitansi->update_honor($object, $idsu, $sifat_bayar, $honor_param, $jns_honor,
+															$ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi);
+				break;
+			case "PERJADIN":
+				$result = $this->m_kwitansi->update_KontrakModalBarangBansos($object, $biaya, $idsu, $sifat_bayar,
+																		$ppn, $pph21, $ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi);
+				break;
+			default:
+				$result = $this->m_kwitansi->update_KontrakModalBarangBansos($object, $nominal, $idsu, $sifat_bayar,
+																		$ppn, $pph, $ta, $tgl_kwitansi, $jns_kwitansi, $id_kwitansi);
+		}
+        redirect('kwitansi_view/spj2');
+    }
+    //simpan ke session
+    function honor_to_session(){
+        
+        //ambil kode di session
+        $jns_honor=$this->input->post('jns_honor');
+        $nama_cache='cache_honor_'.$jns_honor;
+        $cache = $this->session->userdata($nama_cache);
+
+        switch($this->input->post('aksi')){
+            case "simpan":
+                switch($jns_honor){
+                    case 1:
+                        $cell = array(
+                            $this->input->post('nama'),
+                            $this->input->post('jabatan'),
+                            $this->input->post('golongan'),
+                            $this->input->post('jml_bln'),
+                            $this->input->post('bruto'),
+                            $this->input->post('jumlah')
+                        );
+                        break;
+                }
+                        
+                $id=$this->input->post('id_rincian');
+                if ($id!=''){
+                    //edit
+                    $cache->rows[$id] = $cell;
+                    $this->session->set_userdata($nama_cache, $cache);
+                    echo "Berhasil di-edit";
+                }else{
+                    //baru
+                    $id = $this->session->userdata('id_user').$this->input->post('jns_honor'). microtime(true); //_empty.time
+                    $cache->rows[$id] = $cell;
+                    $this->session->set_userdata($nama_cache, $cache);
+                    echo "Berhasil Disimpan ";
+                }
+                
+                break;
+            case "perbaiki":
+                $id = $this->input->post('id_rincian');
+                foreach($cache->rows as $key=>$cell){
+                    if($key == $id) {
+                        echo json_encode($cell);
+                        break;
+                    }
+                }
+                break;
+            case "hapus":
+                $id = $this->input->post('id');
+                $ids = explode(',', $id);
+                
+                //ubah menjadi array
+                foreach ($ids as $id) {
+                    if(array_key_exists($id, $cache->rows)) {
+                        //TODO: kalau delete dari data yg sudah kesimpen di db gmn??
+
+                        unset($cache->rows[$id]);                        
+                    }
+                }
+                $this->session->set_userdata('cache_honor', $cache);
+               echo "Berhasil Dihapus";
+                break;
+        }
+    }
+    function honor_make_table(){
+        $jns_honor = $this->input->post('jns_honor');
+         
+        $cache = $this->session->userdata('cache_honor_'.$jns_honor);
+        $total=0;
+        if (!empty($cache)){
+            switch($jns_honor){
+                case 1:
+                    foreach($cache->rows as $key=>$cell){
+                        $jumlah = $cell[3]*$cell[4];
+                        $total = $total + $jumlah;
+                        echo "
+                            <tr>
+                                <td>$cell[0]</td>
+                                <td>$cell[1]</td>
+                                <td>$cell[2]</td>
+                                <td>$cell[3]</td>
+                                <td>$cell[4]</td>
+                                <td>$jumlah</td>
+                                <td align='center'>
+                                    <a href='javascript:void(0)' onclick='ambil_sesi($key)' class='ico-edit' title='Edit'> </a>
+                                    <a href='javascript:void(0)' onclick='hapus_sesi($key)' class='ico-del' title='Delete'> </a>
+                                </td>
+                            </tr>
+                        ";
+                        
+                    }
+                    break;
+                case 2:
+                    break;
+            }
+                    
+        }
+        
+        echo "
+            <tr>
+                <th colspan=\"5\">Jumlah Total Nilai Rincian honor</th>
+                <th><input type=\"text\" name=\"grand_total\" id=\"grand_total\" readonly=\"readonly\" value=\"$total\" /></th>
+                <th></th>       
+            </tr>
+        ";
+        
+    }
+
+}
+
+?>

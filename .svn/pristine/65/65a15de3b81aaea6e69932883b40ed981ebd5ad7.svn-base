@@ -1,0 +1,177 @@
+<script type="text/javascript">
+	$(function() {
+        $("#total_usulan").autoNumeric(window.numOptions);
+		$("#pagu_real").autoNumeric(window.numOptions);
+		$("#max_usulan").autoNumeric(window.numOptions);
+
+	});
+
+	function show_list() {
+		var tab = $('#tab_list');
+		var tabin = $('#tab_list div:first');
+
+		//hide all
+		$('.t_content').hide();
+
+		tabin.html(loader());
+		tab.show();
+
+		$.post('<?php echo site_url('dpt/ajax_get_list_dpt')?>',
+			   {id_subunit: $('#id_subunit').val()},
+			   function(data){
+			   	  try {
+					var response = $.parseJSON(data);
+
+					catch_expired_session(response);
+
+			   	  } catch (e) {
+					tabin.hide();
+					tabin.html(data);
+					tabin.slideDown('fast');
+			   	  }
+			   });
+	}
+
+	function show_form(postdata) {
+		var tab = $('#tab_form');
+		var tabin = $('#tab_form div:first');
+
+		//hide all
+		$('.t_content').hide();
+
+		tabin.html(loader());
+		tab.show();
+
+		$.post('<?php echo site_url('dpt/ajax_get_form_insert_uraian')?>',
+			   postdata,
+			   function(data){
+			   	  try {
+					var response = $.parseJSON(data);
+
+					catch_expired_session(response);
+
+			   	  } catch (e) {
+					tabin.hide();
+					tabin.html(data);
+					tabin.slideDown('fast');
+			   	  }
+			   });
+	}
+
+	$(function() {
+		show_list();
+	})
+</script>
+<div class="module width_full" id='container_usulan'>
+<header><h3>Pengajuan Dana Parkir Tender</h3></header>
+<div class="module_content">
+<form method="post" name='form_dpt_detail' id='form_dpt_detail' action="save_uraian">
+<input type='hidden' name='id_subunit' id='id_subunit' value='<?php echo $id_subunit?>'>
+
+
+
+<h4>Input Tender Sub Unit <?php echo $nm_sunit?></h4>
+
+<table width="100%" cellspacing="0" style='margin-top: 10px;background-color: yellow;
+	padding: 3px' border="0" align="center">
+    <tr>
+        <td width='120px'>Total Usulan DPT</td><td>:</td>
+        <td><input type='text' name='total_usulan' id='total_usulan'
+                   value='<?php echo $total_usulan?>' readonly='true'
+				   style='text-align: right'></td>
+        <td width='10px'></td>
+		<td width='10px'></td>
+    <tr>
+        <td width='120px'>Pagu Real</td><td>:</td>
+            <td><input type='text' name='pagu real' id='pagu_real'
+                       value='<?php echo $pagu_real?>' readonly='true'
+					   style='text-align: right'></td>
+        <td width='10px'></td>
+        <td width='120px'>Maks Usulan</td><td>:</td>
+        <td><input type='text' name='max_usulan' id='max_usulan'
+                   value='<?php echo $max_usulan?>' readonly='true'
+				   style='text-align: right'></td>
+        <td colspan='7'></td>
+		<td align="right">
+			<?php //if ($show_btn_kirim == TRUE) { ?>
+			<input type="button" id="send_usulan" value="Kirim Usulan">
+
+<script type="text/javascript">
+	$(function() {
+		$('#send_usulan').click(function() {
+			var total_usulan= parseFloat($('#total_usulan').autoNumeric('get'));
+			var max_usulan  = parseFloat($('#max_usulan').autoNumeric('get'));
+
+			if (total_usulan == 0) {
+				alert('Belum ada uraian kegiatan yang dimasukkan. Penyimpanan dibatalkan');
+				return;
+			}
+
+			if (total_usulan > max_usulan) {
+				alert('Maaf, Uraian yang diajukan melebihi MAX Usulan yang diperbolehkan.');
+				return;
+			}
+
+			if (! confirm('Apakah semua data sudah benar? Lanjutkan pengiriman data Usulan?')) {
+				return;
+			}
+
+			//block page
+            $.blockUI({
+                    message: 'Proses kirim usulan, mohon ditunggu ...',
+                    css: window._css,
+                    overlayCSS: window._ovcss
+            });
+
+			//send usulan by ajax
+			$.post('<?php echo site_url('dpt/send_usulan')?>',
+				{ id_dpt: $('#id_dpt').val() },
+				function(data) {
+					try {
+						var json = $.parseJSON(data);
+						//tampilkan message
+						$.blockUI({
+							message: json.msg,
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+
+						if(json.errno != 0){
+							//do nothing for error
+						} else {
+							//MUST: trigger set jenis usulan
+							$('#pilih_sb').trigger('click');
+						}
+					} catch(e) {
+						//log error, misal format json salah
+						console.log('System error : "' + e + '"');
+						$.blockUI({
+							message: 'Terjadi kesalahan sistem, mohon hubungi administrator.',
+							timeout: 2000,
+							css: window._css,
+							overlayCSS: window._ovcss
+						});
+					}
+				}
+			);
+		});
+	});
+</script>
+			<?php //} ?>
+		</td>
+    </tr>
+</table>
+
+<div class="t_container">
+	<div id="tab_list" class="t_content">
+		<div class='t_content_in'></div>
+	</div>
+
+	<div id="tab_form" class="t_content">
+		<div class='t_content_in'></div>
+	</div>
+</div>
+
+</form>
+</div></div>

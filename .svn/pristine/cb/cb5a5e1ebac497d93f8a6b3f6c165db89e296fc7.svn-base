@@ -1,0 +1,15 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-18 09:14:14 --> Severity: Notice  --> Undefined variable: jenis_belanja C:\xampp\htdocs\siaku\application\models\m_spj.php 361
+ERROR - 2013-07-18 09:53:52 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\spp\preview_spp2.php 359
+ERROR - 2013-07-18 10:10:25 --> 404 Page Not Found --> spp/print
+ERROR - 2013-07-18 10:16:14 --> Severity: Notice  --> Undefined index: nip_bpp C:\xampp\htdocs\siaku\application\views\spp\preview_spp2.php 35
+ERROR - 2013-07-18 09:13:36 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-07-18 09:13:36 --> Unable to connect to the database
+ERROR - 2013-07-18 09:13:43 --> Severity: Warning  --> mysqli_connect(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ C:\xampp\htdocs\siaku\system\database\drivers\mysqli\mysqli_driver.php 76
+ERROR - 2013-07-18 09:13:43 --> Unable to connect to the database
+ERROR - 2013-07-18 15:15:18 --> Severity: Notice  --> Undefined property: CI_Output::$enable C:\xampp\htdocs\siaku\application\controllers\kwitansi_view.php 687
+ERROR - 2013-07-18 09:52:54 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 342
+ERROR - 2013-07-18 09:52:54 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 268

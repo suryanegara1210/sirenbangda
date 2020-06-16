@@ -1,0 +1,134 @@
+<?php
+
+class M_max_up extends CI_Model {
+
+	function __construct()
+	{
+		parent::__construct();
+		$this->load->library(array('auth'));
+	}
+
+	function get_tabel_pagu_real_max_up ($ta, $idu)
+	{
+		$sql = "
+			SELECT a.id_subunit, a.kode_subunit, a.id_unit, a.nama_subunit,
+				b.tahun, b.id_pagu,
+				IFNULL(b.pagu_real, 0) AS pagu_real,
+				IFNULL(c.nilai_max, 0) AS nilai_max,
+				IFNULL(c.usulan_up, 0) AS usulan_up
+			FROM m_subunit a
+				LEFT JOIN t_pagu_real b ON a.id_subunit = b.subunit AND b.tahun = ?
+				LEFT JOIN t_max_up c ON a.id_subunit = c.id_subunit AND c.tahun = ?
+			WHERE a.id_unit = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $ta, $idu));
+
+		if($query->num_rows() > 0)
+			return $query->result();
+
+		return FALSE;
+	}
+
+	function get_max_up($ta, $idsu)
+	{
+		$sql = "
+			SELECT *
+			FROM t_max_up a
+			WHERE a.tahun = ?
+				AND a.id_subunit = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu));
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+	}
+
+	function get_pagu_real($ta, $idsu)
+	{
+		$sql = "
+			SELECT *
+			FROM t_pagu_real a
+			WHERE a.tahun = ?
+				AND a.subunit = ?
+		";
+
+		$query = $this->db->query($sql, array($ta, $idsu));
+		if($query->num_rows() > 0) {
+			return $query->row();
+		}
+
+		return FALSE;
+	}
+
+	function simpan_max_up($ta, $idsu, $nilai_max)
+	{
+		//get username
+		$uname = $this->auth->get_username();
+
+		//cek apakah sudah ada
+		$max_up = $this->get_max_up($ta, $idsu);
+
+		if($max_up === FALSE) {
+			//tambah baru
+			$this->db->set('id_subunit', 	$idsu);
+			$this->db->set('tahun', 		$ta);
+			$this->db->set('nilai_max', 	$nilai_max);
+			$this->db->set('created_by', 	$uname);
+			$this->db->set('created_date', 	'now()', FALSE);
+
+			//do insert
+			$res = $this->db->insert('t_max_up');
+			return $res !== FALSE ? $this->db->insert_id() : $res;
+		} else {
+			//update
+			$this->db->set('nilai_max', 	$nilai_max);
+			$this->db->set('changed_by', 	$uname);
+			$this->db->set('changed_date', 	'now()', FALSE);
+
+			//do update
+			$this->db->where('id_subunit', 	$idsu);
+			$this->db->where('tahun',		$ta);
+			$res = $this->db->update('t_max_up');
+			return $res;
+		}
+	}
+
+	function simpan_pagu_real($ta, $idsu, $nilai_pagu)
+	{
+		//get username
+		$uname = $this->auth->get_username();
+
+		//cek apakah sudah ada
+		$pagu_real = $this->get_pagu_real($ta, $idsu);
+
+		if($pagu_real === FALSE) {
+			//tambah baru
+			$this->db->set('subunit', 	$idsu);
+			$this->db->set('tahun', 		$ta);
+			$this->db->set('pagu_real', 	$nilai_pagu);
+			$this->db->set('create_by', 	$uname);
+			$this->db->set('create_date', 	'now()', FALSE);
+
+			//do insert
+			$res = $this->db->insert('t_pagu_real');
+			return $res !== FALSE ? $this->db->insert_id() : $res;
+		} else {
+			//update
+			$this->db->set('pagu_real', 	$nilai_pagu);
+			$this->db->set('changed_by', 	$uname);
+			$this->db->set('changed_date', 	'now()', FALSE);
+
+			//do update
+			$this->db->where('subunit', 	$idsu);
+			$this->db->where('tahun',		$ta);
+			$res = $this->db->update('t_pagu_real');
+			return $res;
+		}
+	}
+}
+
+?>

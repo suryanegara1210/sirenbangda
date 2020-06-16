@@ -1,0 +1,90 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.status.value == "setuju_verifikasi"){
+    alert("Maaf Rincian TUP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  }
+  if (form.status.value == "terotorisasi_kaprodi"){
+    alert("Maaf Rincian TUP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  } 
+  return (true);
+  }
+  </script>
+
+<article class="module width_full">
+            <header><h3>Daftar SPP TUP (Tambahan Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="<?php echo base_url();?>tup/kirim_revisi" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Nama Unit</th>
+                <th>Nomor SPP</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPP</th>
+                <th colspan="3">Aksi</th>
+                
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            //echo"$th/$nomor";
+            $no = 1; 
+            foreach($daftar_spp->result_array() as $row)
+            {  
+            $id=$row['id_spp'];
+            $th=$row['th_spp'];
+            $nama_unit=$row['nama_unit'];  
+            $status=$row['status_spp'];         
+            $jumlah= $this->uang->angka ($row['jumlah']);  
+            $nomor=$row['no_spp']; 
+            $nomor_tes = sprintf("%04d", $nomor);
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat'];  
+            $tahun = '20'.$th;            
+            ?>
+              <input type="hidden" name="id_rekap" value="<?php echo "$id"; ?>"> 
+              <input type="hidden" name="status" value="<?php echo "$status"; ?>"> 
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor_tes/$singkat/$kode_digit/$tahun";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                
+                <?php if($status =="diajukan"){?> 
+                <td align="center"><?php echo"$status";?></td>
+                <?php }else{?>
+                <td align="center" style="background-color:#99ff33"><?php echo"$status";?></td> 
+                <?php }?>
+                
+                <td align="center"> <a href='<?php echo base_url()."tup/preview_spp/".$th."/".$id;?>' title='Preview SPP' ><img src='<?php echo base_url();?>asset/images/preview.png'></a></td>
+                <?php if($status =="diajukan"){?>
+                <td align="center" style="padding-top:8px;" ><a href='<?php echo base_url()."tup/print_spp/".$th."/".$id;?>' title='Print SPP' ><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."tup/otorisasi_spp_up/".$th."/".$id;?>' title='Klik Jika SPP TUP sudah diotorisasi PPK unit' onclick="return confirm('Apakah anda yakin SPP ini sudah diotorisasi oleh PPK?')"> <img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }else{?>
+                <td align="center" style="padding-top:8px;" ><a href='#' title='Print SPP' onclick="return alert('Maaf SPP ini sudah diotorisasi PPK unit')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"><a href='#' title='Klik Jika SPP TUP sudah diotorisasi PPK unit' onclick="return alert('Maaf SPP ini sudah diotorisasi sebelumnya..')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }?>   
+                
+              </tr>   
+            <?php $no++;    
+            ?>
+            <?php }?>         
+            
+ </table>
+ </div>    
+    
+            <footer>
+            
+                
+                <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+                </div>
+
+            </footer>
+            </article>

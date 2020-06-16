@@ -1,0 +1,455 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+* @brief Controller Class Pembuatan Laporan Akuntansi
+* 
+* Controller Class Pembuatan Laporan Akuntansi
+* Jurnal dan Buku Besar
+* 
+* @author I Wayan Shandyasa
+*/                                                                                    
+class Spj extends CI_Controller
+{
+	var $CI = NULL;
+
+	function __construct()
+	{
+		// get CI's object
+		$this->CI =& get_instance(); 
+		parent::__construct();
+		$this->load->helper(array('form','url', 'text_helper','date'));       
+		$this->load->database();
+		$this->load->library(array('Pagination','image_lib'));
+		$this->load->library('konversi');
+		$this->load->library(array('StrUtil','Formatting'));
+		$this->load->model(array('m_spj', 'm_logic', 'm_settings','m_lov','m_spm','m_umum')); 
+		
+		date_default_timezone_set('Etc/GMT-8');
+	}  
+
+//==============>>>
+	/*
+	* fungsi membuat SPJ
+	*/
+    function create(){
+		$this->auth->restrict();
+        
+        $idu = $this->session->userdata('id_unit');
+		$su  = $this->session->userdata('id_subunit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		
+        $data['nama_unit'] = $this->m_umum->get_nama_unit_by_id($idu);
+        $data['nama_sunit'] = $this->m_umum->get_nama_sunit_by_id($su);
+
+        //item yg tidak muncul di list sifat bayar kwitansi, harus dihilangkan
+        $non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+        $this->template->load('template','spj/view_sptb_spj',$data);
+    }
+
+
+    function get_form_spj(){
+		$sifat_bayar	= $this->input->post('jns_belanja');
+        $idu 			= $this->session->userdata('id_unit');
+		$su  			= $this->session->userdata('id_subunit');
+		$ta  			= $this->m_settings->get_tahun_anggaran();
+		$where			= "t_spj.status < '8'";
+		$id_spj			= $this->input->post('id_spj');
+		
+		$data['isi_spj']	= $this->m_spj->get_spj($idu,$sifat_bayar,$where);
+		$data['isi']		= $this->m_spj->get_view_sptb_spj($ta,$sifat_bayar,$idu,$where);
+		
+		$xpersen				= $this->m_settings->get_nilai_maxpersen();
+		//digunakan saat setting usulan default untuk SPJ
+		//$nilai_up				= $this->m_logic->get_nilai_spm_up($ta,$su);
+		$nilai_up				= $this->m_logic->get_nilai_max_up_unit($idu, $ta);
+		$nilai_tup				= $this->m_logic->get_nilai_spm_tup_unit($ta,$idu);
+		$pagu_real				= $this->m_logic->get_pagu_real_unit($ta, $idu);
+		
+		//=== no rule ===//
+		//$nilai_up				= 10000000;
+		//$nilai_tup				= 10000000;
+		//$pagu_real				= 10000000;
+		//=== end no rule ===//
+		
+		$user=$this->auth->get_user();
+		$data['kirim_spj']=$user->hasPrivilege('kirim_spj');
+		$data['tambah_spj']=$user->hasPrivilege('tambah_spj');
+		
+		//var_dump($data['isi_spj']);
+		
+		if($data['isi_spj']){
+			foreach($data['isi_spj']->result() as $rows)
+			{
+				$id_spj			= $rows->id_spj;
+			}
+			$data['cek_all']=$this->m_spj->cek_semua_SPTBSPMSPJ($id_spj);
+			//echo $this->db->last_query();
+		}else{
+			$data['cek_all']=false;
+		}
+				
+		
+		//echo $this->db->last_query();
+		
+		switch($sifat_bayar){
+		case Constant::JB_GUP:
+			$data['nilai_min']	= ($nilai_up)*($xpersen);
+			$data['nilai_max']	= $nilai_up;
+		break;
+		case Constant::JB_LS:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $pagu_real;
+		break; 
+		case Constant::JB_TUP_NHL:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $nilai_tup;
+		break; 
+		case Constant::JB_GUP_NHL:
+			$data['nilai_min']	= 0;
+			$data['nilai_max']	= $nilai_up;
+		break; 
+		}
+														
+		$this->load->view('spj/form_spj_detail',$data);
+    }
+	
+	function tambah_spj(){
+		
+		$sifat_bayar	= $this->uri->segment(3); 
+		$jum_spm		= $this->uri->segment(4);
+		$nilai_max		= $this->uri->segment(5); 
+		$nilai_min		= $this->uri->segment(6); 
+		$id_spj			= $this->uri->segment(7); 
+		$su  			= $this->session->userdata('id_subunit');
+		$idu  			= $this->session->userdata('id_unit');
+		$ta  = $this->m_settings->get_tahun_anggaran();
+
+		$where			= "32";
+		
+		$data['jum_kwi']	= $jum_spm;
+		$data['nilai_max']	= $nilai_max;
+		$data['nilai_min']	= $nilai_min;
+		$data['id_spj']		= $id_spj;
+		//untuk spm aktifin yg ini mas brow!!!
+		//$data['isi']		= $this->m_spj->get_spm_tambahspj($ta, $sifat_bayar ,$where) ;
+		$data['isi']		= $this->m_spj->get_sptb_tambahspj($ta, $idu, $sifat_bayar ,$where) ;
+		//echo $this->db->last_query(); 
+		$this->load->view('spj/tambah_sptb',$data);
+	}
+	
+	function tambah_spm_keSPJ(){
+		$id_spm 	= $this->input->post('id');
+		$id_spj	 	= $this->input->post('id_spj');
+		$count			= count($id_spm);
+		// membuat paket SPJ		
+			for($i=0;$i<$count;$i++){
+				//$this->m_kwitansi->up_status_kwitansi_byID($id_kwitansi[$i],$id_status_kwitansi,$id_spjsu);
+				$this->m_spj->up_spm('', $id_spm[$i], '',$id_spj);
+			}
+    }
+	
+	function tambah_sptb_keSPJ(){
+		$id_sptb 	= $this->input->post('id');
+		$id_spj	 	= $this->input->post('id_spj');
+		$count			= count($id_sptb);
+		// membuat paket SPJ		
+			for($i=0;$i<$count;$i++){
+				$this->m_spj->up_sptb('', $id_sptb[$i], '',$id_spj);
+			}
+    }
+
+	function hapus_spm_spj(){
+		$id_spm 	= $this->input->post('id');
+		$this->m_spj->up_spm('', $id_spm, '',NULL);
+    }
+	
+	function hapus_sptb_spj(){
+		$id_sptb 	= $this->input->post('id');
+		$this->m_spj->up_sptb('', $id_sptb, '',NULL);
+    }
+
+    function kirim_spj_unit() {
+		$this->auth->restrict();
+		$id_spj 	= $this->input->post('id_spj');
+		$st_spj 	= $this->input->post('st_spj');
+		$this->m_spj->kirim_spj($id_spj);
+    } 
+	
+	function create_spj(){
+		$idu  			= $this->session->userdata('id_unit');
+		$created_by  	= $this->session->userdata('username');
+		$jenis_belanja 	= $this->input->post('jns_belanja');
+		$created_date 	= date('Y-m-d H:i:s');
+		
+		$this->m_spj->create_spj($created_date, $jenis_belanja, $idu, $created_by);
+    }
+	
+	
+
+//==============>>>	
+
+	function daftar_spj_view(){
+		
+		$non_kw = array('UP','NHL','SAH');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+		}
+		$this->template->load('template','spj/daftar_spj_view',$data);
+		
+		
+	}
+	
+	function select_tahun_(){
+		$bulan = $this->input->post('bulan');
+		$tahun = $this->input->post('tahun');
+		$jenis_belanja = $this->input->post('jenis_belanja');
+		$data['bulan'] = $bulan;
+		$data['tahun'] = $tahun;
+		$data['jenis_belanja'] = $jenis_belanja;
+		$ta  = $this->m_settings->get_tahun_anggaran();
+		 
+		$data['data_spj']=$this->m_spj->spj_daftar_ambil($ta,$jenis_belanja);
+		$this->load->view('spj/list_spj_view',$data);    
+	}
+	
+	function ajax_get_spm(){
+		$id_spj = $this->input->post('id_spj');
+		$bulan = $this->input->post('bulan');
+		$jenis_belanja = $this->input->post('jenis_belanja');
+		$data['bulan'] = $bulan;
+		$data['jenis_belanja'] = $jenis_belanja;
+		
+		$result = $this->m_spj->view_list_spj($this->m_settings->get_tahun_anggaran(),
+			$id_spj, $jenis_belanja);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Tanggal SPM</th>
+					<th>Nomor SPM</th>
+					<th>Sub Unit</th>
+					<th>Sifat Bayar</th>
+					<th>Keterangan</th>
+					<th>Status</th>
+					<th>Nominal</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			$str = "
+                <tr>
+                	<td align='center'>{$i}</td>
+                    <td align='left'>{$row->tgl_spm}</td>
+                    <td align='left'><a href='".base_url()."spm/preview_spm2/$row->id_spm/$row->sifat_bayar' target='_blank'>{$row->no_spm}</a></td>
+                    <td align='left'>{$row->nama_subunit}</td>
+                    <td align='center'>{$row->sifat_bayar}</td>					
+                    <td align='center'>{$row->uraian_spm}</td>		
+					<td align='center'>{$row->status_spm}</td>				
+                    <td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>					
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	} 
+	
+	//List untuk SPJ Unit yang sudah di SPJ kan
+	function view_spj(){
+		$non_kw = array('UP','NHL','SAH','TUP');
+        $data['sifat_bayar']= $this->m_lov->get_list_lov(Constant::KAP_SIFAT_BAYAR);
+        
+        foreach($data['sifat_bayar'] as $key=>$val){
+            if(in_array($val->kode_value, $non_kw)){
+                unset($data['sifat_bayar'][$key]);
+            }
+            
+        }
+		$this->template->load('template','spj/view_spj',$data);
+		
+	}
+	
+	function get_view_spj() {
+		//$this->output->enable_profiler(TRUE);
+		$this->auth->restrict();
+        $jb = $this->input->post('jenisblj');
+        $data['jenis_belanja'] = $this->input->post('jenisblj');
+        $id_unit = $this->session->userdata('id_unit');
+		$id_spj = $this->input->post('id_spj');
+        
+        $bulan = date('m');
+        $ta = $this->m_settings->get_tahun_anggaran();
+        
+        $data['hasil']= $this->m_spj->list_view_spj($jb,$id_unit);
+        
+        $this->load->view('spj/list_view_spj',$data);
+	}
+	
+	function ajax_get_sptb(){
+		//$this->output->enable_profiler(TRUE);
+		$id_spj = $this->input->post('id_spj');
+		$jenis_belanja = $this->input->post('jenis_belanja');
+		
+		$result = $this->m_spj->view_list_sptb($id_spj);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Tanggal SPTB</th>
+					<th>No SPTB</th>
+					<th>MAK</th>
+					<th>Subunit</th>
+					<th>Jenis SPTJM</th>
+					<th>Status</th>
+					<th>Nominal</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			$str = "
+                <tr>
+                	<td align='center'>{$i}</td>
+					<td align='left'>". DATE('d-m-Y',strtotime($row->tgl_sptb)) ."</td>
+                    <td align='left'>{$row->no_sptb}</td>
+					<td align='left'>".$row->kdgiat.".".$row->kdoutput.".".$row->kdakun."</td>
+                    <td align='center'>{$row->nama_subunit}</td>
+                    <td align='left'>{$row->jenis_sptjm}</td>
+					<td align='center'>{$row->status_kwitansi}</td>		
+                    <td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>
+					<td align='center'>
+                    </td>				
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	}
+	
+	//List untuk Tampilan SPJ Unit yang untuk bagian Monev
+	function spj_pusat(){
+		$ta = $this->m_settings->get_tahun_anggaran();
+        $data['hasil']= $this->m_spj->view_list_pusat();
+		$this->template->load('template','spj/daftar_spj_pusat',$data);
+		
+	}
+	
+	function ajax_get_pusat(){
+		//$this->output->enable_profiler(TRUE);
+		$id_unit = $this->input->post('id_unit');
+		$result = $this->m_spj->view_list_data_pusat($id_unit);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Tanggal</th>
+					<th>No SPJ</th>
+					<th>Sifat Bayar</th>
+					<th>Status</th>
+					<th>Nominal</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			$str = "
+                <tr>
+                	<td align='center'>{$i}</td>
+					<td align='left'>". DATE('d-m-Y',strtotime($row->created_date)) ."</td>
+                    <td align='left'>{$row->no_spj}</td>
+					<td align='center'>{$row->sifat_bayar}</td>
+					<td align='center'>{$row->status_spj}</td>		
+                    <td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>
+                    </td>				
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	}
+	//tampilan SP2D di monev per Unit
+	function sp2d_pusat(){
+		$ta = $this->m_settings->get_tahun_anggaran();
+        $data['hasil']= $this->m_spj->view_list_sp2d();
+		$this->template->load('template','spj/list_sp2d_spj',$data);
+		
+	}
+	
+	function ajax_get_sp2d(){
+		//$this->output->enable_profiler(TRUE);
+		$id_unit = $this->input->post('id_unit');
+		$result = $this->m_spj->view_list_sp2d_pusat($id_unit);
+		
+		$table = "
+		  <table  class='table-common' style='margin: 0px; width: 100%;' >  
+		   <thead> 
+				<tr>
+					<th>No</th>
+					<th>Nomor SP2D</th>
+					<th>Tanggal</th>
+					<th>MAK</th>
+					<th>Sifat Bayar</th>
+					<th>Nominal</th>
+					<th>Aksi</th>
+				</tr>
+		  </thead>
+			   <tbody> 		
+		";
+		
+		$i = 1;
+		foreach($result as $row){
+			$str = "
+                <tr>
+                	<td align='center'>{$i}</td>
+					<td align='center'>{$row->no_sp2d}</td>
+					<td align='center'>". DATE('d-m-Y',strtotime($row->tgl_sp2d)) ."</td>
+					<td align='center'>".$row->kdoutput." ".$row->kdakun."</td>
+					<td align='center'>{$row->sifat_bayar}</td>
+                    <td align='right'>" . Formatting::currency($row->jumlah,0,false) . "</td>
+					<td align='center'><a href='".base_url()."sp2d/preview_sp2d/".$row->id_sp2d."/".$row->sifat_bayar."' 
+					title='Show SP2D' target='_blank'><img src='".base_url()."asset/images/preview.png'/><a></td>
+                    </td>				
+                </tr>
+        	";        
+			$i++;
+			$table .= $str;
+		}
+		
+		$table .= "</tbody>	</table>";
+		
+		echo $table;
+	}
+	
+}

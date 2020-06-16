@@ -1,0 +1,38 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-07-03 10:53:55 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 16:53:55 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 16:53:55 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 16:53:55 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 10:55:34 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 16:55:34 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 16:55:35 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 10:56:41 --> Severity: Notice  --> Undefined index: jenpen C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 412
+ERROR - 2013-07-03 10:56:41 --> Severity: Notice  --> Undefined index: akun C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 413
+ERROR - 2013-07-03 10:56:41 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 10:56:41 --> Severity: Notice  --> Undefined index: kredit C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 415
+ERROR - 2013-07-03 10:56:41 --> Severity: Notice  --> Undefined index: uraian C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 416
+ERROR - 2013-07-03 10:57:28 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 16:57:28 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 10:58:25 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 16:58:25 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 10:59:02 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 10:59:11 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 10:59:21 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 10:59:32 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 11:06:20 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 17:06:20 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 17:06:20 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 17:06:21 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 17:06:21 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 11:07:54 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 17:07:54 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 17:07:54 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 11:09:02 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 17:09:02 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 11:10:19 --> Severity: Notice  --> Undefined index: debet C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 414
+ERROR - 2013-07-03 17:10:19 --> Severity: Notice  --> Undefined variable: isDebet C:\xampp\htdocs\siaku\application\models\m_bukti_akuntansi.php 95
+ERROR - 2013-07-03 11:11:01 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 11:11:14 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 11:11:52 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692
+ERROR - 2013-07-03 11:12:03 --> Severity: Warning  --> Illegal string offset 'berhasil' C:\xampp\htdocs\siaku\application\controllers\bukti_akuntansi.php 692

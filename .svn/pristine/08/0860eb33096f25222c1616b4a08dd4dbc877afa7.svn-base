@@ -1,0 +1,123 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.status.value == "setuju_verifikasi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  }
+  if (form.status.value == "terotorisasi_kaprodi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  } 
+  return (true);
+  }
+</script>
+
+<article class="module width_full">
+            <header><h3>Daftar SPM UP (Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status Dokumen</th>
+                <th>Status SPM</th>    
+                <th colspan="4">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            if($jum_daftar_spm > 0){
+                
+            
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th_spm=$row['th_spm'];
+            //$nomor=$row['nomor_spm']; 
+            $nama_unit=$row['nama_unit'];   
+            $status_spm=$row['status_spm'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");
+            
+            $nmr=$row['no_spm']; 
+            $tahun=$row['th_spm']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat']; 
+            $jumlah=$row['jumlah'];
+            $uang = $this->uang->angka($jumlah); 
+            $thn = '20'.$tahun;   
+            $nomor= sprintf("%04d", $nmr);    
+            ?> 
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$thn";?></td>
+                <td align="center"><?php echo"$uang";?></td>
+                <?php if($dokumen>0){ ?>
+                    <td align="center" style="background-color:#99ff33"><?php echo"kelengkapan sudah dicek";?></td>
+                <?php }else{ ?>
+                    <td align="center"><?php echo"kelengkapan belum dicek";?></td>
+                <?php } ?>
+                
+                <?php if($status_spm =="terotorisasi dekan"){?>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <td align="center"><a href='<?php echo base_url()."unit/veri/".$th_spm."/".$id;?>' title='Cek Kelengkapan Dokumen' ><img src='<?php echo base_url();?>asset/images/edit.png'></a></td>
+                   
+                <?php if($dokumen>0){ ?>
+                    <?php if($ada_belom_dicentang){ ?>
+                    <td align="center"><a href='#' title='Print Cek Kelengkapan' onclick="return alert('Kelengkapan masih ada yg kurang')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                    <?php }else{ ?>
+                    <td align="center"><a href='<?php echo base_url()."unit/print_bukti_penerimaan/".$th_spm."/".$id;?>' title='Print Cek Kelengkapan' ><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                    <?php } ?>
+                <?php }else{ ?>
+                    <td align="center"><a href='#' title='Print Cek Kelengkapan' onclick="return alert('SPM ini belum dicek')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <?php } ?>
+                    
+                <td align="center"><a href='<?php echo base_url()."unit/revisi_kelengkapan_penerima/".$th_spm."/".$id;?>' title='Revisi ke unit'  onclick="return confirm('Apakah anda yakin ingin mengembalikan SPM ini ke Unit?')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='<?php echo base_url()."unit/setuju_spm_pen/".$th_spm."/".$id;?>' title='Kirim ke Verifikator' onclick="return confirm('Apakah anda yakin ingin mengirim SPM ini ke Verifikator Pusat?')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                <?php }elseif($status_spm =="diajukan") {?>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <td align="center"><a href='#' title='Cek Kelengkapan Dokumen'  onclick="return alert('belum siap diperiksa ')"><img src='<?php echo base_url();?>asset/images/edit.png'></a></td>
+                <td align="center"><a href='#' title='Print Cek Kelengkapan' onclick="return alert('SPM ini belum dicek')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' onclick="return alert('Maaf SPM ini sudah dikirim ke Verifikator')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='#' title='Kirim ke Verifikator' onclick="return alert('Maaf SPM ini sudah dikirim ke Verifikator sebelumnya')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+               
+                <?php }elseif($status_spm =="Kelengkapan kurang") {?>
+                <td align="center" style="background-color:#F75D59"><?php echo"$status_spm";?></td>
+                <td align="center"> <a href='#' onclick="return alert('Maaf SPM ini sedang direvisi')"> <img src='<?php echo base_url();?>asset/images/edit.png'></a></td>
+                <td align="center"><a href='#' title='Print Cek Kelengkapan' onclick="return alert('SPM ini belum dicek')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                 <td align="center"><a href='#' title='Revisi ke unit' onclick="return alert('Maaf SPM ini sudah dikirim ke Verifikator Unit')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='#' title='Kirim ke Verifikator' onclick="return alert('Maaf SPM ini sedang direvisi')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+                
+                <?php }else {?>
+                <td align="center" style="background-color:#99ff33"><?php echo"$status_spm";?></td>
+                <td align="center"> <a href='#' onclick="return alert('Maaf SPM ini sudah dikirim ke Verifikator Unit')"> <img src='<?php echo base_url();?>asset/images/edit.png'></a></td>
+                <td align="center"><a href='#' title='Print Cek Kelengkapan' onclick="return alert('Formulir Kelengkapan untuk SPM ini sudah di print')"><img src='<?php echo base_url();?>asset/images/print.png'></a></td>
+                <td align="center"><a href='#' title='Revisi ke unit' onclick="return alert('Maaf SPM ini sudah dikirim ke Verifikator Unit')"><img src='<?php echo base_url();?>asset/images/back.png'></a></td>
+                <td align="center"><a href='#' title='Kirim ke Verifikator' onclick="return alert('Maaf SPM ini sudah dikirim ke Verifikator sebelumnya')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+            
+            <?php } $no++ ?>
+            <?php } ?>
+              </tr>
+       
+            <?php }else{?>
+                 <tr>
+                <td align='center' colspan="8" style="padding-bottom: 15px; padding-top: 15px;">Data Kosong</td>
+                </tr>
+            <?php } ?>
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer> 
+</article>

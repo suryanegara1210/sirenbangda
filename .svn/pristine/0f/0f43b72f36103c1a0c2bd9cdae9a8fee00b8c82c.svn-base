@@ -1,0 +1,28 @@
+<?php
+
+class Home extends CI_Controller {
+
+    public function __construct()
+	{
+		$this->CI =& get_instance();
+		parent::__construct();
+		$this->load->helper('url');
+		$this->load->model(array('m_umum', 'guest/m_home'));
+	}
+
+	function index(){
+		$data['active_menu'] = "dashboard";
+		$data['slider']=$this->m_umum->get_slider();
+		$schedule = $this->m_home->get_schedule_all();
+		$data['schedule'] = json_encode($schedule);		
+		$this->template->load('guest/template', 'guest/home', $data);
+	}
+
+	function get_det_schedule(){
+		$id = $this->input->post("id");
+		$schedule = $this->m_home->get_schedule_one($id);
+		echo json_encode($schedule);
+	}	
+
+}
+?>

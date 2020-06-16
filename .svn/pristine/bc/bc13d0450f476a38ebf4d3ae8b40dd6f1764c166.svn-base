@@ -1,0 +1,157 @@
+<div class="module_content">
+ 	<table class="fcari" width="100%">
+		<tbody>
+			<tr>
+ 				<td width="20%">SKPD</td>
+ 				<td width="80%"></td>
+			</tr>
+ 			<tr>
+ 				<td width="20%">Tujuan</td>
+ 				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Program</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Kode Urusan</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Kode Bidang</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Kode Program</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Kode Kegiatan</td>
+				<td><input class="common" type="text" name="tujuan"/></td>
+			</tr>
+			<tr>
+				<td width="20%">Nama Kegiatan</td>
+				<td width="80%"></td>
+			</tr>
+			<tr>
+				<td width="20%">Indikator Kerja</td>
+				<td>
+					<textarea class="common" name="indikator"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td width="20%">Kondisi Awal</td>
+				<td><input class="common" type="text" name="tujuan"/></td>
+			</tr>
+			<tr>
+				<td width="20%">Satuan Target</td>
+				<td><select name="satuan"></select></td>
+			</tr>		
+			<tr style="background-color: white;">
+				<td></td>
+				<td><hr></td>
+				</tr>					
+				<tr>
+					<td>&nbsp;&nbsp;Target Tahun 1</td>
+					<td><input type="text" name="target_tahun_1"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Nominal Tahun 1</td>
+					<td>Rp. <input type="text" name="nominal_tahun_1"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Uraian Kegiatan</td>
+				<td>
+					<textarea class="common" name="uraian_1"></textarea>
+				</td>
+			</tr>
+			<tr style="background-color: white;">
+				<td></td>
+				<td><hr></td>
+				</tr>					
+				<tr>
+					<td>&nbsp;&nbsp;Target Tahun 2</td>
+					<td><input type="text" name="target_tahun_2"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Nominal Tahun 2</td>
+					<td>Rp. <input type="text" name="nominal_tahun_2"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Uraian Kegiatan</td>
+				<td>
+					<textarea class="common" name="uraian_2"></textarea>
+				</td>
+				<tr style="background-color: white;">
+				<td></td>
+				<td><hr></td>
+				</tr>					
+				<tr>
+					<td>&nbsp;&nbsp;Target Tahun 3</td>
+					<td><input type="text" name="target_tahun_3"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Nominal 1</td>
+					<td>Rp. <input type="text" name="nominal_tahun_3"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Uraian Kegiatan</td>
+				<td>
+					<textarea class="common" name="uraian_3"></textarea>
+				</td>
+				<tr style="background-color: white;">
+				<td></td>
+				<td><hr></td>
+				</tr>					
+				<tr>
+					<td>&nbsp;&nbsp;Target Tahun 4</td>
+					<td><input type="text" name="target_tahun_4"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Nominal 1</td>
+					<td>Rp. <input type="text" name="nominal_tahun_4"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Uraian Kegiatan</td>
+				<td>
+					<textarea class="common" name="uraian_4"></textarea>
+				</td>
+				<tr style="background-color: white;">
+				<td></td>
+				<td><hr></td>
+				</tr>					
+				<tr>
+					<td>&nbsp;&nbsp;Target Tahun 5</td>
+					<td><input type="text" name="target_tahun_5"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Nominal 5</td>
+					<td>Rp. <input type="text" name="nominal_tahun_5"</td>
+				</tr>
+				<tr>
+					<td>&nbsp;&nbsp;Uraian Kegiatan</td>
+				<td>
+					<textarea class="common" name="uraian_5"></textarea>
+				</td>
+			<tr>
+				<td width="20%">Target KOndisi Akhir</td>
+				<td><input class="common" type="text" name="tujuan"/></td>
+			</tr>
+			<tr>
+				<td width="20%">Penangun Jawab</td>
+				<td><input class="common" type="text" name="tujuan"/></td>
+			</tr>
+			<tr>
+				<td width="20%">Lokasi</td>
+				<td><input class="common" type="text" name="tujuan"/></td>
+			</tr>
+ 		</tbody>
+ 	</table>
+	<footer>
+		<div class="submit_link">  
+			<input type='button' id="simpan" name="simpan" value='Simpan' />
+			<input type="button" value="Keluar" onclick="window.location.href='<?php echo site_url('renstra'); ?>'" />
+		</div> 
+	</footer>		
+ </div>
+ 

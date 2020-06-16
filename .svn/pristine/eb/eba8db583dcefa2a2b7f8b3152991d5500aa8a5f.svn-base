@@ -1,0 +1,57 @@
+<?php include('rincian_header.php'); ?>
+
+</br>
+<table class="form-honor-cetak list" width="100%" border="1">
+	<thead>
+  		<tr>
+  		  <th width="25px">No</th>
+        <th>Nama Dosen</th>
+        <th width="60px">Golongan</th>
+        <th width="60px">Kode MK</th>
+        <th width="120px">Mata Kuliah</th>
+        <th width="60px">Jumlah Peserta</th>
+        <th width="80px">Tarif / Peserta </th>
+        <th width="110px">Jumlah Honor Bruto</th>
+        <th width="80px">PPH</th>
+        <th width="110px">Jumlah Honor Diterima</th>
+        <th width="150px">Tanda Tangan</th>
+    </thead>
+    <tbody>
+<?php if($hasil ==""){
+	 echo "<tr><td colspan='11' align='center'><strong>Data Belum Terisikan..</strong></td></tr>";
+	 }else{
+     $i=0;
+   $grand_total=0;
+   $grand_pph=0;
+   $grand_terima=0;
+	 foreach($hasil->result() as $row) : $i++;?>
+    <tr>
+        <td class='txt-center'><?php echo $i ?></td>
+        <td ><?php echo $row->nama; ?></td>        
+        <td class="txt-center"><?php echo $row->golongan; ?></td>
+        <td class="txt-center"><?php echo $row->kd_mk; ?></td>
+        <td ><?php echo $row->m_kul; ?></td>        
+        <td class="txt-center"><?php echo $row->volume; ?></td>
+        <td class="txt-right"><?php echo $this->uang->angka($row->satuan); ?></td>
+        <td class="txt-right"><?php echo $this->uang->angka($row->subtotal); ?></td>
+        <td class="txt-right"><?php echo $this->uang->angka($row->pph_honor);?></td>
+        <td class="txt-right"><?php echo $this->uang->angka($row->subtotal - $row->pph_honor); ?></td>
+        <td class="ttd">........................</td>
+     </tr>
+<?php 
+    $grand_total += $row->subtotal;
+    $grand_pph   += $row->pph_honor;
+    $grand_terima+= ($row->subtotal - $row->pph_honor);
+    endforeach; }?>
+    <tr>
+      <td class="txt-center" colspan="7">Jumlah</td>
+      <td align="right"><?php echo $this->uang->angka($grand_total);?></td>
+      <td align="right"><?php echo $this->uang->angka($grand_pph);?></td>
+      <td align="right"><?php echo $this->uang->angka($grand_terima);?></td>
+      <td>&nbsp;</td>
+    </tr>
+
+    </tbody>
+</table>
+
+<?php include('rincian_footer.php'); ?>

@@ -1,0 +1,82 @@
+<table border='0' width='100%'>   
+ <tr ><td align="center"><strong>SURAT PERNYATAAN (TUP)</strong></td></tr>
+</table>
+<br><br>
+<table border='0' >
+  <tr>
+    <td align="left">Yang bertanda tangan di bawah ini </td>
+    <td>:</td>
+    <td></td>
+  </tr>
+</table>
+ <?php foreach($unit->result_array() as $row){
+     $nama_unit=$row['nama_unit'];     
+     $nm_kajur=$row['dekan_nama'];     
+     $nip_kajur=$row['dekan_nip'];   
+ ?>
+ <br>
+<table> 
+  <tr>
+    <td align="left">N  a  m  a </td>
+    <td>:</td>
+    <td><?php echo"$nm_kajur"; ?></td>
+  </tr>
+  <tr>
+    <td align="left">N I P</td>
+    <td>:</td>
+    <td><?php echo "$nip_kajur"; ?></td>
+  </tr>  
+  <tr>
+    <td align="left">Jabatan </td>
+    <td>:</td>       
+    <td>Dekan <?php echo $nama_unit;?>  </td><br>  
+    
+  </tr>
+</table>
+<table> 
+  <tr>
+    <td align="left">menyatakan dengan sebenarnya bahwa jumlah Uang Persediaan tersebut tidak akan dipergunakan untuk membiayai pengeluaran-pengeluaran yang menurut ketentuan harus dengan cara Langsung (LS).</td>
+    </tr>                  
+</table>
+<br>
+
+<br>
+<table>
+    <tr>  
+        <td>Demikian surat pernyataan ini dibuat dengan sebenarnya untuk dapat
+        dipergunakan sebagaimana mestinya.
+        </td> 
+    </tr>
+</table>
+<br><br><br>
+<?php $tgl_s= date("d-m-Y");?> 
+            <table width="100%">
+                <tr>
+                    <td width="40%"></td> 
+                    <td width="20%"></td>
+                    <td width="40%">Bukit, <?php echo "$tgl_s";?> </td>   
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Ketua Pelaksana Kegiatan, </td>
+                </tr>
+
+                <tr height="40px"><td><br><br><br></td> </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td><?php echo"$nm_kajur"; ?></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>NIP. <?php echo "$nip_kajur"; ?></td>
+                </tr>
+            </table>
+
+<table>
+<?php  
+ }
+?>
+

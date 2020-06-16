@@ -1,0 +1,105 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');?>
+	<link href="<?php echo base_url('asset/css/js-image-slider.css');?>" rel="stylesheet" type="text/css" />
+    <script src="<?php echo base_url('asset/js/js-image-slider.js');?>" type="text/javascript"></script>
+    <link href="<?php echo base_url('asset/css/tooltip.css');?>" rel="stylesheet" type="text/css" />
+    <script src="<?php echo base_url('asset/js/tooltip.js');?>" type="text/javascript"></script>
+    <script src="<?php echo base_url('asset/chart/Chart.js'); ?>"></script>
+
+<script> 
+    //var belum, spj, sp2d, saldo;
+    <?php
+    /*$belum=0;
+    $spj=0;
+    $sp2d=0;
+    $total=0;
+    foreach ($data as $row) {
+        if (empty($row->nominal)) {
+            $row->nominal=0;
+        }; 
+        
+        if ($row->flag=='belum') {
+            $total=$total+$row->nominal;
+            $belum=$row->nominal;
+        }elseif ($row->flag=='sp2d') {
+            $total=$total+$row->nominal;
+            $sp2d=$row->nominal;    
+        }elseif ($row->flag=='spj') {
+            $total=$total+$row->nominal;
+            $spj=$row->nominal;
+        }elseif ($row->flag=='pr') {
+            $pagu_real=$row->nominal;
+        }elseif ($row->flag=='pok') {
+            $pok=$row->nominal;
+        };
+    }
+
+    $saldo=$pagu_real-$total;
+    $persen_belum=round(($belum/$pagu_real)*100, 2);
+    $persen_spj=round(($spj/$pagu_real)*100, 2);
+    $persen_sp2d=round(($sp2d/$pagu_real)*100, 2);
+    $persen_saldo=100-$persen_belum-$persen_spj-$persen_sp2d;
+    */?>
+
+    /*belum=<?php //echo $persen_belum; ?>;
+    spj=<?php //echo $persen_spj; ?>;
+    sp2d=<?php //echo $persen_sp2d; ?>;
+    saldo=<?php //echo $persen_saldo; ?>;
+    var pieData = [        
+        {
+            value: sp2d,
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Sudah SP2D"
+        },
+        {
+            value: spj,
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: "Sedang SPJ"
+        },        
+        {
+            value: belum,
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "Belum SPJ dan SP2D"
+        },        
+        {
+            value: saldo,
+            color:"#949FB1",
+            highlight: "#A8B3C5",
+            label: "Saldo"
+        }
+    ];
+
+    window.onload = function(){
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myPie = new Chart(ctx).Pie(pieData);
+    };  */      
+</script>
+
+<article class="module width_full">
+	<header>
+  		<h3>HOME <?php echo $this->session->userdata('nama_unit'); ?></h3>
+  	</header>
+  	<div class="module_content">
+    <table border="0" width="100%">
+        <tr>
+        	<td width="610px">
+            <div id="slider">
+                <?php
+                    $i=0; 
+                    foreach ($slider as $row) { $i++;
+                ?>
+                <img src="<?php echo base_url($row->link);?>" alt="<?php echo $row->ket;?>" />
+                <?php } ?>
+            </div>
+            </td>
+            <td>
+            <div style="padding-top:10px">
+            
+            </div>
+            </td>
+        </tr>
+     </table>
+    </div>
+</article>

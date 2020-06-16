@@ -1,0 +1,19 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-05-21 04:47:32 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 04:47:32 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 04:47:32 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 04:47:33 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 05:10:06 --> Severity: Notice  --> Undefined variable: nilai_sp2d_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 246
+ERROR - 2013-05-21 05:33:30 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 05:33:30 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 05:33:30 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 05:33:30 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 05:37:18 --> Severity: Notice  --> Undefined variable: isi_tender C:\xampp\htdocs\siaku\application\views\dpt\view_dpt.php 79
+ERROR - 2013-05-21 05:37:18 --> Severity: Warning  --> Invalid argument supplied for foreach() C:\xampp\htdocs\siaku\application\views\dpt\view_dpt.php 79
+ERROR - 2013-05-21 10:20:47 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 10:20:47 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 10:20:47 --> Severity: Notice  --> Undefined variable: row C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 10:20:47 --> Severity: Notice  --> Trying to get property of non-object C:\xampp\htdocs\siaku\application\views\dpt\daftar_dpt2.php 86
+ERROR - 2013-05-21 11:47:12 --> Severity: Notice  --> Undefined variable: nilai_sp2d_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 246
+ERROR - 2013-05-21 11:47:13 --> Severity: Notice  --> Undefined variable: nilai_sp2d_up C:\xampp\htdocs\siaku\application\controllers\usulan.php 246

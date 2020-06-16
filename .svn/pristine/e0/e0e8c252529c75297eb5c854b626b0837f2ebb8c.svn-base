@@ -1,0 +1,12 @@
+<?php foreach($hasil->result() as $row)
+   {
+      ?>
+      <tr>
+         <td>
+		 <input name='pph' type='' value='<?php echo $row->pph;?>' size="25" id="pph" disabled="disabled" />
+		 </td>
+         </td>
+      </tr>
+      <?php }
+   ?>
+

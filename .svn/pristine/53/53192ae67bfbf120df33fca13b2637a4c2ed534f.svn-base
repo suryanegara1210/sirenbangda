@@ -1,0 +1,864 @@
+<?php /**
+    * @brief Model Class yang terkait dengan Pembuatan Laporan Akuntansi
+    * Jurnal dan Buku Besar
+    *
+    * Class Model ini untuk mengelola proses pembuatan Laporan Akuntansi
+    * Jurnal dan Buku Besar
+    *
+    * @author I Wayan Shandyasa
+    * @author Putu Praba Santika
+    */
+class M_Report extends CI_Model {
+
+	public function __construct()
+	{
+		parent::__construct();
+	}
+	/**
+	* Fungsi pengumuman TUP
+	* @return query array data pengumuman    
+	*/
+	function bukti_daftar_ambil($bulan,$bulan2,$tahun,$id_unit=null, $jenis_bukti){
+        if ($jenis_bukti != 'SEMUA') {
+            $where_jen_bukti = "AND t_bukti_akuntansi.jenis_bukti = '$jenis_bukti'";
+        }
+        else
+        {
+            $where_jen_bukti ="";
+        }
+        $sql_atas="
+            SELECT * 
+            FROM t_bukti_det 
+            INNER JOIN t_bukti_akuntansi
+            ON t_bukti_det.`id_bukti` = t_bukti_akuntansi.`id_bukti`
+            INNER JOIN m_bas
+            ON t_bukti_det.`akun_bas` = m_bas.`akun_kode`
+            WHERE YEAR( t_bukti_akuntansi.tgl_bukti)='$tahun' 
+                AND MONTH( t_bukti_akuntansi.tgl_bukti)>='$bulan' 
+                AND MONTH( t_bukti_akuntansi.tgl_bukti)<='$bulan2' 
+                AND t_bukti_akuntansi.`status`='DITERIMA' 
+                ". $where_jen_bukti ."
+        ";
+        $sql_id_unit="AND t_bukti_akuntansi.id_subunit IN (SELECT id_subunit FROM m_subunit where id_unit='$id_unit')";
+        $sql_bawah="
+            AND t_bukti_akuntansi.`status_posting`='0'
+            ORDER BY t_bukti_akuntansi.tgl_bukti asc,t_bukti_akuntansi.id_bukti,debet desc
+        ";
+        if(!is_null($id_unit) && $id_unit!='-1'){
+            $sql=$sql_atas.$sql_id_unit.$sql_bawah;
+        }else{
+            $sql=$sql_atas.$sql_bawah;
+        }
+		$qf=$this->db->query($sql);
+		return $qf->result();
+	}
+    
+    function ada_ls_sp2d_blm_cair($id_unit){
+        $this->db->from('t_kwitansi');
+        $this->db->join('t_sp2d','t_kwitansi.id_sp2d=t_sp2d.id_sp2d');
+        $this->db->where('t_kwitansi.sifat_bayar', constant::JB_LS);
+        $this->db->where('t_sp2d.id_status_sp2d !=', constant::SP2D_DICAIRKAN);
+        //$this->db->where("t_kwitansi.id_subunit IN (SELECT id_subunit FROM m_subunit where id_unit='$id_unit')",null,false);
+        if($id_unit!='-1'){
+            $this->db->where('id_unit',$id_unit);
+        }
+        $query=$this->db->get();
+        if ($query->num_rows()>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    function ada_gup_blm_otor_kaprodi($id_unit){
+        $this->db->from('t_kwitansi');
+        $this->db->where('t_kwitansi.sifat_bayar', constant::JB_GUP);
+        //FIXME: oto kaprodi brp kodenya?
+        $this->db->where('t_kwitansi.id_status_kwitansi', constant::KWITANSI_OK);
+        if($id_unit!='-1'){
+            $this->db->where('id_unit',$id_unit);
+        }
+        $query=$this->db->get();
+        if ($query->num_rows()>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+	
+	function daftar_jurnal($bulan,$bulan2,$tahun,$jenis_bukti){
+        if ($jenis_bukti != 'SEMUA') {
+            $where_jen_bukti = "AND t_bukti_akuntansi.jenis_bukti = '$jenis_bukti'";
+        }
+        else
+        {
+            $where_jen_bukti ="";
+        }
+
+		$qf=$this->db->query("
+					SELECT * 
+					FROM t_bukti_det 
+					INNER JOIN t_bukti_akuntansi
+					ON t_bukti_det.`id_bukti` = t_bukti_akuntansi.`id_bukti`
+					INNER JOIN m_bas
+					ON t_bukti_det.`akun_bas` = m_bas.`akun_kode`
+					WHERE t_bukti_akuntansi.tahun_anggaran='$tahun' 
+					AND MONTH( t_bukti_akuntansi.tgl_bukti)>='$bulan' 
+                    AND MONTH( t_bukti_akuntansi.tgl_bukti)<='$bulan2' 
+					AND t_bukti_akuntansi.`status`='DITERIMA'
+                    ". $where_jen_bukti ."
+					ORDER BY t_bukti_akuntansi.tgl_bukti asc,t_bukti_akuntansi.id_bukti,debet desc 
+				");
+		return $qf->result();
+	}
+	
+	function ambil_akun(){
+            $qf=$this->db->query("
+				SELECT DISTINCT akun_kode, CONCAT(akun_kode, ' - ', akun_nama) AS nmakun
+            	FROM m_bas
+            	WHERE SUBSTRING(akun_kode,7,6)
+			");
+			        
+            foreach ($qf->result() as $row){
+                $result['']= '-- Semua Akun  --';
+                $result[$row->akun_kode]= $row->nmakun;
+            }
+            return $result;
+    }
+	
+	function simpan_jurnal($bulan,$bulan2,$tahun,$jenis_bukti,$id_unit,$id_bb){
+        if ($jenis_bukti != 'SEMUA') {
+            $where_jen_bukti = "AND a.jenis_bukti = '$jenis_bukti'";
+        }
+        else
+        {
+            $where_jen_bukti ="";
+        }
+
+        if(!empty($id_unit) && $id_unit!='-1'){
+            $where_unit ="AND a.id_subunit IN (SELECT id_subunit FROM m_subunit where id_unit='$id_unit')";
+        }else{
+            $where_unit ="";
+        }
+
+		$nowFormat = date('Y-m-d H:i:s');
+		$qf=$this->db->query("
+					INSERT INTO
+						t_jurnal(`id_bukti`,`no_bukti`,`jenis`,`akun_bas`,`id_subunit`,`keterangan`,
+						`debet`,`kredit`,`tgl_buku`,`tgl_transaksi`,`created_by`,`created_date`,
+						`changed_by`,`changed_date`,`id_buku_besar`)
+					SELECT a.id_bukti, a.no_bukti,
+						a.jenis_bukti, b.akun_bas, a.id_subunit, b.uraian,
+						b.debet, b.kredit, '$nowFormat', 
+						a.tgl_bukti, a.created_by, a.created_date,
+						a.changed_by, a.changed_date, '$id_bb'
+					FROM t_bukti_akuntansi a JOIN t_bukti_det b 
+					ON a.id_bukti = b.id_bukti
+					WHERE YEAR( a.tgl_bukti)='$tahun' 
+					AND MONTH( a.tgl_bukti)>='$bulan' 
+                    AND MONTH( a.tgl_bukti)<='$bulan2' 
+                    AND a.`status`='DITERIMA' 
+					AND a.`status_posting`='0'
+                    ". $where_unit ." 
+                    ". $where_jen_bukti ."
+					");
+					//return $qf;
+	}
+
+    function simpan_det_bb($bulan,$bulan2,$tahun,$jenis_bukti,$id_unit,$id_bb){
+        if ($jenis_bukti != 'SEMUA') {
+            $where_jen_bukti = "AND a.jenis_bukti = '$jenis_bukti'";
+        }
+        else
+        {
+            $where_jen_bukti ="";
+        }
+
+        if(!empty($id_unit) && $id_unit!='-1'){
+            $where_unit ="AND a.id_subunit IN (SELECT id_subunit FROM m_subunit where id_unit='$id_unit')";
+        }else{
+            $where_unit ="";
+        }
+
+        $nowFormat = date('Y-m-d H:i:s');
+        $qf=$this->db->query("
+                    INSERT INTO
+                        t_det_buku_besar(`id_buku_besar`,`akun_kode`,`saldo`)
+                    SELECT 
+                        '$id_bb',
+                        akun_bas, 
+                        (IF(t_det_buku_besar.saldo IS NOT NULL, t_det_buku_besar.saldo, 0)+vw1.saldo) AS saldo 
+                    FROM (
+                        SELECT 
+                            akun_bas, 
+                            SUM(IF(debet IS NOT NULL, debet, 0)-IF(kredit IS NOT NULL, kredit, 0)) AS saldo 
+                        FROM t_bukti_akuntansi a 
+                        JOIN t_bukti_det b ON a.id_bukti = b.id_bukti 
+                        WHERE 
+                            YEAR( a.tgl_bukti)='$tahun' 
+                            AND MONTH( a.tgl_bukti)>='$bulan' 
+                            AND MONTH( a.tgl_bukti)<='$bulan2' 
+                            AND a.`status`='DITERIMA' 
+                            AND a.`status_posting`='0'
+                            ". $where_unit ." 
+                            ". $where_jen_bukti ." 
+                        GROUP BY akun_bas
+                    ) vw1 LEFT JOIN t_det_buku_besar ON vw1.akun_bas=t_det_buku_besar.akun_kode                    
+                    ");
+                    //return $qf;
+    }
+
+    function simpan_bb($saldo,$ta,$bw,$bh,$cmt){
+        $nowFormat = date('Y-m-d H:i:s');
+        $qf=$this->db->query("
+                    INSERT INTO
+                        t_buku_besar(`saldo`,`tgl_posting`,`tahun_anggaran`,`bulan_awal`,`bulan_akhir`,`comment`)
+                    VALUES
+                        ('$saldo','$nowFormat','$ta','$bw','$bh','$cmt')
+                    ");
+        return $this->db->insert_id();
+    }
+
+    function get_saldo_awal($ta){
+        $qf=$this->db->query("
+                    SELECT 
+                        saldo
+                    FROM 
+                        t_buku_besar
+                    WHERE 
+                        tahun_anggaran='". $ta ."'
+                    ORDER BY 
+                        tgl_posting DESC
+                    LIMIT 0,1
+                ");
+        $result=$qf->row();
+        if (!empty($result)) {
+            $result=$result->saldo;
+        }else{
+            $result=0;
+        }
+        return $result;
+    }
+    
+    function get_saldo_awal_list($tgl_posting, $ta){
+        $qf=$this->db->query("
+                    SELECT 
+                        saldo
+                    FROM 
+                        t_buku_besar
+                    WHERE 
+                        tgl_posting < '$tgl_posting'
+                        AND tahun_anggaran = '$ta'
+                    ORDER BY 
+                        tgl_posting DESC
+                    LIMIT 0,1
+                ");
+        $result=$qf->row();
+        if (!empty($result)) {
+            $result=$result->saldo;
+        }else{
+            $result=0;
+        }
+        return $result;
+    }
+    
+    function get_saldo_awal_list_per_akun($akun_kode, $tgl_posting, $ta){
+        $qf=$this->db->query("
+                    SELECT 
+                        t_det_buku_besar.saldo 
+                    FROM 
+                        t_buku_besar 
+                    INNER JOIN 
+                        t_det_buku_besar ON t_buku_besar.id_buku_besar=t_det_buku_besar.id_buku_besar 
+                    WHERE 
+                        akun_kode='$akun_kode' 
+                        AND tgl_posting < '$tgl_posting' 
+                        AND tahun_anggaran = '$ta' 
+                    ORDER BY 
+                        tgl_posting DESC 
+                    LIMIT 0,1                    
+                ");
+        $result=$qf->row();
+        if (!empty($result)) {
+            $result=$result->saldo;
+        }else{
+            $result=0;
+        }
+        return $result;
+    }
+
+    function get_saldo_awal_by_year($tahun){
+        $tahun=$tahun-1;
+        $qf=$this->db->query("
+                    SELECT 
+                        saldo
+                    FROM 
+                        t_buku_besar
+                    WHERE 
+                        tahun_anggaran = '$tahun'
+                    ORDER BY 
+                        tgl_posting DESC
+                    LIMIT 0,1
+                ");
+        $result=$qf->row();
+        if (!empty($result)) {
+            $result=$result->saldo;
+        }else{
+            $result=0;
+        }
+        return $result;
+    }
+	
+	function update_status_posting($bulan,$bulan2,$tahun,$jenis_bukti,$id_unit,$id_bb){
+        if ($jenis_bukti != 'SEMUA') {
+            $where_jen_bukti = "AND t_bukti_akuntansi.jenis_bukti = '$jenis_bukti'";
+        }
+        else
+        {
+            $where_jen_bukti ="";
+        }
+
+        if(!empty($id_unit) && $id_unit!='-1'){
+            $where_unit ="AND t_bukti_akuntansi.id_subunit IN (SELECT id_subunit FROM m_subunit where id_unit='$id_unit')";
+        }else{
+            $where_unit ="";
+        }
+
+		$nowFormat = date('Y-m-d H:i:s');
+		$qf=$this->db->query("
+					UPDATE t_bukti_akuntansi
+						SET status_posting='1', 
+						tgl_posting='$nowFormat', 
+                        id_buku_besar='$id_bb'
+					WHERE 
+					t_bukti_akuntansi.tahun_anggaran='$tahun' 
+                    AND MONTH( t_bukti_akuntansi.tgl_bukti)>='$bulan' 
+					AND MONTH( t_bukti_akuntansi.tgl_bukti)<='$bulan2' 
+                    AND t_bukti_akuntansi.`status`='DITERIMA' 
+					AND t_bukti_akuntansi.status_posting='0' 
+                    ". $where_jen_bukti ." 
+                    ". $where_unit ."
+					");
+		
+	} 
+
+	function id_jurnal(){
+		$this->db->select('id_jurnal');
+		$this->db->distinct();
+		$this->db->from('t_jurnal');
+		$result = $this->db->get();    
+		return $result->row();
+	}
+	
+    function update_status_posting_bb($bulan,$bulan2,$tahun,$akun_kode,$id_buku_besar){
+        if (!is_null($akun_kode)) {
+            $where = "AND t_jurnal.`akun_bas` LIKE '$akun_kode%'";
+        }
+        else
+        {
+            $where ="";
+        }
+
+        $nowFormat = date('Y-m-d H:i:s');
+        $qf=$this->db->query("
+                    UPDATE t_jurnal
+                        SET id_buku_besar='$id_buku_besar', 
+                        tgl_posting='$nowFormat'
+                    WHERE 
+                        YEAR( t_jurnal.tgl_buku)='$tahun'
+                        AND MONTH( t_jurnal.tgl_buku)>='$bulan'
+                        AND MONTH( t_jurnal.tgl_buku)<='$bulan2'
+                        AND (t_jurnal.`id_buku_besar` IS NULL OR t_jurnal.`id_buku_besar`=0) 
+                        ". $where ."
+                    ");
+        
+    } 
+
+	function jurnal_daftar_ambil($bulan,$bulan2,$tahun,$akun_kode){
+		$qf=$this->db->query("
+					SELECT t_jurnal.*, t_jurnal.`keterangan` AS ket
+					FROM m_bas
+					INNER JOIN t_jurnal
+					ON t_jurnal.`akun_bas` = m_bas.`akun_kode`
+					WHERE YEAR( t_jurnal.tgl_buku)='$tahun'
+					AND MONTH( t_jurnal.tgl_buku)>='$bulan'
+                    AND MONTH( t_jurnal.tgl_buku)<='$bulan2'
+					AND t_jurnal.`akun_bas` LIKE '$akun_kode%' 
+                    AND (t_jurnal.`id_buku_besar` IS NULL OR t_jurnal.`id_buku_besar`=0)
+					ORDER BY tgl_buku ASC, t_jurnal.debet desc
+				");
+		return $qf->result();
+	}
+
+    function bb_semua_akun($bulan,$bulan2,$tahun){
+        $qf=$this->db->query("
+                    SELECT 
+                        id_jurnal,
+                        id_bukti,
+                        no_bukti,
+                        jenis,
+                        akun_bas,
+                        t_jurnal.id_subunit,
+                        referensi,
+                        SUM(debet) AS debet,
+                        SUM(kredit) AS kredit,
+                        tgl_buku,
+                        tgl_transaksi,
+                        created_by,
+                        created_date,
+                        changed_by,
+                        changed_date,
+                        tgl_posting,
+                        t_jurnal.`keterangan` AS ket,
+                        m_bas.akun_nama 
+                    FROM 
+                        m_bas
+                    INNER JOIN 
+                        t_jurnal ON t_jurnal.`akun_bas` = m_bas.`akun_kode` 
+                    WHERE 
+                        YEAR( t_jurnal.tgl_buku)='$tahun'
+                        AND MONTH( t_jurnal.tgl_transaksi)>='$bulan'
+                        AND MONTH( t_jurnal.tgl_transaksi)<='$bulan2'
+                        AND (t_jurnal.`id_buku_besar` IS NULL OR t_jurnal.`id_buku_besar`=0)
+                    GROUP BY 
+                        t_jurnal.akun_bas 
+                    ORDER BY 
+                        t_jurnal.akun_bas ASC
+                ");
+        return $qf->result();
+    }
+
+    function bb_semua_akun_by_year($tahun){
+        $qf=$this->db->query("
+                    SELECT 
+                        id_jurnal,
+                        id_bukti,
+                        no_bukti,
+                        jenis,
+                        akun_bas,
+                        t_jurnal.id_subunit,
+                        referensi,
+                        SUM(debet) AS debet,
+                        SUM(kredit) AS kredit,
+                        tgl_buku,
+                        tgl_transaksi,
+                        created_by,
+                        created_date,
+                        changed_by,
+                        changed_date,                        
+                        t_jurnal.`keterangan` AS ket,
+                        m_bas.akun_nama, 
+                        m_bas.saldo_normal 
+                    FROM 
+                        m_bas
+                    INNER JOIN 
+                        t_jurnal ON t_jurnal.`akun_bas` = m_bas.`akun_kode` 
+                    WHERE 
+                        YEAR( t_jurnal.tgl_transaksi)='$tahun'                        
+                        AND (t_jurnal.`id_buku_besar` IS NOT NULL OR t_jurnal.`id_buku_besar`!=0)
+                    GROUP BY 
+                        t_jurnal.akun_bas 
+                    ORDER BY 
+                        t_jurnal.akun_bas ASC
+                ");
+        return $qf->result();
+    }
+    
+    function get_bb($tahun){
+        $qf=$this->db->query("
+                    SELECT *
+                    FROM 
+                        t_buku_besar
+                    WHERE
+                        YEAR(tgl_posting)='$tahun'
+                    ORDER BY
+                        tgl_posting ASC
+                ");
+        return $qf->result();
+    }
+
+    function get_bb_one($id){
+        $qf=$this->db->query("
+                    SELECT *
+                    FROM 
+                        t_buku_besar
+                    WHERE
+                        id_buku_besar='$id'
+                ");
+        return $qf->row();
+    }
+
+    function bb_detail_semua_akun($id_buku_besar){
+        $qf=$this->db->query("
+                    SELECT 
+                        id_jurnal,
+                        id_bukti,
+                        no_bukti,
+                        jenis,
+                        akun_bas,
+                        t_jurnal.id_subunit,
+                        referensi,
+                        SUM(debet) AS debet,
+                        SUM(kredit) AS kredit,
+                        tgl_buku,
+                        tgl_transaksi,
+                        created_by,
+                        created_date,
+                        changed_by,
+                        changed_date,                        
+                        t_jurnal.`keterangan` AS ket,
+                        m_bas.akun_nama, 
+                        m_bas.saldo_normal 
+                    FROM 
+                        m_bas
+                    INNER JOIN 
+                        t_jurnal ON t_jurnal.`akun_bas` = m_bas.`akun_kode` 
+                    WHERE 
+                        id_buku_besar='$id_buku_besar'
+                    GROUP BY 
+                        t_jurnal.akun_bas 
+                    ORDER BY 
+                        t_jurnal.akun_bas ASC
+                ");
+        return $qf->result();
+    }
+
+    function bb_detail_per_akun($id_buku_besar,$akun_kode){
+        $qf=$this->db->query("
+                    SELECT t_jurnal.*, t_jurnal.`keterangan` AS ket, m_bas.saldo_normal 
+                    FROM m_bas
+                    INNER JOIN t_jurnal
+                    ON t_jurnal.`akun_bas` = m_bas.`akun_kode`
+                    WHERE
+                        id_buku_besar='$id_buku_besar'
+                        AND t_jurnal.`akun_bas` LIKE '$akun_kode%'                        
+                    ORDER BY tgl_buku ASC, t_jurnal.debet desc
+                ");
+        return $qf->result();
+    }
+    
+    /**
+    * Ambil skema pembayaran
+    * @return array skema pembayaran
+    */
+    function aruskas_jenis_ambil(){
+        $this->db->from('m_arus_kas');
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function aruskas_jenis_save($id, $deskripsi){        
+        $this->db->set('deskripsi', $deskripsi);
+        if ($id==='' || $id===false){
+            $this->db->set('created_date', date('Y-m-d H:i:s'));
+            $this->db->set('created_by', $this->session->userdata('username'));
+            $hasil=$this->db->insert('m_arus_kas');
+            if($hasil){
+                return "Berhasil menambahkan . . .";
+            }
+        }else{
+            $this->db->set('changed_date', date('Y-m-d H:i:s'));
+            $this->db->set('changed_by', $this->session->userdata('username'));
+            $this->db->where('id_arus_kas', $id);
+            $hasil=$this->db->update('m_arus_kas');
+            if($hasil){
+                return "Berhasil memperbaharui . . .";
+            }
+        }
+        return false;
+    }
+    
+    function aruskas_jenis_del($id){
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        
+        $this->db->where('id_arus_kas', $id);
+        $this->db->delete('m_arus_kas_detail_bas');
+
+        $this->db->where('id_arus_kas', $id);
+        $this->db->delete('m_arus_kas');
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE) {
+            return false;
+        }else{
+            return "Berhasil menghapus . . .";
+        }        
+    }
+    
+    //item
+    function aruskas_item_ambil($id,$jenis_arus=''){
+        $this->db->from('m_arus_kas_detail');
+        if($jenis_arus==='keluar'){
+            $this->db->where('jenis_arus_kas','ARUS KELUAR');
+        }else{
+            $this->db->where('jenis_arus_kas','ARUS MASUK');
+        }
+        $this->db->where('id_arus_kas',$id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function aruskas_item_save($iditem,$item){
+        if ($iditem===''){
+            $item->created_date=date('Y-m-d H:i:s');
+            $item->created_by=$this->session->userdata('username');
+            $hasil=$this->db->insert('m_arus_kas_detail',$item);
+            if($hasil){
+                return "Berhasil menambahkan";
+            }
+        }else{
+            $item->changed_date=date('Y-m-d H:i:s');
+            $item->changed_by=$this->session->userdata('username');
+            $this->db->where('id_rincian',$iditem);
+            $hasil=$this->db->update('m_arus_kas_detail',$item);
+            if($hasil){
+                return "Berhasil memperbaharui";
+            }
+        }
+        return false;
+    }
+    
+    function aruskas_item_del($id){
+        $this->db->where('id_rincian', $id);
+        $hasil=$this->db->delete('m_arus_kas_detail');
+        if($hasil){
+            return "Berhasil menghapus";
+        }else return false;
+    }
+    
+    //rincian
+    function aruskas_rincian_ambil($id){
+        $this->db->select('akun_nama,kode_bas,id_arus_kas_bas');
+        $this->db->from('m_arus_kas_detail_bas');
+        $this->db->join('m_bas','m_arus_kas_detail_bas.kode_bas=akun_kode');
+        $this->db->where('id_arus_kas',$id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function aruskas_rincian_save($idrincian,$rincian){
+        if ($idrincian===''){
+            $rincian->created_date=date('Y-m-d H:i:s');
+            $rincian->created_by=$this->session->userdata('username');
+            $hasil=$this->db->insert('m_arus_kas_detail_bas',$rincian);
+            if($hasil){
+                return "Berhasil menambahkan . . .";
+            }
+        }else{
+            $rincian->changed_date=date('Y-m-d H:i:s');
+            $rincian->changed_by=$this->session->userdata('username');
+            $this->db->where('id_arus_kas_bas',$idrincian);
+            $hasil=$this->db->update('m_arus_kas_detail_bas',$rincian);
+            if($hasil){
+                return "Berhasil memperbaharui . . .";
+            }
+        }
+        return false;
+    }
+    
+    function aruskas_rincian_del($id){
+        $this->db->where('id_arus_kas_bas', $id);
+        $hasil=$this->db->delete('m_arus_kas_detail_bas');
+        if($hasil){
+            return "Berhasil menghapus . . .";
+        }else return false;
+    }
+    
+    function aktivitas($bln1_skrg, $bln2_skrg, $thn_skrg, $bln1_sblm, $bln2_sblm, $thn_sblm, $mulai, $akhir, $level, $standar){
+        //$query = "CALL aktivitas_n_neraca('1', '12', '2014', '1', '12', '2013', '4', '7', '8')";
+        $query = "CALL aktivitas_n_neraca(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";        
+        $par = array($bln1_skrg, $bln2_skrg, $thn_skrg, $bln1_sblm, $bln2_sblm, $thn_sblm, $mulai, $akhir, $level, $standar);
+        $result = $this->db->query($query, $par);        
+        return $result->result();
+    }
+    function neraca($th,$bln,$mulai,$akhir){
+        $query = " CALL laporan_aktivitas(?, ?, ?, ?) ";
+        $par = array($th,$bln,$mulai,$akhir);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function arus_kas($bln1_skrg, $bln2_skrg, $thn_skrg, $bln1_sblm, $bln2_sblm, $thn_sblm, $bln1_skrg_ak_sblm, $bln2_skrg_ak_sblm, $thn_skrg_ak_sblm, $bln1_sblm_ak_sblm, $bln2_sblm_ak_sblm, $thn_sblm_ak_sblm, $level){        
+        $query = "CALL arus_kas(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $par = array($bln1_skrg, $bln2_skrg, $thn_skrg, $bln1_sblm, $bln2_sblm, $thn_sblm, $bln1_skrg_ak_sblm, $bln2_skrg_ak_sblm, $thn_skrg_ak_sblm, $bln1_sblm_ak_sblm, $bln2_sblm_ak_sblm, $thn_sblm_ak_sblm, $level);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function arus_kas_all(){
+        $query = "SELECT id_arus_kas, deskripsi FROM m_arus_kas";        
+        $result = $this->db->query($query);
+        return $result->result();
+    }    
+    function arus_kas_setara_awal($bln1_sblm, $bln2_sblm, $thn_sblm, $bln1_sblm_ak_sblm, $bln2_sblm_ak_sblm, $thn_sblm_ak_sblm){
+        $query = "CALL setara_kas_awal(?, ?, ?, ?, ?, ?, '8')";
+        $par = array($bln1_sblm, $bln2_sblm, $thn_sblm, $bln1_sblm_ak_sblm, $bln2_sblm_ak_sblm, $thn_sblm_ak_sblm);
+        $result = $this->db->query($query, $par);
+        $return = $result->row();        
+
+        $dbc = $this->db->conn_id;
+        while( mysqli_more_results($dbc) )
+        {
+            if(mysqli_next_result($dbc))
+            {
+                $result = mysqli_use_result($dbc);                
+                unset($result);                
+            } 
+        }
+
+        return $return;
+    }    
+    function buku_besar($th,$bln,$mulai,$akhir){
+        $query = " CALL laporan_aktivitas(?, ?, ?, ?) ";
+        $par = array($th,$bln,$mulai,$akhir);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function neraca_saldo($bln1_skrg, $bln2_skrg, $thn_skrg, $bln1_sblm, $bln2_sblm, $thn_sblm, $mulai, $akhir, $level, $standar){
+        $query = "CALL neraca_saldo(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";        
+        $par = array($bln1_skrg, $bln2_skrg, $thn_skrg, $bln1_sblm, $bln2_sblm, $thn_sblm, $mulai, $akhir, $level, $standar);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function unit_get_all(){
+        $this->db->select('m_unit.id_unit,nama_unit,kunci');
+        $this->db->from('m_unit');
+        $this->db->join('t_kunci_jurnal','m_unit.id_unit=t_kunci_jurnal.id_unit','left');
+        $query=$this->db->get();
+        return $query->result();
+    }
+    function kunci_jurnal_save($kunci){
+        date_default_timezone_set('Etc/GMT-8');
+                
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        
+        $this->db->truncate('t_kunci_jurnal'); 
+        
+        foreach ($kunci as $id_unit=>$iskunci){
+            echo $id_unit." - ".$iskunci;
+            $this->db->set('kunci',$iskunci);
+            $this->db->set('id_unit',$id_unit);
+            $this->db->set('created_date',date('Y-m-d H:i:s'));
+            $this->db->set('created_by',$this->session->userdata('username'));
+            $this->db->insert('t_kunci_jurnal');
+        }
+        
+        $this->db->trans_complete();
+        if($this->db->trans_status() === true){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil memverifikasi.');
+            redirect('report/kunci_jurnal');
+        } else {
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL memverifikasi.');
+            redirect('report/kunci_jurnal');
+        }
+    }
+    function cek_kunci($id,$tipe='unit'){
+        $this->db->select('kunci');
+        $this->db->from('t_kunci_jurnal');
+        if($id!='-1'){
+            if($tipe=='unit'){
+                $this->db->where('id_unit',$id);
+            }else{
+                $subunit=$this->m_umum->subunit_detail($id);
+                if(isset($subunit->id_unit)){
+                    $this->db->where('id_unit',$subunit->id_unit);
+                }else{
+                    return false;
+                }
+            }
+        }
+        
+        
+        $query=$this->db->get();
+        $kunci = $query->row();
+        
+        if(isset($kunci->kunci) && $kunci->kunci=='1'){
+            return true;
+        }else{
+            return false;
+        }
+        
+    }
+
+    function hapus_bb($id)
+    {
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+
+        $this->db->query("UPDATE t_bukti_akuntansi SET status_posting=0, tgl_posting=NULL, id_buku_besar=NULL WHERE id_buku_besar IN (". $id .")");
+        $this->db->query("DELETE FROM t_jurnal WHERE id_buku_besar IN (". $id .")");
+        $this->db->query("DELETE FROM t_buku_besar WHERE id_buku_besar IN (". $id .")");
+        $this->db->query("DELETE FROM t_det_buku_besar WHERE id_buku_besar IN (". $id .")");
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    function get_akun_sa_all($ta)
+    {
+        $query = "SELECT m_bas.akun_kode, m_bas.akun_nama, IF(m_bas.saldo_normal='D',1,-1)*((SUM(IF(debet IS NOT NULL, debet, 0)))-(SUM(IF(kredit IS NOT NULL, kredit, 0)))) AS nominal FROM m_bas LEFT JOIN (SELECT t_jurnal.*, is_input_sa, t_buku_besar.tgl_posting AS tgl_posting_bb FROM t_jurnal INNER JOIN t_buku_besar ON t_buku_besar.id_buku_besar=t_jurnal.id_buku_besar WHERE is_input_sa=1 AND YEAR(t_buku_besar.tgl_posting)='". $ta ."') AS t_jurnal ON m_bas.akun_kode=t_jurnal.akun_bas WHERE level=8 AND aktif='YA' AND LEFT(m_bas.akun_kode,1)>=1 and LEFT(m_bas.akun_kode,1)<=3 GROUP BY m_bas.akun_kode";
+        $result = $this->db->query($query);
+        return $result->result();
+    }
+
+    function simpan_sa($tahun_anggaran, $akun, $nominal)
+    {
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+
+        $query = "SELECT * FROM t_buku_besar WHERE is_input_sa=1 AND tahun_anggaran='". $tahun_anggaran ."'";
+        $result = $this->db->query($query);
+        $ada_sa = $result->row();
+
+        $id_sa=0;
+        $nowFormat = $tahun_anggaran.'-1-1';//date('Y-m-d H:i:s');
+        if (empty($ada_sa)) {
+            //Tidak ada saldo awal d buku besar
+            $query = "INSERT INTO t_buku_besar(tgl_posting,is_input_sa,tahun_anggaran) VALUES ('". $nowFormat ."','1','". $tahun_anggaran ."')";
+            $this->db->query($query);
+            $id_sa=$this->db->insert_id();
+        }else{
+            //Ada saldo awal d buku besar
+            $id_sa=$ada_sa->id_buku_besar;
+            $query = "DELETE FROM t_jurnal WHERE id_buku_besar='". $id_sa ."'";
+            $this->db->query($query);
+        }
+
+        $jml_array = count($akun);
+        $total_nominal=0;
+        for ($i=1; $i <= $jml_array; $i++) { 
+            $var = (float) $nominal[$i];                        
+            if (!empty($var)){
+                $query = "SELECT saldo_normal FROM m_bas WHERE akun_kode='". $akun[$i] ."'";
+                $result = $this->db->query($query);
+                $saldo_normal = $result->row();
+                if ($saldo_normal->saldo_normal=='D') {
+                    $tbl_nominal='debet';
+                }else{
+                    $tbl_nominal='kredit';
+                }
+                $query = "INSERT INTO t_jurnal(akun_bas,keterangan,". $tbl_nominal .",tgl_buku,tgl_transaksi,id_buku_besar) VALUES ('". $akun[$i] ."','Saldo Awal','". $var ."','". $nowFormat ."','". $nowFormat ."','". $id_sa ."')";
+                $this->db->query($query);
+                $query = "INSERT INTO t_det_buku_besar(id_buku_besar,akun_kode,saldo) VALUES ('". $id_sa ."','". $akun[$i] ."','". $var ."')";
+                $this->db->query($query);
+                $total_nominal=$total_nominal+$var;
+            }             
+        }
+
+        $query = "UPDATE t_buku_besar SET saldo='". $total_nominal ."' WHERE id_buku_besar='". $id_sa ."'";
+        $this->db->query($query);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE){
+            return false;
+        }else{
+            return true;
+        }        
+    }
+}

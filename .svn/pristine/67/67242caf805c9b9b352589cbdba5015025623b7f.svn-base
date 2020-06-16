@@ -1,0 +1,71 @@
+<?php
+    if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+    
+    $this->auth->restrict();
+?> 
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><?php echo $title;?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="<?php echo base_url();?>asset/images/favicon.ico" >
+        
+    <!-- Bootstrap -->
+    <link href="<?php echo base_url();?>asset/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+            
+  </head>
+  <body>
+  	<div class="navbar navbar-inverse navbar-fixed-top">
+	  	<div class='navbar-inner'>
+	  		<div class='container'>
+	  			<a class='brand' href='<?php echo site_url('home');?>'>SIAKU</a>
+		  		<div class='nav-collapse collapse'>
+					<ul class='nav'>
+						<li><a href='#'>Home</a></li>		
+		              <li class="dropdown">
+		                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+		                <ul class="dropdown-menu">
+		                  <li><a href="#">Action</a></li>
+		                  <li><a href="#">Another action</a></li>
+		                  <li><a href="#">Something else here</a></li>
+		                  <li class="divider"></li>
+		                  <li class="nav-header">Nav header</li>
+		                  <li><a href="#">Separated link</a></li>
+		                  <li><a href="#">One more separated link</a></li>
+		                </ul>
+		              </li>						
+						<li><a href='#'>Belanja</a></li>
+					</ul>
+		  		</div>
+
+	  		</div>
+	  		
+	  	</div>	  	
+  	</div>
+  	<div class='container'>
+  		<div class='row'>
+  			<div class='span6'>row info</div>
+  			<div class='span6'>asda</div>
+  		</div>
+  		<div class='row'>
+  			<div class='span12'>asdas</div>
+  		</div>
+  	</div>
+  	
+  	<!-- tempatkan semua script di bagian akhir agar page dapat diload lebih cepat -->
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.validate.min.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/jquery/autoNumeric.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>asset/js/accounting.js"></script>
+    <script type="text/javascript" src="<?php echo base_url(); ?>asset/js/common.js"></script>  	
+  </body>
+</html>

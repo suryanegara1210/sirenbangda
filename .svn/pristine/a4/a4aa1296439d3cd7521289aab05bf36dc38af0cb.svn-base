@@ -1,0 +1,646 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Pen_lain extends CI_Controller {
+    
+    //private $tabel = array();
+    
+    public function __construct(){                                
+        $this->CI =& get_instance(); 
+        parent::__construct();
+        
+        $this->load->model(array('m_umum','m_lov','m_bas','m_pen_lain'));
+    }
+    
+    function input(){
+        
+        $this->auth->has_privileges('create_mou');
+        
+        $jen_pen=$this->m_lov->get_list_lov(Constant::KAP_JENIS_PENERIMAAN);
+        $result= Array();
+        $result[]= '~~~ Tipe Jasa ~~~';
+        foreach ($jen_pen as $jp){
+            $result[$jp->kode_value]= $jp->nama_value;
+        }
+        unset( $result[constant::MOU_LADIK]);
+        $data['jen_pen']=$result;
+        $data['judul']='Input Ringkasan MOU';
+        $data['title']=$data['judul'];
+        $data['link']=site_url('pen_lain/input_per_mou');
+        $this->template->load('template','pen_lain/kepala',$data);
+    }
+    
+    function input_per_mou(){
+        
+        $this->auth->has_privileges('create_mou');
+        
+        $jen_pen=$this->input->post('jen_pen');
+        switch($jen_pen){
+            case Constant::MOU_LADIK_LAIN :
+                $data['pilih_unit'] = $this->m_umum->unit_semua(constant::WITHOUT_ALL);
+                $data['jenis_layan']=$this->m_pen_lain->tipe_ambil();
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $this->load->view('pen_lain/input_ladik_lain',$data);
+                break;
+            case Constant::MOU_HIBAH_TERENCANA :
+                $this->load->view('pen_lain/input_hibah');
+                break;
+            case Constant::MOU_PPPMAS :
+                $data['pilih_unit'] = $this->m_umum->unit_semua(constant::WITHOUT_ALL);
+                $data['jenis_layan']=$this->m_pen_lain->tipe_ambil();
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $this->load->view('pen_lain/input_pppmas',$data);
+                break;
+            case Constant::MOU_HIBAH_TAKTER :
+                $this->load->view('pen_lain/input_hibah_takter');
+                break;
+            case Constant::MOU_UNIT_USAHA :
+                $this->load->view('pen_lain/input_unit_usaha');
+                break;
+            case Constant::MOU_ASET :
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $this->load->view('pen_lain/input_aset_inseden',$data);
+                break;
+            case Constant::MOU_ASET_RUTIN :
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $data['jenis_aset']=$this->m_pen_lain->getJenis_aset();
+                $this->load->view('pen_lain/input_aset_rutin',$data);
+                break;
+            case Constant::MOU_INVESTASI :
+                $data['jenis_investasi']=$this->m_pen_lain->jenis_investasi();
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $this->load->view('pen_lain/input_investasi',$data);
+                break;
+            case Constant::MOU_JASA_GIRO :
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $this->load->view('pen_lain/input_jasa_giro',$data);
+                break;
+        }
+    }
+    
+    function simpan($jenis){
+        
+        $this->auth->has_privileges('create_mou');
+        
+        date_default_timezone_set('Etc/GMT-8');
+        $master = new stdClass();
+        $master->created_by     = $this->session->userdata('username');
+        $master->created_date   = date('Y-m-d H:i:s');
+        $master->jenis_mou      = $jenis;
+        
+        switch($jenis){
+            case Constant::MOU_LADIK_LAIN :
+                $master->no_mou          =$this->input->post('no_mou');
+                $master->tgl_mou         =$this->input->post('tgl_mou');
+                $master->jenis           =$this->input->post('jenis_kerjasama');
+                $master->pemberi         =$this->input->post('mitra_kerjasama');
+                $master->uraian          =$this->input->post('uraian_pekerjaan');
+                $master->jangka_waktu    =$this->input->post('jangka_waktu');
+                $master->nilai           =$this->input->post('nilai_kontrak');
+                $master->skema_bayar=$this->input->post('skema_bayar');
+                $master->persentase      =$this->input->post('fee_jasa');
+                $master->nila_dasar      =$this->input->post('nilai_dasar');
+                
+                $nama   = $_POST['nama'];
+                $unit   = $_POST['unit'];
+                
+                $detail= array();
+                if(isset($nama)){
+                    foreach ($nama as $no=>$nam){
+                        $detail[]=array(
+                            'id_unit'       => $unit[$no],
+                            'nama'          => $nam,
+                            'created_by'    => $this->session->userdata('username'),
+                            'created_date'  => date('Y-m-d H:i:s')
+                        );
+                    }
+                }
+                break;
+            case Constant::MOU_HIBAH_TERENCANA :
+                $master->no_mou      = $this->input->post('no_mou');
+                $master->tgl_mou     = $this->input->post('tgl_mou');
+                $master->pemberi     = $this->input->post('pemberi');
+                $master->penerima    = $this->input->post('penerima');
+                $master->uraian      = $this->input->post('peruntukan');
+                $master->jenis       = $this->input->post('jenis_hibah');
+                $master->bentuk_hibah= $this->input->post('bentuk_hibah');
+                switch ($master->bentuk_hibah) {
+                    case "Uang":
+                        $master->nilai    = $this->input->post('nominal');
+                        break;
+                    case "Aset":
+                        $master->bentuk = $this->input->post('bentuk');
+                        $master->banyak = $this->input->post('banyak');
+                        $master->nilai  = $this->input->post('nilai');
+                        break;
+                    case "Jasa":
+                        $master->bentuk = $this->input->post('jenis_jasa');
+                        $master->nilai      = $this->input->post('nilai');
+                        break;
+                }
+                $master->mulai       = $this->input->post('mulai');
+                $master->akhir       = $this->input->post('akhir');
+                $master->syarat      = $this->input->post('syarat');
+                break;
+            case Constant::MOU_PPPMAS :
+                $master->no_mou          =$this->input->post('no_sk');
+                $master->tgl_mou         =$this->input->post('tgl_sk');
+                $master->jenis           =$this->input->post('jenis_kerjasama');
+                $master->tempat          =$this->input->post('tempat_tugas');
+                $master->uraian          =$this->input->post('uraian_pekerjaan');
+                $master->jangka_waktu    =$this->input->post('jangka_waktu');
+                $master->nilai           =$this->input->post('nilai_kontrak');
+                $master->skema_bayar    =$this->input->post('skema_bayar');
+                $master->persentase     =$this->input->post('fee_jasa');
+                $master->nila_dasar     =$this->input->post('nilai_dasar');
+                
+                $nama   = $_POST['nama'];
+                $unit   = $_POST['unit'];
+                $detail= array();
+                if(isset($nama)){
+                    foreach ($nama as $no=>$nam){
+                        $detail[]=array(
+                            'id_unit'       => $unit[$no],
+                            'nama'          => $nam,
+                            'created_by'    => $this->session->userdata('username'),
+                            'created_date'  => date('Y-m-d H:i:s')
+                        );
+                    }
+                }
+                break;
+            case Constant::MOU_HIBAH_TAKTER :
+                $master->no_mou      = $this->input->post('no_mou');
+                $master->tgl_mou     = $this->input->post('tgl_mou');
+                $master->pemberi     = $this->input->post('pemberi');
+                $master->penerima    = $this->input->post('penerima');
+                $master->uraian  = $this->input->post('peruntukan');
+                $master->jenis = $this->input->post('jenis_hibah');
+                $master->bentuk_hibah= $this->input->post('bentuk_hibah');
+                switch ($master->bentuk_hibah) {
+                    case "Uang":
+                        $master->nilai    = $this->input->post('nominal');
+                        break;
+                    case "Aset":
+                        $master->bentuk = $this->input->post('bentuk');
+                        $master->banyak = $this->input->post('banyak');
+                        $master->nilai  = $this->input->post('nilai');
+                        break;
+                    case "Jasa":
+                        $master->bentuk = $this->input->post('jenis_jasa');
+                        $master->nilai      = $this->input->post('nilai');
+                        break;
+                }
+                $master->mulai       = $this->input->post('mulai');
+                $master->akhir       = $this->input->post('akhir');
+                $master->syarat      = $this->input->post('syarat');
+                break;
+            case Constant::MOU_UNIT_USAHA :
+                $master->no_mou             =$this->input->post('no_mou');
+                $master->tgl_mou            =$this->input->post('tgl_mou');
+                $master->kd_unit_usaha      =$this->input->post('kd_unit_usaha');
+                $master->nm_unit_usaha      =$this->input->post('nm_unit_usaha');
+                $master->tempat             =$this->input->post('alamat_unit_usaha');
+                $master->uraian             =$this->input->post('desk_unit_usaha');
+                $master->nilai              =$this->input->post('nilai_unit_usaha');
+                break;
+            case Constant::MOU_ASET :
+                $master->no_mou     =$this->input->post('no_mou');
+                $master->tgl_mou    =$this->input->post('tgl_mou');
+                $master->pemberi    =$this->input->post('penyewa');
+                $master->jenis      =$this->input->post('jenis_aset');
+                $master->nilai      =$this->input->post('nilai_sewa');
+                $master->tempat     =$this->input->post('lokasi');
+                $master->mulai      =$this->input->post('mulaix');
+                $master->akhir      =$this->input->post('akhirx');
+                $master->skema_bayar=$this->input->post('skema_bayar');
+                break;
+            case Constant::MOU_ASET_RUTIN :
+                $master->no_mou     =$this->input->post('no_mou');
+                $master->tgl_mou    =$this->input->post('tgl_mou');
+                $master->pemberi    =$this->input->post('penyewa');
+                $master->jenis      =$this->input->post('jenis_aset');
+                $master->nilai      =$this->input->post('nilai_sewa');
+                $master->tempat     =$this->input->post('lokasi');
+                $master->mulai      =$this->input->post('mulaix');
+                $master->akhir      =$this->input->post('akhirx');
+                $master->skema_bayar=$this->input->post('skema_bayar');
+                break;
+            case Constant::MOU_INVESTASI :
+                $master->no_mou          =$this->input->post('no_mou');
+                $master->tgl_mou         =$this->input->post('tgl_mou');
+                $master->no_rencana      =$this->input->post('no_rencana');
+                $master->jenis           =$this->input->post('jenis_investasi');
+                $master->pemberi         =$this->input->post('nama_rencana');
+                $master->uraian          =$this->input->post('uraian_rencana');
+                $master->jangka_waktu    =$this->input->post('jangka_waktu');
+                $master->nilai           =$this->input->post('nilai_rencana');
+                $master->skema_bayar     =$this->input->post('skema_bayar');
+                $master->periode         =$this->input->post('periode');
+                break;
+            case Constant::MOU_JASA_GIRO :
+                $master->no_mou          =$this->input->post('no_mou');
+                $master->tgl_mou         =$this->input->post('tgl_mou');
+                $master->no_jasa         =$this->input->post('no_jasa');
+                $master->pemberi         =$this->input->post('nama_jasa');
+                $master->uraian          =$this->input->post('uraian_jasa');
+                $master->jangka_waktu    =$this->input->post('jangka_waktu');
+                $master->nilai           =$this->input->post('nilai_jasa');
+                $master->skema_bayar     =$this->input->post('skema_bayar');
+                $master->tgl_cair        =$this->input->post('tgl_cair');
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', 'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        $idmaster=$this->input->post('id_mou');
+
+        if (!isset($detail)){
+            $detail='';
+        }
+        $hasil  = $this->m_pen_lain->simpan($master, $detail, $idmaster);
+        
+        if($hasil!==false){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil menyimpan...');
+            redirect('pen_lain/detail/'.$jenis.'/'.$hasil);
+        } else{
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL menyimpan MOU.');
+            redirect('pen_lain/input');
+        }
+    }
+    
+    function detail($jenis,$id,$cetak=''){
+        
+        $this->auth->has_privileges('read_mou');
+        
+        $data['jenis']=$jenis;
+        $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis,$id);
+        switch($jenis){
+            case Constant::MOU_LADIK_LAIN :
+                $data['nama_mou'] = $this->m_pen_lain->ambil_detail_det($jenis,$id);
+                $data['nama_isi'] = 'isi_ladik_lain';
+                break;
+            case Constant::MOU_HIBAH_TERENCANA :
+                $data['nama_isi'] = 'isi_hibah';
+                break;
+            case Constant::MOU_PPPMAS :
+                $data['nama_mou'] = $this->m_pen_lain->ambil_detail_det($jenis,$id);
+                $data['nama_isi'] = 'isi_pppmas';
+                break;
+            case Constant::MOU_HIBAH_TAKTER :
+                $data['nama_isi'] = 'isi_hibah_takter';
+                break;
+            case Constant::MOU_UNIT_USAHA :
+                $data['nama_isi'] = 'isi_unit_usaha';
+                break;
+            case Constant::MOU_ASET :
+                $data['nama_isi'] = 'isi_aset_inseden';
+                break;
+            case Constant::MOU_ASET_RUTIN :
+                $data['nama_isi'] = 'isi_aset_rutin';
+                break;
+            case Constant::MOU_INVESTASI :
+                $data['nama_isi'] = 'isi_investasi';
+                break;
+            case Constant::MOU_JASA_GIRO :
+                $data['nama_isi'] = 'isi_jasa_giro';
+                break;
+            default:
+                $this->session->set_userdata('msg_typ','err');
+                $this->session->set_userdata('msg', $jenis.'Halaman Yang diminta tidak tersedia...');
+                redirect(base_url());
+                break;
+        }
+        if($cetak==='cetak'){
+            $sekarang=date("Y-m-d_H-i");
+            $filename=$jenis.'_'.$id.'_'.$sekarang.'.pdf';
+            $output = $this->load->view('pen_lain/'.$data['nama_isi'], $data,  true); 
+            generate_pdf_A4($output,$filename);
+        }else{
+            $data['title']="Resume Mou";
+            $this->template->load('template','pen_lain/detail',$data);
+        }
+        
+    }
+    
+    function semua(){
+        
+        $this->auth->has_privileges('read_mou');
+        
+        $jen_pen=$this->m_lov->get_list_lov(Constant::KAP_JENIS_PENERIMAAN);
+        $result= Array();
+        $result[]= '~~~ Tipe Jasa ~~~';
+        foreach ($jen_pen as $jp){
+            $result[$jp->kode_value]= $jp->nama_value;
+        }
+        unset( $result[constant::MOU_LADIK]);
+        $data['jen_pen']=$result;
+        $data['judul']='Daftar Ringkasan MOU';
+        $data['title']='Daftar Ringkasan MOU';
+        $data['link']=site_url('pen_lain/semua_per_mou');
+        $this->template->load('template','pen_lain/kepala',$data);
+    }
+    
+    function semua_per_mou(){
+        
+        $this->auth->has_privileges('read_mou');
+        
+        $jen_pen=$this->input->post('jen_pen');
+        $data['resume_mou']=$this->m_pen_lain->ambil_semua($jen_pen);
+        $data['judul']='Daftar Resume MOU';
+        /*
+        $data['link']['inputbkm']['judul']="Input Bukti Kas Masuk";
+        $data['link']['inputbkm']['alamat']="bukti_akuntansi/input/".constant::BUK_BKM."/";
+        $data['link']['inputbkm']['img']="add";
+        */
+        $data['link']['detail']['judul']="Detail Mou";
+        $data['link']['detail']['alamat']="pen_lain/detail/";
+        $data['link']['detail']['img']="detail";
+        
+        $data['link']['status']['judul']="Status Dokumen";
+        $data['link']['status']['fb']=true;
+        $data['link']['status']['alamat']="pen_lain/status/";
+        $data['link']['status']['img']="history";
+        
+        $file_daftar='daftar'.$this->m_umum->nama_file($jen_pen);
+        $this->load->view('pen_lain/'.$file_daftar,$data);
+    }
+    
+    function edit(){
+        
+        $this->auth->has_privileges('edit_mou');
+        
+        $jen_pen=$this->m_lov->get_list_lov(Constant::KAP_JENIS_PENERIMAAN);
+        $result= Array();
+        $result[]= '~~~ Tipe Jasa ~~~';
+        foreach ($jen_pen as $jp){
+            $result[$jp->kode_value]= $jp->nama_value;
+        }
+        unset( $result[constant::MOU_LADIK]);
+        $data['jen_pen']=$result;
+        $data['judul']='Edit Ringkasan MOU';
+        $data['title']='Edit Ringkasan MOU';
+        $data['link']=site_url('pen_lain/edit_per_mou');
+        $this->template->load('template','pen_lain/kepala',$data);
+    }
+    
+    function edit_per_mou(){
+        
+        $this->auth->has_privileges('edit_mou');
+        
+        $jen_pen=$this->input->post('jen_pen');
+        $data['resume_mou']=$this->m_pen_lain->ambil_semua($jen_pen);
+        $data['isEdit']=TRUE;
+        $file_daftar='daftar'.$this->m_umum->nama_file($jen_pen);
+        $data['judul']='Daftar Resume MOU';
+        $data['link']['editmou']['judul']="Edit MOU";
+        $data['link']['editmou']['alamat']="pen_lain/editmou/";
+        $data['link']['editmou']['img']="edit";
+        $data['link']['detail']['judul']="Detail Mou";
+        $data['link']['detail']['alamat']="pen_lain/detail/";
+        $data['link']['detail']['img']="detail";
+        $this->load->view('pen_lain/'.$file_daftar,$data);
+    }
+    
+    function editmou($jenis,$id){
+        
+        $this->auth->has_privileges('edit_mou');
+        
+        $data['jenis']=$jenis;
+        $data['isi_mou']=$this->m_pen_lain->ambil_detail($jenis,$id);
+        $data['isEdit']=TRUE;
+        switch($jenis){
+            case Constant::MOU_LADIK_LAIN :
+                $data['pilih_unit'] = $this->m_umum->unit_semua(constant::WITHOUT_ALL);
+                $data['jenis_layan']=$this->m_pen_lain->tipe_ambil();
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $data['nama_mou'] = $this->m_pen_lain->ambil_detail_det($jenis,$id);
+                $file_input="input_ladik_lain";
+                break;
+            case Constant::MOU_HIBAH_TERENCANA :
+                $file_input="input_hibah";
+                break;
+            case Constant::MOU_PPPMAS :
+                $data['pilih_unit'] = $this->m_umum->unit_semua(constant::WITHOUT_ALL);
+                $data['jenis_layan']=$this->m_pen_lain->tipe_ambil();
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $data['nama_mou'] = $this->m_pen_lain->ambil_detail_det($jenis,$id);
+                $file_input="input_pppmas";
+                break;
+            case Constant::MOU_HIBAH_TAKTER :
+                $file_input="input_hibah_takter";
+                break;
+            case Constant::MOU_UNIT_USAHA :
+                $file_input="input_unit_usaha";
+                break;
+            case Constant::MOU_ASET :
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $file_input="input_aset_inseden";
+                break;
+            case Constant::MOU_ASET_RUTIN :
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $data['jenis_aset']=$this->m_pen_lain->getJenis_aset();
+                $file_input="input_aset_rutin";
+                break;
+            case Constant::MOU_INVESTASI :
+                $data['jenis_investasi']=$this->m_pen_lain->jenis_investasi();
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $file_input="input_investasi";
+                break;
+            case Constant::MOU_JASA_GIRO :
+                $data['skema_bayar']=$this->m_pen_lain->skema_bayar_ambil();
+                $file_input="input_jasa_giro";
+                break;
+        }
+        $data['title']="Edit Resume MOU";
+        $this->template->load('template','pen_lain/'.$file_input,$data);
+        //$this->load->view('pen_lain/'.$file_input,$data);
+    }
+    
+    function inputbukti(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $jen_buk=$this->m_lov->get_list_lov(Constant::KAP_JENIS_BUKTI);
+        $jbkt= Array();
+        $jbkt['']= '~~~ Jenis Bukti ~~~';
+        foreach ($jen_buk as $jb){
+            $jbkt[$jb->kode_value]= $jb->nama_value;
+        }
+        unset( $jbkt[constant::BUK_BKK]);
+        $data['jen_bkt']=$jbkt;
+        
+        $jen_pen=$this->m_lov->get_list_lov(Constant::KAP_JENIS_PENERIMAAN);
+        $jpen= Array();
+        $jpen['']= '~~~ Referensi Jenis Penerimaan ~~~';
+        foreach ($jen_pen as $jp){
+            $jpen[$jp->kode_value]= $jp->nama_value;
+        }
+        $jpen['NOREF']= 'Tanpa Referensi';
+        unset( $jpen[constant::MOU_LADIK]);
+        $data['jen_pen']=$jpen;
+        
+        $data['title']='Input Bukti Kas Masuk';
+        $data['judul']='Input Bukti Kas Masuk';
+        $data['link']=site_url('pen_lain/inputbukti_per_mou');
+        $this->template->load('template','pen_lain/kepala_bukti',$data);
+    }
+    
+    function inputbukti_per_mou(){
+        
+        $this->auth->has_privileges('create_bukti_akuntansi');
+        
+        $jen_pen=$this->input->post('jen_pen');
+        $jen_bkt=$this->input->post('jen_bkt');
+        $data['resume_mou']=$this->m_pen_lain->ambil_non_bukti($jen_bkt,$jen_pen);
+        switch($jen_bkt){
+            case constant::BUK_BKM:
+                $data['judul']='Daftar MOU yang Belum dibuatkan Bukti Kas Masuk';
+                $data['link']['inputbkm']['judul']="Input Bukti Kas Masuk";
+                $data['link']['inputbkm']['alamat']="bukti_akuntansi/input/".$jen_bkt."/";
+                $data['link']['inputbkm']['img']="add";
+                break;
+            case constant::BUK_BM:
+                $data['judul']='Daftar MOU yang Belum dibuatkan Bukti Memorial';
+                $data['link']['inputbm']['judul']="Input Bukti Memorial";
+                $data['link']['inputbm']['alamat']="bukti_akuntansi/input/".constant::BUK_BM."/";
+                $data['link']['inputbm']['img']="add";
+                break;
+            default :
+                return false;
+                break;
+        }
+        $data['link']['detail']['judul']="Detail Mou";
+        $data['link']['detail']['alamat']="pen_lain/detail/";
+        $data['link']['detail']['img']="detail";
+        
+        $data['jen_bkt']=$jen_bkt;
+        
+        $namafile=$this->m_umum->nama_file($jen_pen);
+        if($namafile){
+            $file_daftar='daftar'.$namafile;
+            $this->load->view('pen_lain/'.$file_daftar,$data);
+        }else return false;
+        
+    }
+    
+    function inputss(){
+        
+        $this->auth->has_privileges('create_surat_setor');
+        
+        $surat_setor=$this->m_lov->get_list_lov(Constant::KAP_SURAT_SETOR);
+        $jss= Array();
+        $jss['']= '~~~ Jenis Surat Setor ~~~';
+        foreach ($surat_setor as $sk){
+            $jss[$sk->kode_value]= $sk->nama_value;
+        }
+        $data['jen_ss']=$jss;
+        
+        $jen_pen=$this->m_lov->get_list_lov(Constant::KAP_JENIS_PENERIMAAN);
+        $result= Array();
+        $result[]= '~~~ Tipe Jasa ~~~';
+        foreach ($jen_pen as $jp){
+            $result[$jp->kode_value]= $jp->nama_value;
+        }
+        unset( $result[constant::MOU_LADIK]);
+        $data['jen_pen']=$result;
+        $data['judul']='Input Surat Setor';
+        $data['title']='Input Surat Setor';
+        $data['link']=site_url('pen_lain/inputss_per_mou');
+        $this->template->load('template','pen_lain/kepala_ss',$data);
+    }
+    
+    function inputss_per_mou(){
+        
+        $this->auth->has_privileges('create_surat_setor');
+        
+        $jen_pen=$this->input->post('jen_pen');
+        $jen_ss=$this->input->post('jen_ss');
+        $data['judul']='Daftar MOU yang Belum dibuatkan Surat Setor';
+        $data['resume_mou']=$this->m_pen_lain->ambil_non_ss($jen_ss,$jen_pen);
+        $data['is_add_bkm']=true;
+        
+        switch($jen_ss){
+            case constant::SS_SS:
+                $data['judul']='Daftar MOU yang Belum dibuatkan Surat Setor';
+                $data['link']['inputss']['judul']="Input Surat Setor";
+                $data['link']['inputss']['alamat']="surat_setor/input/".$jen_ss."/";
+                $data['link']['inputss']['img']="add";
+                break;
+            case constant::SS_SSBP:
+                $data['judul']='Daftar MOU yang Belum dibuatkan Surat Setor Bukan Pajak';
+                $data['link']['inputssbp']['judul']="Input Surat Setor Bukan Pajak";
+                $data['link']['inputssbp']['alamat']="surat_setor/input/".$jen_ss."/";
+                $data['link']['inputssbp']['img']="add";
+                break;
+            case constant::SS_SSPB:
+                $data['judul']='Daftar MOU yang Belum dibuatkan Surat Setor Pengembalian Belanja';
+                $data['link']['inputsspb']['judul']="Input Bukti Pengembalian Belanja";
+                $data['link']['inputsspb']['alamat']="surat_setor/input/".$jen_ss."/";
+                $data['link']['inputsspb']['img']="add";
+                break;
+            default :
+                return false;
+                break;
+        }
+        
+        $data['link']['detail']['judul']="Detail Mou";
+        $data['link']['detail']['alamat']="pen_lain/detail/";
+        $data['link']['detail']['img']="detail";
+        
+        $file_daftar='daftar'.$this->m_umum->nama_file($jen_pen);
+        $this->load->view('pen_lain'.'/'.$file_daftar,$data);
+    }
+    
+    function status($jenis,$id){
+        //TODO: ijinkan hanya ajax request
+        $this->load->model('m_bukti_akuntansi');
+        $this->load->model('m_surat_setor');
+        $data['jenis']=$jenis;
+        $data['id']=$id;
+        
+        switch($jenis){
+            case Constant::MOU_LADIK_LAIN :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                $data['ssbp'] = $this->m_surat_setor->detail_by_kode(constant::SS_SSBP,$jenis,$id);
+                break;
+            case Constant::MOU_HIBAH_TERENCANA :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                $data['ssbp'] = $this->m_surat_setor->detail_by_kode(constant::SS_SSBP,$jenis,$id);
+                break;
+            case Constant::MOU_PPPMAS :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                break;
+            case Constant::MOU_HIBAH_TAKTER :
+                $hibah_takter=$this->m_pen_lain->ambil_detail($jenis,$id);
+                if($hibah_takter->bentuk_hibah==='Uang'){
+                    $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                    $data['ssbp'] = $this->m_surat_setor->detail_by_kode(constant::SS_SSBP,$jenis,$id);
+                }else{
+                    $data['bm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BM,$jenis,$id);
+                }
+                break;
+            case Constant::MOU_UNIT_USAHA :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                break;
+            case Constant::MOU_ASET :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                break;
+            case Constant::MOU_ASET_RUTIN :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                break;
+            case Constant::MOU_INVESTASI :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                break;
+            case Constant::MOU_JASA_GIRO :
+                $data['bkm'] = $this->m_bukti_akuntansi->detail_by_kode(constant::BUK_BKM,$jenis,$id);
+                break;
+            default:
+                return false;
+                break;
+        }
+        $this->load->view('pen_lain/status',$data);
+    }
+    
+}

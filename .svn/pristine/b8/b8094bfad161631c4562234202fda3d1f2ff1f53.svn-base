@@ -1,0 +1,80 @@
+<script language="javascript">
+  function validasi(form){
+  
+  if (form.status.value == "setuju_verifikasi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  }
+  if (form.status.value == "terotorisasi_kaprodi"){
+    alert("Maaf Rincian UP anda sudah diverifikasi oleh verifikator Unit.");  
+    return (false);
+  } 
+  return (true);
+  }
+</script>
+
+<article class="module width_full">
+            <header><h3>Daftar SPM UP (Uang Persediaan)</h3></header>
+                     
+                <div class="module_content">
+                   
+                <form method="post" name='formName4' action="" > 
+     
+    <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+            <tr >
+                <th>No</th>
+                <th>Fakultas</th>
+                <th>Nomor SPM</th>
+                <th>Jumlah Rp.</th>
+                <th>Status SPM</th>
+                <th colspan="2">Aksi</th>
+            </tr>
+            </thead>
+            <?php //echo $this->db->last_query();
+            if($jum_spm > 0){
+            $no = 1; 
+            foreach($daftar_spm->result_array() as $row)
+            {  
+            $id=$row['id_spm'];
+            $th_spm=$row['th_spm'];   
+            $nama_unit=$row['nama_unit'];   
+            $status_spm=$row['status_spm'];
+            $jum=$row['jumlah'];  
+            $jumlah = number_format($jum,0,",",".");
+            
+            $nmr=$row['no_spm']; 
+            $tahun=$row['th_spm']; 
+            $kode_digit=$row['kode_digit']; 
+            $singkat=$row['singkat'];
+            
+            $th= '20'.$tahun;
+            $nomor = sprintf("%04d", $nmr);      
+            ?> 
+              <tr>
+                <td align='center'><?php echo "$no";?></td>
+                <td align="center"><?php echo "$nama_unit";?></td>
+                <td align="center"><?php echo "$nomor/$singkat/$kode_digit/$th";?></td>
+                <td align="center"><?php echo"$jumlah";?></td>
+                <td align="center"><?php echo"$status_spm";?></td>
+                <td align="center"><a href='<?php echo base_url()."unit/data_terceklist_unit/".$th_spm."/".$id;?>' title='Lihat Detail Kelengkapan Dokumen' ><img src='<?php echo base_url();?>asset/images/icn_edit_article.png'></a></td>
+                
+                <td align="center"><a href='<?php echo base_url()."unit/kirim_ulang_kepusat/".$th_spm."/".$id;?>' title='Kirim kembali ke Pusat' onclick="return confirm('Apakah anda yakin ingin mengirim kembali SPM ini ke pusat?')"><img src='<?php echo base_url();?>asset/images/icn_alert_success.png'></a></td>
+
+              <?php }?> 
+              </tr>  
+            <?php $no++ 
+            ?>
+            <?php }else{ ?> 
+            <tr>
+                <td align='center' colspan="7" style="padding-top: 20px; padding-bottom: 20px;">Data Kosong</td>
+            </tr>        
+            <?php } ?>
+ </table>
+ </div>    
+     <footer>
+            <div class="submit_link">  
+                    <input type="button" value="Kembali" onclick=self.history.back() > 
+            </div>
+     </footer> 
+</article>

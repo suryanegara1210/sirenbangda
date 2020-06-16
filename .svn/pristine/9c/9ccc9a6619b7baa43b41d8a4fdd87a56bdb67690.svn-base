@@ -1,0 +1,446 @@
+<?php /**
+    * @brief Model Class yang terkait dengan Pembuatan Laporan Akuntansi
+    * Rekap di bendahara Pengeluaran
+    *
+    * Class Model ini untuk mengelola proses pembuatan Laporan Akuntansi
+    * Jurnal dan Buku Besar
+    *
+    * @author I Wayan Shandyasa
+    */
+class M_Rekap extends CI_Model {
+
+	public function __construct()
+	{
+		parent::__construct();
+	}
+	/**
+	* Fungsi mengambil data spm dan sp2d yang sudah dicairkan
+	* @return query array data pengumuman    
+	*/
+	function data_sp2dcair($bulanx,$bulany,$tahun, $unit){
+        if ($unit == '-1') {
+            $unit="";
+        }else{
+            $unit="AND a.id_unit =".$unit;
+        }
+
+        /*$qf=$this->db->query("
+			SELECT b.`no_spm`,b.`tgl_spm`,b.`cara_bayar` 
+			FROM t_sp2d a
+			INNER JOIN t_spm b
+			ON a.`id_spm` = b.`id_spm` 
+			WHERE a.id_status_sp2d='73'
+			AND YEAR( a.tgl_sp2d)='$tahun' 
+			AND MONTH( a.tgl_sp2d) BETWEEN '$bulanx' AND '$bulany'
+            ".$unit."
+			");*/
+        $qf=$this->db->query("
+                    SELECT * FROM (
+                        (SELECT m_unit.`nama_unit`,t_sp2d.`no_sp2d`,t_sp2d.`id_sp2d`, t_sp2d.`sifat_bayar`,
+                            a.`kdoutput`,a.`kdakun`,a.`kdgiat`,a.`kdkomponen`,t_sp2d.`tgl_sp2d`,
+                            YEAR(t_sp2d.tgl_sp2d) AS thn, SUM(nominal) AS jumlah, t_spm.id_spm, t_spm.no_spm,t_sptb.id_sptb, t_sptb.no_sptb,
+                            GROUP_CONCAT(DISTINCT(a.akun_kode)) as bas, id_buktitrans, id_buktitrans2
+                        FROM t_kwitansi a
+                        INNER JOIN t_sp2d ON t_sp2d.id_sp2d = a.id_sp2d
+                        INNER JOIN m_unit ON m_unit.`id_unit` = a.`id_unit`
+                        INNER JOIN t_spm ON t_spm.id_spm = a.id_spm
+                        INNER JOIN t_sptb ON t_sptb.id_sptb = a.id_sptb
+                        WHERE t_sp2d.`id_status_sp2d` = '73'
+                        AND MONTH(t_sp2d.tgl_sp2d) >= $bulanx
+                        AND MONTH(t_sp2d.tgl_sp2d) <= $bulany
+                        AND YEAR( t_sp2d.tgl_sp2d)=$tahun
+                        AND ((t_sp2d.`sifat_bayar` != 'GUP' AND id_buktitrans IS NULL) OR (t_sp2d.`sifat_bayar` = 'GUP' AND (id_buktitrans IS NULL OR id_buktitrans2 IS NULL)))
+                        ".$unit."
+                        GROUP BY t_sp2d.id_sp2d) 
+                        UNION 
+                        (SELECT m_unit.`nama_unit`,t_sp2d.`no_sp2d`,t_sp2d.`id_sp2d`, t_sp2d.`sifat_bayar`,
+                            '',a.`akun_kode` as kdakun, '','', t_sp2d.`tgl_sp2d`, YEAR(t_sp2d.`tgl_sp2d`) AS thn,
+                            SUM(total_usulan) AS jumlah, t_spm.id_spm, t_spm.no_spm, '', '',
+                            '' as bas, '', ''
+                        FROM t_usulan a
+                        INNER JOIN t_sp2d ON t_sp2d.`id_spm` = a.`ref_id_spm`
+                        INNER JOIN m_unit ON m_unit.`id_unit` = a.`id_unit`
+                        INNER JOIN t_spm ON t_spm.id_spm = a.ref_id_spm
+                        WHERE t_sp2d.`id_status_sp2d` = '73'
+                        AND MONTH(t_sp2d.tgl_sp2d) >= $bulanx
+                        AND MONTH(t_sp2d.tgl_sp2d) <= $bulany
+                        AND YEAR( t_sp2d.tgl_sp2d)=$tahun
+                        AND id_buktitrans IS NULL
+                        ".$unit."
+                        GROUP BY t_sp2d.id_sp2d)
+                    ) AS vw_sp2d
+                    ORDER BY tgl_sp2d ASC
+                    ");                    
+		return $qf->result();
+	}
+
+    function select_sp2dcair($id_sp2d){
+        $qf=$this->db->query("
+                    (SELECT 
+                        id_unit,nama_unit,no_sp2d,id_sp2d, id_spm,sifat_bayar,kdoutput,kdakun,kdgiat,kdkomponen,tgl_sp2d, thn, SUM(jumlah) AS jumlah, id_spm, no_spm,id_sptb, no_sptb, GROUP_CONCAT(bas) as bas, GROUP_CONCAT(bas_jml) as bas_jml, uraian_spm, GROUP_CONCAT(akun_nama SEPARATOR '#=#') as akun_nama
+                    FROM 
+                        (SELECT 
+                            m_unit.id_unit,m_unit.`nama_unit`,t_sp2d.`no_sp2d`,t_sp2d.`id_sp2d`, t_sp2d.`id_spm`,t_sp2d.`sifat_bayar`, a.`kdoutput`,a.`kdakun`,a.`kdgiat`,a.`kdkomponen`,t_sp2d.`tgl_sp2d`, YEAR(t_sp2d.tgl_sp2d) AS thn, SUM(nominal) AS jumlah, t_spm.no_spm,t_sptb.id_sptb, t_sptb.no_sptb, a.akun_kode as bas, SUM(nominal) as bas_jml, t_spm.uraian_spm, m_bas.akun_nama
+                        FROM t_kwitansi a 
+                        INNER JOIN t_sp2d ON t_sp2d.id_sp2d = a.id_sp2d 
+                        INNER JOIN m_unit ON m_unit.`id_unit` = a.`id_unit` 
+                        INNER JOIN t_spm ON t_spm.id_spm = a.id_spm 
+                        INNER JOIN t_sptb ON t_sptb.id_sptb = a.id_sptb 
+                        LEFT JOIN m_bas ON m_bas.akun_kode=a.akun_kode
+                        WHERE t_sp2d.`id_sp2d` = '". $id_sp2d ."'
+                        GROUP BY a.akun_kode) AS vw 
+                    GROUP BY vw.id_sp2d) 
+                    UNION 
+                    (SELECT 
+                        m_unit.id_unit,m_unit.`nama_unit`,t_sp2d.`no_sp2d`,t_sp2d.`id_sp2d`, t_sp2d.`id_spm`,t_sp2d.`sifat_bayar`, '',a.`akun_kode` as kdakun, '','', t_sp2d.`tgl_sp2d`, YEAR(t_sp2d.`tgl_sp2d`) AS thn, SUM(total_usulan) AS jumlah, t_spm.id_spm, t_spm.no_spm, '', '', '' as bas, '', t_spm.uraian_spm, ''
+                    FROM t_usulan a 
+                    INNER JOIN t_sp2d ON t_sp2d.`id_spm` = a.`ref_id_spm` 
+                    INNER JOIN m_unit ON m_unit.`id_unit` = a.`id_unit` 
+                    INNER JOIN t_spm ON t_spm.id_spm = a.ref_id_spm                     
+                    WHERE t_sp2d.`id_sp2d` = '". $id_sp2d ."'
+                    GROUP BY t_sp2d.id_sp2d)
+                    ");                    
+        return $qf->row();
+    }
+
+    function update_buktitrans($master){
+        $this->db->where('id_sp2d',$master->id_sp2d);
+        $status=$this->db->update('t_sp2d', $master);
+        if(!$status){
+            return false;
+        }else{
+            return $master->id_sp2d;
+        }
+    }
+    
+    function ada_ls_sp2d_blm_cair($id_unit){
+        $this->db->from('t_kwitansi');
+        $this->db->join('t_sp2d','t_kwitansi.id_sp2d=t_sp2d.id_sp2d');
+        $this->db->where('t_kwitansi.sifat_bayar', constant::JB_LS);
+        $this->db->where('t_sp2d.id_status_sp2d', constant::SP2D_DICAIRKAN);
+        //$this->db->where("t_kwitansi.id_subunit IN (SELECT id_subunit FROM m_subunit where id_unit='$id_unit')",null,false);
+        if($id_unit!='-1'){
+            $this->db->where('id_unit',$id_unit);
+        }
+        $query=$this->db->get();
+        if ($query->num_rows()>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    function ada_gup_blm_otor_kaprodi($id_unit){
+        $this->db->from('t_kwitansi');
+        $this->db->where('t_kwitansi.sifat_bayar', constant::JB_GUP);
+        //FIXME: oto kaprodi brp kodenya?
+        $this->db->where('t_kwitansi.id_status_kwitansi', constant::KWITANSI_OK);
+        if($id_unit!='-1'){
+            $this->db->where('id_unit',$id_unit);
+        }
+        $query=$this->db->get();
+        if ($query->num_rows()>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+	
+	function daftar_jurnal($bulan,$tahun){
+		$qf=$this->db->query("
+					SELECT b.`no_spm`,b.`tgl_spm`,b.`cara_bayar` FROM t_sp2d a
+INNER JOIN t_spm b
+ON a.`id_spm` = b.`id_spm` 
+WHERE a.id_status_sp2d='73'
+AND YEAR( a.tgl_sp2d)='2014' 
+AND MONTH( a.tgl_sp2d) BETWEEN '02' AND '02'
+				");
+		return $qf->result();
+	}
+	
+	function ambil_akun(){
+            $qf=$this->db->query("
+				SELECT DISTINCT akun_kode, CONCAT(akun_kode, ' - ', akun_nama) AS nmakun
+            	FROM m_bas
+            	WHERE SUBSTRING(akun_kode,7,6)
+			");
+			        
+            foreach ($qf->result() as $row){
+                $result['']= '-- Semua Akun  --';
+                $result[$row->akun_kode]= $row->nmakun;
+            }
+            return $result;
+    }
+	
+	function simpan_jurnal($bulan,$tahun){
+		$nowFormat = date('Y-m-d H:i:s');
+		$qf=$this->db->query("
+					INSERT INTO
+						t_jurnal(`id_bukti`,`no_bukti`,`jenis`,`akun_bas`,`id_subunit`,`keterangan`,
+						`debet`,`kredit`,`tgl_buku`,`tgl_transaksi`,`created_by`,`created_date`,
+						`changed_by`,`changed_date`)
+					SELECT a.id_bukti, a.no_bukti,
+						a.jenis_bukti, b.akun_bas, a.id_subunit, b.uraian,
+						b.debet, b.kredit, '$nowFormat', 
+						a.tgl_bukti, a.created_by, a.created_date,
+						a.changed_by, a.changed_date
+					FROM t_bukti_akuntansi a JOIN t_bukti_det b 
+					ON a.id_bukti = b.id_bukti
+					WHERE YEAR( a.created_date)='$tahun' 
+					AND MONTH( a.created_date)<='$bulan'
+					AND a.`status_posting`='0'
+					");
+					//return $qf;
+	}
+	
+	function update_status_posting($bulan,$tahun){
+		$nowFormat = date('Y-m-d H:i:s');
+		$qf=$this->db->query("
+					UPDATE t_bukti_akuntansi
+						SET status_posting='1' , 
+						tgl_posting='$nowFormat'
+					WHERE 
+					YEAR( t_bukti_akuntansi.created_date)='$tahun' 
+					AND MONTH( t_bukti_akuntansi.created_date)<='$bulan'
+					AND t_bukti_akuntansi.status_posting='0' 
+					");
+		
+	} 
+	
+	function id_jurnal(){
+		$this->db->select('id_jurnal');
+		$this->db->distinct();
+		$this->db->from('t_jurnal');
+		$result = $this->db->get();    
+		return $result->row();
+	}
+	
+	function jurnal_daftar_ambil($bulan,$tahun,$akun_kode){
+		$qf=$this->db->query("
+					SELECT t_jurnal.*, t_jurnal.`keterangan` AS ket
+					FROM m_bas
+					INNER JOIN t_jurnal
+					ON t_jurnal.`akun_bas` = m_bas.`akun_kode`
+					WHERE YEAR( t_jurnal.created_date)='$tahun'
+					AND MONTH( t_jurnal.created_date)<='$bulan'
+					AND t_jurnal.`akun_bas` LIKE '$akun_kode%' 
+					ORDER BY t_jurnal.debet desc 
+				");
+		return $qf->result();
+	}
+    
+    
+    
+    /**
+    * Ambil skema pembayaran
+    * @return array skema pembayaran
+    */
+    function aruskas_jenis_ambil(){
+        $this->db->from('m_arus_kas');
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function aruskas_jenis_save($id, $kode, $deskripsi){
+        $this->db->set('kode_arus_kas', $kode);
+        $this->db->set('deskripsi', $deskripsi);
+        if ($id==='' || $id===false){
+            $this->db->set('created_date', date('Y-m-d H:i:s'));
+            $this->db->set('created_by', $this->session->userdata('username'));
+            $hasil=$this->db->insert('m_arus_kas');
+            if($hasil){
+                return "Berhasil menambahkan";
+            }
+        }else{
+            $this->db->set('changed_date', date('Y-m-d H:i:s'));
+            $this->db->set('changed_by', $this->session->userdata('username'));
+            $this->db->where('id_arus_kas', $id);
+            $hasil=$this->db->update('m_arus_kas');
+            if($hasil){
+                return "Berhasil memperbaharui";
+            }
+        }
+        return false;
+    }
+    
+    function aruskas_jenis_del($id){
+        $this->db->where('id_arus_kas', $id);
+        $hasil=$this->db->delete('m_arus_kas');
+        if($hasil){
+            return "Berhasil menghapus";
+        }else return false;
+    }
+    
+    //item
+    function aruskas_item_ambil($id,$jenis_arus=''){
+        $this->db->from('m_arus_kas_detail');
+        if($jenis_arus==='keluar'){
+            $this->db->where('jenis_arus_kas','ARUS KELUAR');
+        }else{
+            $this->db->where('jenis_arus_kas','ARUS MASUK');
+        }
+        $this->db->where('id_arus_kas',$id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function aruskas_item_save($iditem,$item){
+        if ($iditem===''){
+            $item->created_date=date('Y-m-d H:i:s');
+            $item->created_by=$this->session->userdata('username');
+            $hasil=$this->db->insert('m_arus_kas_detail',$item);
+            if($hasil){
+                return "Berhasil menambahkan";
+            }
+        }else{
+            $item->changed_date=date('Y-m-d H:i:s');
+            $item->changed_by=$this->session->userdata('username');
+            $this->db->where('id_rincian',$iditem);
+            $hasil=$this->db->update('m_arus_kas_detail',$item);
+            if($hasil){
+                return "Berhasil memperbaharui";
+            }
+        }
+        return false;
+    }
+    
+    function aruskas_item_del($id){
+        $this->db->where('id_rincian', $id);
+        $hasil=$this->db->delete('m_arus_kas_detail');
+        if($hasil){
+            return "Berhasil menghapus";
+        }else return false;
+    }
+    
+    //rincian
+    function aruskas_rincian_ambil($id){
+        $this->db->select('akun_nama,kode_bas,id_arus_kas_bas');
+        $this->db->from('m_arus_kas_detail_bas');
+        $this->db->join('m_bas','m_arus_kas_detail_bas.kode_bas=akun_kode');
+        $this->db->where('id_rincian',$id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function aruskas_rincian_save($idrincian,$rincian){
+        if ($idrincian===''){
+            $item->created_date=date('Y-m-d H:i:s');
+            $item->created_by=$this->session->userdata('username');
+            $hasil=$this->db->insert('m_arus_kas_detail_bas',$rincian);
+            if($hasil){
+                return "Berhasil menambahkan";
+            }
+        }else{
+            $item->changed_date=date('Y-m-d H:i:s');
+            $item->changed_by=$this->session->userdata('username');
+            $this->db->where('id_arus_kas_bas',$idrincian);
+            $hasil=$this->db->update('m_arus_kas_detail_bas',$rincian);
+            if($hasil){
+                return "Berhasil memperbaharui";
+            }
+        }
+        return false;
+    }
+    
+    function aruskas_rincian_del($id){
+        $this->db->where('id_arus_kas_bas', $id);
+        $hasil=$this->db->delete('m_arus_kas_detail_bas');
+        if($hasil){
+            return "Berhasil menghapus";
+        }else return false;
+    }
+    
+    function aktivitas($th,$bln,$mulai,$akhir,$level){
+        $query = " CALL laporan_aktivitas(?, ?, ?, ?, ?) ";
+        $par = array($th,$bln,$mulai,$akhir,$level);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function neraca($th,$bln,$mulai,$akhir){
+        $query = " CALL laporan_aktivitas(?, ?, ?, ?) ";
+        $par = array($th,$bln,$mulai,$akhir);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function arus_kas($th,$bln){
+        $query = " CALL laporan_arus_kas(?, ?) ";
+        $par = array($th,$bln);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function buku_besar($th,$bln,$mulai,$akhir){
+        $query = " CALL laporan_aktivitas(?, ?, ?, ?) ";
+        $par = array($th,$bln,$mulai,$akhir);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function neraca_saldo($th,$bln,$subunit,$minlev){
+        $query = " CALL laporan_neraca_saldo(?,?,?,?) ";
+        $par = array($th,$bln,$subunit,$minlev);
+        $result = $this->db->query($query, $par);
+        return $result->result();
+    }
+    function unit_get_all(){
+        $this->db->select('m_unit.id_unit,nama_unit,kunci');
+        $this->db->from('m_unit');
+        $this->db->join('t_kunci_jurnal','m_unit.id_unit=t_kunci_jurnal.id_unit','left');
+        $query=$this->db->get();
+        return $query->result();
+    }
+    function kunci_jurnal_save($kunci){
+        date_default_timezone_set('Etc/GMT-8');
+                
+        $this->db->trans_strict(FALSE);
+        $this->db->trans_start();
+        
+        $this->db->truncate('t_kunci_jurnal'); 
+        
+        foreach ($kunci as $id_unit=>$iskunci){
+            echo $id_unit." - ".$iskunci;
+            $this->db->set('kunci',$iskunci);
+            $this->db->set('id_unit',$id_unit);
+            $this->db->set('created_date',date('Y-m-d H:i:s'));
+            $this->db->set('created_by',$this->session->userdata('username'));
+            $this->db->insert('t_kunci_jurnal');
+        }
+        
+        $this->db->trans_complete();
+        if($this->db->trans_status() === true){
+            $this->session->set_userdata('msg_typ','ok');
+            $this->session->set_userdata('msg', 'Berhasil memverifikasi.');
+            redirect('report/kunci_jurnal');
+        } else {
+            $this->session->set_userdata('msg_typ','err');
+            $this->session->set_userdata('msg', 'GAGAL memverifikasi.');
+            redirect('report/kunci_jurnal');
+        }
+    }
+    function cek_kunci($id,$tipe='unit'){
+        $this->db->select('kunci');
+        $this->db->from('t_kunci_jurnal');
+        if($id!='-1'){
+            if($tipe=='unit'){
+                $this->db->where('id_unit',$id);
+            }else{
+                $subunit=$this->m_umum->subunit_detail($id);
+                if(isset($subunit->id_unit)){
+                    $this->db->where('id_unit',$subunit->id_unit);
+                }else{
+                    return false;
+                }
+            }
+        }
+        
+        
+        $query=$this->db->get();
+        $kunci = $query->row();
+        
+        if(isset($kunci->kunci) && $kunci->kunci=='1'){
+            return true;
+        }else{
+            return false;
+        }
+        
+    }
+       
+}
+// perbaikan m_rekap query

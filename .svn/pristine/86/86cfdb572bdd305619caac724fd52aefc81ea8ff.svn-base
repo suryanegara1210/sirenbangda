@@ -1,0 +1,129 @@
+<article class="module width_full">
+<header>
+	<h3>Posting Jurnal - Buku Besar</h3>
+</header>
+
+<div class="module_content">
+                   
+<form method="post" name='form_jurnal' action="<?php echo base_url();?>report/simpan_jurnal" onSubmit='return validasi(this)'> 
+<table cellspacing="0" >    
+	<tr>
+    	<td width="140">Jenis Bukti Transaksi</td>
+        <td width="">Periode Awal</td>
+        <td width="">Periode Akhir</td>
+        <td width="">Tahun</td>
+        <td width="100" colspan="2">Unit</td>
+        
+    </tr>
+    <tr>
+        <td>            
+            <?php echo form_dropdown("jen_bkt",$jen_bkt,"","id='jen_bkt'"); ?>
+        </td>
+        <td><select name="bulan" id="bulan">        		
+                <option value="01">Januari</option>
+                <option value="02">Pebruari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </td>
+        <td><select name="bulan2" id="bulan2">        		
+                <option value="01">Januari</option>
+                <option value="02">Pebruari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </td>
+        <td><select name="tahun" id="tahun">
+        		<option value="<?php echo $ta; ?>"><?php echo $ta; ?></option>
+        	</select>
+        </td>
+        <td>
+            <?php echo form_dropdown("unit_drp",$unit,"","id='unit_drp' style=\"max-width: 300px;\""); ?>
+        </td>
+        <td>
+        	<input type="button" value="Tampil" name="tampil" id="tampil" onClick="viewAll()">
+            <input type="button" value="Ulangi" name="ulang" id="ulang" onClick="location.reload();">
+        </td>
+    </tr>  
+</table> 
+
+
+<table><div id='tabel'></div> </table>
+</div>
+</article> 
+
+<script>
+function viewAll(){
+	var bulan= $("#bulan").val();
+	var bulan2= $("#bulan2").val();
+	var tahun= $("#tahun").val();
+	var unit= $("#unit_drp").val();
+    var jen_bkt= $("#jen_bkt").val();
+    
+	$.ajax({
+		type: "POST",
+		url : "<?php echo site_url('report/select_tahun')?>",
+		data: { bulan:bulan, bulan2: bulan2, tahun: tahun,unit:unit, jen_bkt:jen_bkt},
+		success: function(msg){
+			$('#tabel').html(msg);
+			
+    		var sum_debet= $("#sum_debet").val();
+    		var sum_kredit= $("#sum_kredit").val();
+    		
+    		if(sum_debet!=sum_kredit){
+    			$('#simpan').attr("disabled", "disabled");
+    		}else{
+    			$('#simpan').removeAttr('disabled');
+    		}
+		  
+            $("#bulan").prop("disabled",true);
+            $("#bulan2").prop("disabled",true);
+            $("#tahun").prop("disabled",true);
+            $("#unit_drp").prop("disabled",true);
+            $("#jen_bkt").prop("disabled",true);
+            $("#tampil").prop("disabled",true);
+		}
+	});
+ }
+ 
+function simpanlah(){
+        if (confirm('Apakah Anda Yakin untuk Memposting ke Jurnal ?')){
+			var bulan= $("#bulan").val();
+			var bulan2= $("#bulan2").val();
+			var tahun= $("#tahun").val();
+			var sum_debet= $("#sum_debet").val();
+			var sum_kredit= $("#sum_kredit").val();
+            var jen_bkt= $("#jen_bkt").val();            
+            var unit= $("#unit_drp").val();
+            var saldo= $("#saldo").val();
+            var cmt= $("#cmt").val();			
+			var idVar = {saldo:saldo, bulan :bulan, bulan2: bulan2, tahun: tahun, id_unit: unit, jen_bkt:jen_bkt, cmt:cmt};
+			$.ajax({
+					type: "POST",
+					url : "<?php echo site_url('report/buat_jurnal')?>",
+					data: idVar,
+					success: function(msg){
+					   alert ('Data Berhasil Disimpan');
+					   location.reload();
+					}
+			  });
+			
+        }
+    }
+</script>  

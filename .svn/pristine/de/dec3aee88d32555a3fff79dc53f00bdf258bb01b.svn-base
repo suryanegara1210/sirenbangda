@@ -1,0 +1,98 @@
+<article class="module width_full">
+<?php foreach($daftar_up->result_array() as $row){ $nama_unit = $row['nama_subunit'];}?>
+<header><h3>Detail Rincian UP (Uang Persediaan) <?php echo "$nama_unit"; ?> </h3></header>
+                     
+            <div class="module_content">
+            <form method="post" name='formName4' action="<?php echo base_url();?>index.php/unit/verifikasi" onSubmit='return validasi(this)'> 
+             <?php /*?>
+            <table style="margin-left: 20px; margin-top: 10px;">
+            <?php foreach($daftar_up->result_array() as $row)
+                    { $tgl = $row['tgl_pengajuan'];
+            $tgl_skr = date('d');
+            $date=substr($tgl,8,2);        
+            if ($tgl_skr<$date) {     
+                $lama=30-($date-$tgl_skr);
+                }else {    
+                $lama=abs($tgl_skr-$date);
+                }
+            }
+            
+            ?> 
+            <tr><td>Time Elapsed : <?php if($lama=='0'){?>
+                 <img src='<?php echo base_url();?>asset/images/cool.gif'>
+            <?php }elseif($lama=='1'){ ?>
+                 <img src='<?php echo base_url();?>asset/images/annoyed.gif'>
+            <?php }elseif($lama > '1'){ ?>
+                 <img src='<?php echo base_url();?>asset/images/angry.gif'>
+            <?php }?>
+            </td></tr>
+            </table><?php */?>
+            <?php foreach($daftar_up->result_array() as $row)
+            {  
+            $id_subunit=$row['id_subunit']; 
+            $kode_subunit=$row['kode_subunit']; 
+            $id=$row['id_transaksi']; 
+            $kd_output= $row['kdoutput'];
+            $kd_komponen= $row['kdkomponen'];
+            $nama_output= $row['nmoutput'];
+            $nama_komponen= $row['nmkomponen'];
+            $kd_akun= $row['kdakun'];
+            $nmakun= $row['nmakun'];   
+            $header= $row['nmheader'];    
+            $jm=$row['jumlah'];
+            $jumlah = number_format($jm,0,",",".");    
+            ?>
+              
+            <table  class="table-common" style="margin-left: 20px; width: 780px;" >  
+             <thead> 
+                <tr >
+                <th>Kode Output / Kode Komponen <br> / Kode Akun </th>
+                <th>Output / Komponen / Nama Akun / Header</th>
+                <th>Jumlah (Rp.)</th> 
+                </tr>
+             </thead>
+               
+              <input type="hidden" name="id_transaksi" value="<?php echo "$id"; ?>"> 
+              <input type="hidden" name="kode_unit" value="<?php echo "$id_subunit"; ?>"> 
+              <tr>
+                <td align='left'><?php echo "$kd_output";?></td>
+                <td><?php echo "$nama_output";?></td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kd_komponen";?></td>
+                <td><?php echo "$nama_komponen";?></td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'><?php echo "$kd_output.$kd_komponen.$kd_akun";?></td>
+                <td><?php echo "$nmakun";?></td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td align='left'>Header</td>
+                <td><?php echo "$header";?></td>
+                <td align="right"><?php echo "$jumlah";?></td>
+              </tr>
+           
+              <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              
+             <table style="padding-left: 20px;" >
+                    <tr><td style="font-size: 16px; background-color: gray;" width="10px" ><a href="javascript:Start('<?php echo base_url();?>index.php/unit/tampil_pagu/<?php echo"$kode_subunit" ?>')" title='Daftar Pagu'>Pagu</a></td></tr>
+             </table>
+
+
+              <?php }?>
+
+ </table>   
+ </div>
+ <footer> 
+                    <div class="submit_link">     
+                        <input type="button" value="Kembali" onclick=self.history.back() > 
+                    </div>  
+            </footer>
+ </article>

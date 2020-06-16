@@ -1,0 +1,52 @@
+<form action="<?php echo site_url('report/kunci_jurnal_save');?>" method="POST" id="kunci_jurnal" name="kunci_jurnal" accept-charset="UTF-8">
+<article class="module width_full">
+    <header><h3>Laporan Neraca</h3></header>
+        <div class="module_content">
+            <input type="button" onclick="javascript:checkAll('kunci_jurnal', true);" value="Cawang Semua" class="alt_btn">
+            <table class="table-common" align="center" style="width: 98%;">
+                <tr>
+                    <th>No</th>
+                    <th>Nama Unit</th>
+                    <th>Kunci</th>
+                </tr>
+                <?php
+                    $no=1;
+                    foreach ($unit as $un){
+                        if($un->kunci == '1'){
+                            $cek='checked class="readonly"';
+                        }else{
+                            $cek='';
+                        }
+                    echo "<tr>
+                            <td> $no </td>
+                            <td> $un->nama_unit </td>
+                            <td align=\"center\"><input type=\"checkbox\" name=\"kunci[$un->id_unit]\"  value=\"1\" $cek /></td>
+                        </tr>";
+                
+                    $no++;
+                    }
+                ?>
+            </table>
+        </div>
+        <footer>
+				<div class="submit_link" id="submit_link">
+                    <input type="button" onclick="javascript:checkAll('kunci_jurnal', false);" value="Batal" class="alt_btn">                    <input type="submit" value="Simpan" class="alt_btn">
+                </div>
+			</footer>
+</article>
+<script>
+function checkAll(formname, checktoggle){
+    var checkboxes = new Array(); 
+    checkboxes = document[formname].getElementsByTagName('input');
+
+    for (var i=0; i<checkboxes.length; i++){
+        if (checkboxes[i].type == 'checkbox'){
+            if(checkboxes[i].className != 'readonly'){
+                checkboxes[i].checked = checktoggle;
+            }else{
+                checkboxes[i].checked = true;
+            }
+        }
+    }
+}
+</script>

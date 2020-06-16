@@ -1,0 +1,35 @@
+<article class="module width_full">
+    <header><h3><?php echo $judul; ?></h3></header>
+        <div class="module_content">
+            <div id="jbkt" style="margin-right: 10px; float:left; max-width: 250px;">
+                Jenis Surat Setor<br/>
+                <?php echo form_dropdown("jen_ss",$jen_ss,"","id='jen_ss' style=\"max-width: 250px;\""); ?>
+            </div>
+            <div id="jpen" style="margin-right: 10px; float:left; ">
+                Jenis Penerimaan<br/>
+                <?php echo form_dropdown("jen_pen",$jen_pen,"","id='jen_pen'"); ?>
+            </div>
+            <div id="cr" style="margin-right: 10px;float:left;">
+                Tampilkan:<br/>
+                <input type="button" id="cari" value="Tampilkan" onclick="ambildata()" />
+            </div>
+        </div>
+</article>
+
+<div id="input_form"></div>
+
+<script type="text/javascript">
+    function ambildata(){
+        var jen_pen= $("#jen_pen").val();
+        var jen_ss= $("#jen_ss").val();
+        $.ajax({
+                type: "POST",
+                url : "<?php echo $link;?>",
+                data: { jen_pen: jen_pen,jen_ss:jen_ss },
+                success: function(msg){
+                        $('#input_form').html('');
+                        $('#input_form').html(msg);
+                }
+        });
+    }
+</script>

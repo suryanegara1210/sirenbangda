@@ -1,0 +1,10 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+
+ERROR - 2013-08-30 12:22:25 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\controllers\common.php 362
+ERROR - 2013-08-30 12:22:25 --> Severity: Notice  --> Undefined variable: jns_belanja C:\xampp\htdocs\siaku\application\models\m_pok.php 323
+ERROR - 2013-08-30 12:22:45 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 34
+ERROR - 2013-08-30 12:22:45 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 36
+ERROR - 2013-08-30 12:22:45 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 40
+ERROR - 2013-08-30 12:22:45 --> Severity: Notice  --> Undefined property: stdClass::$subtotal C:\xampp\htdocs\siaku\application\views\kwitansi\rincian_honor\rincian_honor_5.php 42
+ERROR - 2013-08-30 12:38:54 --> Query error: Unknown column 'volume' in 'field list'
+ERROR - 2013-08-30 12:59:38 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`siaku_db`.`t_kwitansi`, CONSTRAINT `fk_t_kwitansi_t_pajak_1` FOREIGN KEY (`id_pajak`) REFERENCES `m_pajak` (`id_pajak`))

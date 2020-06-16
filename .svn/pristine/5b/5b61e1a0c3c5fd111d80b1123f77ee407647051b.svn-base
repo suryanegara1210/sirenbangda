@@ -1,0 +1,21 @@
+	    
+        <article class="module width_full">
+    		<header><h3>Input Ringkasan MOU</h3></header>
+            <div class="module_content">
+                <!-- page content -->
+                <?php include_once ($nama_isi.'.php') ?>
+            </div>
+            <footer>
+				<div class="submit_link">
+                    <input type="button" value="Cetak" onclick="cetak()">
+                    <script>
+                        function cetak(){
+                            var lokasi='<?php echo site_url('laporan/detail/'.$jenis.'/'.$isi_mou->id_mou.'/cetak');?>';
+                            location.href=lokasi;
+                        }
+                    </script>
+				</div>
+			</footer>
+   </form>
+        </article>
+        <!-- end of styles article --> 
